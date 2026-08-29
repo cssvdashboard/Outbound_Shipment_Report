@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Production build output
+dist/
+
+# OS machine files
+.DS_Store
+Thumbs.db
+*.local
+*.tsbuildinfo
