@@ -177,21 +177,6 @@ export const App: React.FC = () => {
           )}
 
         </main>
-
-        {/* 4. FOOTER */}
-        <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/60 backdrop-blur-md py-4 mt-auto text-xs text-slate-500 dark:text-slate-400">
-          <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Export Summary Engine</span>
-              <span>•</span>
-              <span>Sub-millisecond In-Memory Analytics</span>
-            </div>
-            <div>
-              Data is parsed 100% locally in your browser. No files are uploaded to external servers.
-            </div>
-          </div>
-        </footer>
       </div>
 
     </div>
