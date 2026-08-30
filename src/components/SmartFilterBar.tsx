@@ -5,7 +5,8 @@ import {
   Globe,
   Check,
   ChevronDown,
-  Search
+  Search,
+  RotateCcw
 } from 'lucide-react';
 import { FilterState, Shipment } from '../types/logistics';
 import { searchCustomers } from '../utils/analytics';
@@ -25,6 +26,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   filters,
   onCustomerChange,
   onDestinationChange,
+  onResetFilters,
   allCustomers = [],
   allDestinations = []
 }) => {
@@ -128,6 +130,25 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     }
   };
 
+  // Total active filters count
+  const totalActiveFilters =
+    filters.selectedShippers.length +
+    filters.selectedCustomers.length +
+    filters.selectedDestinations.length +
+    filters.selectedTransitDelays.length +
+    filters.selectedClearanceDelays.length +
+    filters.selectedDestinationDelays.length +
+    filters.selectedFinalResolutions.length +
+    filters.selectedTTRanges.length;
+
+  const handleReset = () => {
+    setCustomerSearch('');
+    setDestSearch('');
+    if (onResetFilters) {
+      onResetFilters();
+    }
+  };
+
   // Helper to highlight matching text
   const highlightMatch = (text: string, query: string, colorClass: string) => {
     if (!query || !query.trim()) return text;
@@ -156,11 +177,11 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     <div className="sticky top-16 z-30 w-full bg-white/95 dark:bg-[#0b1120]/95 backdrop-blur-xl border-y border-slate-200 dark:border-slate-800/90 py-3 px-3 sm:px-6 lg:px-8 shadow-md transition-colors duration-200">
       <div className="max-w-[1700px] mx-auto">
         
-        {/* Main Controls: Customer & Destination Search Bars side-by-side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Main Controls: Customer Search, Destination Search & Reset Button */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           
           {/* 1. CUSTOMER SEARCH BAR */}
-          <div className="relative w-full" ref={customerDropdownRef}>
+          <div className="relative flex-1" ref={customerDropdownRef}>
             <div className="relative flex items-center">
               
               {/* Customer Users Icon */}
@@ -320,7 +341,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
           </div>
 
           {/* 2. DESTINATION SEARCH BAR */}
-          <div className="relative w-full" ref={destDropdownRef}>
+          <div className="relative flex-1" ref={destDropdownRef}>
             <div className="relative flex items-center">
               
               {/* Destination Globe Icon */}
@@ -477,6 +498,21 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
               </div>
             )}
           </div>
+
+          {/* 3. RESET BUTTON */}
+          <button
+            type="button"
+            onClick={handleReset}
+            className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shrink-0 border ${
+              totalActiveFilters > 0
+                ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/25 hover:scale-[1.02]'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700/80 hover:scale-[1.02]'
+            }`}
+            title="Reset all search queries and active filters"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+            <span>Reset{totalActiveFilters > 0 ? ` (${totalActiveFilters})` : ''}</span>
+          </button>
 
         </div>
 
