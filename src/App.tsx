@@ -97,13 +97,15 @@ export const App: React.FC = () => {
           onTabChange={setActiveTab}
         />
 
-        {/* 2. CUSTOMER FILTER BAR */}
+        {/* 2. CUSTOMER & DESTINATION FILTER BAR */}
         <SmartFilterBar
           rawShipments={rawShipments}
           filters={filters}
           onCustomerChange={setCustomerFilter}
+          onDestinationChange={setDestinationFilter}
           onResetFilters={resetAllFilters}
           allCustomers={allCustomers}
+          allDestinations={allDestinations}
         />
 
         {/* 3. MAIN DASHBOARD CONTENT */}
