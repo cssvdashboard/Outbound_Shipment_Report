@@ -216,23 +216,23 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         
         {/* Total AWB Volume */}
         <div className="glass-card p-4 rounded-2xl relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-blue-500/10 blur-xl group-hover:bg-blue-500/20 transition-all pointer-events-none" />
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-sky-500/10 blur-xl group-hover:bg-sky-500/20 transition-all pointer-events-none" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              Total Shipments
+            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+              <strong>Total Shipments</strong>
             </span>
-            <div className="p-2 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/20">
+            <div className="p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
               <Package className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 tracking-tight">
-              {summary.totalCount.toLocaleString()}
+            <div className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
+              <strong>{summary.totalCount.toLocaleString()}</strong>
             </div>
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 light:text-slate-500">
-              <span>{summary.totalWeight.toLocaleString()} kg</span>
+            <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+              <span><strong>{summary.totalWeight.toLocaleString()}</strong> kg</span>
               <span>•</span>
-              <span>{summary.totalPkgs.toLocaleString()} pkgs</span>
+              <span><strong>{summary.totalPkgs.toLocaleString()}</strong> pkgs</span>
             </div>
           </div>
         </div>
@@ -241,22 +241,22 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         <div className="glass-card p-4 rounded-2xl relative overflow-hidden group">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-indigo-500/10 blur-xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              Average Transit Time
+            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+              <strong>Average Transit Time</strong>
             </span>
             <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-indigo-400 tracking-tight flex items-baseline gap-1">
-              <span>{summary.avgTT}</span>
-              <span className="text-sm font-semibold text-slate-400">days</span>
+            <div className="text-2xl sm:text-3xl font-black text-indigo-400 tracking-tight flex items-baseline gap-1">
+              <span><strong>{summary.avgTT}</strong></span>
+              <span className="text-sm font-bold text-slate-400">days</span>
             </div>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500">
-              <span className="text-emerald-400 font-mono">Min: {summary.minTT}d</span>
+            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+              <span className="text-emerald-400 font-mono"><strong>Min: {summary.minTT}d</strong></span>
               <span>•</span>
-              <span className="text-amber-400 font-mono">Max: {summary.maxTT}d</span>
+              <span className="text-amber-400 font-mono"><strong>Max: {summary.maxTT}d</strong></span>
             </div>
           </div>
         </div>
@@ -272,21 +272,21 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-emerald-500/10 blur-xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              On-Time Rate (≤ 5 Days)
+            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+              <strong>On-Time Rate (≤ 5 Days)</strong>
             </span>
             <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight flex items-baseline gap-1">
-              <span>{summary.onTimePercentage}%</span>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight flex items-baseline gap-1">
+              <span><strong>{summary.onTimePercentage}%</strong></span>
             </div>
-            <div className="flex items-center justify-between mt-1.5 text-xs text-slate-400 light:text-slate-500">
-              <span>{summary.onTimeCount.toLocaleString()} AWBs</span>
-              <span className="text-[10px] text-emerald-400 font-semibold underline">
-                {selectedTTRange === 'Within 4-5 Days' ? 'Active Filter' : 'Click to Filter'}
+            <div className="flex items-center justify-between mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+              <span><strong>{summary.onTimeCount.toLocaleString()}</strong> AWBs</span>
+              <span className="text-[10px] text-emerald-400 font-bold underline">
+                <strong>{selectedTTRange === 'Within 4-5 Days' ? 'Active Filter' : 'Click to Filter'}</strong>
               </span>
             </div>
           </div>
@@ -299,22 +299,22 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-amber-500/10 blur-xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              Recorded Delay Cases
+            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+              <strong>Recorded Delay Cases</strong>
             </span>
             <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 tracking-tight flex items-baseline gap-1">
-              <span>{totalDelays.toLocaleString()}</span>
-              <span className="text-xs font-semibold text-slate-400">({delayRate}%)</span>
+            <div className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight flex items-baseline gap-1">
+              <span><strong>{totalDelays.toLocaleString()}</strong></span>
+              <span className="text-xs font-bold text-slate-400 font-mono">({delayRate}%)</span>
             </div>
-            <div className="flex items-center justify-between mt-1.5 text-xs text-slate-400 light:text-slate-500">
-              <span>Transit: {summary.transitDelayCount}</span>
-              <span>Clear: {summary.clearanceDelayCount}</span>
-              <span>Dest: {summary.destinationDelayCount}</span>
+            <div className="flex items-center justify-between mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+              <span><strong>Transit:</strong> {summary.transitDelayCount}</span>
+              <span><strong>Clear:</strong> {summary.clearanceDelayCount}</span>
+              <span><strong>Dest:</strong> {summary.destinationDelayCount}</span>
             </div>
           </div>
         </div>

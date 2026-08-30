@@ -8,21 +8,12 @@ import {
   Eye,
   X,
   Package,
-  Layers,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
   Copy,
   Check,
-  Filter,
-  Calendar,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Globe,
-  Users,
-  Building2,
-  Sparkles
+  AlertTriangle
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
@@ -139,10 +130,8 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
     for (const s of filteredData) {
       sumTT += s.tt;
       totalWt += s.weight || 0;
-      if (s.ttRange === 'Within 4-5 Days' || (s.tt > 0 && s.tt <= 5)) onTime++;
-      if ((s.clearanceDelay && s.clearanceDelay !== '-') || (s.transitDelay && s.transitDelay !== '-') || (s.destinationDelay && s.destinationDelay !== '-')) {
-        delays++;
-      }
+      if (s.tt <= 5 && s.tt > 0) onTime++;
+      if (s.clearanceDelay || s.transitDelay || s.destinationDelay) delays++;
     }
 
     return {
@@ -153,50 +142,28 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
     };
   }, [filteredData]);
 
-  // Export Handlers
   const handleExportCSV = () => {
     if (filteredData.length === 0) return;
-    const worksheet = XLSX.utils.json_to_sheet(
-      filteredData.map((s) => ({
-        'AWB Tracking #': s.awb,
-        'MAWB': s.mawb || '',
-        'Destination': s.destination,
-        'City': s.city || '',
-        'Customer Account': s.customer,
-        'Shipper Name': s.shprName,
-        'Recipient': s.recipient || '',
-        'Weight (kg)': formatWeight(s.weight),
-        'Package Count': s.pkgCount || 1,
-        'Transit Time (Days)': formatTT(s.tt),
-        'Timeline': s.ttRange,
-        'Final Resolution': s.finalResolution,
-        'Transit Delay': s.transitDelay || '',
-        'Clearance Delay': s.clearanceDelay || '',
-        'Destination Delay': s.destinationDelay || '',
-        'Remarks': s.remarks || '',
-        'Description of Goods': s.description || ''
-      }))
-    );
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Shipments_Export');
-    XLSX.writeFile(workbook, `Shipments_Export_${new Date().toISOString().slice(0, 10)}.csv`, {
-      bookType: 'csv'
-    });
+    XLSX.writeFile(workbook, `Shipments_Export_${new Date().toISOString().slice(0, 10)}.csv`, { bookType: 'csv' });
   };
 
   const handleExportExcel = () => {
     if (filteredData.length === 0) return;
     const worksheet = XLSX.utils.json_to_sheet(
       filteredData.map((s) => ({
-        'AWB Tracking #': s.awb,
-        'MAWB': s.mawb || '',
+        'AWB Tracking Number': s.awb,
         'Destination': s.destination,
-        'City': s.city || '',
         'Customer Account': s.customer,
         'Shipper Name': s.shprName,
         'Recipient': s.recipient || '',
+        'Destination City': s.city || '',
+        'Pickup Date': formatExcelDate(s.pickup),
+        'POD Date': formatExcelDate(s.pod),
         'Weight (kg)': formatWeight(s.weight),
-        'Package Count': s.pkgCount || 1,
+        'Pieces': s.pkgCount,
         'Transit Time (Days)': formatTT(s.tt),
         'Timeline': s.ttRange,
         'Final Resolution': s.finalResolution,
@@ -215,9 +182,9 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="w-3 h-3 text-slate-500 opacity-60" />;
     return sortOrder === 'asc' ? (
-      <ArrowUp className="w-3 h-3 text-blue-400 font-bold" />
+      <ArrowUp className="w-3 h-3 text-sky-400 font-bold" />
     ) : (
-      <ArrowDown className="w-3 h-3 text-blue-400 font-bold" />
+      <ArrowDown className="w-3 h-3 text-sky-400 font-bold" />
     );
   };
 
@@ -225,23 +192,23 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
     <div className="w-full space-y-4 animate-fade-in">
       
       {/* 1. TOP HEADER & METRICS STRIP */}
-      <div className="glass-panel p-4 sm:p-5 rounded-2xl space-y-4 shadow-sm">
+      <div className="glass-panel p-4 sm:p-5 rounded-2xl space-y-4 shadow-sm border border-slate-800/80">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/25">
+            <div className="p-3 rounded-2xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25">
               <FileSpreadsheet className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
                 <h2 className="text-base sm:text-lg font-extrabold text-white light:text-slate-900 tracking-tight">
-                  Shipment Record Explorer
+                  <strong>Shipment Record Explorer</strong>
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 font-mono">
-                  {filteredData.length.toLocaleString()} Active AWBs
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-500/15 text-blue-400 border border-blue-500/30 font-mono">
+                  <strong>{filteredData.length.toLocaleString()} Active AWBs</strong>
                 </span>
               </div>
-              <p className="text-xs text-slate-400 light:text-slate-500 mt-0.5">
-                Full-width transaction explorer • {totalRawCount.toLocaleString()} total shipments loaded in file
+              <p className="text-xs text-slate-400 light:text-slate-500 mt-0.5 font-medium">
+                Full-width transaction explorer • <strong>{totalRawCount.toLocaleString()}</strong> total shipments loaded in file
               </p>
             </div>
           </div>
@@ -249,21 +216,23 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
           {/* Quick Action Export Buttons */}
           <div className="flex items-center gap-2 self-stretch sm:self-auto">
             <button
+              type="button"
               onClick={handleExportExcel}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-bold border border-emerald-500/30 transition-all hover:scale-[1.02] shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-bold border border-emerald-500/30 transition-all hover:scale-[1.02] shadow-sm cursor-pointer"
               title="Download Excel spreadsheet"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Excel</span>
+              <span><strong>Export Excel</strong></span>
             </button>
 
             <button
+              type="button"
               onClick={handleExportCSV}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white text-xs font-bold border border-blue-500/30 transition-all hover:scale-[1.02] shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white text-xs font-bold border border-blue-500/30 transition-all hover:scale-[1.02] shadow-sm cursor-pointer"
               title="Download CSV spreadsheet"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
+              <span><strong>Export CSV</strong></span>
             </button>
           </div>
         </div>
@@ -271,20 +240,20 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
         {/* Dynamic Metric Badges Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
           <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-400">Average TT:</span>
-            <span className="text-sm font-bold text-indigo-400 font-mono">{tableSummary.avgTT} days</span>
+            <span className="text-xs text-slate-400 font-bold"><strong>Average TT:</strong></span>
+            <span className="text-sm font-black text-indigo-400 font-mono"><strong>{tableSummary.avgTT} days</strong></span>
           </div>
           <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-400">On-Time Rate:</span>
-            <span className="text-sm font-bold text-emerald-400 font-mono">{tableSummary.onTimePct}%</span>
+            <span className="text-xs text-slate-400 font-bold"><strong>On-Time Rate:</strong></span>
+            <span className="text-sm font-black text-emerald-400 font-mono"><strong>{tableSummary.onTimePct}%</strong></span>
           </div>
           <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-400">Gross Weight:</span>
-            <span className="text-sm font-bold text-white font-mono">{tableSummary.totalWt} kg</span>
+            <span className="text-xs text-slate-400 font-bold"><strong>Gross Weight:</strong></span>
+            <span className="text-sm font-black text-white font-mono"><strong>{tableSummary.totalWt} kg</strong></span>
           </div>
           <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-400">Active Delays:</span>
-            <span className="text-sm font-bold text-amber-400 font-mono">{tableSummary.delaysCount} AWBs</span>
+            <span className="text-xs text-slate-400 font-bold"><strong>Active Delays:</strong></span>
+            <span className="text-sm font-black text-amber-400 font-mono"><strong>{tableSummary.delaysCount} AWBs</strong></span>
           </div>
         </div>
 
@@ -293,7 +262,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
           
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchTerm}
@@ -302,12 +271,13 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 setCurrentPage(1);
               }}
               placeholder="Search across all fields: AWB Tracking #, Shipper Name, Customer, Destination, Recipient, Remarks..."
-              className="w-full pl-10 pr-9 py-2 text-xs rounded-xl bg-slate-950/90 border border-slate-700/90 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full pl-10 pr-9 py-2 text-xs font-semibold rounded-xl bg-slate-950/90 border border-slate-700/90 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
             />
             {searchTerm && (
               <button
+                type="button"
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -332,15 +302,15 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   setQuickFilter(pill.id as any);
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   quickFilter === pill.id
                     ? pill.id === 'rts'
-                      ? 'bg-rose-600 text-white shadow-sm shadow-rose-500/40'
-                      : 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-500/40 font-black'
+                      : 'bg-blue-600 text-white shadow-md shadow-blue-500/30 font-black'
                     : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
                 }`}
               >
-                {pill.label}
+                <span><strong>{pill.label}</strong></span>
               </button>
             ))}
           </div>
@@ -348,92 +318,92 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
         </div>
       </div>
 
-      {/* 2. MAIN WIDESCREEN TABLE CONTAINER (ZERO CLIPPING & FORMATTED DECIMALS) */}
+      {/* 2. MAIN WIDESCREEN TABLE CONTAINER */}
       <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border border-slate-800/90">
         <div className="max-h-[640px] overflow-x-auto overflow-y-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="sticky top-0 bg-slate-900/98 backdrop-blur-xl border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
+            <thead className="sticky top-0 bg-[#0b0f19]/98 backdrop-blur-xl border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
               <tr>
                 <th
                   onClick={() => handleSort('awb')}
-                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[150px]"
+                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[150px] font-bold"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>AWB Tracking #</span>
+                    <span><strong>AWB Tracking #</strong></span>
                     {renderSortIcon('awb')}
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort('destination')}
-                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[90px]"
+                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[90px] font-bold"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Dest</span>
+                    <span><strong>Dest</strong></span>
                     {renderSortIcon('destination')}
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort('customer')}
-                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[220px]"
+                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[220px] font-bold"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Customer Account</span>
+                    <span><strong>Customer Account</strong></span>
                     {renderSortIcon('customer')}
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort('shprName')}
-                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[220px]"
+                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[220px] font-bold"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Shipper Name</span>
+                    <span><strong>Shipper Name</strong></span>
                     {renderSortIcon('shprName')}
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[200px]">
-                  Recipient &amp; Destination City
+                <th className="py-3.5 px-4 min-w-[200px] font-bold">
+                  <strong>Recipient &amp; Destination City</strong>
                 </th>
 
                 <th
                   onClick={() => handleSort('tt')}
-                  className="py-3.5 px-3 text-right cursor-pointer hover:text-white transition-colors min-w-[110px]"
+                  className="py-3.5 px-3 text-right cursor-pointer hover:text-white transition-colors min-w-[110px] font-bold"
                 >
                   <div className="flex items-center justify-end gap-1.5">
-                    <span>TT (Days)</span>
+                    <span><strong>TT (Days)</strong></span>
                     {renderSortIcon('tt')}
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort('ttRange')}
-                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[120px]"
+                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[120px] font-bold"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Timeline</span>
+                    <span><strong>Timeline</strong></span>
                     {renderSortIcon('ttRange')}
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort('finalResolution')}
-                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[120px]"
+                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[120px] font-bold"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Resolution</span>
+                    <span><strong>Resolution</strong></span>
                     {renderSortIcon('finalResolution')}
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[220px]">
-                  Logged Exceptions &amp; Remarks
+                <th className="py-3.5 px-4 min-w-[220px] font-bold">
+                  <strong>Logged Exceptions &amp; Remarks</strong>
                 </th>
 
-                <th className="py-3.5 px-3 text-center min-w-[80px]">
-                  Inspect
+                <th className="py-3.5 px-3 text-center min-w-[80px] font-bold">
+                  <strong>Inspect</strong>
                 </th>
               </tr>
             </thead>
@@ -449,13 +419,13 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     className="hover:bg-slate-800/40 text-slate-200 transition-colors group"
                   >
                     {/* AWB with Copy Button */}
-                    <td className="py-3 px-4 font-mono font-bold text-blue-400">
+                    <td className="py-3 px-4 font-mono font-bold text-sky-400">
                       <div className="flex items-center gap-2">
-                        <span>{s.awb}</span>
+                        <span><strong>{s.awb}</strong></span>
                         <button
                           type="button"
                           onClick={(e) => handleCopyAWB(s.awb, e)}
-                          className="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                           title="Copy AWB Tracking Number"
                         >
                           {isCopied ? (
@@ -470,19 +440,19 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     {/* Destination Country Badge */}
                     <td className="py-3 px-3">
                       <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 font-mono font-bold text-xs text-white shadow-sm">
-                        {s.destination}
+                        <strong>{s.destination}</strong>
                       </span>
                     </td>
 
                     {/* Customer Account Name */}
-                    <td className="py-3 px-4 font-medium text-slate-200" title={s.customer}>
+                    <td className="py-3 px-4 font-bold text-slate-200" title={s.customer}>
                       <div className="line-clamp-2 leading-relaxed">
-                        {s.customer}
+                        <strong>{s.customer}</strong>
                       </div>
                     </td>
 
                     {/* Shipper Name */}
-                    <td className="py-3 px-4 text-slate-300" title={s.shprName}>
+                    <td className="py-3 px-4 text-slate-300 font-medium" title={s.shprName}>
                       <div className="line-clamp-2 leading-relaxed font-normal">
                         {s.shprName}
                       </div>
@@ -490,56 +460,56 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                     {/* Recipient & City */}
                     <td className="py-3 px-4">
-                      <div className="font-medium text-slate-300 line-clamp-1" title={s.recipient || 'N/A'}>
+                      <div className="font-semibold text-slate-300 line-clamp-1" title={s.recipient || 'N/A'}>
                         {s.recipient || '-'}
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
+                      <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
                         {s.city ? `${s.city}, ${s.destination}` : s.destination}
                       </div>
                     </td>
 
-                    {/* Transit Time (2 Decimals!) */}
+                    {/* Transit Time */}
                     <td className="py-3 px-3 text-right font-mono font-extrabold text-sm">
                       <span
                         className={
                           s.tt <= 4.5
-                            ? 'text-emerald-400'
+                            ? 'text-emerald-400 font-black'
                             : s.tt <= 5.5
-                            ? 'text-amber-400'
-                            : 'text-rose-400'
+                            ? 'text-amber-400 font-black'
+                            : 'text-rose-400 font-black'
                         }
                       >
-                        {formattedDays} <span className="text-xs font-normal text-slate-400">d</span>
+                        <strong>{formattedDays}</strong> <span className="text-xs font-normal text-slate-400">d</span>
                       </span>
                     </td>
 
                     {/* Delivery Timeline Pill */}
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
                           s.ttRange === 'Within 4-5 Days' || s.tt <= 5
                             ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                             : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                         }`}
                       >
-                        {s.tt <= 5 ? 'Within 4-5d' : '> 5 Days'}
+                        <strong>{s.tt <= 5 ? 'Within 4-5d' : '> 5 Days'}</strong>
                       </span>
                     </td>
 
                     {/* Final Resolution Pill */}
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
                           s.finalResolution === 'Delivered'
                             ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                             : s.finalResolution === 'RTS'
-                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-extrabold shadow-sm'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-black shadow-sm'
                             : s.finalResolution === 'Lost'
-                            ? 'bg-red-600/30 text-red-200 border border-red-500/60 font-extrabold shadow-sm'
+                            ? 'bg-red-600/30 text-red-200 border border-red-500/60 font-black shadow-sm'
                             : s.finalResolution === 'Destroyed'
-                            ? 'bg-rose-950 text-rose-300 border border-rose-800/80 font-extrabold shadow-sm'
+                            ? 'bg-rose-950 text-rose-300 border border-rose-800/80 font-black shadow-sm'
                             : s.finalResolution === 'Seized'
-                            ? 'bg-red-950 text-red-300 border border-red-700/80 font-extrabold shadow-sm'
+                            ? 'bg-red-950 text-red-300 border border-red-700/80 font-black shadow-sm'
                             : s.finalResolution === 'Undelivered'
                             ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
                             : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30'
@@ -548,26 +518,26 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                         {['RTS', 'Lost', 'Destroyed', 'Seized'].includes(s.finalResolution) && (
                           <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1 animate-pulse" />
                         )}
-                        {s.finalResolution || 'Delivered'}
+                        <strong>{s.finalResolution || 'Delivered'}</strong>
                       </span>
                     </td>
 
                     {/* Logged Delays & Remarks */}
-                    <td className="py-3 px-4 text-xs">
+                    <td className="py-3 px-4 text-xs font-medium">
                       {s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                        <div className="text-amber-300 font-medium line-clamp-1" title={`Clearance Delay: ${s.clearanceDelay}`}>
-                          📋 {s.clearanceDelay}
+                        <div className="text-amber-300 font-bold line-clamp-1" title={`Clearance Delay: ${s.clearanceDelay}`}>
+                          📋 <strong>{s.clearanceDelay}</strong>
                         </div>
                       ) : s.transitDelay && s.transitDelay !== '-' ? (
-                        <div className="text-indigo-300 font-medium line-clamp-1" title={`Transit Delay: ${s.transitDelay}`}>
-                          ✈️ {s.transitDelay}
+                        <div className="text-indigo-300 font-bold line-clamp-1" title={`Transit Delay: ${s.transitDelay}`}>
+                          ✈️ <strong>{s.transitDelay}</strong>
                         </div>
                       ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                        <div className="text-rose-300 font-medium line-clamp-1" title={`Destination Delay: ${s.destinationDelay}`}>
-                          🚚 {s.destinationDelay}
+                        <div className="text-rose-300 font-bold line-clamp-1" title={`Destination Delay: ${s.destinationDelay}`}>
+                          🚚 <strong>{s.destinationDelay}</strong>
                         </div>
                       ) : s.remarks && s.remarks !== '-' ? (
-                        <div className="text-slate-400 line-clamp-1" title={s.remarks}>
+                        <div className="text-slate-400 line-clamp-1 font-normal" title={s.remarks}>
                           💬 {s.remarks}
                         </div>
                       ) : (
@@ -578,11 +548,12 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     {/* Inspect Button */}
                     <td className="py-3 px-3 text-center">
                       <button
+                        type="button"
                         onClick={() => setSelectedShipment(s)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors"
+                        className="p-1.5 rounded-xl bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white transition-colors cursor-pointer"
                         title="View Full Shipment Dossier"
                       >
-                        <Eye className="w-3.5 h-3.5 text-blue-400 group-hover:text-white" />
+                        <Eye className="w-3.5 h-3.5 text-sky-400 group-hover:text-white" />
                       </button>
                     </td>
                   </tr>
@@ -594,8 +565,8 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   <td colSpan={10} className="py-16 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Package className="w-8 h-8 text-slate-600" />
-                      <p className="text-sm font-semibold">No shipment records found</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm font-bold text-white"><strong>No shipment records found</strong></p>
+                      <p className="text-xs text-slate-400">
                         Try modifying your search keywords or resetting active quick filters.
                       </p>
                     </div>
@@ -607,17 +578,17 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
         </div>
 
         {/* 3. PAGINATION CONTROLS BAR */}
-        <div className="p-4 bg-slate-900/95 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+        <div className="p-4 bg-[#0b0f19]/95 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <span>Rows per page:</span>
+            <div className="flex items-center gap-1.5 font-bold">
+              <span><strong>Rows per page:</strong></span>
               <select
                 value={pageSize}
                 onChange={(e) => {
                   setPageSize(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer"
               >
                 <option value={15}>15</option>
                 <option value={25}>25</option>
@@ -626,39 +597,41 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
               </select>
             </div>
 
-            <span>
+            <span className="font-semibold">
               Showing{' '}
-              <strong className="text-white font-mono">
+              <strong className="text-white font-mono font-bold">
                 {filteredData.length > 0 ? (validCurrentPage - 1) * pageSize + 1 : 0}
               </strong>{' '}
               -{' '}
-              <strong className="text-white font-mono">
+              <strong className="text-white font-mono font-bold">
                 {Math.min(validCurrentPage * pageSize, filteredData.length)}
               </strong>{' '}
-              of <strong className="text-white font-mono">{filteredData.length.toLocaleString()}</strong> records
+              of <strong className="text-white font-mono font-bold">{filteredData.length.toLocaleString()}</strong> records
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={validCurrentPage <= 1}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 transition-colors flex items-center gap-1 font-bold cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Previous</span>
+              <span><strong>Previous</strong></span>
             </button>
             
-            <span className="font-mono text-xs px-2.5 text-slate-300 font-semibold">
-              Page {validCurrentPage} of {totalPages}
+            <span className="font-mono text-xs px-2.5 text-slate-300 font-bold">
+              <strong>Page {validCurrentPage} of {totalPages}</strong>
             </span>
 
             <button
+              type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={validCurrentPage >= totalPages}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 transition-colors flex items-center gap-1 font-bold cursor-pointer"
             >
-              <span>Next</span>
+              <span><strong>Next</strong></span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -668,32 +641,33 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       {/* 4. SHIPMENT DETAIL MODAL DOSSIER */}
       {selectedShipment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel w-full max-w-2xl p-6 sm:p-7 rounded-3xl space-y-5 shadow-2xl relative bg-slate-950 border border-blue-500/40">
+          <div className="glass-panel w-full max-w-2xl p-6 sm:p-7 rounded-3xl space-y-5 shadow-2xl relative bg-slate-950 border border-sky-500/40">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <div className="p-3 rounded-2xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
                   <Package className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-base sm:text-lg font-black text-white font-mono">
-                      AWB #{selectedShipment.awb}
+                      <strong>AWB #{selectedShipment.awb}</strong>
                     </h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 font-mono">
-                      {selectedShipment.destination}
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-sky-500/20 text-sky-400 font-mono">
+                      <strong>{selectedShipment.destination}</strong>
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    MAWB: {selectedShipment.mawb || 'N/A'} • Ramp: {selectedShipment.rampId || 'N/A'} • Dest Loc: {selectedShipment.destLocCd || 'N/A'}
+                  <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                    MAWB: <strong>{selectedShipment.mawb || 'N/A'}</strong> • Ramp: <strong>{selectedShipment.rampId || 'N/A'}</strong> • Dest Loc: <strong>{selectedShipment.destLocCd || 'N/A'}</strong>
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() => setSelectedShipment(null)}
-                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -702,69 +676,69 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
             {/* Dossier Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Customer Account</span>
-                <span className="font-bold text-white mt-1 block text-sm">{selectedShipment.customer}</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Customer Account</strong></span>
+                <span className="font-black text-white mt-1 block text-sm"><strong>{selectedShipment.customer}</strong></span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Shipper Name</span>
-                <span className="font-bold text-white mt-1 block text-sm">{selectedShipment.shprName}</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Shipper Name</strong></span>
+                <span className="font-black text-white mt-1 block text-sm"><strong>{selectedShipment.shprName}</strong></span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Recipient &amp; Delivery City</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Recipient &amp; Delivery City</strong></span>
                 <span className="font-bold text-white mt-1 block text-sm">
-                  {selectedShipment.recipient || 'N/A'}
+                  <strong>{selectedShipment.recipient || 'N/A'}</strong>
                 </span>
-                <span className="text-slate-400 text-xs block mt-0.5">
+                <span className="text-slate-400 text-xs block mt-0.5 font-medium">
                   City: {selectedShipment.city || 'N/A'} ({selectedShipment.destination})
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Transit Time &amp; Resolution</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Transit Time &amp; Resolution</strong></span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="font-black text-indigo-400 font-mono text-base">
-                    {formatTT(selectedShipment.tt)} days
+                    <strong>{formatTT(selectedShipment.tt)} days</strong>
                   </span>
-                  <span className="text-xs text-slate-400 font-semibold">({selectedShipment.ttRange})</span>
+                  <span className="text-xs text-slate-400 font-bold"><strong>({selectedShipment.ttRange})</strong></span>
                 </div>
-                <span className={`font-bold text-xs block mt-0.5 ${
+                <span className={`font-black text-xs block mt-0.5 ${
                   selectedShipment.finalResolution === 'Delivered'
                     ? 'text-emerald-400'
                     : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(selectedShipment.finalResolution)
-                    ? 'text-rose-400 font-extrabold'
+                    ? 'text-rose-400 font-black'
                     : 'text-amber-400'
                 }`}>
-                  Status: {selectedShipment.finalResolution}
+                  <strong>Status: {selectedShipment.finalResolution}</strong>
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Pickup Date</span>
-                <span className="font-bold text-white mt-1 block">
-                  {formatExcelDate(selectedShipment.pickup)}
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Pickup Date</strong></span>
+                <span className="font-bold text-white mt-1 block font-mono">
+                  <strong>{formatExcelDate(selectedShipment.pickup)}</strong>
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">POD / Delivery Date</span>
-                <span className="font-bold text-white mt-1 block">
-                  {formatExcelDate(selectedShipment.pod)}
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>POD / Delivery Date</strong></span>
+                <span className="font-bold text-white mt-1 block font-mono">
+                  <strong>{formatExcelDate(selectedShipment.pod)}</strong>
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Package Pieces</span>
-                <span className="font-bold text-white mt-1 block font-mono text-sm">
-                  {selectedShipment.pkgCount || 1} pcs
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Package Pieces</strong></span>
+                <span className="font-black text-white mt-1 block font-mono text-sm">
+                  <strong>{selectedShipment.pkgCount || 1} pcs</strong>
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Gross Weight</span>
-                <span className="font-bold text-white mt-1 block font-mono text-sm">
-                  {formatWeight(selectedShipment.weight)} kg
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Gross Weight</strong></span>
+                <span className="font-black text-white mt-1 block font-mono text-sm">
+                  <strong>{formatWeight(selectedShipment.weight)} kg</strong>
                 </span>
               </div>
             </div>
@@ -772,21 +746,21 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
             {/* Delays section */}
             {(selectedShipment.clearanceDelay || selectedShipment.transitDelay || selectedShipment.destinationDelay || selectedShipment.remarks) && (
               <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-2">
-                <div className="font-bold text-amber-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                <div className="font-black text-amber-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Logged Delay Exceptions &amp; Remarks</span>
+                  <span><strong>Logged Delay Exceptions &amp; Remarks</strong></span>
                 </div>
                 {selectedShipment.clearanceDelay && selectedShipment.clearanceDelay !== '-' && (
-                  <div className="text-slate-300">📋 Clearance Delay: <span className="text-white font-bold">{selectedShipment.clearanceDelay}</span></div>
+                  <div className="text-slate-300">📋 Clearance Delay: <span className="text-white font-bold"><strong>{selectedShipment.clearanceDelay}</strong></span></div>
                 )}
                 {selectedShipment.transitDelay && selectedShipment.transitDelay !== '-' && (
-                  <div className="text-slate-300">✈️ Transit Delay: <span className="text-white font-bold">{selectedShipment.transitDelay}</span></div>
+                  <div className="text-slate-300">✈️ Transit Delay: <span className="text-white font-bold"><strong>{selectedShipment.transitDelay}</strong></span></div>
                 )}
                 {selectedShipment.destinationDelay && selectedShipment.destinationDelay !== '-' && (
-                  <div className="text-slate-300">🚚 Destination Delay: <span className="text-white font-bold">{selectedShipment.destinationDelay}</span></div>
+                  <div className="text-slate-300">🚚 Destination Delay: <span className="text-white font-bold"><strong>{selectedShipment.destinationDelay}</strong></span></div>
                 )}
                 {selectedShipment.remarks && selectedShipment.remarks !== '-' && (
-                  <div className="text-slate-300">💬 Remarks: <span className="text-white font-bold">{selectedShipment.remarks}</span></div>
+                  <div className="text-slate-300">💬 Remarks: <span className="text-white font-bold"><strong>{selectedShipment.remarks}</strong></span></div>
                 )}
               </div>
             )}
@@ -794,17 +768,18 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
             {/* Description */}
             {selectedShipment.description && (
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
-                <span className="text-slate-500 text-[10px] uppercase font-bold block">Description of Goods</span>
-                <p className="text-slate-200 mt-1 leading-relaxed">{selectedShipment.description}</p>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Description of Goods</strong></span>
+                <p className="text-slate-200 mt-1 leading-relaxed font-medium">{selectedShipment.description}</p>
               </div>
             )}
 
             <div className="pt-2 flex justify-end">
               <button
+                type="button"
                 onClick={() => setSelectedShipment(null)}
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md shadow-sky-500/20 cursor-pointer"
               >
-                Close Dossier
+                <strong>Close Dossier</strong>
               </button>
             </div>
           </div>

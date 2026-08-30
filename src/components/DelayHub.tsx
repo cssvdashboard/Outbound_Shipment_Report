@@ -6,10 +6,7 @@ import {
   Calendar,
   Search,
   Filter,
-  ArrowRight,
-  TrendingDown,
-  AlertOctagon,
-  Layers
+  ArrowRight
 } from 'lucide-react';
 import { RatioBreakdown, MetricSummary } from '../types/logistics';
 import { Bar } from 'react-chartjs-2';
@@ -34,8 +31,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
   onSelectDelayFilter,
   activeTransitFilter,
   activeClearanceFilter,
-  activeDestinationFilter,
-  onNavigateTab
+  activeDestinationFilter
 }) => {
   const [activeCategory, setActiveCategory] = useState<'transit' | 'clearance' | 'destination'>('transit');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -92,7 +88,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
     scales: {
       x: {
         grid: { color: 'rgba(255, 255, 255, 0.05)' },
-        ticks: { color: '#94a3b8', font: { size: 10 } }
+        ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' as const } }
       },
       y: {
         grid: { display: false },
@@ -120,25 +116,25 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           onClick={() => setActiveCategory('transit')}
           className={`glass-card p-4 rounded-2xl cursor-pointer transition-all ${
             activeCategory === 'transit'
-              ? 'ring-2 ring-indigo-500 bg-indigo-950/40'
+              ? 'ring-2 ring-indigo-500 bg-indigo-950/40 shadow-glow-indigo'
               : 'hover:border-indigo-500/40'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Transit Delays
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <strong>Transit Delays</strong>
             </span>
             <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
               <Plane className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-white light:text-slate-900">
-              {summary.transitDelayCount.toLocaleString()}
-              <span className="text-xs font-normal text-slate-400 ml-1.5">AWBs</span>
+            <div className="text-2xl font-black text-white light:text-slate-900">
+              <strong>{summary.transitDelayCount.toLocaleString()}</strong>
+              <span className="text-xs font-bold text-slate-400 ml-1.5">AWBs</span>
             </div>
-            <div className="text-xs text-indigo-400 font-semibold mt-1">
-              {transitDelays.length} Distinct Causes
+            <div className="text-xs text-indigo-400 font-bold mt-1">
+              <strong>{transitDelays.length} Distinct Causes</strong>
             </div>
           </div>
         </div>
@@ -148,25 +144,25 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           onClick={() => setActiveCategory('clearance')}
           className={`glass-card p-4 rounded-2xl cursor-pointer transition-all ${
             activeCategory === 'clearance'
-              ? 'ring-2 ring-amber-500 bg-amber-950/40'
+              ? 'ring-2 ring-amber-500 bg-amber-950/40 shadow-glow-amber'
               : 'hover:border-amber-500/40'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Customs Clearance Delays
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <strong>Customs Clearance Delays</strong>
             </span>
             <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
               <FileText className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-white light:text-slate-900">
-              {summary.clearanceDelayCount.toLocaleString()}
-              <span className="text-xs font-normal text-slate-400 ml-1.5">AWBs</span>
+            <div className="text-2xl font-black text-white light:text-slate-900">
+              <strong>{summary.clearanceDelayCount.toLocaleString()}</strong>
+              <span className="text-xs font-bold text-slate-400 ml-1.5">AWBs</span>
             </div>
-            <div className="text-xs text-amber-400 font-semibold mt-1">
-              {clearanceDelays.length} Paperwork & Customs Causes
+            <div className="text-xs text-amber-400 font-bold mt-1">
+              <strong>{clearanceDelays.length} Paperwork &amp; Customs Causes</strong>
             </div>
           </div>
         </div>
@@ -176,25 +172,25 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           onClick={() => setActiveCategory('destination')}
           className={`glass-card p-4 rounded-2xl cursor-pointer transition-all ${
             activeCategory === 'destination'
-              ? 'ring-2 ring-rose-500 bg-rose-950/40'
+              ? 'ring-2 ring-rose-500 bg-rose-950/40 shadow-glow-rose'
               : 'hover:border-rose-500/40'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Destination Final-Mile Delays
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <strong>Destination Final-Mile Delays</strong>
             </span>
             <div className="p-2 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20">
               <Truck className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-white light:text-slate-900">
-              {summary.destinationDelayCount.toLocaleString()}
-              <span className="text-xs font-normal text-slate-400 ml-1.5">AWBs</span>
+            <div className="text-2xl font-black text-white light:text-slate-900">
+              <strong>{summary.destinationDelayCount.toLocaleString()}</strong>
+              <span className="text-xs font-bold text-slate-400 ml-1.5">AWBs</span>
             </div>
-            <div className="text-xs text-rose-400 font-semibold mt-1">
-              {destinationDelays.length} Last-Mile Exception Causes
+            <div className="text-xs text-rose-400 font-bold mt-1">
+              <strong>{destinationDelays.length} Last-Mile Exception Causes</strong>
             </div>
           </div>
         </div>
@@ -202,20 +198,20 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         {/* Weekend Impact Delays */}
         <div className="glass-card p-4 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Weekend Delays
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <strong>Weekend Delays</strong>
             </span>
             <div className="p-2 rounded-xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/20">
               <Calendar className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-white light:text-slate-900">
-              {summary.weekendDelayCount.toLocaleString()}
-              <span className="text-xs font-normal text-slate-400 ml-1.5">AWBs</span>
+            <div className="text-2xl font-black text-white light:text-slate-900">
+              <strong>{summary.weekendDelayCount.toLocaleString()}</strong>
+              <span className="text-xs font-bold text-slate-400 ml-1.5">AWBs</span>
             </div>
-            <div className="text-xs text-cyan-400 font-semibold mt-1">
-              Non-working day holds
+            <div className="text-xs text-cyan-400 font-bold mt-1">
+              <strong>Non-working day holds</strong>
             </div>
           </div>
         </div>
@@ -223,45 +219,48 @@ export const DelayHub: React.FC<DelayHubProps> = ({
       </div>
 
       {/* 2. CATEGORY BREAKDOWN & CHART INTERFACE */}
-      <div className="glass-panel p-5 rounded-2xl space-y-5">
+      <div className="glass-panel p-5 rounded-2xl space-y-5 border border-slate-800/80">
         
         {/* Header with Category Tabs and Search */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-4 border-b border-slate-800 light:border-slate-200">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-4 border-b border-slate-800/80 light:border-slate-200">
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => { setActiveCategory('transit'); setSearchTerm(''); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeCategory === 'transit'
-                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30 font-black'
                   : 'text-slate-400 hover:text-slate-200 bg-slate-800/60'
               }`}
             >
               <Plane className="w-3.5 h-3.5" />
-              Transit Delay Breakdown ({transitDelays.length})
+              <span><strong>Transit Delay Breakdown ({transitDelays.length})</strong></span>
             </button>
 
             <button
+              type="button"
               onClick={() => { setActiveCategory('clearance'); setSearchTerm(''); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeCategory === 'clearance'
-                  ? 'bg-amber-600 text-white shadow-sm shadow-amber-500/30'
+                  ? 'bg-amber-600 text-white shadow-md shadow-amber-500/30 font-black'
                   : 'text-slate-400 hover:text-slate-200 bg-slate-800/60'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              Clearance Delay Breakdown ({clearanceDelays.length})
+              <span><strong>Clearance Delay Breakdown ({clearanceDelays.length})</strong></span>
             </button>
 
             <button
+              type="button"
               onClick={() => { setActiveCategory('destination'); setSearchTerm(''); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeCategory === 'destination'
-                  ? 'bg-rose-600 text-white shadow-sm shadow-rose-500/30'
+                  ? 'bg-rose-600 text-white shadow-md shadow-rose-500/30 font-black'
                   : 'text-slate-400 hover:text-slate-200 bg-slate-800/60'
               }`}
             >
               <Truck className="w-3.5 h-3.5" />
-              Destination Delay Breakdown ({destinationDelays.length})
+              <span><strong>Destination Delay Breakdown ({destinationDelays.length})</strong></span>
             </button>
           </div>
 
@@ -273,7 +272,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={`Search ${activeCategory} reasons...`}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-950/80 border border-slate-700/80 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full pl-8 pr-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-950/80 border border-slate-700/80 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
             />
           </div>
         </div>
@@ -282,43 +281,43 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Chart View */}
-          <div className="lg:col-span-5 glass-card p-4 rounded-xl flex flex-col justify-between">
+          <div className="lg:col-span-5 glass-card p-4 rounded-xl flex flex-col justify-between border border-slate-800/80">
             <div>
-              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">
-                Top Root-Cause Distribution
+              <h3 className="text-xs font-extrabold uppercase text-slate-300 tracking-wider mb-2">
+                <strong>Top Root-Cause Distribution</strong>
               </h3>
-              <p className="text-xs text-slate-500 mb-3">
+              <p className="text-xs text-slate-400 mb-3 font-medium">
                 Ranking top delay reasons by total impacted shipments
               </p>
               <div className="h-64 relative">
                 {topReasons.length > 0 ? (
                   <Bar data={barChartData} options={barChartOptions} />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                  <div className="h-full flex items-center justify-center text-xs text-slate-400 font-semibold">
                     No delay data available.
                   </div>
                 )}
               </div>
             </div>
-            <div className="mt-3 pt-2 text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-800">
-              <span>Showing top {topReasons.length} reasons</span>
-              <span className="font-mono font-semibold text-slate-300">
-                {topReasons.reduce((acc, curr) => acc + curr.count, 0).toLocaleString()} AWBs
+            <div className="mt-3 pt-2 text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-800 font-semibold">
+              <span><strong>Showing top {topReasons.length} reasons</strong></span>
+              <span className="font-mono font-bold text-slate-200">
+                <strong>{topReasons.reduce((acc, curr) => acc + curr.count, 0).toLocaleString()} AWBs</strong>
               </span>
             </div>
           </div>
 
           {/* Ranked Table View */}
-          <div className="lg:col-span-7 glass-card rounded-xl overflow-hidden flex flex-col justify-between">
+          <div className="lg:col-span-7 glass-card rounded-xl overflow-hidden flex flex-col justify-between border border-slate-800/80">
             <div className="max-h-[380px] overflow-y-auto">
               <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+                <thead className="sticky top-0 bg-[#0b0f19] border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10">
                   <tr>
-                    <th className="py-2.5 px-3 w-12 text-center">#</th>
-                    <th className="py-2.5 px-3">Delay Reason Description</th>
-                    <th className="py-2.5 px-3 text-right">AWB Count</th>
-                    <th className="py-2.5 px-3 text-right">Share (%)</th>
-                    <th className="py-2.5 px-3 text-center">Drilldown</th>
+                    <th className="py-2.5 px-3 w-12 text-center"><strong>#</strong></th>
+                    <th className="py-2.5 px-3"><strong>Delay Reason Description</strong></th>
+                    <th className="py-2.5 px-3 text-right"><strong>AWB Count</strong></th>
+                    <th className="py-2.5 px-3 text-right"><strong>Share (%)</strong></th>
+                    <th className="py-2.5 px-3 text-center"><strong>Drilldown</strong></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -331,69 +330,52 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                           isFiltered ? 'bg-blue-600/15' : ''
                         }`}
                       >
-                        <td className="py-2.5 px-3 text-center text-slate-500 font-mono text-[11px]">
-                          {idx + 1}
+                        <td className="py-2.5 px-3 text-center text-slate-400 font-mono text-[11px] font-bold">
+                          <strong>{idx + 1}</strong>
                         </td>
-                        <td className="py-2.5 px-3 font-medium text-slate-200">
+                        <td className="py-2.5 px-3 font-semibold text-slate-200">
                           <div className="flex items-center gap-2">
-                            <span>{item.name}</span>
+                            <span><strong>{item.name}</strong></span>
                             {isFiltered && (
-                              <span className="px-1.5 py-0.2 rounded text-[10px] bg-blue-500/20 text-blue-300 font-semibold">
-                                Filter Active
+                              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">
+                                <strong>Filter Active</strong>
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 text-right font-extrabold text-white font-mono">
-                          {item.count.toLocaleString()}
+                        <td className="py-2.5 px-3 text-right font-black text-white font-mono">
+                          <strong>{item.count.toLocaleString()}</strong>
                         </td>
                         <td className="py-2.5 px-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="font-mono text-slate-300 font-semibold">
-                              {item.percentage}%
-                            </span>
-                            <div className="w-12 bg-slate-800 rounded-full h-1.5 hidden sm:block">
-                              <div
-                                className="bg-blue-500 h-1.5 rounded-full"
-                                style={{ width: `${item.percentage}%` }}
-                              />
-                            </div>
-                          </div>
+                          <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono text-[11px] font-bold">
+                            <strong>{item.percentage}%</strong>
+                          </span>
                         </td>
                         <td className="py-2.5 px-3 text-center">
                           <button
                             type="button"
-                            onClick={() => {
-                              onSelectDelayFilter(activeCategory, item.name);
-                              onNavigateTab('explorer');
-                            }}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white text-[11px] font-semibold transition-colors"
-                            title="Filter shipments by this exact reason"
+                            onClick={() => onSelectDelayFilter(activeCategory, item.name)}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                              isFiltered
+                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30'
+                                : 'bg-slate-800 text-slate-300 hover:bg-blue-600 hover:text-white border border-slate-700'
+                            }`}
                           >
                             <Filter className="w-3 h-3" />
-                            <span>View AWBs</span>
+                            <span><strong>{isFiltered ? 'Clear' : 'Filter'}</strong></span>
                           </button>
                         </td>
                       </tr>
                     );
                   })}
-                  {currentList.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400">
-                        No delay reasons found matching &quot;{searchTerm}&quot;
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>
 
-            <div className="p-3 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-              <span>
-                Total Reasons in Category: <strong className="text-white">{currentList.length}</strong>
-              </span>
-              <span className="text-[11px]">
-                Click <span className="text-blue-400 font-semibold">&quot;View AWBs&quot;</span> to drill down into the Shipment Explorer table.
+            <div className="p-3 bg-slate-950/80 border-t border-slate-800 text-xs text-slate-400 flex items-center justify-between font-medium">
+              <span>Click <strong>Filter</strong> next to any delay reason to isolate impacted shipments.</span>
+              <span className="font-bold text-slate-300">
+                Total for category: <strong>{currentList.reduce((acc, curr) => acc + curr.count, 0).toLocaleString()} AWBs</strong>
               </span>
             </div>
           </div>

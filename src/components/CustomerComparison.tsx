@@ -133,7 +133,6 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   };
 
   const handleAutoFillTopCustomers = () => {
-    // Find top 4 customers by AWB count for the selected destination
     const destShipments =
       selectedDestination === 'ALL'
         ? rawShipments
@@ -161,8 +160,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       {
         label: 'Avg Transit Time (Days)',
         data: comparisonData.map((c) => c.avgTT),
-        backgroundColor: 'rgba(59, 130, 246, 0.85)',
-        borderColor: '#2563eb',
+        backgroundColor: 'rgba(56, 189, 248, 0.85)',
+        borderColor: '#0284c7',
         borderWidth: 1,
         borderRadius: 6,
         yAxisID: 'y'
@@ -170,7 +169,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       {
         label: 'On-Time Rate (%)',
         data: comparisonData.map((c) => c.onTimePercentage),
-        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+        backgroundColor: 'rgba(52, 211, 153, 0.85)',
         borderColor: '#059669',
         borderWidth: 1,
         borderRadius: 6,
@@ -214,19 +213,19 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         type: 'linear' as const,
         display: true,
         position: 'left' as const,
-        title: { display: true, text: 'Avg Days', color: '#60a5fa', font: { size: 10 } },
+        title: { display: true, text: 'Avg Days', color: '#38bdf8', font: { size: 10, weight: 'bold' as const } },
         grid: { color: 'rgba(51, 65, 85, 0.3)' },
-        ticks: { color: '#94a3b8' }
+        ticks: { color: '#94a3b8', font: { weight: 'bold' as const } }
       },
       y1: {
         type: 'linear' as const,
         display: true,
         position: 'right' as const,
-        title: { display: true, text: 'On-Time Rate (%)', color: '#34d399', font: { size: 10 } },
+        title: { display: true, text: 'On-Time Rate (%)', color: '#34d399', font: { size: 10, weight: 'bold' as const } },
         grid: { display: false },
         min: 0,
         max: 100,
-        ticks: { color: '#94a3b8' }
+        ticks: { color: '#94a3b8', font: { weight: 'bold' as const } }
       }
     }
   };
@@ -235,17 +234,17 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     <div className="space-y-6 animate-fade-in">
       
       {/* 1. SELECTION & CONFIGURATION PANEL */}
-      <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-slate-800 light:border-slate-200">
+      <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-800/80">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-slate-800/80 light:border-slate-200">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white light:text-slate-900">
-                Multi-Customer Benchmark &amp; Transit Time Comparison Tool
+              <h2 className="text-sm font-black text-white light:text-slate-900">
+                <strong>Multi-Customer Benchmark &amp; Transit Time Comparison Tool</strong>
               </h2>
-              <p className="text-xs text-slate-400 light:text-slate-500">
+              <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
                 Compare delivery speeds, volumes, and delay rates for any destination
               </p>
             </div>
@@ -255,10 +254,10 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           <button
             type="button"
             onClick={handleAutoFillTopCustomers}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-semibold border border-indigo-500/30 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold border border-indigo-500/30 transition-all cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Load Top Customers for {selectedDestination}</span>
+            <span><strong>Load Top Customers for {selectedDestination}</strong></span>
           </button>
         </div>
 
@@ -267,10 +266,10 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           
           {/* 1. Target Destination Search Bar */}
           <div className="md:col-span-5 relative z-50" ref={destDropdownRef}>
-            <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between">
-              <span>1. Target Destination Country</span>
-              <span className="text-[10px] text-slate-500 font-mono">
-                {selectedDestination === 'ALL' ? 'Global' : `${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs`}
+            <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
+              <span><strong>1. Target Destination Country</strong></span>
+              <span className="text-[10px] text-slate-400 font-mono font-bold">
+                <strong>{selectedDestination === 'ALL' ? 'Global' : `${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs`}</strong>
               </span>
             </label>
             <div className="relative">
@@ -298,13 +297,13 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       : `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
                     : 'Search Destination'
                 }
-                className={`w-full pl-9 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                className={`w-full pl-9 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-500/50 ${
                   selectedDestination && selectedDestination !== 'ALL'
-                    ? 'bg-blue-50/70 border-blue-400 text-blue-900 dark:bg-blue-950/40 dark:border-blue-500/60 dark:text-blue-200 placeholder:text-blue-800 dark:placeholder:text-blue-300'
+                    ? 'bg-sky-50/70 border-sky-400 text-sky-950 dark:bg-sky-950/40 dark:border-sky-500/60 dark:text-sky-200 placeholder:text-sky-800 dark:placeholder:text-sky-300'
                     : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
                 }`}
               />
-              <Globe className="w-4 h-4 text-blue-500 dark:text-blue-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Globe className="w-4 h-4 text-sky-500 dark:text-sky-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
               {/* Clear and Toggle Icons */}
               <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
@@ -333,9 +332,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
-                  className="p-1 text-slate-400 hover:text-blue-400 transition-colors cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-sky-400 transition-colors cursor-pointer"
                 >
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-blue-400' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-sky-400' : ''}`} />
                 </button>
               </div>
 
@@ -348,20 +347,20 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       onClick={() => handleSelectDestination('ALL')}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
                         selectedDestination === 'ALL'
-                          ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40'
+                          ? 'bg-sky-50 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 font-bold border border-sky-500/40'
                           : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         {selectedDestination === 'ALL' ? (
-                          <Check className="w-4 h-4 text-blue-500 font-bold" />
+                          <Check className="w-4 h-4 text-sky-500 font-bold" />
                         ) : (
                           <span className="w-2 h-2 rounded-full bg-slate-400" />
                         )}
-                        <span className="font-bold">All Destinations Globally</span>
+                        <span className="font-bold"><strong>All Destinations Globally</strong></span>
                       </div>
                       <span className="text-[10px] font-mono font-bold text-slate-400">
-                        {rawShipments.length.toLocaleString()} AWBs
+                        <strong>{rawShipments.length.toLocaleString()} AWBs</strong>
                       </span>
                     </button>
                   </div>
@@ -377,24 +376,24 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                           onClick={() => handleSelectDestination(code)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
                             isSelected
-                              ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
-                              : 'text-slate-800 hover:bg-blue-50 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                              ? 'bg-sky-600 text-white font-bold shadow-md shadow-sky-500/25'
+                              : 'text-slate-800 hover:bg-sky-50 dark:text-slate-200 dark:hover:bg-slate-800/80'
                           }`}
                         >
                           <div className="flex items-center gap-2">
                             {isSelected ? (
                               <Check className="w-3.5 h-3.5 text-white font-bold" />
                             ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0" />
                             )}
                             <span className="font-mono font-extrabold">{code}</span>
                           </div>
                           <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
                             isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                              ? 'bg-white/20 text-white font-black'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold'
                           }`}>
-                            {count.toLocaleString()} AWBs
+                            <strong>{count.toLocaleString()} AWBs</strong>
                           </span>
                         </button>
                       );
@@ -407,9 +406,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
           {/* 2. Add Customer Search Autocomplete */}
           <div className="md:col-span-7 relative z-50" ref={dropdownRef}>
-            <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between">
-              <span>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</span>
-              <span className="text-[10px] text-slate-500">Ranked by shipment volume</span>
+            <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
+              <span><strong>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</strong></span>
+              <span className="text-[10px] text-slate-500 font-semibold">Ranked by shipment volume</span>
             </label>
             <div className="relative">
               <input
@@ -453,11 +452,11 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       >
                         <div className="flex items-center gap-2 truncate pr-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0 group-hover:scale-125 transition-transform" />
-                          <span className="truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-300 font-bold">{item.name}</span>
+                          <span className="truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-300 font-extrabold">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950 font-bold">
-                            {item.count.toLocaleString()} AWBs
+                            <strong>{item.count.toLocaleString()} AWBs</strong>
                           </span>
                           <Plus className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         </div>
@@ -474,13 +473,13 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         {/* Selected Customer Chips */}
         {selectedCustomers.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <span className="text-xs text-slate-500 font-semibold">Comparing:</span>
+            <span className="text-xs text-slate-400 font-bold"><strong>Comparing:</strong></span>
             {selectedCustomers.map((cust) => (
               <span
                 key={cust}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 border border-slate-700"
               >
-                <span>{cust}</span>
+                <span><strong>{cust}</strong></span>
                 <button
                   type="button"
                   onClick={() => handleRemoveCustomer(cust)}
@@ -510,18 +509,18 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
               >
                 {/* Highlight badges */}
                 <div className="flex items-start justify-between gap-2">
-                  <div className="font-bold text-white text-sm line-clamp-2" title={c.customer}>
-                    {c.customer}
+                  <div className="font-extrabold text-white text-sm line-clamp-2" title={c.customer}>
+                    <strong>{c.customer}</strong>
                   </div>
                   {isFastest && (
-                    <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                       <Trophy className="w-3 h-3" />
-                      Fastest
+                      <strong>Fastest</strong>
                     </span>
                   )}
                   {isHighestVol && !isFastest && (
-                    <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                      Top Vol
+                    <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                      <strong>Top Vol</strong>
                     </span>
                   )}
                 </div>
@@ -529,59 +528,59 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 <div className="mt-4 space-y-3">
                   {/* Transit Time Metric */}
                   <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <div className="text-[11px] text-slate-400 font-semibold flex items-center justify-between">
-                      <span>Avg Transit Time</span>
+                    <div className="text-[11px] text-slate-400 font-bold flex items-center justify-between">
+                      <span><strong>Avg Transit Time</strong></span>
                       <Clock className="w-3.5 h-3.5 text-indigo-400" />
                     </div>
                     <div className="text-2xl font-black text-indigo-400 mt-1 flex items-baseline gap-1 font-mono">
-                      <span>{c.avgTT > 0 ? c.avgTT : '-'}</span>
-                      <span className="text-xs font-normal text-slate-400">days</span>
+                      <span><strong>{c.avgTT > 0 ? c.avgTT : '-'}</strong></span>
+                      <span className="text-xs font-bold text-slate-400">days</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono">
-                      <span>Min: {c.minTT}d</span>
-                      <span>Max: {c.maxTT}d</span>
+                    <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono font-bold">
+                      <span><strong>Min: {c.minTT}d</strong></span>
+                      <span><strong>Max: {c.maxTT}d</strong></span>
                     </div>
                   </div>
 
                   {/* Volume & On-time Stats */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                      <span className="text-slate-400 text-[11px] block">AWB Volume</span>
-                      <span className="text-base font-bold text-white font-mono">
-                        {c.awbCount.toLocaleString()}
+                      <span className="text-slate-400 text-[11px] block font-bold"><strong>AWB Volume</strong></span>
+                      <span className="text-base font-black text-white font-mono">
+                        <strong>{c.awbCount.toLocaleString()}</strong>
                       </span>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                      <span className="text-slate-400 text-[11px] block">On-Time (≤5d)</span>
-                      <span className="text-base font-bold text-emerald-400 font-mono">
-                        {c.onTimePercentage}%
+                      <span className="text-slate-400 text-[11px] block font-bold"><strong>On-Time (≤5d)</strong></span>
+                      <span className="text-base font-black text-emerald-400 font-mono">
+                        <strong>{c.onTimePercentage}%</strong>
                       </span>
                     </div>
                   </div>
 
                   {/* Delay Breakdown Summary */}
                   <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                      <span>Recorded Delays</span>
-                      <span className="font-mono text-amber-400 font-semibold">{c.delayCount} AWBs</span>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-bold">
+                      <span><strong>Recorded Delays</strong></span>
+                      <span className="font-mono text-amber-400 font-black"><strong>{c.delayCount} AWBs</strong></span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
-                      <span>Transit: {c.transitDelays}</span>
-                      <span>Clear: {c.clearanceDelays}</span>
-                      <span>Dest: {c.destinationDelays}</span>
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono font-semibold">
+                      <span><strong>Transit:</strong> {c.transitDelays}</span>
+                      <span><strong>Clear:</strong> {c.clearanceDelays}</span>
+                      <span><strong>Dest:</strong> {c.destinationDelays}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2 text-[10px] text-slate-500 flex items-center justify-between border-t border-slate-800">
-                  <span>Destination: {selectedDestination}</span>
+                <div className="mt-3 pt-2 text-[10px] text-slate-400 flex items-center justify-between border-t border-slate-800 font-semibold">
+                  <span><strong>Destination: {selectedDestination}</strong></span>
                   <button
                     type="button"
                     onClick={() => handleRemoveCustomer(c.customer)}
-                    className="text-rose-400 hover:underline cursor-pointer"
+                    className="text-rose-400 hover:underline cursor-pointer font-bold"
                   >
-                    Remove
+                    <strong>Remove</strong>
                   </button>
                 </div>
               </div>
@@ -589,18 +588,18 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           })}
         </div>
       ) : (
-        <div className="glass-card p-12 text-center rounded-2xl text-slate-400">
+        <div className="glass-card p-12 text-center rounded-2xl text-slate-400 font-semibold">
           Please add at least 1 customer above to view comparative benchmarks.
         </div>
       )}
 
       {/* 3. VISUAL BENCHMARK CHART */}
       {comparisonData.length > 0 && (
-        <div className="glass-panel p-5 rounded-2xl relative z-10">
+        <div className="glass-panel p-5 rounded-2xl relative z-10 border border-slate-800/80">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="w-4 h-4 text-blue-400" />
-            <h3 className="text-xs font-bold uppercase text-slate-300 tracking-wider">
-              Comparative Transit Time &amp; On-Time Performance Benchmark
+            <BarChart2 className="w-4 h-4 text-sky-400" />
+            <h3 className="text-xs font-extrabold uppercase text-slate-300 tracking-wider">
+              <strong>Comparative Transit Time &amp; On-Time Performance Benchmark</strong>
             </h3>
           </div>
           <div className="h-72 relative">
