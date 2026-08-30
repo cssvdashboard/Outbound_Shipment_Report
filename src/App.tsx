@@ -26,6 +26,7 @@ export const App: React.FC = () => {
     removeShipperFilter,
     addCustomerFilter,
     removeCustomerFilter,
+    setCustomerFilter,
     setDestinationFilter,
     setFinalResolutionFilter,
     setTTRangeFilter,
@@ -96,13 +97,13 @@ export const App: React.FC = () => {
           onTabChange={setActiveTab}
         />
 
-        {/* 2. DESTINATION FILTER BAR */}
+        {/* 2. CUSTOMER FILTER BAR */}
         <SmartFilterBar
           rawShipments={rawShipments}
           filters={filters}
-          onDestinationChange={setDestinationFilter}
+          onCustomerChange={setCustomerFilter}
           onResetFilters={resetAllFilters}
-          allDestinations={allDestinations}
+          allCustomers={allCustomers}
         />
 
         {/* 3. MAIN DASHBOARD CONTENT */}

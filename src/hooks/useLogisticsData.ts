@@ -193,6 +193,13 @@ export function useLogisticsData() {
     }));
   }, []);
 
+  const setCustomerFilter = useCallback((customer: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      selectedCustomers: customer === 'ALL' || !customer ? [] : [customer]
+    }));
+  }, []);
+
   const setDestinationFilter = useCallback((dest: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -306,6 +313,7 @@ export function useLogisticsData() {
     removeShipperFilter,
     addCustomerFilter,
     removeCustomerFilter,
+    setCustomerFilter,
     setDestinationFilter,
     setFinalResolutionFilter,
     setTTRangeFilter,
