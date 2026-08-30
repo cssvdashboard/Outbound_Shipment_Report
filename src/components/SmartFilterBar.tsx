@@ -182,12 +182,12 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 placeholder={
                   selectedCustomer
                     ? `Customer: ${selectedCustomer} (${selectedCustomerCount.toLocaleString()} AWBs)`
-                    : `Customer : All ${totalDistinctCustomersCount.toLocaleString()} Customers`
+                    : 'Type here Customer Name'
                 }
                 className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
                   selectedCustomer
                     ? 'bg-emerald-50/70 border-emerald-400 text-emerald-950 dark:bg-emerald-950/40 dark:border-emerald-500/60 dark:text-emerald-200 placeholder:text-emerald-800 dark:placeholder:text-emerald-300'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
                 }`}
               />
 
@@ -238,7 +238,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                     <span>
                       {customerSearch.trim()
                         ? `Matching Customers for "${customerSearch}"`
-                        : `Top Customer Accounts (Quick Pick)`}
+                        : `All Customers (${totalDistinctCustomersCount.toLocaleString()} Total)`}
                     </span>
                   </span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300">
@@ -263,7 +263,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                       ) : (
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
                       )}
-                      <span className="font-bold">Customer : All {totalDistinctCustomersCount.toLocaleString()} Customers</span>
+                      <span className="font-bold">All Customers ({totalDistinctCustomersCount.toLocaleString()} Total)</span>
                     </div>
                     <span className="text-[10px] font-mono font-bold text-slate-400">
                       {rawShipments.length.toLocaleString()} AWBs
@@ -342,12 +342,12 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 placeholder={
                   selectedDestination
                     ? `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
-                    : `Destination : All ${totalDestinationsCount.toLocaleString()} Countries`
+                    : 'Type Here Destination'
                 }
                 className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                   selectedDestination
                     ? 'bg-blue-50/70 border-blue-400 text-blue-900 dark:bg-blue-950/40 dark:border-blue-500/60 dark:text-blue-200 placeholder:text-blue-800 dark:placeholder:text-blue-300'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
                 }`}
               />
 
@@ -398,7 +398,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                     <span>
                       {destSearch.trim()
                         ? `Matching Destinations for "${destSearch.toUpperCase()}"`
-                        : `Destination Countries (${totalDestinationsCount} Total)`}
+                        : `All Destinations (${totalDestinationsCount} Total)`}
                     </span>
                   </span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
@@ -423,7 +423,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                       ) : (
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
                       )}
-                      <span className="font-bold">Destination : All {totalDestinationsCount.toLocaleString()} Countries</span>
+                      <span className="font-bold">All Destinations ({totalDestinationsCount} Countries)</span>
                     </div>
                     <span className="text-[10px] font-mono font-bold text-slate-400">
                       {rawShipments.length.toLocaleString()} AWBs
