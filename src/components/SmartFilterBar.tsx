@@ -44,11 +44,20 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Destination Searchable Combobox State
+  // Destination Searchable Dropdown State
   const [destSearch, setDestSearch] = useState<string>('');
   const [isDestDropdownOpen, setIsDestDropdownOpen] = useState<boolean>(false);
   const destDropdownRef = useRef<HTMLDivElement>(null);
-  const destInputRef = useRef<HTMLInputElement>(null);
+  const destSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus destination search input when dropdown opens
+  useEffect(() => {
+    if (isDestDropdownOpen) {
+      setTimeout(() => {
+        destSearchInputRef.current?.focus();
+      }, 50);
+    }
+  }, [isDestDropdownOpen]);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -381,165 +390,182 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             )}
           </div>
 
-          {/* Destination Searchable Combobox (Writing search box + dropdown box together) & Reset Filter */}
+          {/* Destination Dropdown Button with Embedded Text Search Bar & Reset Filter */}
           <div className="flex items-center gap-2">
             
-            {/* Searchable Destination Combobox */}
+            {/* Destination Searchable Dropdown */}
             <div className="relative" ref={destDropdownRef}>
-              <div className="relative min-w-[210px] sm:min-w-[250px]">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+              
+              {/* Destination Dropdown Button Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
+                className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-sm min-w-[220px] sm:min-w-[260px] ${
+                  selectedDestination
+                    ? 'bg-blue-50/80 border-blue-400 text-blue-800 dark:bg-blue-950/60 dark:border-blue-500/60 dark:text-blue-300'
+                    : 'bg-slate-50 border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600'
+                }`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                  <span className="truncate">
+                    {selectedDestination
+                      ? `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
+                      : `Destination: All (${allDestinations.length} Countries)`}
+                  </span>
                 </div>
 
-                <input
-                  ref={destInputRef}
-                  type="text"
-                  value={destSearch}
-                  onChange={(e) => {
-                    setDestSearch(e.target.value);
-                    setIsDestDropdownOpen(true);
-                  }}
-                  onFocus={() => setIsDestDropdownOpen(true)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                      setIsDestDropdownOpen(false);
-                    } else if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (filteredDestinations.length > 0) {
-                        onDestinationChange(filteredDestinations[0]);
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {selectedDestination && (
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDestinationChange('ALL');
                         setDestSearch('');
-                        setIsDestDropdownOpen(false);
-                      }
-                    }
-                  }}
-                  placeholder={
-                    selectedDestination
-                      ? `Destination: ${selectedDestination}`
-                      : 'Search Dest (e.g. US, DE)...'
-                  }
-                  className="w-full pl-8 pr-16 py-2.5 text-xs font-bold rounded-xl bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer shadow-sm transition-all"
-                />
-
-                {/* Right controls: Clear X and Chevron Dropdown Toggle */}
-                <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
-                  {selectedDestination && !destSearch && (
-                    <button
-                      type="button"
-                      onClick={() => onDestinationChange('ALL')}
-                      className="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                      }}
+                      className="p-0.5 rounded-full hover:bg-rose-200 dark:hover:bg-rose-900/60 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                       title="Clear destination filter"
                     >
                       <X className="w-3 h-3" />
-                    </button>
+                    </span>
                   )}
-                  {destSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setDestSearch('')}
-                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                      title="Clear search text"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    title="Toggle destinations list"
-                  >
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} />
-                  </button>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} />
                 </div>
-              </div>
+              </button>
 
-              {/* Destination Dropdown Box / List */}
+              {/* Destination Dropdown Menu with Embedded Text Search Bar */}
               {isDestDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 max-h-72 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/20 divide-y divide-slate-100 dark:divide-slate-800">
-                  {/* Dropdown Header */}
-                  <div className="p-2.5 bg-slate-50 dark:bg-slate-950/80 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md">
-                    <span className="flex items-center gap-1.5 font-bold">
-                      <Globe className="w-3.5 h-3.5 text-blue-500" />
-                      <span>{destSearch.trim() ? `Matching: "${destSearch.toUpperCase()}"` : 'Select Destination'}</span>
-                    </span>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-                      {filteredDestinations.length} countries
-                    </span>
-                  </div>
-
-                  {/* All Destinations Option */}
-                  <div className="p-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onDestinationChange('ALL');
-                        setDestSearch('');
-                        setIsDestDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                        !selectedDestination
-                          ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
-                          : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {!selectedDestination ? (
-                          <Check className="w-3.5 h-3.5 text-blue-500 font-bold" />
-                        ) : (
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        )}
-                        <span>All Destinations ({allDestinations.length} Countries)</span>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold text-slate-400">
-                        {rawShipments.length.toLocaleString()} AWBs
+                <div className="absolute right-0 top-full mt-2 w-80 max-h-80 overflow-hidden z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/25 flex flex-col">
+                  
+                  {/* Top Text Search Bar inside Dropdown */}
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200/80 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      <span className="flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Filter Destination Countries</span>
                       </span>
-                    </button>
-                  </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
+                        {filteredDestinations.length} of {allDestinations.length}
+                      </span>
+                    </div>
 
-                  {/* Country List Options */}
-                  <div className="p-1.5 space-y-0.5">
-                    {filteredDestinations.map((code) => {
-                      const isSelected = selectedDestination === code;
-                      const count = destinationCounts.get(code) || 0;
-                      return (
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                        <Search className="w-3.5 h-3.5 text-blue-500" />
+                      </div>
+                      <input
+                        ref={destSearchInputRef}
+                        type="text"
+                        value={destSearch}
+                        onChange={(e) => setDestSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            setIsDestDropdownOpen(false);
+                          } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (filteredDestinations.length > 0) {
+                              onDestinationChange(filteredDestinations[0]);
+                              setDestSearch('');
+                              setIsDestDropdownOpen(false);
+                            }
+                          }
+                        }}
+                        placeholder="Type to search country (e.g. US, DE, CA)..."
+                        className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-900 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      {destSearch && (
                         <button
-                          key={code}
                           type="button"
                           onClick={() => {
-                            onDestinationChange(code);
                             setDestSearch('');
-                            setIsDestDropdownOpen(false);
+                            destSearchInputRef.current?.focus();
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
-                              : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
-                          }`}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                         >
-                          <div className="flex items-center gap-2">
-                            {isSelected ? (
-                              <Check className="w-3.5 h-3.5 text-white font-bold" />
-                            ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                            )}
-                            <span className="font-mono font-extrabold">{code}</span>
-                          </div>
-                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                            isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                          }`}>
-                            {count.toLocaleString()} AWBs
-                          </span>
+                          <X className="w-3 h-3" />
                         </button>
-                      );
-                    })}
+                      )}
+                    </div>
+                  </div>
 
-                    {filteredDestinations.length === 0 && (
-                      <div className="p-4 text-center text-xs text-slate-400">
-                        No destination found matching &quot;{destSearch}&quot;
-                      </div>
-                    )}
+                  {/* Scrollable Destination List */}
+                  <div className="overflow-y-auto max-h-56 p-1.5 divide-y divide-slate-100 dark:divide-slate-800/60">
+                    
+                    {/* All Destinations Option */}
+                    <div className="pb-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onDestinationChange('ALL');
+                          setDestSearch('');
+                          setIsDestDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          !selectedDestination
+                            ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
+                            : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {!selectedDestination ? (
+                            <Check className="w-3.5 h-3.5 text-blue-500 font-bold" />
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                          )}
+                          <span className="font-semibold">All Destinations (127 Countries)</span>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold text-slate-400">
+                          {rawShipments.length.toLocaleString()} AWBs
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Filtered Country Items */}
+                    <div className="pt-1 space-y-0.5">
+                      {filteredDestinations.map((code) => {
+                        const isSelected = selectedDestination === code;
+                        const count = destinationCounts.get(code) || 0;
+                        return (
+                          <button
+                            key={code}
+                            type="button"
+                            onClick={() => {
+                              onDestinationChange(code);
+                              setDestSearch('');
+                              setIsDestDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
+                                : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {isSelected ? (
+                                <Check className="w-3.5 h-3.5 text-white font-bold" />
+                              ) : (
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                              )}
+                              <span className="font-mono font-extrabold">{code}</span>
+                            </div>
+                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                              isSelected
+                                ? 'bg-white/20 text-white'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            }`}>
+                              {count.toLocaleString()} AWBs
+                            </span>
+                          </button>
+                        );
+                      })}
+
+                      {filteredDestinations.length === 0 && (
+                        <div className="p-4 text-center text-xs text-slate-400">
+                          No country code matching &quot;{destSearch}&quot;
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 </div>
               )}
