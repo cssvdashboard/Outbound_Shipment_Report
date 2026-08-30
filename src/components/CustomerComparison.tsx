@@ -281,17 +281,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
               {/* Suggestions dropdown */}
               {isDropdownOpen && availableCustomerSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5 divide-y divide-slate-100 dark:divide-slate-800">
-                  <div className="p-2 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800">
-                    <span className="font-bold">
-                      {customerSearch.trim() ? `Matching Customers for "${customerSearch}"` : 'Top Volume Customers (Click to Compare)'}
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold">
-                      {availableCustomerSuggestions.length} accounts
-                    </span>
-                  </div>
-
-                  <div className="pt-1 space-y-0.5">
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5">
+                  <div className="space-y-0.5">
                     {availableCustomerSuggestions.map((item) => (
                       <button
                         key={item.name}
