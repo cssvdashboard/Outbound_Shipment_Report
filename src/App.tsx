@@ -96,15 +96,10 @@ export const App: React.FC = () => {
           onTabChange={setActiveTab}
         />
 
-        {/* 2. SMART FILTER & AUTOCOMPLETE BAR */}
+        {/* 2. DESTINATION FILTER BAR */}
         <SmartFilterBar
           rawShipments={rawShipments}
           filters={filters}
-          onFilterModeChange={setFilterMode}
-          onAddShipper={addShipperFilter}
-          onRemoveShipper={removeShipperFilter}
-          onAddCustomer={addCustomerFilter}
-          onRemoveCustomer={removeCustomerFilter}
           onDestinationChange={setDestinationFilter}
           onResetFilters={resetAllFilters}
           allDestinations={allDestinations}

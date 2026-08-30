@@ -4,24 +4,14 @@ import {
   X,
   RotateCcw,
   Globe,
-  Users,
-  ChevronDown,
-  Building2,
-  Sparkles,
-  Layers,
-  Check
+  Check,
+  ChevronDown
 } from 'lucide-react';
-import { FilterState, FilterMode, Shipment } from '../types/logistics';
-import { searchShippers, searchCustomers } from '../utils/analytics';
+import { FilterState, Shipment } from '../types/logistics';
 
 interface SmartFilterBarProps {
   rawShipments: Shipment[];
   filters: FilterState;
-  onFilterModeChange: (mode: FilterMode) => void;
-  onAddShipper: (shipper: string) => void;
-  onRemoveShipper: (shipper: string) => void;
-  onAddCustomer: (customer: string) => void;
-  onRemoveCustomer: (customer: string) => void;
   onDestinationChange: (dest: string) => void;
   onResetFilters: () => void;
   allDestinations: string[];
@@ -30,91 +20,27 @@ interface SmartFilterBarProps {
 export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   rawShipments,
   filters,
-  onAddShipper,
-  onRemoveShipper,
-  onAddCustomer,
-  onRemoveCustomer,
   onDestinationChange,
   onResetFilters,
   allDestinations
 }) => {
-  const [searchInput, setSearchInput] = useState<string>('');
+  const [destSearch, setDestSearch] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
-  const [searchTarget, setSearchTarget] = useState<'all' | 'customer' | 'shipper'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Destination Searchable Dropdown State
-  const [destSearch, setDestSearch] = useState<string>('');
-  const [isDestDropdownOpen, setIsDestDropdownOpen] = useState<boolean>(false);
-  const destDropdownRef = useRef<HTMLDivElement>(null);
-  const destSearchInputRef = useRef<HTMLInputElement>(null);
-
-  // Focus destination search input when dropdown opens
-  useEffect(() => {
-    if (isDestDropdownOpen) {
-      setTimeout(() => {
-        destSearchInputRef.current?.focus();
-      }, 50);
-    }
-  }, [isDestDropdownOpen]);
-
-  // Close dropdowns on click outside
+  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
-      }
-      if (destDropdownRef.current && !destDropdownRef.current.contains(event.target as Node)) {
-        setIsDestDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Compute matching autocomplete items based on query
-  const matchingCustomers = useMemo(() => {
-    if (searchTarget === 'shipper') return [];
-    return searchCustomers(rawShipments, searchInput, 15);
-  }, [rawShipments, searchInput, searchTarget]);
-
-  const matchingShippers = useMemo(() => {
-    if (searchTarget === 'customer') return [];
-    return searchShippers(rawShipments, searchInput, 15);
-  }, [rawShipments, searchInput, searchTarget]);
-
-  const totalResultsCount = matchingCustomers.length + matchingShippers.length;
-
-  const handleSelectCustomer = (name: string) => {
-    onAddCustomer(name);
-    setSearchInput('');
-    setIsDropdownOpen(false);
-  };
-
-  const handleSelectShipper = (name: string) => {
-    onAddShipper(name);
-    setSearchInput('');
-    setIsDropdownOpen(false);
-  };
-
-  // Keyboard navigation & Enter key submission
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      setIsDropdownOpen(false);
-      return;
-    }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (matchingCustomers.length > 0 && (searchTarget === 'customer' || searchTarget === 'all')) {
-        handleSelectCustomer(matchingCustomers[0].name);
-      } else if (matchingShippers.length > 0 && (searchTarget === 'shipper' || searchTarget === 'all')) {
-        handleSelectShipper(matchingShippers[0].name);
-      }
-    }
-  };
-
-  // Destination Counts & Filtering
+  // Compute destination counts from dataset
   const destinationCounts = useMemo(() => {
     const map = new Map<string, number>();
     for (const s of rawShipments) {
@@ -126,6 +52,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     return map;
   }, [rawShipments]);
 
+  // Filter destination list based on typed query
   const filteredDestinations = useMemo(() => {
     if (!destSearch.trim()) return allDestinations;
     const q = destSearch.trim().toUpperCase();
@@ -134,25 +61,23 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
 
   const selectedDestination = filters.selectedDestinations[0] || null;
 
-  // Helper to highlight matching text in suggestions
-  const highlightMatch = (text: string, query: string) => {
-    if (!query || !query.trim()) return text;
-    const tokens = query.trim().split(/\s+/).filter(Boolean);
-    if (tokens.length === 0) return text;
-    
-    const escaped = tokens.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-    const regex = new RegExp(`(${escaped})`, 'gi');
-    const parts = text.split(regex);
+  const handleSelectDestination = (code: string) => {
+    onDestinationChange(code);
+    setDestSearch('');
+    setIsDropdownOpen(false);
+  };
 
-    return parts.map((part, i) =>
-      tokens.some((t) => t.toLowerCase() === part.toLowerCase()) ? (
-        <span key={i} className="text-blue-600 dark:text-blue-400 font-extrabold underline decoration-blue-500/50">
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    );
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsDropdownOpen(false);
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredDestinations.length > 0) {
+        handleSelectDestination(filteredDestinations[0]);
+      }
+    }
   };
 
   const totalActiveFilters =
@@ -167,489 +92,210 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
 
   return (
     <div className="sticky top-16 z-30 w-full bg-white/95 dark:bg-[#0b1120]/95 backdrop-blur-xl border-y border-slate-200 dark:border-slate-800/90 py-3 px-3 sm:px-6 lg:px-8 shadow-md transition-colors duration-200">
-      <div className="max-w-[1700px] mx-auto space-y-3">
+      <div className="max-w-[1700px] mx-auto space-y-2">
         
-        {/* Main Controls Row */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        {/* Main Controls Row: Destination Search Bar Only */}
+        <div className="flex items-center gap-3">
           
-          {/* Universal Search with Autocomplete Dropdown */}
+          {/* Destination Text Search Bar with Dropdown */}
           <div className="relative flex-1" ref={dropdownRef}>
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Search className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                </div>
-                
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={searchInput}
-                  onChange={(e) => {
-                    setSearchInput(e.target.value);
-                    setIsDropdownOpen(true);
-                  }}
-                  onFocus={() => setIsDropdownOpen(true)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={
-                    searchTarget === 'customer'
-                      ? 'Search Customer accounts (e.g. "Epic", "Motijheel", "Classic", "Liz")...'
-                      : searchTarget === 'shipper'
-                      ? 'Search Shipper names (e.g. "Four", "Elite", "Fashion", "Triple A")...'
-                      : 'Search any Customer account or Shipper name...'
-                  }
-                  className="w-full pl-10 pr-52 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all shadow-inner"
-                />
+            <div className="relative flex items-center">
+              
+              {/* Globe Icon */}
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <Globe className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+              </div>
 
-                {/* Match count badge inside input when typing */}
-                {searchInput.trim() && (
-                  <div className="absolute right-40 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-mono font-bold border border-blue-500/30 pointer-events-none">
-                    <span>{totalResultsCount} found</span>
-                  </div>
-                )}
+              {/* Text Search Input */}
+              <input
+                ref={inputRef}
+                type="text"
+                value={destSearch}
+                onChange={(e) => {
+                  setDestSearch(e.target.value);
+                  setIsDropdownOpen(true);
+                }}
+                onFocus={() => setIsDropdownOpen(true)}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  selectedDestination
+                    ? `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
+                    : `Destination : All ${allDestinations.length} countries`
+                }
+                className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                  selectedDestination
+                    ? 'bg-blue-50/70 border-blue-400 text-blue-900 dark:bg-blue-950/40 dark:border-blue-500/60 dark:text-blue-200 placeholder:text-blue-800 dark:placeholder:text-blue-300'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400'
+                }`}
+              />
 
-                {/* Clear search 'X' button if text exists */}
-                {searchInput && (
+              {/* Right side controls: Clear X and Chevron */}
+              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1.5">
+                {destSearch ? (
                   <button
                     type="button"
                     onClick={() => {
-                      setSearchInput('');
+                      setDestSearch('');
                       inputRef.current?.focus();
                     }}
-                    className="absolute right-36 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
                     title="Clear search input"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
-                )}
-                
-                {/* Search Target Switcher Tabs Pill */}
-                <div className="absolute inset-y-1 right-1 flex items-center bg-slate-200/80 dark:bg-slate-800/90 p-0.5 rounded-lg border border-slate-300/60 dark:border-slate-700/80 shadow-sm">
+                ) : selectedDestination ? (
                   <button
                     type="button"
-                    onClick={() => setSearchTarget('all')}
-                    className={`px-2 py-1 text-[10px] font-bold rounded-md flex items-center gap-1 transition-all cursor-pointer ${
-                      searchTarget === 'all'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                    title="Search across all Customers and Shippers"
+                    onClick={() => onDestinationChange('ALL')}
+                    className="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Reset destination to All countries"
                   >
-                    <Layers className="w-3 h-3" />
-                    <span>All</span>
+                    <X className="w-3.5 h-3.5" />
                   </button>
+                ) : null}
 
-                  <button
-                    type="button"
-                    onClick={() => setSearchTarget('customer')}
-                    className={`px-2 py-1 text-[10px] font-bold rounded-md flex items-center gap-1 transition-all cursor-pointer ${
-                      searchTarget === 'customer'
-                        ? 'bg-emerald-600 text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                    title="Filter search to Customers only"
-                  >
-                    <Users className="w-3 h-3" />
-                    <span>Customer</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSearchTarget('shipper')}
-                    className={`px-2 py-1 text-[10px] font-bold rounded-md flex items-center gap-1 transition-all cursor-pointer ${
-                      searchTarget === 'shipper'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                    title="Filter search to Shippers only"
-                  >
-                    <Building2 className="w-3 h-3" />
-                    <span>Shipper</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="p-1 text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
+                  title="Toggle destination list"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} />
+                </button>
               </div>
             </div>
 
-            {/* Universal Autocomplete Dropdown List */}
+            {/* Destination Autocomplete Dropdown List */}
             {isDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 max-h-80 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/20 divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="absolute left-0 right-0 top-full mt-2 max-h-80 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/25 divide-y divide-slate-100 dark:divide-slate-800">
                 
                 {/* Header summary in dropdown */}
                 <div className="p-2.5 bg-slate-50 dark:bg-slate-950/80 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md">
                   <span className="flex items-center gap-1.5 font-bold">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                    {searchInput.trim() ? (
-                      <span>Search Results for &quot;{searchInput}&quot;</span>
-                    ) : (
-                      <span>Top Volume Accounts &amp; Shippers (Quick Pick)</span>
-                    )}
+                    <Globe className="w-3.5 h-3.5 text-blue-500" />
+                    <span>
+                      {destSearch.trim()
+                        ? `Matching Destinations for "${destSearch.toUpperCase()}"`
+                        : `Destination Countries (${allDestinations.length} Total)`}
+                    </span>
                   </span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-                    {totalResultsCount} results available
+                    {filteredDestinations.length} available
                   </span>
                 </div>
 
-                {/* 1. CUSTOMER RESULTS SECTION */}
-                {matchingCustomers.length > 0 && (searchTarget === 'all' || searchTarget === 'customer') && (
-                  <div className="p-2">
-                    <div className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-black text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>Customer Accounts ({matchingCustomers.length})</span>
-                      </div>
-                      <span className="text-[9px] font-normal text-slate-400">Click to filter dashboard</span>
+                {/* All Destinations Option */}
+                <div className="p-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDestination('ALL')}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                      !selectedDestination
+                        ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
+                        : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {!selectedDestination ? (
+                        <Check className="w-4 h-4 text-blue-500 font-bold" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-slate-400" />
+                      )}
+                      <span className="font-bold">Destination : All {allDestinations.length} countries</span>
                     </div>
+                    <span className="text-[10px] font-mono font-bold text-slate-400">
+                      {rawShipments.length.toLocaleString()} AWBs
+                    </span>
+                  </button>
+                </div>
 
-                    <div className="space-y-1 mt-1">
-                      {matchingCustomers.map((item) => {
-                        const isSelected = filters.selectedCustomers.includes(item.name);
-                        return (
-                          <button
-                            key={`cust-${item.name}`}
-                            type="button"
-                            onClick={() => handleSelectCustomer(item.name)}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
-                              isSelected
-                                ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
-                                : 'text-slate-800 hover:bg-emerald-50/70 dark:text-slate-200 dark:hover:bg-slate-800/90'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 truncate pr-2">
-                              {isSelected ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 font-bold" />
-                              ) : (
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 group-hover:scale-125 transition-transform" />
-                              )}
-                              <span className="truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-300">
-                                {highlightMatch(item.name, searchInput)}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 shrink-0 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/80">
-                              {item.count.toLocaleString()} AWBs
-                            </span>
-                          </button>
-                        );
-                      })}
+                {/* Country List Options */}
+                <div className="p-1.5 space-y-0.5">
+                  {filteredDestinations.map((code) => {
+                    const isSelected = selectedDestination === code;
+                    const count = destinationCounts.get(code) || 0;
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => handleSelectDestination(code)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
+                            : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isSelected ? (
+                            <Check className="w-3.5 h-3.5 text-white font-bold" />
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                          )}
+                          <span className="font-mono font-extrabold">{code}</span>
+                        </div>
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                          isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                        }`}>
+                          {count.toLocaleString()} AWBs
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  {filteredDestinations.length === 0 && (
+                    <div className="p-6 text-center text-xs text-slate-400 space-y-1">
+                      <p className="font-semibold">No destination country found matching &quot;{destSearch}&quot;</p>
+                      <p className="text-[11px] text-slate-500">Try searching for a 2-letter country code (e.g. US, DE, GB).</p>
                     </div>
-                  </div>
-                )}
-
-                {/* 2. SHIPPER RESULTS SECTION */}
-                {matchingShippers.length > 0 && (searchTarget === 'all' || searchTarget === 'shipper') && (
-                  <div className="p-2">
-                    <div className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-black text-blue-600 dark:text-blue-400 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Building2 className="w-3.5 h-3.5" />
-                        <span>Shipper Names ({matchingShippers.length})</span>
-                      </div>
-                      <span className="text-[9px] font-normal text-slate-400">Click to filter dashboard</span>
-                    </div>
-
-                    <div className="space-y-1 mt-1">
-                      {matchingShippers.map((item) => {
-                        const isSelected = filters.selectedShippers.includes(item.name);
-                        return (
-                          <button
-                            key={`shpr-${item.name}`}
-                            type="button"
-                            onClick={() => handleSelectShipper(item.name)}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
-                              isSelected
-                                ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
-                                : 'text-slate-800 hover:bg-blue-50/70 dark:text-slate-200 dark:hover:bg-slate-800/90'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 truncate pr-2">
-                              {isSelected ? (
-                                <Check className="w-3.5 h-3.5 text-blue-500 shrink-0 font-bold" />
-                              ) : (
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 group-hover:scale-125 transition-transform" />
-                              )}
-                              <span className="truncate group-hover:text-blue-600 dark:group-hover:text-blue-300">
-                                {highlightMatch(item.name, searchInput)}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shrink-0 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/80">
-                              {item.count.toLocaleString()} AWBs
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* No results message */}
-                {totalResultsCount === 0 && (
-                  <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
-                    <p className="font-semibold">No accounts found matching &quot;{searchInput}&quot;</p>
-                    <p className="text-[11px] text-slate-400">Try searching for partial keywords or check your spelling.</p>
-                  </div>
-                )}
+                  )}
+                </div>
 
               </div>
             )}
           </div>
 
-          {/* Destination Dropdown Button with Embedded Text Search Bar & Reset Filter */}
-          <div className="flex items-center gap-2">
-            
-            {/* Destination Searchable Dropdown */}
-            <div className="relative" ref={destDropdownRef}>
-              
-              {/* Destination Dropdown Button Trigger */}
-              <button
-                type="button"
-                onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
-                className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-sm min-w-[220px] sm:min-w-[260px] ${
-                  selectedDestination
-                    ? 'bg-blue-50/80 border-blue-400 text-blue-800 dark:bg-blue-950/60 dark:border-blue-500/60 dark:text-blue-300'
-                    : 'bg-slate-50 border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600'
-                }`}
-              >
-                <div className="flex items-center gap-2 truncate">
-                  <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
-                  <span className="truncate">
-                    {selectedDestination
-                      ? `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
-                      : `Destination: All (${allDestinations.length} Countries)`}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {selectedDestination && (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDestinationChange('ALL');
-                        setDestSearch('');
-                      }}
-                      className="p-0.5 rounded-full hover:bg-rose-200 dark:hover:bg-rose-900/60 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                      title="Clear destination filter"
-                    >
-                      <X className="w-3 h-3" />
-                    </span>
-                  )}
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} />
-                </div>
-              </button>
-
-              {/* Destination Dropdown Menu with Embedded Text Search Bar */}
-              {isDestDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 max-h-80 overflow-hidden z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/25 flex flex-col">
-                  
-                  {/* Top Text Search Bar inside Dropdown */}
-                  <div className="p-2.5 bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200/80 dark:border-slate-800 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                      <span className="flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-blue-500" />
-                        <span>Filter Destination Countries</span>
-                      </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-                        {filteredDestinations.length} of {allDestinations.length}
-                      </span>
-                    </div>
-
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-                        <Search className="w-3.5 h-3.5 text-blue-500" />
-                      </div>
-                      <input
-                        ref={destSearchInputRef}
-                        type="text"
-                        value={destSearch}
-                        onChange={(e) => setDestSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Escape') {
-                            setIsDestDropdownOpen(false);
-                          } else if (e.key === 'Enter') {
-                            e.preventDefault();
-                            if (filteredDestinations.length > 0) {
-                              onDestinationChange(filteredDestinations[0]);
-                              setDestSearch('');
-                              setIsDestDropdownOpen(false);
-                            }
-                          }
-                        }}
-                        placeholder="Type to search country (e.g. US, DE, CA)..."
-                        className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-900 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                      />
-                      {destSearch && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDestSearch('');
-                            destSearchInputRef.current?.focus();
-                          }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Scrollable Destination List */}
-                  <div className="overflow-y-auto max-h-56 p-1.5 divide-y divide-slate-100 dark:divide-slate-800/60">
-                    
-                    {/* All Destinations Option */}
-                    <div className="pb-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onDestinationChange('ALL');
-                          setDestSearch('');
-                          setIsDestDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                          !selectedDestination
-                            ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
-                            : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          {!selectedDestination ? (
-                            <Check className="w-3.5 h-3.5 text-blue-500 font-bold" />
-                          ) : (
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                          )}
-                          <span className="font-semibold">All Destinations (127 Countries)</span>
-                        </div>
-                        <span className="text-[10px] font-mono font-bold text-slate-400">
-                          {rawShipments.length.toLocaleString()} AWBs
-                        </span>
-                      </button>
-                    </div>
-
-                    {/* Filtered Country Items */}
-                    <div className="pt-1 space-y-0.5">
-                      {filteredDestinations.map((code) => {
-                        const isSelected = selectedDestination === code;
-                        const count = destinationCounts.get(code) || 0;
-                        return (
-                          <button
-                            key={code}
-                            type="button"
-                            onClick={() => {
-                              onDestinationChange(code);
-                              setDestSearch('');
-                              setIsDestDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
-                                : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              {isSelected ? (
-                                <Check className="w-3.5 h-3.5 text-white font-bold" />
-                              ) : (
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                              )}
-                              <span className="font-mono font-extrabold">{code}</span>
-                            </div>
-                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                              isSelected
-                                ? 'bg-white/20 text-white'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                            }`}>
-                              {count.toLocaleString()} AWBs
-                            </span>
-                          </button>
-                        );
-                      })}
-
-                      {filteredDestinations.length === 0 && (
-                        <div className="p-4 text-center text-xs text-slate-400">
-                          No country code matching &quot;{destSearch}&quot;
-                        </div>
-                      )}
-                    </div>
-
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Reset Filters Button */}
-            {totalActiveFilters > 0 && (
-              <button
-                type="button"
-                onClick={onResetFilters}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
-                title="Reset all active filters"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset ({totalActiveFilters})</span>
-              </button>
-            )}
-          </div>
+          {/* Reset Filters Button (Visible when any filter is applied) */}
+          {totalActiveFilters > 0 && (
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02] shrink-0"
+              title="Reset all filters"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
 
-        {/* Selected Active Filters Chips Row */}
+        {/* Active Filter Tags Row (Only shown when filters are selected) */}
         {totalActiveFilters > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1.5">
-              Active Filters:
+              Active:
             </span>
 
-            {/* Customer tags (Emerald) */}
-            {filters.selectedCustomers.map((cust) => (
-              <span
-                key={cust}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-700/60 shadow-sm"
-              >
-                <Users className="w-3.5 h-3.5 shrink-0" />
-                <span className="max-w-[220px] truncate">Customer: {cust}</span>
-                <button
-                  type="button"
-                  onClick={() => onRemoveCustomer(cust)}
-                  className="hover:text-slate-900 dark:hover:text-white p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
-                  title="Remove customer filter"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-
-            {/* Shipper tags (Blue) */}
-            {filters.selectedShippers.map((shipper) => (
-              <span
-                key={shipper}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-700/60 shadow-sm"
-              >
-                <Building2 className="w-3.5 h-3.5 shrink-0" />
-                <span className="max-w-[220px] truncate">Shipper: {shipper}</span>
-                <button
-                  type="button"
-                  onClick={() => onRemoveShipper(shipper)}
-                  className="hover:text-slate-900 dark:hover:text-white p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
-                  title="Remove shipper filter"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-
-            {/* Destination tags */}
+            {/* Destination tag */}
             {filters.selectedDestinations.map((dest) => (
               <span
                 key={dest}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-300 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-700/60 shadow-sm"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-300 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-700/60 shadow-sm"
               >
                 <Globe className="w-3.5 h-3.5" />
-                <span>Dest: {dest}</span>
+                <span>Destination: {dest}</span>
                 <button
                   type="button"
                   onClick={() => onDestinationChange('ALL')}
-                  className="p-0.5 rounded-full hover:bg-cyan-200 dark:hover:bg-cyan-800 transition-colors cursor-pointer"
+                  className="p-0.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors cursor-pointer"
                 >
                   <X className="w-3 h-3" />
                 </button>
               </span>
             ))}
 
-            {/* TT Range tags */}
+            {/* Timeline Range tags */}
             {filters.selectedTTRanges.map((tt) => (
               <span
                 key={tt}
