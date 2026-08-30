@@ -101,7 +101,7 @@ export function computeSummaryMetrics(shipments: Shipment[]): MetricSummary {
 
     const tt = s.tt;
     sumTT += tt;
-    if (tt < minTT) minTT = tt;
+    if (tt > 0 && tt < minTT) minTT = tt;
     if (tt > maxTT) maxTT = tt;
 
     if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
@@ -265,7 +265,7 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
     c.count++;
     const tt = s.tt;
     c.sumTT += tt;
-    if (tt < c.minTT) c.minTT = tt;
+    if (tt > 0 && tt < c.minTT) c.minTT = tt;
     if (tt > c.maxTT) c.maxTT = tt;
 
     if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
@@ -341,7 +341,7 @@ export function computeCustomerComparison(
     for (const s of custShipments) {
       const tt = s.tt;
       sumTT += tt;
-      if (tt < minTT) minTT = tt;
+      if (tt > 0 && tt < minTT) minTT = tt;
       if (tt > maxTT) maxTT = tt;
 
       if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {

@@ -166,7 +166,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
     for (const s of modalAllShipments) {
       sumTT += s.tt;
-      if (s.tt < minTT) minTT = s.tt;
+      if (s.tt > 0 && s.tt < minTT) minTT = s.tt;
       if (s.tt > maxTT) maxTT = s.tt;
       totalWeight += s.weight || 0;
       totalPkgs += s.pkgCount || 0;
