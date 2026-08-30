@@ -6,12 +6,10 @@ import {
   X,
   Trophy,
   Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Layers,
-  ArrowUpDown,
   Sparkles,
-  BarChart2
+  BarChart2,
+  Check,
+  ChevronDown
 } from 'lucide-react';
 import { Shipment, CustomerComparisonMetric } from '../types/logistics';
 import { computeCustomerComparison, searchCustomers } from '../utils/analytics';
@@ -25,8 +23,7 @@ interface CustomerComparisonProps {
 
 export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   rawShipments,
-  allDestinations,
-  allCustomers
+  allDestinations
 }) => {
   const [selectedDestination, setSelectedDestination] = useState<string>('US');
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([
@@ -34,21 +31,57 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     'EPIC GARMENTS MANUFACTURING COMPANY LTD.',
     'M N Enterprise **Agent**'
   ]);
+
+  // Customer Autocomplete Search State
   const [customerSearch, setCustomerSearch] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown on click outside
+  // Destination Autocomplete Search State
+  const [destSearch, setDestSearch] = useState<string>('');
+  const [isDestDropdownOpen, setIsDestDropdownOpen] = useState<boolean>(false);
+  const destDropdownRef = useRef<HTMLDivElement>(null);
+  const destInputRef = useRef<HTMLInputElement>(null);
+
+  // Close dropdowns on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
+      if (destDropdownRef.current && !destDropdownRef.current.contains(event.target as Node)) {
+        setIsDestDropdownOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Compute destination counts from dataset
+  const destinationCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of rawShipments) {
+      if (s.destination) {
+        const dest = s.destination.toUpperCase();
+        map.set(dest, (map.get(dest) || 0) + 1);
+      }
+    }
+    return map;
+  }, [rawShipments]);
+
+  // Filter destination list based on query
+  const filteredDestinations = useMemo(() => {
+    if (!destSearch.trim()) return allDestinations;
+    const q = destSearch.trim().toUpperCase();
+    return allDestinations.filter((code) => code.includes(q));
+  }, [allDestinations, destSearch]);
+
+  const handleSelectDestination = (dest: string) => {
+    setSelectedDestination(dest);
+    setDestSearch('');
+    setIsDestDropdownOpen(false);
+  };
 
   // Filter and rank customers for autocomplete by AWB volume
   const availableCustomerSuggestions = useMemo(() => {
@@ -152,13 +185,19 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     plugins: {
       legend: {
         position: 'top' as const,
-        labels: { color: '#94a3b8', font: { size: 11, weight: 'bold' as const } }
+        labels: {
+          color: '#94a3b8',
+          font: { size: 11, weight: 'bold' as const },
+          padding: 12
+        }
       },
       tooltip: {
         callbacks: {
-          afterLabel: (ctx: any) => {
-            const item = comparisonData[ctx.dataIndex];
-            return `AWBs: ${item?.awbCount.toLocaleString() || 0}`;
+          afterLabel: function (context: any) {
+            const dataIndex = context.dataIndex;
+            const item = comparisonData[dataIndex];
+            if (!item) return '';
+            return `AWBs: ${item.awbCount.toLocaleString()} | Delays: ${item.delayCount}`;
           }
         }
       }
@@ -166,14 +205,17 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#cbd5e1', font: { size: 11, weight: 'bold' as const } }
+        ticks: {
+          color: '#94a3b8',
+          font: { size: 10, weight: 'bold' as const }
+        }
       },
       y: {
         type: 'linear' as const,
         display: true,
         position: 'left' as const,
-        title: { display: true, text: 'Average TT (Days)', color: '#60a5fa', font: { size: 10 } },
-        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+        title: { display: true, text: 'Avg Days', color: '#60a5fa', font: { size: 10 } },
+        grid: { color: 'rgba(51, 65, 85, 0.3)' },
         ticks: { color: '#94a3b8' }
       },
       y1: {
@@ -211,8 +253,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
           {/* Quick Auto-Fill Top Customers */}
           <button
+            type="button"
             onClick={handleAutoFillTopCustomers}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-semibold border border-indigo-500/30 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-semibold border border-indigo-500/30 transition-all cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Load Top Customers for {selectedDestination}</span>
@@ -222,30 +265,148 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         {/* Destination & Customer Selectors */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           
-          {/* Target Destination Dropdown */}
-          <div className="md:col-span-4">
-            <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-              1. Target Destination Country
+          {/* 1. Target Destination Search Bar */}
+          <div className="md:col-span-5 relative z-50" ref={destDropdownRef}>
+            <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between">
+              <span>1. Target Destination Country</span>
+              <span className="text-[10px] text-slate-500 font-mono">
+                {selectedDestination === 'ALL' ? 'Global' : `${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs`}
+              </span>
             </label>
             <div className="relative">
-              <select
-                value={selectedDestination}
-                onChange={(e) => setSelectedDestination(e.target.value)}
-                className="w-full pl-9 pr-8 py-2.5 text-xs font-bold rounded-xl bg-slate-950/90 border border-slate-700/80 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
-              >
-                <option value="ALL">All Destinations Globally</option>
-                {allDestinations.map((dest) => (
-                  <option key={dest} value={dest}>
-                    Destination: {dest}
-                  </option>
-                ))}
-              </select>
-              <Globe className="w-4 h-4 text-blue-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                ref={destInputRef}
+                type="text"
+                value={destSearch}
+                onChange={(e) => {
+                  setDestSearch(e.target.value);
+                  setIsDestDropdownOpen(true);
+                }}
+                onFocus={() => setIsDestDropdownOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsDestDropdownOpen(false);
+                  } else if (e.key === 'Enter' && filteredDestinations.length > 0) {
+                    e.preventDefault();
+                    handleSelectDestination(filteredDestinations[0]);
+                  }
+                }}
+                placeholder={
+                  selectedDestination
+                    ? selectedDestination === 'ALL'
+                      ? 'Destination: All Countries'
+                      : `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
+                    : 'Search Destination'
+                }
+                className={`w-full pl-9 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                  selectedDestination && selectedDestination !== 'ALL'
+                    ? 'bg-blue-50/70 border-blue-400 text-blue-900 dark:bg-blue-950/40 dark:border-blue-500/60 dark:text-blue-200 placeholder:text-blue-800 dark:placeholder:text-blue-300'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
+                }`}
+              />
+              <Globe className="w-4 h-4 text-blue-500 dark:text-blue-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+
+              {/* Clear and Toggle Icons */}
+              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
+                {destSearch ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDestSearch('');
+                      destInputRef.current?.focus();
+                    }}
+                    className="p-1 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : selectedDestination !== 'ALL' ? (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDestination('ALL')}
+                    className="p-1 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Reset to All Destinations"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
+                  className="p-1 text-slate-400 hover:text-blue-400 transition-colors cursor-pointer"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-blue-400' : ''}`} />
+                </button>
+              </div>
+
+              {/* Destination Dropdown Popup */}
+              {isDestDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5 divide-y divide-slate-100 dark:divide-slate-800">
+                  <div className="p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectDestination('ALL')}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                        selectedDestination === 'ALL'
+                          ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40'
+                          : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {selectedDestination === 'ALL' ? (
+                          <Check className="w-4 h-4 text-blue-500 font-bold" />
+                        ) : (
+                          <span className="w-2 h-2 rounded-full bg-slate-400" />
+                        )}
+                        <span className="font-bold">All Destinations Globally</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-slate-400">
+                        {rawShipments.length.toLocaleString()} AWBs
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="pt-1 space-y-0.5">
+                    {filteredDestinations.map((code) => {
+                      const isSelected = selectedDestination === code;
+                      const count = destinationCounts.get(code) || 0;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => handleSelectDestination(code)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
+                            isSelected
+                              ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
+                              : 'text-slate-800 hover:bg-blue-50 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {isSelected ? (
+                              <Check className="w-3.5 h-3.5 text-white font-bold" />
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                            )}
+                            <span className="font-mono font-extrabold">{code}</span>
+                          </div>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                            isSelected
+                              ? 'bg-white/20 text-white'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                          }`}>
+                            {count.toLocaleString()} AWBs
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Add Customer Search Autocomplete */}
-          <div className="md:col-span-8 relative z-50" ref={dropdownRef}>
+          {/* 2. Add Customer Search Autocomplete */}
+          <div className="md:col-span-7 relative z-50" ref={dropdownRef}>
             <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between">
               <span>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</span>
               <span className="text-[10px] text-slate-500">Ranked by shipment volume</span>
@@ -261,10 +422,10 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 }}
                 onFocus={() => setIsDropdownOpen(true)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search customer account by name or keyword (e.g. 'Epic', 'Motijheel', 'Classic')..."
-                className="w-full pl-9 pr-10 py-2.5 text-xs rounded-xl bg-slate-950/90 border border-slate-700/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                placeholder="Search Customer"
+                className="w-full pl-9 pr-10 py-2.5 text-xs font-bold rounded-xl bg-slate-50 border border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 shadow-inner"
               />
-              <Users className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Users className="w-4 h-4 text-emerald-500 dark:text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
               {customerSearch && (
                 <button
@@ -323,7 +484,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveCustomer(cust)}
-                  className="p-0.5 rounded-full hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                  className="p-0.5 rounded-full hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -416,8 +577,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 <div className="mt-3 pt-2 text-[10px] text-slate-500 flex items-center justify-between border-t border-slate-800">
                   <span>Destination: {selectedDestination}</span>
                   <button
+                    type="button"
                     onClick={() => handleRemoveCustomer(c.customer)}
-                    className="text-rose-400 hover:underline"
+                    className="text-rose-400 hover:underline cursor-pointer"
                   >
                     Remove
                   </button>
