@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Users,
   Globe,
@@ -14,7 +14,7 @@ import {
   BarChart2
 } from 'lucide-react';
 import { Shipment, CustomerComparisonMetric } from '../types/logistics';
-import { computeCustomerComparison } from '../utils/analytics';
+import { computeCustomerComparison, searchCustomers } from '../utils/analytics';
 import { Bar } from 'react-chartjs-2';
 
 interface CustomerComparisonProps {
@@ -36,15 +36,25 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   ]);
   const [customerSearch, setCustomerSearch] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter customers for autocomplete
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter and rank customers for autocomplete by AWB volume
   const availableCustomerSuggestions = useMemo(() => {
-    if (!customerSearch.trim()) return [];
-    const q = customerSearch.toLowerCase();
-    return allCustomers
-      .filter((c) => c.toLowerCase().includes(q) && !selectedCustomers.includes(c))
-      .slice(0, 15);
-  }, [allCustomers, customerSearch, selectedCustomers]);
+    const rawResults = searchCustomers(rawShipments, customerSearch, 25);
+    return rawResults.filter((item) => !selectedCustomers.includes(item.name));
+  }, [rawShipments, customerSearch, selectedCustomers]);
 
   // Compute comparison metrics
   const comparisonData: CustomerComparisonMetric[] = useMemo(() => {
@@ -72,6 +82,17 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     }
     setCustomerSearch('');
     setIsDropdownOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsDropdownOpen(false);
+      return;
+    }
+    if (e.key === 'Enter' && availableCustomerSuggestions.length > 0) {
+      e.preventDefault();
+      handleAddCustomer(availableCustomerSuggestions[0].name);
+    }
   };
 
   const handleRemoveCustomer = (customer: string) => {
@@ -224,40 +245,73 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           </div>
 
           {/* Add Customer Search Autocomplete */}
-          <div className="md:col-span-8 relative">
-            <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-              2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)
+          <div className="md:col-span-8 relative" ref={dropdownRef}>
+            <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between">
+              <span>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</span>
+              <span className="text-[10px] text-slate-500">Ranked by shipment volume</span>
             </label>
             <div className="relative">
               <input
+                ref={inputRef}
                 type="text"
                 value={customerSearch}
                 onChange={(e) => {
                   setCustomerSearch(e.target.value);
                   setIsDropdownOpen(true);
                 }}
-                onFocus={() => {
-                  if (customerSearch.trim()) setIsDropdownOpen(true);
-                }}
-                placeholder="Search and add customer name (e.g. 'Epic', 'Motijheel', 'Classic')..."
-                className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-slate-950/90 border border-slate-700/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                onFocus={() => setIsDropdownOpen(true)}
+                onKeyDown={handleKeyDown}
+                placeholder="Search customer account by name or keyword (e.g. 'Epic', 'Motijheel', 'Classic')..."
+                className="w-full pl-9 pr-10 py-2.5 text-xs rounded-xl bg-slate-950/90 border border-slate-700/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
               <Users className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
+              {customerSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomerSearch('');
+                    inputRef.current?.focus();
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+
               {/* Suggestions dropdown */}
               {isDropdownOpen && availableCustomerSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto z-50 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-1">
-                  {availableCustomerSuggestions.map((cust) => (
-                    <button
-                      key={cust}
-                      type="button"
-                      onClick={() => handleAddCustomer(cust)}
-                      className="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-slate-800 hover:text-white rounded-lg flex items-center justify-between transition-colors"
-                    >
-                      <span className="truncate">{cust}</span>
-                      <Plus className="w-3.5 h-3.5 text-emerald-400" />
-                    </button>
-                  ))}
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto z-[100] rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-1.5 divide-y divide-slate-800">
+                  <div className="p-2 text-[11px] text-slate-400 font-semibold flex items-center justify-between">
+                    <span>
+                      {customerSearch.trim() ? `Matching Customers for "${customerSearch}"` : 'Top Volume Customers (Click to Compare)'}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                      {availableCustomerSuggestions.length} accounts
+                    </span>
+                  </div>
+
+                  <div className="pt-1 space-y-0.5">
+                    {availableCustomerSuggestions.map((item) => (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => handleAddCustomer(item.name)}
+                        className="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl flex items-center justify-between transition-colors cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 truncate pr-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                          <span className="truncate group-hover:text-emerald-300 font-medium">{item.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 group-hover:bg-slate-700">
+                            {item.count.toLocaleString()} AWBs
+                          </span>
+                          <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

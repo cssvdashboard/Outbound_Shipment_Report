@@ -15,6 +15,12 @@ import {
   computeCountryPerformance
 } from '../utils/analytics';
 import { loadSavedDataset, saveDataset, clearSavedDataset, DatasetMeta } from '../services/storage';
+import {
+  checkServerHealth,
+  fetchDatasetFromServer,
+  syncDatasetToServer,
+  resetServerDataset
+} from '../services/api';
 
 export const initialFilterState: FilterState = {
   searchTerm: '',
@@ -38,19 +44,38 @@ export function useLogisticsData() {
     isCustom: false
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isServerConnected, setIsServerConnected] = useState<boolean>(false);
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
 
-  // Load initial data from IndexedDB or fetch /defaultData.json
+  // Load initial data: prefer backend server, fallback to IndexedDB or local JSON
   useEffect(() => {
     async function initData() {
       setIsLoading(true);
       try {
+        // 1. Check if backend server is online
+        const serverHealth = await checkServerHealth();
+        if (serverHealth) {
+          setIsServerConnected(true);
+          const serverData = await fetchDatasetFromServer();
+          if (serverData && serverData.data.length > 0) {
+            setRawShipments(serverData.data);
+            setDatasetMeta(serverData.meta);
+            // Cache in IndexedDB for offline resilience
+            saveDataset(serverData.data, serverData.meta.filename);
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          setIsServerConnected(false);
+        }
+
+        // 2. Fallback to IndexedDB
         const { data, meta } = await loadSavedDataset();
         if (data && data.length > 0 && meta) {
           setRawShipments(data);
           setDatasetMeta(meta);
         } else {
-          // Fetch from static public JSON
+          // 3. Fallback to static public JSON
           const response = await fetch('./defaultData.json');
           if (!response.ok) throw new Error('Failed to fetch defaultData.json');
           const defaultData: Shipment[] = await response.json();
@@ -75,11 +100,20 @@ export function useLogisticsData() {
   const handleDatasetUpdate = useCallback(async (newShipments: Shipment[], filename: string) => {
     setIsLoading(true);
     try {
+      const formattedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+      
+      // Update local storage
       await saveDataset(newShipments, filename);
+      
+      // Try to sync with server in background
+      if (isServerConnected) {
+        syncDatasetToServer(newShipments, filename).catch(err => console.warn('Server sync error:', err));
+      }
+
       setRawShipments(newShipments);
       setDatasetMeta({
         filename,
-        uploadedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }),
+        uploadedAt: formattedTime,
         rowCount: newShipments.length,
         isCustom: true
       });
@@ -90,13 +124,25 @@ export function useLogisticsData() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isServerConnected]);
 
   // Handler to reset back to default July dataset
   const handleResetToDefault = useCallback(async () => {
     setIsLoading(true);
     try {
       await clearSavedDataset();
+      
+      if (isServerConnected) {
+        const serverReset = await resetServerDataset();
+        if (serverReset && serverReset.data.length > 0) {
+          setRawShipments(serverReset.data);
+          setDatasetMeta(serverReset.meta);
+          setFilters(initialFilterState);
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const response = await fetch('./defaultData.json');
       const defaultData: Shipment[] = await response.json();
       setRawShipments(defaultData);
@@ -112,7 +158,7 @@ export function useLogisticsData() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isServerConnected]);
 
   // Filter setters
   const setFilterMode = useCallback((mode: 'include' | 'exclude') => {
@@ -252,6 +298,7 @@ export function useLogisticsData() {
     filteredShipments,
     datasetMeta,
     isLoading,
+    isServerConnected,
     filters,
     setFilters,
     setFilterMode,

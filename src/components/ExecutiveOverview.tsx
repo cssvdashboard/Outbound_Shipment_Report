@@ -458,39 +458,92 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
             {/* Resolution Cards Grid - Interactive Clickable Cards (Opens Popup Modal) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {finalResolutions.map((res) => (
-                <button
-                  key={res.name}
-                  type="button"
-                  onClick={() => {
-                    setModalResolution(res.name);
-                    setModalSearch('');
-                    setModalCurrentPage(1);
-                  }}
-                  className="p-2.5 rounded-xl text-left transition-all relative overflow-hidden bg-slate-900/80 border border-slate-800 hover:border-blue-500/60 hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] group"
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-xs font-bold text-slate-200 group-hover:text-blue-300 transition-colors truncate">
-                      {res.name}
-                    </span>
-                    <span
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: res.color }}
-                    />
-                  </div>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className="text-base font-extrabold text-white">
-                      {res.count.toLocaleString()}
-                    </span>
-                    <span className="text-[11px] font-mono font-semibold text-slate-400">
-                      {res.percentage}%
-                    </span>
-                  </div>
-                  <div className="mt-1 text-[10px] text-blue-400 font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <Eye className="w-3 h-3" /> Click to view details →
-                  </div>
-                </button>
-              ))}
+              {finalResolutions.map((res) => {
+                const isNegative = ['rts', 'lost', 'destroyed', 'seized', 'undelivered'].includes(res.name.toLowerCase().trim());
+                const isSuccess = res.name.toLowerCase().trim() === 'delivered';
+
+                return (
+                  <button
+                    key={res.name}
+                    type="button"
+                    onClick={() => {
+                      setModalResolution(res.name);
+                      setModalSearch('');
+                      setModalCurrentPage(1);
+                    }}
+                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border ${
+                      isNegative
+                        ? 'bg-gradient-to-br from-rose-950/40 via-red-950/20 to-slate-900/90 border-rose-900/60 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.25)] hover:scale-[1.02] active:scale-[0.98]'
+                        : isSuccess
+                        ? 'bg-gradient-to-br from-emerald-950/30 via-slate-900/90 to-slate-900 border-emerald-900/50 hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
+                        : 'bg-slate-900/80 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {isNegative ? (
+                          <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse flex-shrink-0" />
+                        ) : isSuccess ? (
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] flex-shrink-0" />
+                        ) : (
+                          <span
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: res.color }}
+                          />
+                        )}
+                        <span className={`text-xs font-bold truncate ${
+                          isNegative 
+                            ? 'text-rose-200 group-hover:text-rose-100 font-extrabold' 
+                            : isSuccess 
+                            ? 'text-emerald-200 group-hover:text-emerald-100' 
+                            : 'text-slate-200 group-hover:text-blue-300'
+                        }`}>
+                          {res.name}
+                        </span>
+                      </div>
+                      {isNegative && (
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                          Negative
+                        </span>
+                      )}
+                      {isSuccess && (
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          Success
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-2.5 flex items-baseline justify-between">
+                      <span className={`text-lg font-black font-mono tracking-tight ${
+                        isNegative ? 'text-rose-400 group-hover:text-rose-300' : isSuccess ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-white'
+                      }`}>
+                        {res.count.toLocaleString()}
+                      </span>
+                      <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                        isNegative 
+                          ? 'bg-rose-950/60 text-rose-300 border border-rose-900/50' 
+                          : isSuccess 
+                          ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50' 
+                          : 'text-slate-400 bg-slate-800/80 border border-slate-700/50'
+                      }`}>
+                        {res.percentage}%
+                      </span>
+                    </div>
+
+                    <div className={`mt-1.5 text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ${
+                      isNegative ? 'text-rose-400' : isSuccess ? 'text-emerald-400' : 'text-blue-400'
+                    }`}>
+                      {isNegative ? (
+                        <><AlertTriangle className="w-3 h-3 text-rose-400" /> Negative outlier • View popup →</>
+                      ) : isSuccess ? (
+                        <><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Delivered • View popup →</>
+                      ) : (
+                        <><Eye className="w-3 h-3" /> Click to view details →</>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -509,39 +562,78 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       </div>
 
       {/* 3. FULL-FEATURED POPUP MODAL FOR FINAL RESOLUTION EXPLORER */}
-      {modalResolution && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel w-full max-w-5xl max-h-[90vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl border border-blue-500/40 relative overflow-hidden bg-slate-950/95">
-            
-            {/* Modal Header */}
-            <div>
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                    <ShieldAlert className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      <h3 className="text-base sm:text-lg font-bold text-white">
-                        Final Resolution: <span className="text-blue-400">{modalResolution}</span>
-                      </h3>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                        {modalAllShipments.length.toLocaleString()} Total AWBs
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Filtered shipment records from Shipment Explorer for status: &quot;{modalResolution}&quot;
-                    </p>
-                  </div>
-                </div>
+      {modalResolution && (() => {
+        const isModalNegative = ['rts', 'lost', 'destroyed', 'seized', 'undelivered'].includes(modalResolution.toLowerCase().trim());
+        const isModalSuccess = modalResolution.toLowerCase().trim() === 'delivered';
 
-                <button
-                  onClick={() => setModalResolution(null)}
-                  className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className={`glass-panel w-full max-w-5xl max-h-[90vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${
+              isModalNegative 
+                ? 'border-rose-500/50 shadow-[0_0_40px_rgba(239,68,68,0.25)]' 
+                : isModalSuccess 
+                ? 'border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)]' 
+                : 'border-blue-500/40'
+            }`}>
+              
+              {/* Modal Header */}
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl border ${
+                      isModalNegative
+                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
+                        : isModalSuccess
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                        : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                    }`}>
+                      {isModalNegative ? (
+                        <AlertTriangle className="w-5 h-5 text-rose-400" />
+                      ) : (
+                        <ShieldAlert className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <h3 className="text-base sm:text-lg font-bold text-white">
+                          Final Resolution:{' '}
+                          <span className={`font-black ${
+                            isModalNegative ? 'text-rose-400' : isModalSuccess ? 'text-emerald-400' : 'text-blue-400'
+                          }`}>
+                            {modalResolution}
+                          </span>
+                        </h3>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
+                          isModalNegative
+                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            : isModalSuccess
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                        }`}>
+                          {modalAllShipments.length.toLocaleString()} Total AWBs
+                        </span>
+                        {isModalNegative && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-rose-950 text-rose-400 border border-rose-700">
+                            Negative Exception
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {isModalNegative 
+                          ? `Detailed negative exception logs & outlier shipment records for status: "${modalResolution}"`
+                          : `Filtered shipment records from Shipment Explorer for status: "${modalResolution}"`
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setModalResolution(null)}
+                    className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
               {/* Quick Metrics Strip */}
               {modalStats && (
@@ -766,7 +858,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
           </div>
         </div>
-      )}
+      )})()}
 
       {/* Single Shipment Detail Sub-Modal */}
       {inspectedShipment && (
@@ -813,7 +905,15 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                 <span className="text-slate-500 block text-[10px]">Final Resolution</span>
-                <span className="font-bold text-emerald-400 block mt-0.5">{inspectedShipment.finalResolution}</span>
+                <span className={`font-bold block mt-0.5 ${
+                  inspectedShipment.finalResolution === 'Delivered'
+                    ? 'text-emerald-400'
+                    : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(inspectedShipment.finalResolution)
+                    ? 'text-rose-400 font-extrabold'
+                    : 'text-amber-400'
+                }`}>
+                  {inspectedShipment.finalResolution}
+                </span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                 <span className="text-slate-500 block text-[10px]">Pkg &amp; Weight</span>

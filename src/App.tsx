@@ -8,7 +8,7 @@ import { CountryMatrix } from './components/CountryMatrix';
 import { CustomerComparison } from './components/CustomerComparison';
 import { ShipmentExplorer } from './components/ShipmentExplorer';
 import { getStoredTheme, setStoredTheme } from './services/storage';
-import { Loader2, Package, Sparkles } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('overview');
@@ -19,6 +19,7 @@ export const App: React.FC = () => {
     filteredShipments,
     datasetMeta,
     isLoading,
+    isServerConnected,
     filters,
     setFilterMode,
     addShipperFilter,
@@ -70,120 +71,130 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 dark:bg-[#090d16] dark:text-slate-100 light:bg-slate-50 light:text-slate-900 transition-colors duration-300 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/40 dark:from-[#080d19] dark:via-[#0b1120] dark:to-[#0f172a] text-slate-800 dark:text-slate-100 transition-colors duration-300 flex flex-col font-sans selection:bg-blue-500/20 selection:text-blue-500 relative">
       
-      {/* 1. STICKY APP HEADER */}
-      <Header
-        datasetMeta={datasetMeta}
-        totalFilteredCount={filteredShipments.length}
-        totalRawCount={rawShipments.length}
-        filteredShipments={filteredShipments}
-        theme={theme}
-        onThemeToggle={handleThemeToggle}
-        onDatasetUpdate={handleDatasetUpdate}
-        onResetToDefault={handleResetToDefault}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+      {/* Eye-Soothing Ambient Glows */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-[15%] -left-[10%] w-[45vw] h-[45vw] rounded-full bg-blue-400/5 dark:bg-blue-600/10 blur-[130px]" />
+        <div className="absolute top-[35%] -right-[10%] w-[40vw] h-[40vw] rounded-full bg-indigo-400/5 dark:bg-indigo-600/8 blur-[140px]" />
+        <div className="absolute -bottom-[15%] left-[20%] w-[45vw] h-[45vw] rounded-full bg-cyan-400/5 dark:bg-cyan-600/8 blur-[150px]" />
+      </div>
 
-      {/* 2. SMART FILTER & AUTOCOMPLETE BAR */}
-      <SmartFilterBar
-        rawShipments={rawShipments}
-        filters={filters}
-        onFilterModeChange={setFilterMode}
-        onAddShipper={addShipperFilter}
-        onRemoveShipper={removeShipperFilter}
-        onAddCustomer={addCustomerFilter}
-        onRemoveCustomer={removeCustomerFilter}
-        onDestinationChange={setDestinationFilter}
-        onResetFilters={resetAllFilters}
-        allDestinations={allDestinations}
-      />
+      <div className="relative z-10 flex flex-col flex-1">
+        {/* 1. STICKY APP HEADER */}
+        <Header
+          datasetMeta={datasetMeta}
+          totalFilteredCount={filteredShipments.length}
+          totalRawCount={rawShipments.length}
+          filteredShipments={filteredShipments}
+          theme={theme}
+          isServerConnected={isServerConnected}
+          onThemeToggle={handleThemeToggle}
+          onDatasetUpdate={handleDatasetUpdate}
+          onResetToDefault={handleResetToDefault}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-      {/* 3. MAIN DASHBOARD CONTENT */}
-      <main className="flex-1 max-w-[1700px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-6">
-        
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-            <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-            <p className="text-sm font-semibold text-slate-400">
-              Processing logistics records...
-            </p>
+        {/* 2. SMART FILTER & AUTOCOMPLETE BAR */}
+        <SmartFilterBar
+          rawShipments={rawShipments}
+          filters={filters}
+          onFilterModeChange={setFilterMode}
+          onAddShipper={addShipperFilter}
+          onRemoveShipper={removeShipperFilter}
+          onAddCustomer={addCustomerFilter}
+          onRemoveCustomer={removeCustomerFilter}
+          onDestinationChange={setDestinationFilter}
+          onResetFilters={resetAllFilters}
+          allDestinations={allDestinations}
+        />
+
+        {/* 3. MAIN DASHBOARD CONTENT */}
+        <main className="flex-1 max-w-[1700px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-6">
+          
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+              <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                Processing logistics records...
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Active Tab View Rendering */}
+              {activeTab === 'overview' && (
+                <ExecutiveOverview
+                  summary={summaryMetrics}
+                  deliveryTimeline={deliveryTimeline}
+                  finalResolutions={finalResolutions}
+                  filteredShipments={filteredShipments}
+                  rawShipments={rawShipments}
+                  selectedFinalResolution={filters.selectedFinalResolutions[0] || null}
+                  selectedTTRange={filters.selectedTTRanges[0] || null}
+                  onSelectResolution={setFinalResolutionFilter}
+                  onSelectTTRange={setTTRangeFilter}
+                  onNavigateTab={setActiveTab}
+                />
+              )}
+
+              {activeTab === 'delays' && (
+                <DelayHub
+                  summary={summaryMetrics}
+                  transitDelays={transitDelaysBreakdown}
+                  clearanceDelays={clearanceDelaysBreakdown}
+                  destinationDelays={destinationDelaysBreakdown}
+                  onSelectDelayFilter={setDelayFilter}
+                  activeTransitFilter={filters.selectedTransitDelays}
+                  activeClearanceFilter={filters.selectedClearanceDelays}
+                  activeDestinationFilter={filters.selectedDestinationDelays}
+                  onNavigateTab={setActiveTab}
+                />
+              )}
+
+              {activeTab === 'country' && (
+                <CountryMatrix
+                  countryData={countryPerformance}
+                  totalAWBs={filteredShipments.length}
+                  onSelectCountry={setDestinationFilter}
+                  selectedDestination={filters.selectedDestinations[0] || null}
+                />
+              )}
+
+              {activeTab === 'comparison' && (
+                <CustomerComparison
+                  rawShipments={rawShipments}
+                  allDestinations={allDestinations}
+                  allCustomers={allCustomers}
+                />
+              )}
+
+              {activeTab === 'explorer' && (
+                <ShipmentExplorer
+                  shipments={filteredShipments}
+                  totalRawCount={rawShipments.length}
+                />
+              )}
+            </>
+          )}
+
+        </main>
+
+        {/* 4. FOOTER */}
+        <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/60 backdrop-blur-md py-4 mt-auto text-xs text-slate-500 dark:text-slate-400">
+          <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-semibold text-slate-700 dark:text-slate-300">Export Summary Engine</span>
+              <span>•</span>
+              <span>Sub-millisecond In-Memory Analytics</span>
+            </div>
+            <div>
+              Data is parsed 100% locally in your browser. No files are uploaded to external servers.
+            </div>
           </div>
-        ) : (
-          <>
-            {/* Active Tab View Rendering */}
-            {activeTab === 'overview' && (
-              <ExecutiveOverview
-                summary={summaryMetrics}
-                deliveryTimeline={deliveryTimeline}
-                finalResolutions={finalResolutions}
-                filteredShipments={filteredShipments}
-                rawShipments={rawShipments}
-                selectedFinalResolution={filters.selectedFinalResolutions[0] || null}
-                selectedTTRange={filters.selectedTTRanges[0] || null}
-                onSelectResolution={setFinalResolutionFilter}
-                onSelectTTRange={setTTRangeFilter}
-                onNavigateTab={setActiveTab}
-              />
-            )}
-
-            {activeTab === 'delays' && (
-              <DelayHub
-                summary={summaryMetrics}
-                transitDelays={transitDelaysBreakdown}
-                clearanceDelays={clearanceDelaysBreakdown}
-                destinationDelays={destinationDelaysBreakdown}
-                onSelectDelayFilter={setDelayFilter}
-                activeTransitFilter={filters.selectedTransitDelays}
-                activeClearanceFilter={filters.selectedClearanceDelays}
-                activeDestinationFilter={filters.selectedDestinationDelays}
-                onNavigateTab={setActiveTab}
-              />
-            )}
-
-            {activeTab === 'country' && (
-              <CountryMatrix
-                countryData={countryPerformance}
-                totalAWBs={filteredShipments.length}
-                onSelectCountry={setDestinationFilter}
-                selectedDestination={filters.selectedDestinations[0] || null}
-              />
-            )}
-
-            {activeTab === 'comparison' && (
-              <CustomerComparison
-                rawShipments={rawShipments}
-                allDestinations={allDestinations}
-                allCustomers={allCustomers}
-              />
-            )}
-
-            {activeTab === 'explorer' && (
-              <ShipmentExplorer
-                shipments={filteredShipments}
-                totalRawCount={rawShipments.length}
-              />
-            )}
-          </>
-        )}
-
-      </main>
-
-      {/* 4. FOOTER */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/60 dark:bg-slate-950/60 light:bg-white light:border-slate-200 py-4 mt-auto text-xs text-slate-500">
-        <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="font-semibold text-slate-400 light:text-slate-600">TransitPulse Intelligence Engine</span>
-            <span>•</span>
-            <span>Sub-millisecond In-Memory Analytics</span>
-          </div>
-          <div>
-            Data is parsed 100% locally in your browser. No files are uploaded to external servers.
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
 
     </div>
   );

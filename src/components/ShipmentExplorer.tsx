@@ -334,7 +334,9 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 }}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   quickFilter === pill.id
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                    ? pill.id === 'rts'
+                      ? 'bg-rose-600 text-white shadow-sm shadow-rose-500/40'
+                      : 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
                     : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
                 }`}
               >
@@ -527,16 +529,25 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     {/* Final Resolution Pill */}
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
                           s.finalResolution === 'Delivered'
-                            ? 'bg-emerald-500/15 text-emerald-400'
+                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                             : s.finalResolution === 'RTS'
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-extrabold shadow-sm'
                             : s.finalResolution === 'Lost'
-                            ? 'bg-rose-600 text-white font-bold'
-                            : 'bg-indigo-500/15 text-indigo-400'
+                            ? 'bg-red-600/30 text-red-200 border border-red-500/60 font-extrabold shadow-sm'
+                            : s.finalResolution === 'Destroyed'
+                            ? 'bg-rose-950 text-rose-300 border border-rose-800/80 font-extrabold shadow-sm'
+                            : s.finalResolution === 'Seized'
+                            ? 'bg-red-950 text-red-300 border border-red-700/80 font-extrabold shadow-sm'
+                            : s.finalResolution === 'Undelivered'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
+                            : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30'
                         }`}
                       >
+                        {['RTS', 'Lost', 'Destroyed', 'Seized'].includes(s.finalResolution) && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1 animate-pulse" />
+                        )}
                         {s.finalResolution || 'Delivered'}
                       </span>
                     </td>
@@ -718,7 +729,13 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   </span>
                   <span className="text-xs text-slate-400 font-semibold">({selectedShipment.ttRange})</span>
                 </div>
-                <span className="text-emerald-400 font-bold text-xs block mt-0.5">
+                <span className={`font-bold text-xs block mt-0.5 ${
+                  selectedShipment.finalResolution === 'Delivered'
+                    ? 'text-emerald-400'
+                    : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(selectedShipment.finalResolution)
+                    ? 'text-rose-400 font-extrabold'
+                    : 'text-amber-400'
+                }`}>
                   Status: {selectedShipment.finalResolution}
                 </span>
               </div>

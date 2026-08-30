@@ -1,3 +1,5 @@
+import plugin from 'tailwindcss/plugin';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -8,6 +10,11 @@ export default {
   theme: {
     extend: {
       colors: {
+        slate: {
+          850: '#111b2e',
+          925: '#0c1322',
+          950: '#080d19',
+        },
         brand: {
           50: '#eef8ff',
           100: '#d8eeff',
@@ -36,5 +43,9 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function({ addVariant }) {
+      addVariant('light', 'html.light &');
+    }),
+  ],
 }

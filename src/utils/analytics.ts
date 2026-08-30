@@ -11,14 +11,20 @@ export function filterShipments(shipments: Shipment[], filters: FilterState): Sh
   return shipments.filter((item) => {
     // 1. Shipper Filter (supports Include and Filter Out / Exclude)
     if (filters.selectedShippers && filters.selectedShippers.length > 0) {
-      const match = filters.selectedShippers.includes(item.shprName);
+      const match = filters.selectedShippers.some(
+        (s) => s.trim().toLowerCase() === (item.shprName || '').trim().toLowerCase()
+      );
       if (filters.filterMode === 'include' && !match) return false;
       if (filters.filterMode === 'exclude' && match) return false;
     }
 
-    // 2. Customer Filter
+    // 2. Customer Filter (supports Include and Filter Out / Exclude)
     if (filters.selectedCustomers && filters.selectedCustomers.length > 0) {
-      if (!filters.selectedCustomers.includes(item.customer)) return false;
+      const match = filters.selectedCustomers.some(
+        (c) => c.trim().toLowerCase() === (item.customer || '').trim().toLowerCase()
+      );
+      if (filters.filterMode === 'include' && !match) return false;
+      if (filters.filterMode === 'exclude' && match) return false;
     }
 
     // 3. Destination Country Filter
@@ -179,12 +185,12 @@ export function computeFinalResolutions(shipments: Shipment[]): RatioBreakdown[]
 
   const palette: Record<string, string> = {
     'Delivered': '#10b981',
-    'RTS': '#ef4444',
+    'RTS': '#ef4444',       // Blood red / Crimson alert
+    'Lost': '#dc2626',      // Deep blood red / severe loss
+    'Destroyed': '#b91c1c', // Crimson burgundy / critical loss
+    'Seized': '#991b1b',    // Deep blood crimson / customs confiscation
+    'Undelivered': '#ea580c', // High-alert orange-red
     'NFBRK': '#8b5cf6',
-    'Undelivered': '#f97316',
-    'Lost': '#ec4899',
-    'Destroyed': '#64748b',
-    'Seized': '#e11d48',
     'Re-route': '#3b82f6',
     'Available For Pickup': '#06b6d4'
   };
@@ -382,13 +388,23 @@ export function searchShippers(
   query: string,
   limit: number = 25
 ): { name: string; count: number }[] {
-  if (!query || query.trim() === '') return [];
-  const q = query.toLowerCase().trim();
+  const trimmed = (query || '').toLowerCase().trim();
+  const tokens = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
 
   const countMap: Record<string, number> = {};
   for (const s of shipments) {
-    if (s.shprName && s.shprName.toLowerCase().includes(q)) {
-      countMap[s.shprName] = (countMap[s.shprName] || 0) + 1;
+    if (!s.shprName) continue;
+    const name = s.shprName.trim();
+    if (!name) continue;
+
+    if (tokens.length === 0) {
+      countMap[name] = (countMap[name] || 0) + 1;
+    } else {
+      const lower = name.toLowerCase();
+      const matches = tokens.every((token) => lower.includes(token));
+      if (matches) {
+        countMap[name] = (countMap[name] || 0) + 1;
+      }
     }
   }
 
@@ -403,13 +419,23 @@ export function searchCustomers(
   query: string,
   limit: number = 25
 ): { name: string; count: number }[] {
-  if (!query || query.trim() === '') return [];
-  const q = query.toLowerCase().trim();
+  const trimmed = (query || '').toLowerCase().trim();
+  const tokens = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
 
   const countMap: Record<string, number> = {};
   for (const s of shipments) {
-    if (s.customer && s.customer.toLowerCase().includes(q)) {
-      countMap[s.customer] = (countMap[s.customer] || 0) + 1;
+    if (!s.customer) continue;
+    const name = s.customer.trim();
+    if (!name) continue;
+
+    if (tokens.length === 0) {
+      countMap[name] = (countMap[name] || 0) + 1;
+    } else {
+      const lower = name.toLowerCase();
+      const matches = tokens.every((token) => lower.includes(token));
+      if (matches) {
+        countMap[name] = (countMap[name] || 0) + 1;
+      }
     }
   }
 
