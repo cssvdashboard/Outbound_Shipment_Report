@@ -30,7 +30,6 @@ interface SmartFilterBarProps {
 export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   rawShipments,
   filters,
-  onFilterModeChange,
   onAddShipper,
   onRemoveShipper,
   onAddCustomer,
@@ -45,11 +44,20 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown on click outside
+  // Destination Searchable Combobox State
+  const [destSearch, setDestSearch] = useState<string>('');
+  const [isDestDropdownOpen, setIsDestDropdownOpen] = useState<boolean>(false);
+  const destDropdownRef = useRef<HTMLDivElement>(null);
+  const destInputRef = useRef<HTMLInputElement>(null);
+
+  // Close dropdowns on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (destDropdownRef.current && !destDropdownRef.current.contains(event.target as Node)) {
+        setIsDestDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -96,6 +104,26 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
       }
     }
   };
+
+  // Destination Counts & Filtering
+  const destinationCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of rawShipments) {
+      if (s.destination) {
+        const dest = s.destination.toUpperCase();
+        map.set(dest, (map.get(dest) || 0) + 1);
+      }
+    }
+    return map;
+  }, [rawShipments]);
+
+  const filteredDestinations = useMemo(() => {
+    if (!destSearch.trim()) return allDestinations;
+    const q = destSearch.trim().toUpperCase();
+    return allDestinations.filter((code) => code.includes(q));
+  }, [allDestinations, destSearch]);
+
+  const selectedDestination = filters.selectedDestinations[0] || null;
 
   // Helper to highlight matching text in suggestions
   const highlightMatch = (text: string, query: string) => {
@@ -230,10 +258,9 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                   </button>
                 </div>
               </div>
-
             </div>
 
-            {/* Universal Autocomplete Dropdown List - In Front of Everything (z-[100]) */}
+            {/* Universal Autocomplete Dropdown List */}
             {isDropdownOpen && (
               <div className="absolute left-0 right-0 top-full mt-2 max-h-80 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/20 divide-y divide-slate-100 dark:divide-slate-800">
                 
@@ -354,24 +381,168 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             )}
           </div>
 
-          {/* Destination Selector & Reset Filter */}
+          {/* Destination Searchable Combobox (Writing search box + dropdown box together) & Reset Filter */}
           <div className="flex items-center gap-2">
-            {/* Destination Dropdown */}
-            <div className="relative">
-              <select
-                value={filters.selectedDestinations[0] || 'ALL'}
-                onChange={(e) => onDestinationChange(e.target.value)}
-                className="appearance-none pl-8 pr-8 py-2.5 text-xs font-bold rounded-xl bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer shadow-sm"
-              >
-                <option value="ALL">Destination: All ({allDestinations.length} Countries)</option>
-                {allDestinations.map((code) => (
-                  <option key={code} value={code}>
-                    Destination: {code}
-                  </option>
-                ))}
-              </select>
-              <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            
+            {/* Searchable Destination Combobox */}
+            <div className="relative" ref={destDropdownRef}>
+              <div className="relative min-w-[210px] sm:min-w-[250px]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+                </div>
+
+                <input
+                  ref={destInputRef}
+                  type="text"
+                  value={destSearch}
+                  onChange={(e) => {
+                    setDestSearch(e.target.value);
+                    setIsDestDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDestDropdownOpen(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setIsDestDropdownOpen(false);
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (filteredDestinations.length > 0) {
+                        onDestinationChange(filteredDestinations[0]);
+                        setDestSearch('');
+                        setIsDestDropdownOpen(false);
+                      }
+                    }
+                  }}
+                  placeholder={
+                    selectedDestination
+                      ? `Destination: ${selectedDestination}`
+                      : 'Search Dest (e.g. US, DE)...'
+                  }
+                  className="w-full pl-8 pr-16 py-2.5 text-xs font-bold rounded-xl bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer shadow-sm transition-all"
+                />
+
+                {/* Right controls: Clear X and Chevron Dropdown Toggle */}
+                <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                  {selectedDestination && !destSearch && (
+                    <button
+                      type="button"
+                      onClick={() => onDestinationChange('ALL')}
+                      className="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                      title="Clear destination filter"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {destSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setDestSearch('')}
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                      title="Clear search text"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Toggle destinations list"
+                  >
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Destination Dropdown Box / List */}
+              {isDestDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 max-h-72 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/20 divide-y divide-slate-100 dark:divide-slate-800">
+                  {/* Dropdown Header */}
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-950/80 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md">
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Globe className="w-3.5 h-3.5 text-blue-500" />
+                      <span>{destSearch.trim() ? `Matching: "${destSearch.toUpperCase()}"` : 'Select Destination'}</span>
+                    </span>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
+                      {filteredDestinations.length} countries
+                    </span>
+                  </div>
+
+                  {/* All Destinations Option */}
+                  <div className="p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDestinationChange('ALL');
+                        setDestSearch('');
+                        setIsDestDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                        !selectedDestination
+                          ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
+                          : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {!selectedDestination ? (
+                          <Check className="w-3.5 h-3.5 text-blue-500 font-bold" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                        )}
+                        <span>All Destinations ({allDestinations.length} Countries)</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-slate-400">
+                        {rawShipments.length.toLocaleString()} AWBs
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Country List Options */}
+                  <div className="p-1.5 space-y-0.5">
+                    {filteredDestinations.map((code) => {
+                      const isSelected = selectedDestination === code;
+                      const count = destinationCounts.get(code) || 0;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => {
+                            onDestinationChange(code);
+                            setDestSearch('');
+                            setIsDestDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
+                              : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {isSelected ? (
+                              <Check className="w-3.5 h-3.5 text-white font-bold" />
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                            )}
+                            <span className="font-mono font-extrabold">{code}</span>
+                          </div>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                            isSelected
+                              ? 'bg-white/20 text-white'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                          }`}>
+                            {count.toLocaleString()} AWBs
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {filteredDestinations.length === 0 && (
+                      <div className="p-4 text-center text-xs text-slate-400">
+                        No destination found matching &quot;{destSearch}&quot;
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Reset Filters Button */}
@@ -389,31 +560,18 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
           </div>
         </div>
 
-        {/* Selected Active Filters Chips Row - Positioned Front and Center */}
+        {/* Selected Active Filters Chips Row */}
         {totalActiveFilters > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1.5">
               Active Filters:
-              <span
-                className={`text-[10px] uppercase px-2 py-0.5 rounded-md font-mono font-extrabold ${
-                  filters.filterMode === 'include'
-                    ? 'bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-500/30'
-                    : 'bg-rose-500/15 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 border border-rose-500/30'
-                }`}
-              >
-                {filters.filterMode === 'include' ? 'Include Only' : 'Filter Out (Exclude)'}
-              </span>
             </span>
 
             {/* Customer tags (Emerald) */}
             {filters.selectedCustomers.map((cust) => (
               <span
                 key={cust}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${
-                  filters.filterMode === 'include'
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-700/60 shadow-sm'
-                    : 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-700/60 shadow-sm'
-                }`}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-700/60 shadow-sm"
               >
                 <Users className="w-3.5 h-3.5 shrink-0" />
                 <span className="max-w-[220px] truncate">Customer: {cust}</span>
@@ -432,11 +590,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             {filters.selectedShippers.map((shipper) => (
               <span
                 key={shipper}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${
-                  filters.filterMode === 'include'
-                    ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-700/60 shadow-sm'
-                    : 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-700/60 shadow-sm'
-                }`}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-700/60 shadow-sm"
               >
                 <Building2 className="w-3.5 h-3.5 shrink-0" />
                 <span className="max-w-[220px] truncate">Shipper: {shipper}</span>
