@@ -83,12 +83,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom' as const,
-        labels: {
-          color: '#94a3b8',
-          font: { size: 11, weight: 'bold' as const },
-          padding: 14
-        }
+        display: false
       },
       tooltip: {
         callbacks: {
@@ -342,10 +337,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             {/* Donut Chart Container */}
             <div className="h-56 my-3 relative flex items-center justify-center">
               <Doughnut data={timelineChartData} options={timelineChartOptions} />
-              <div className="absolute flex flex-col items-center pointer-events-none">
-                <span className="text-xs text-slate-400 light:text-slate-500 font-medium">On-Time</span>
-                <span className="text-2xl font-black text-emerald-400 font-mono">
-                  {summary.onTimePercentage}%
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none select-none text-center">
+                <span className="text-xs text-slate-400 light:text-slate-500 font-bold uppercase tracking-wider">
+                  <strong>On-Time</strong>
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono tracking-tight leading-tight">
+                  <strong>{summary.onTimePercentage}%</strong>
                 </span>
               </div>
             </div>
