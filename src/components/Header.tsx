@@ -115,12 +115,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-950 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-                Export Summary
+                <strong>Export Summary Dashboard</strong>
               </h1>
             </div>
           </div>
 
-          {/* Actions: Weekly Upload, Reset, Theme, Export */}
+          {/* Actions: File Upload, Reset, Theme, Export */}
           <div className="flex items-center gap-2 sm:gap-3">
             <input
               type="file"
@@ -133,15 +133,15 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50"
-              title="Upload new weekly Excel or CSV dataset"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50"
+              title="Upload new Excel or CSV dataset"
             >
               {isUploading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Upload className="w-3.5 h-3.5" />
               )}
-              <span className="hidden sm:inline"><strong>{isUploading ? 'Uploading...' : 'Upload Weekly Excel'}</strong></span>
+              <span className="hidden sm:inline"><strong>{isUploading ? 'Uploading...' : 'Upload File'}</strong></span>
               <span className="sm:hidden"><strong>{isUploading ? '...' : 'Upload'}</strong></span>
             </button>
 
@@ -201,10 +201,10 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Navigation Tabs */}
         <div className="flex items-center gap-2 py-2 overflow-x-auto no-scrollbar border-t border-slate-200/80 dark:border-slate-800/60">
           {[
-            { id: 'overview', label: 'Executive Overview', icon: Package },
-            { id: 'delays', label: 'Delay Analysis Hub', icon: AlertCircle },
-            { id: 'country', label: 'Country Matrix', icon: Layers },
-            { id: 'comparison', label: 'Customer Benchmark', icon: CheckCircle2 },
+            { id: 'overview', label: 'Overview', icon: Package },
+            { id: 'delays', label: 'Delay Analysis', icon: AlertCircle },
+            { id: 'country', label: 'Destination Details', icon: Layers },
+            { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2 },
             { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet },
           ].map((tab) => {
             const Icon = tab.icon;

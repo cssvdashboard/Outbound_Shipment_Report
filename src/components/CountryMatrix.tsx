@@ -89,7 +89,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
           </div>
           <div>
             <h2 className="text-sm font-bold text-white light:text-slate-900">
-              <strong>Country Code Performance Matrix</strong>
+              <strong>Destination Details &amp; Country Performance Matrix</strong>
             </h2>
             <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
               Dynamically calculated across all active customer &amp; shipper filters

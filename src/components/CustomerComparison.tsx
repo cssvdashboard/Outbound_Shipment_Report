@@ -242,7 +242,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-black text-white light:text-slate-900">
-                <strong>Multi-Customer Benchmark &amp; Transit Time Comparison Tool</strong>
+                <strong>Multi-Customer Performance Comparison &amp; Transit Time Benchmark</strong>
               </h2>
               <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
                 Compare delivery speeds, volumes, and delay rates for any destination
