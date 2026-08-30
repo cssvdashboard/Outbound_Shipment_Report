@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Search,
-  Filter,
-  FilterX,
   X,
   RotateCcw,
   Globe,
@@ -233,36 +231,6 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 </div>
               </div>
 
-              {/* Include vs Exclude (Filter Out) Mode Buttons */}
-              <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 dark:bg-slate-950/90 dark:border-slate-800 shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => onFilterModeChange('include')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    filters.filterMode === 'include'
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                  title="Show ONLY records matching selected customer(s) or shipper(s)"
-                >
-                  <Filter className="w-3.5 h-3.5" />
-                  <span>Filter</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onFilterModeChange('exclude')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    filters.filterMode === 'exclude'
-                      ? 'bg-rose-600 text-white shadow-sm shadow-rose-500/30'
-                      : 'text-slate-600 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400'
-                  }`}
-                  title="FILTER OUT: Hide / exclude selected customer(s) or shipper(s) from dashboard"
-                >
-                  <FilterX className="w-3.5 h-3.5" />
-                  <span>Filter Out</span>
-                </button>
-              </div>
             </div>
 
             {/* Universal Autocomplete Dropdown List - In Front of Everything (z-[100]) */}
