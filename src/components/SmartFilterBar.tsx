@@ -182,7 +182,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 placeholder={
                   selectedCustomer
                     ? `Customer: ${selectedCustomer} (${selectedCustomerCount.toLocaleString()} AWBs)`
-                    : 'Type here Customer Name'
+                    : 'Search Customer'
                 }
                 className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
                   selectedCustomer
@@ -342,7 +342,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 placeholder={
                   selectedDestination
                     ? `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
-                    : 'Type Here Destination'
+                    : 'Search Destination'
                 }
                 className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                   selectedDestination
