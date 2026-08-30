@@ -10,8 +10,6 @@ import {
   Download,
   CheckCircle2,
   AlertCircle,
-  Server,
-  Database,
   Loader2
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
@@ -36,8 +34,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   datasetMeta,
-  totalFilteredCount,
-  totalRawCount,
   filteredShipments,
   theme,
   isServerConnected = false,
@@ -118,64 +114,9 @@ export const Header: React.FC<HeaderProps> = ({
               <Package className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-                  Export Summary
-                </h1>
-                <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                  Analytics Hub
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
-                Weekly Logistics & Shipment Intelligence
-              </p>
-            </div>
-          </div>
-
-          {/* Dataset Status Banner & Server Status */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Server Connection Indicator */}
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all ${
-              isServerConnected
-                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-500/30'
-            }`}>
-              {isServerConnected ? (
-                <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <Server className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                  <span>Node.js Server Online</span>
-                </>
-              ) : (
-                <>
-                  <Database className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                  <span>Local IndexedDB Mode</span>
-                </>
-              )}
-            </div>
-
-            {/* Dataset Metadata Pill */}
-            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-xs">
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 max-w-[150px] truncate">
-                    {datasetMeta.filename}
-                  </span>
-                  {datasetMeta.isCustom ? (
-                    <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
-                      Custom Dataset
-                    </span>
-                  ) : (
-                    <span className="px-1.5 py-0.2 rounded text-[10px] bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30 font-semibold">
-                      Default July
-                    </span>
-                  )}
-                </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {totalFilteredCount.toLocaleString()} / {totalRawCount.toLocaleString()} AWBs active
-                </span>
-              </div>
+              <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
+                Export Summary
+              </h1>
             </div>
           </div>
 
@@ -208,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onResetToDefault}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
-                title="Reset to default July dataset"
+                title="Reset to default dataset"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span className="hidden md:inline">Reset Default</span>
