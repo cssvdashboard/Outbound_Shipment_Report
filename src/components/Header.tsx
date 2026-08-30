@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-950 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-                <strong>Export Summary Dashboard</strong>
+                <strong>Dashboard - Export</strong>
               </h1>
             </div>
           </div>
@@ -201,7 +201,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Navigation Tabs */}
         <div className="flex items-center gap-2 py-2 overflow-x-auto no-scrollbar border-t border-slate-200/80 dark:border-slate-800/60">
           {[
-            { id: 'overview', label: 'Overview', icon: Package },
+            { id: 'overview', label: 'Overview (July 2026)', icon: Package },
             { id: 'delays', label: 'Delay Analysis', icon: AlertCircle },
             { id: 'country', label: 'Destination Details', icon: Layers },
             { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2 },
