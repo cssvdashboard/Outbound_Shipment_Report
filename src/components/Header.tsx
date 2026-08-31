@@ -200,13 +200,13 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Navigation Tabs Bar */}
         <div className="py-2.5 overflow-x-auto no-scrollbar border-t border-slate-200/80 dark:border-slate-800/60">
-          <div className="flex items-center gap-2 p-1 bg-slate-100/90 dark:bg-[#070b14]/90 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 w-fit min-w-full sm:min-w-0">
+          <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 dark:bg-[#070c18]/90 rounded-2xl border border-slate-200 dark:border-slate-800/90 shadow-inner w-fit min-w-full sm:min-w-0">
             {[
-              { id: 'overview', label: 'Overview (July 2026)', icon: Package },
-              { id: 'delays', label: 'Delay Analysis', icon: AlertCircle },
-              { id: 'country', label: 'Destination Details', icon: Layers },
-              { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2 },
-              { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet },
+              { id: 'overview', label: 'Overview (July 2026)', icon: Package, color: 'text-sky-500' },
+              { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
+              { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
+              { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
+              { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -214,14 +214,22 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  className={`group relative flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border border-blue-400/50 scale-[1.02] ring-2 ring-blue-500/20'
-                      : 'bg-white dark:bg-slate-900/90 text-slate-700 hover:text-slate-950 dark:text-slate-200 dark:hover:text-white border border-slate-200 dark:border-slate-700/80 shadow-sm hover:border-blue-400/60 dark:hover:border-blue-500/60 hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
+                      ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white shadow-lg shadow-blue-500/35 border border-blue-400/50 -translate-y-0.5 ring-2 ring-blue-500/25'
+                      : 'bg-white dark:bg-[#0f172a] text-slate-700 hover:text-slate-950 dark:text-slate-200 dark:hover:text-white border border-slate-200 dark:border-slate-700/80 shadow-sm hover:border-blue-400/80 dark:hover:border-blue-500/80 hover:bg-slate-50 dark:hover:bg-slate-800/90 hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10 active:translate-y-0'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-blue-500 dark:text-blue-400'}`} />
-                  <span><strong>{tab.label}</strong></span>
+                  <span
+                    className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                      isActive
+                        ? 'bg-white/20 border border-white/30 text-white shadow-inner'
+                        : 'bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 group-hover:scale-110 group-hover:border-blue-400/50'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : tab.color}`} />
+                  </span>
+                  <span className="tracking-tight"><strong>{tab.label}</strong></span>
                 </button>
               );
             })}
