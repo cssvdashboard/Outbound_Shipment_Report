@@ -44,6 +44,12 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   const destDropdownRef = useRef<HTMLDivElement>(null);
   const destInputRef = useRef<HTMLInputElement>(null);
 
+  // Auto-Load Top Customers for Country Search & Dropdown State
+  const [autoLoadSearch, setAutoLoadSearch] = useState<string>('');
+  const [isAutoLoadDropdownOpen, setIsAutoLoadDropdownOpen] = useState<boolean>(false);
+  const autoLoadDropdownRef = useRef<HTMLDivElement>(null);
+  const autoLoadInputRef = useRef<HTMLInputElement>(null);
+
   // Close dropdowns on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -52,6 +58,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       }
       if (destDropdownRef.current && !destDropdownRef.current.contains(event.target as Node)) {
         setIsDestDropdownOpen(false);
+      }
+      if (autoLoadDropdownRef.current && !autoLoadDropdownRef.current.contains(event.target as Node)) {
+        setIsAutoLoadDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -81,6 +90,39 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     setSelectedDestination(dest);
     setDestSearch('');
     setIsDestDropdownOpen(false);
+  };
+
+  // Filter destination list for auto-load search
+  const filteredAutoLoadDestinations = useMemo(() => {
+    if (!autoLoadSearch.trim()) return allDestinations;
+    const q = autoLoadSearch.trim().toUpperCase();
+    return allDestinations.filter((code) => code.includes(q));
+  }, [allDestinations, autoLoadSearch]);
+
+  // Auto-Load Top Customers handler when a country is selected
+  const handleAutoLoadForCountry = (countryCode: string) => {
+    setSelectedDestination(countryCode);
+    setAutoLoadSearch('');
+    setIsAutoLoadDropdownOpen(false);
+
+    const destShipments =
+      countryCode === 'ALL'
+        ? rawShipments
+        : rawShipments.filter((s) => s.destination === countryCode);
+    
+    const countMap: Record<string, number> = {};
+    for (const s of destShipments) {
+      if (s.customer) countMap[s.customer] = (countMap[s.customer] || 0) + 1;
+    }
+
+    const top = Object.entries(countMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([name]) => name);
+
+    if (top.length > 0) {
+      setSelectedCustomers(top);
+    }
   };
 
   // Filter and rank customers for autocomplete by AWB volume
@@ -130,27 +172,6 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
   const handleRemoveCustomer = (customer: string) => {
     setSelectedCustomers(selectedCustomers.filter((c) => c !== customer));
-  };
-
-  const handleAutoFillTopCustomers = () => {
-    const destShipments =
-      selectedDestination === 'ALL'
-        ? rawShipments
-        : rawShipments.filter((s) => s.destination === selectedDestination);
-    
-    const countMap: Record<string, number> = {};
-    for (const s of destShipments) {
-      if (s.customer) countMap[s.customer] = (countMap[s.customer] || 0) + 1;
-    }
-
-    const top = Object.entries(countMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
-      .map(([name]) => name);
-
-    if (top.length > 0) {
-      setSelectedCustomers(top);
-    }
   };
 
   // Grouped Bar Chart Data comparing Avg TT and On-time Rate
@@ -235,9 +256,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       
       {/* 1. SELECTION & CONFIGURATION PANEL */}
       <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-800/80">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-slate-800/80 light:border-slate-200">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-800/80 light:border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+            <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -250,15 +271,124 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             </div>
           </div>
 
-          {/* Quick Auto-Fill Top Customers */}
-          <button
-            type="button"
-            onClick={handleAutoFillTopCustomers}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold border border-indigo-500/30 transition-all cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span><strong>Load Top Customers for {selectedDestination}</strong></span>
-          </button>
+          {/* Quick Auto-Load Top Customers for Country Search Bar & Dropdown Combobox */}
+          <div className="relative z-50 w-full lg:w-96" ref={autoLoadDropdownRef}>
+            <div className="relative">
+              <input
+                ref={autoLoadInputRef}
+                type="text"
+                value={autoLoadSearch}
+                onChange={(e) => {
+                  setAutoLoadSearch(e.target.value);
+                  setIsAutoLoadDropdownOpen(true);
+                }}
+                onFocus={() => setIsAutoLoadDropdownOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsAutoLoadDropdownOpen(false);
+                  } else if (e.key === 'Enter' && filteredAutoLoadDestinations.length > 0) {
+                    e.preventDefault();
+                    handleAutoLoadForCountry(filteredAutoLoadDestinations[0]);
+                  }
+                }}
+                placeholder={
+                  selectedDestination && selectedDestination !== 'ALL'
+                    ? `⚡ Auto-Load Top Customers for ${selectedDestination}...`
+                    : '⚡ Search Country to Auto-Load Top Customers...'
+                }
+                className="w-full pl-9 pr-14 py-2 text-xs font-bold rounded-xl bg-indigo-950/40 border border-indigo-500/40 text-indigo-100 placeholder:text-indigo-300/70 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-inner"
+              />
+              <Sparkles className="w-4 h-4 text-indigo-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+
+              <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                {autoLoadSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAutoLoadSearch('');
+                      autoLoadInputRef.current?.focus();
+                    }}
+                    className="p-1 text-indigo-300 hover:text-white transition-colors cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsAutoLoadDropdownOpen(!isAutoLoadDropdownOpen)}
+                  className="p-1 text-indigo-300 hover:text-white transition-colors cursor-pointer"
+                  title="Toggle country list"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAutoLoadDropdownOpen ? 'rotate-180 text-indigo-300' : ''}`} />
+                </button>
+              </div>
+
+              {/* Dropdown Popup */}
+              {isAutoLoadDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-[#0f172a] border border-indigo-500/40 shadow-2xl shadow-black/90 p-1.5 divide-y divide-slate-800">
+                  <div className="p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleAutoLoadForCountry('ALL')}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                        selectedDestination === 'ALL'
+                          ? 'bg-indigo-600 text-white font-black shadow-md shadow-indigo-500/30'
+                          : 'text-slate-200 hover:bg-indigo-950/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {selectedDestination === 'ALL' ? (
+                          <Check className="w-4 h-4 text-white font-bold" />
+                        ) : (
+                          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        )}
+                        <span className="font-bold"><strong>Global (All Destinations)</strong></span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-indigo-300">
+                        <strong>{rawShipments.length.toLocaleString()} AWBs</strong>
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="pt-1 space-y-0.5">
+                    {filteredAutoLoadDestinations.map((code) => {
+                      const isSelected = selectedDestination === code;
+                      const count = destinationCounts.get(code) || 0;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => handleAutoLoadForCountry(code)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/25'
+                              : 'text-slate-200 hover:bg-indigo-950/60 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {isSelected ? (
+                              <Check className="w-3.5 h-3.5 text-white font-bold" />
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0 group-hover:scale-125 transition-transform" />
+                            )}
+                            <span className="font-mono font-extrabold">{code}</span>
+                          </div>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                            isSelected
+                              ? 'bg-white/20 text-white font-black'
+                              : 'bg-slate-800 text-slate-300 group-hover:bg-indigo-900/60 group-hover:text-indigo-200'
+                          }`}>
+                            <strong>{count.toLocaleString()} AWBs</strong>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Destination & Customer Selectors */}
@@ -485,7 +615,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   onClick={() => handleRemoveCustomer(cust)}
                   className="p-0.5 rounded-full hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             ))}
