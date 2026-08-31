@@ -291,11 +291,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                     handleAutoLoadForCountry(filteredAutoLoadDestinations[0]);
                   }
                 }}
-                placeholder={
-                  selectedDestination && selectedDestination !== 'ALL'
-                    ? `Select Top Customer for ${selectedDestination}..`
-                    : 'Select Top Customer for..'
-                }
+                placeholder="Select Top Customer for.."
                 className="w-full pl-9 pr-14 py-2 text-xs font-bold rounded-xl bg-indigo-950/40 border border-indigo-500/40 text-indigo-100 placeholder:text-indigo-300/70 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-inner"
               />
               <Sparkles className="w-4 h-4 text-indigo-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
