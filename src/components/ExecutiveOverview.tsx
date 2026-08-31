@@ -477,75 +477,47 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
-                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border ${
-                      isNegative
-                        ? 'bg-gradient-to-br from-rose-950/40 via-red-950/20 to-slate-900/90 border-rose-900/60 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.25)] hover:scale-[1.02] active:scale-[0.98]'
-                        : isSuccess
-                        ? 'bg-gradient-to-br from-emerald-950/30 via-slate-900/90 to-slate-900 border-emerald-900/50 hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
-                    }`}
+                    className="p-3.5 rounded-2xl text-left transition-all relative overflow-hidden group border bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/80 hover:border-slate-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <div className="flex items-center justify-between gap-1">
-                      <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-2 min-w-0">
                         {isNegative ? (
-                          <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse flex-shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-rose-400/80 flex-shrink-0" />
                         ) : isSuccess ? (
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] flex-shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
                         ) : (
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: res.color }}
                           />
                         )}
-                        <span className={`text-xs font-bold truncate ${
-                          isNegative 
-                            ? 'text-rose-200 group-hover:text-rose-100 font-extrabold' 
-                            : isSuccess 
-                            ? 'text-emerald-200 group-hover:text-emerald-100' 
-                            : 'text-slate-200 group-hover:text-blue-300'
-                        }`}>
+                        <span className="text-xs font-bold truncate text-slate-200 group-hover:text-white">
                           {res.name}
                         </span>
                       </div>
                       {isNegative && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                          Negative
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700/60">
+                          Exception
                         </span>
                       )}
                       {isSuccess && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           Success
                         </span>
                       )}
                     </div>
 
-                    <div className="mt-2.5 flex items-baseline justify-between">
-                      <span className={`text-lg font-black font-mono tracking-tight ${
-                        isNegative ? 'text-rose-400 group-hover:text-rose-300' : isSuccess ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-white'
-                      }`}>
+                    <div className="mt-3 flex items-baseline justify-between">
+                      <span className="text-xl font-black font-mono tracking-tight text-white group-hover:text-blue-200 transition-colors">
                         {res.count.toLocaleString()}
                       </span>
-                      <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                        isNegative 
-                          ? 'bg-rose-950/60 text-rose-300 border border-rose-900/50' 
-                          : isSuccess 
-                          ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50' 
-                          : 'text-slate-400 bg-slate-800/80 border border-slate-700/50'
-                      }`}>
+                      <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700/60">
                         {res.percentage}%
                       </span>
                     </div>
 
-                    <div className={`mt-1.5 text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ${
-                      isNegative ? 'text-rose-400' : isSuccess ? 'text-emerald-400' : 'text-blue-400'
-                    }`}>
-                      {isNegative ? (
-                        <><AlertTriangle className="w-3 h-3 text-rose-400" /> Negative outlier • View popup →</>
-                      ) : isSuccess ? (
-                        <><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Delivered • View popup →</>
-                      ) : (
-                        <><Eye className="w-3 h-3" /> Click to view details →</>
-                      )}
+                    <div className="mt-2 text-[10px] font-medium text-slate-400 group-hover:text-blue-300 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                      <Eye className="w-3 h-3" /> Click to view details →
                     </div>
                   </button>
                 );
