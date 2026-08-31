@@ -293,8 +293,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 }}
                 placeholder={
                   selectedDestination && selectedDestination !== 'ALL'
-                    ? `⚡ Auto-Load Top Customers for ${selectedDestination}...`
-                    : '⚡ Search Country to Auto-Load Top Customers...'
+                    ? `Select Top Customer for ${selectedDestination}..`
+                    : 'Select Top Customer for..'
                 }
                 className="w-full pl-9 pr-14 py-2 text-xs font-bold rounded-xl bg-indigo-950/40 border border-indigo-500/40 text-indigo-100 placeholder:text-indigo-300/70 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-inner"
               />
