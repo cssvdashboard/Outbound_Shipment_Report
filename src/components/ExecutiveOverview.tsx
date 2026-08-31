@@ -477,75 +477,47 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
-                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border ${
-                      isNegative
-                        ? 'bg-gradient-to-br from-rose-950/40 via-red-950/20 to-slate-900/90 border-rose-900/60 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.25)] hover:scale-[1.02] active:scale-[0.98]'
-                        : isSuccess
-                        ? 'bg-gradient-to-br from-emerald-950/30 via-slate-900/90 to-slate-900 border-emerald-900/50 hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
-                    }`}
+                    className="p-3.5 rounded-2xl text-left transition-all relative overflow-hidden group border bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/80 hover:border-slate-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <div className="flex items-center justify-between gap-1">
-                      <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-2 min-w-0">
                         {isNegative ? (
-                          <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse flex-shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-rose-400/80 flex-shrink-0" />
                         ) : isSuccess ? (
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] flex-shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
                         ) : (
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: res.color }}
                           />
                         )}
-                        <span className={`text-xs font-bold truncate ${
-                          isNegative 
-                            ? 'text-rose-200 group-hover:text-rose-100 font-extrabold' 
-                            : isSuccess 
-                            ? 'text-emerald-200 group-hover:text-emerald-100' 
-                            : 'text-slate-200 group-hover:text-blue-300'
-                        }`}>
+                        <span className="text-xs font-bold truncate text-slate-200 group-hover:text-white">
                           {res.name}
                         </span>
                       </div>
                       {isNegative && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                          Negative
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700/60">
+                          Exception
                         </span>
                       )}
                       {isSuccess && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           Success
                         </span>
                       )}
                     </div>
 
-                    <div className="mt-2.5 flex items-baseline justify-between">
-                      <span className={`text-lg font-black font-mono tracking-tight ${
-                        isNegative ? 'text-rose-400 group-hover:text-rose-300' : isSuccess ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-white'
-                      }`}>
+                    <div className="mt-3 flex items-baseline justify-between">
+                      <span className="text-xl font-black font-mono tracking-tight text-white group-hover:text-blue-200 transition-colors">
                         {res.count.toLocaleString()}
                       </span>
-                      <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                        isNegative 
-                          ? 'bg-rose-950/60 text-rose-300 border border-rose-900/50' 
-                          : isSuccess 
-                          ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50' 
-                          : 'text-slate-400 bg-slate-800/80 border border-slate-700/50'
-                      }`}>
+                      <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700/60">
                         {res.percentage}%
                       </span>
                     </div>
 
-                    <div className={`mt-1.5 text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ${
-                      isNegative ? 'text-rose-400' : isSuccess ? 'text-emerald-400' : 'text-blue-400'
-                    }`}>
-                      {isNegative ? (
-                        <><AlertTriangle className="w-3 h-3 text-rose-400" /> Negative outlier • View popup →</>
-                      ) : isSuccess ? (
-                        <><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Delivered • View popup →</>
-                      ) : (
-                        <><Eye className="w-3 h-3" /> Click to view details →</>
-                      )}
+                    <div className="mt-2 text-[10px] font-medium text-slate-400 group-hover:text-blue-300 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                      <Eye className="w-3 h-3" /> Click to view details →
                     </div>
                   </button>
                 );
@@ -573,59 +545,39 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
-            <div className={`glass-panel w-full max-w-5xl max-h-[90vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${
-              isModalNegative 
-                ? 'border-rose-500/50 shadow-[0_0_40px_rgba(239,68,68,0.25)]' 
-                : isModalSuccess 
-                ? 'border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)]' 
-                : 'border-blue-500/40'
-            }`}>
+            <div className="glass-panel w-full max-w-5xl max-h-[90vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border border-slate-800/90">
               
               {/* Modal Header */}
               <div>
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl border ${
-                      isModalNegative
-                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
-                        : isModalSuccess
-                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                        : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                    }`}>
+                    <div className="p-2.5 rounded-xl border bg-slate-900 text-slate-300 border-slate-800">
                       {isModalNegative ? (
-                        <AlertTriangle className="w-5 h-5 text-rose-400" />
+                        <AlertTriangle className="w-5 h-5 text-rose-400/90" />
                       ) : (
-                        <ShieldAlert className="w-5 h-5" />
+                        <ShieldAlert className="w-5 h-5 text-blue-400" />
                       )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2.5">
                         <h3 className="text-base sm:text-lg font-bold text-white">
                           Final Resolution:{' '}
-                          <span className={`font-black ${
-                            isModalNegative ? 'text-rose-400' : isModalSuccess ? 'text-emerald-400' : 'text-blue-400'
-                          }`}>
+                          <span className="font-black text-white">
                             {modalResolution}
                           </span>
                         </h3>
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
-                          isModalNegative
-                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                            : isModalSuccess
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                            : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                        }`}>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold border bg-slate-900 text-slate-300 border-slate-700">
                           {modalAllShipments.length.toLocaleString()} Total AWBs
                         </span>
                         {isModalNegative && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-rose-950 text-rose-400 border border-rose-700">
-                            Negative Exception
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-900 text-slate-400 border border-slate-700">
+                            Exception Records
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {isModalNegative 
-                          ? `Detailed negative exception logs & outlier shipment records for status: "${modalResolution}"`
+                          ? `Detailed exception logs & shipment records for status: "${modalResolution}"`
                           : `Filtered shipment records from Shipment Explorer for status: "${modalResolution}"`
                         }
                       </p>
@@ -747,17 +699,15 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                             }}
                             className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 group ${
                               isSelected
-                                ? isModalNegative
-                                  ? 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-600/35 border border-rose-400/60 scale-[1.02] ring-2 ring-rose-500/30'
-                                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/35 border border-blue-400/60 scale-[1.02] ring-2 ring-blue-500/30'
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/35 border border-blue-400/60 scale-[1.02] ring-2 ring-blue-500/30'
                                 : 'bg-slate-800/90 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/80 hover:border-slate-500'
                             }`}
                           >
                             <span><strong>{cat.reason}</strong></span>
                             <span className={`font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
                               isSelected
-                                ? 'bg-white/25 text-white font-black'
-                                : 'bg-slate-900 text-rose-300 border border-rose-900/40 group-hover:border-rose-500/40'
+                                ? 'bg-white/20 text-white font-black'
+                                : 'bg-slate-900/90 text-slate-300 border border-slate-700/60'
                             }`}>
                               <strong>{cat.count} AWBs ({cat.percentage}%)</strong>
                             </span>
