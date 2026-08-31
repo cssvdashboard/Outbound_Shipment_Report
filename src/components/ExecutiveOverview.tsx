@@ -572,8 +572,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         const isModalSuccess = modalResolution.toLowerCase().trim() === 'delivered';
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
-            <div className={`glass-panel w-full max-w-5xl max-h-[90vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className={`glass-panel w-full max-w-[96vw] 2xl:max-w-[1600px] max-h-[92vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${
               isModalNegative 
                 ? 'border-rose-500/50 shadow-[0_0_40px_rgba(239,68,68,0.25)]' 
                 : isModalSuccess 
@@ -963,7 +963,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
       {/* Single Shipment Detail Sub-Modal */}
       {inspectedShipment && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
           <div className="glass-panel w-full max-w-lg p-6 rounded-3xl space-y-4 shadow-2xl relative bg-slate-950 border border-slate-700">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2.5">

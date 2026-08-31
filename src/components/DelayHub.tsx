@@ -671,8 +671,8 @@ export const DelayHub: React.FC<DelayHubProps> = ({
             : 'Weekend Delay';
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
-            <div className={`glass-panel w-full max-w-5xl max-h-[90vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${catStyle.border} ${catStyle.glow}`}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className={`glass-panel w-full max-w-[96vw] 2xl:max-w-[1600px] max-h-[92vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${catStyle.border} ${catStyle.glow}`}>
               
               {/* Modal Header */}
               <div>
@@ -872,16 +872,14 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                                 <span className="text-slate-400 text-[10px] block truncate">{s.remarks}</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-center">
+                            <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setInspectedShipment(s);
-                                }}
-                                className="p-1 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors"
-                                title="Open Dossier"
+                                type="button"
+                                onClick={() => setInspectedShipment(s)}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-sky-400 hover:text-white transition-all shadow-sm hover:shadow-blue-500/30 cursor-pointer"
+                                title="View full AWB dossier"
                               >
-                                <Eye className="w-3.5 h-3.5" />
+                                <Eye className="w-4 h-4" />
                               </button>
                             </td>
                           </tr>
@@ -963,7 +961,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
 
       {/* 4. SINGLE SHIPMENT DOSSIER SUB-MODAL */}
       {inspectedShipment && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
           <div className="glass-panel w-full max-w-lg p-6 rounded-3xl space-y-4 shadow-2xl relative bg-slate-950 border border-slate-700">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
