@@ -1063,7 +1063,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <Truck className="w-4 h-4" />
           </div>
           <div className="text-xs font-bold text-slate-400">
-            <strong>Destination Final-Mile Delays</strong>
+            <strong>Destination Delays</strong>
           </div>
           <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
             <span><strong>{summary.destinationDelayCount.toLocaleString()}</strong></span>

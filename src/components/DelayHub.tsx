@@ -402,7 +402,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         <div
           onClick={() => {
             setActiveCategory('destination');
-            setModalTarget({ category: 'destination', title: 'Destination Final-Mile Delays (All Exceptions)' });
+            setModalTarget({ category: 'destination', title: 'Destination Delays (All Exceptions)' });
             setModalSearch('');
             setModalCurrentPage(1);
           }}
@@ -411,11 +411,11 @@ export const DelayHub: React.FC<DelayHubProps> = ({
               ? 'ring-2 ring-rose-500 bg-rose-950/40 shadow-glow-rose'
               : 'hover:border-rose-500/40'
           }`}
-          title="Click to view all Destination Final-Mile Delay AWBs"
+          title="Click to view all Destination Delay AWBs"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              <strong>Destination Final-Mile Delays</strong>
+              <strong>Destination Delays</strong>
             </span>
             <div className="p-2 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20">
               <Truck className="w-4 h-4" />
@@ -667,7 +667,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
             : modalTarget.category === 'clearance'
             ? 'Customs Clearance Delay'
             : modalTarget.category === 'destination'
-            ? 'Destination Final-Mile Delay'
+            ? 'Destination Delay'
             : 'Weekend Delay';
 
         return (
@@ -1017,7 +1017,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                 </span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Destination Final-Mile Delay</span>
+                <span className="text-slate-500 block text-[10px]">Destination Delay</span>
                 <span className="font-bold text-rose-300 block mt-0.5">
                   {inspectedShipment.destinationDelay || 'None'}
                 </span>
