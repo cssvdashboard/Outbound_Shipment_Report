@@ -367,9 +367,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   Delivery Timeline Distribution
                 </h2>
               </div>
-              <span className="text-[11px] font-medium text-slate-400">
-                Click cards below to filter
-              </span>
             </div>
 
             {/* Donut Chart Container */}
@@ -455,11 +452,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 <h2 className="text-sm font-bold text-white light:text-slate-900">
                   Final Resolution &amp; Outcome Status
                 </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-                  Click any card to open detailed popup
-                </span>
               </div>
             </div>
 
@@ -585,11 +577,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           </div>
 
           {/* Quick Hub Navigation Link */}
-          <div className="mt-4 pt-3 border-t border-slate-800 light:border-slate-200 flex items-center justify-between text-xs">
-            <span className="text-slate-400">Click any resolution card above to open full shipment details popup.</span>
+          <div className="mt-4 pt-3 border-t border-slate-800 light:border-slate-200 flex items-center justify-end text-xs">
             <button
               onClick={() => onNavigateTab('delays')}
-              className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline"
+              className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
             >
               Open Delay Hub <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
