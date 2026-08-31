@@ -64,6 +64,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   const [modalPageSize, setModalPageSize] = useState<number>(25);
   const [modalCurrentPage, setModalCurrentPage] = useState<number>(1);
   const [inspectedShipment, setInspectedShipment] = useState<Shipment | null>(null);
+  const [showCauseBreakdown, setShowCauseBreakdown] = useState<boolean>(true);
 
   // Helper to extract the primary reason/delay for any shipment
   const getShipmentPrimaryReason = (s: Shipment): string => {
@@ -676,70 +677,95 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
               {/* Categorized Root-Cause / Delay Reason Breakdown (Specifically for RTS, Undelivered & All Statuses) */}
               {modalCategoryBreakdown.length > 0 && (
-                <div className="mb-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-2.5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                <div className="mb-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-2.5 transition-all">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                       <span className="text-xs font-black uppercase text-slate-200 tracking-wider">
                         <strong>Root Cause &amp; Delay Reason Breakdown ({modalCategoryBreakdown.length} Distinct Causes)</strong>
                       </span>
+                      {modalSelectedCategory && !showCauseBreakdown && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                          Active Cause: {modalSelectedCategory}
+                        </span>
+                      )}
                     </div>
-                    <span className="text-[11px] text-slate-400 font-semibold">
-                      Click any reason pill below to isolate AWBs:
-                    </span>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto no-scrollbar pt-0.5">
-                    {/* All Causes Option */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setModalSelectedCategory(null);
-                        setModalCurrentPage(1);
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                        modalSelectedCategory === null
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/35 border border-blue-400/50 scale-[1.02]'
-                          : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
-                      }`}
-                    >
-                      <span><strong>All Causes</strong></span>
-                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/30 font-bold">
-                        {modalAllShipments.length}
+                    {/* On / Off Switch for Cause Breakdown */}
+                    <div className="flex items-center gap-2.5 bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800">
+                      <span className="text-[11px] font-bold text-slate-300 select-none">
+                        {showCauseBreakdown ? 'Hide Breakdown' : 'Show Breakdown'}
                       </span>
-                    </button>
-
-                    {/* Individual Reason Chips */}
-                    {modalCategoryBreakdown.map((cat) => {
-                      const isSelected = modalSelectedCategory?.toLowerCase() === cat.reason.toLowerCase();
-                      return (
-                        <button
-                          key={cat.reason}
-                          type="button"
-                          onClick={() => {
-                            setModalSelectedCategory(isSelected ? null : cat.reason);
-                            setModalCurrentPage(1);
-                          }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 group ${
-                            isSelected
-                              ? isModalNegative
-                                ? 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-600/35 border border-rose-400/60 scale-[1.02] ring-2 ring-rose-500/30'
-                                : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/35 border border-blue-400/60 scale-[1.02] ring-2 ring-blue-500/30'
-                              : 'bg-slate-800/90 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/80 hover:border-slate-500'
-                          }`}
-                        >
-                          <span><strong>{cat.reason}</strong></span>
-                          <span className={`font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
-                            isSelected
-                              ? 'bg-white/25 text-white font-black'
-                              : 'bg-slate-900 text-rose-300 border border-rose-900/40 group-hover:border-rose-500/40'
-                          }`}>
-                            <strong>{cat.count} AWBs ({cat.percentage}%)</strong>
-                          </span>
-                        </button>
-                      );
-                    })}
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={showCauseBreakdown}
+                        onClick={() => setShowCauseBreakdown(!showCauseBreakdown)}
+                        className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer border ${
+                          showCauseBreakdown
+                            ? 'bg-blue-600 border-blue-400 justify-end'
+                            : 'bg-slate-800 border-slate-600 justify-start'
+                        }`}
+                        title={showCauseBreakdown ? 'Click to hide causes and expand AWB table' : 'Click to show all cause breakdown pills'}
+                      >
+                        <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md" />
+                      </button>
+                    </div>
                   </div>
+
+                  {showCauseBreakdown && (
+                    <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto no-scrollbar pt-0.5 animate-fade-in">
+                      {/* All Causes Option */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalSelectedCategory(null);
+                          setModalCurrentPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                          modalSelectedCategory === null
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/35 border border-blue-400/50 scale-[1.02]'
+                            : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
+                        }`}
+                      >
+                        <span><strong>All Causes</strong></span>
+                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/30 font-bold">
+                          {modalAllShipments.length}
+                        </span>
+                      </button>
+
+                      {/* Individual Reason Chips */}
+                      {modalCategoryBreakdown.map((cat) => {
+                        const isSelected = modalSelectedCategory?.toLowerCase() === cat.reason.toLowerCase();
+                        return (
+                          <button
+                            key={cat.reason}
+                            type="button"
+                            onClick={() => {
+                              setModalSelectedCategory(isSelected ? null : cat.reason);
+                              setModalCurrentPage(1);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 group ${
+                              isSelected
+                                ? isModalNegative
+                                  ? 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-600/35 border border-rose-400/60 scale-[1.02] ring-2 ring-rose-500/30'
+                                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/35 border border-blue-400/60 scale-[1.02] ring-2 ring-blue-500/30'
+                                : 'bg-slate-800/90 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/80 hover:border-slate-500'
+                            }`}
+                          >
+                            <span><strong>{cat.reason}</strong></span>
+                            <span className={`font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                              isSelected
+                                ? 'bg-white/25 text-white font-black'
+                                : 'bg-slate-900 text-rose-300 border border-rose-900/40 group-hover:border-rose-500/40'
+                            }`}>
+                              <strong>{cat.count} AWBs ({cat.percentage}%)</strong>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -780,7 +806,9 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
 
             {/* Modal Table Container */}
-            <div className="flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-800 bg-slate-900/60 max-h-[48vh] my-1">
+            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-800 bg-slate-900/60 my-1 transition-all ${
+              showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
+            }`}>
               <table className="w-full text-left text-xs min-w-[850px]">
                 <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px] tracking-wider z-10">
                   <tr>
