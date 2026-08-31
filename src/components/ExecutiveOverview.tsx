@@ -59,10 +59,21 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 }) => {
   // Modal state for Final Resolution Popup
   const [modalResolution, setModalResolution] = useState<string | null>(null);
+  const [modalSelectedCategory, setModalSelectedCategory] = useState<string | null>(null);
   const [modalSearch, setModalSearch] = useState<string>('');
   const [modalPageSize, setModalPageSize] = useState<number>(25);
   const [modalCurrentPage, setModalCurrentPage] = useState<number>(1);
   const [inspectedShipment, setInspectedShipment] = useState<Shipment | null>(null);
+
+  // Helper to extract the primary reason/delay for any shipment
+  const getShipmentPrimaryReason = (s: Shipment): string => {
+    if (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') return s.destinationDelay.trim();
+    if (s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '') return s.clearanceDelay.trim();
+    if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') return s.transitDelay.trim();
+    if (s.remarks && s.remarks !== '-' && s.remarks.trim() !== '') return s.remarks.trim();
+    if (s.weekendDelay && s.weekendDelay.toLowerCase() === 'yes') return 'Weekend Hold';
+    return 'Other / Unspecified';
+  };
 
   // Donut chart config for Delivery Timeline
   const timelineChartData = {
@@ -108,6 +119,26 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     return filteredShipments.filter((s) => s.finalResolution === modalResolution);
   }, [modalResolution, filteredShipments]);
 
+  // Compute category/root-cause breakdown for the active resolution modal (specifically for RTS, Undelivered, etc.)
+  const modalCategoryBreakdown = useMemo(() => {
+    if (modalAllShipments.length === 0) return [];
+    const countMap: Record<string, number> = {};
+
+    for (const s of modalAllShipments) {
+      const reason = getShipmentPrimaryReason(s);
+      countMap[reason] = (countMap[reason] || 0) + 1;
+    }
+
+    const total = modalAllShipments.length;
+    return Object.entries(countMap)
+      .map(([reason, count]) => ({
+        reason,
+        count,
+        percentage: ((count / total) * 100).toFixed(1)
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [modalAllShipments]);
+
   // Close modal on Escape key press
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -122,10 +153,17 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [modalResolution, inspectedShipment]);
+
   const modalFilteredShipments = useMemo(() => {
-    if (!modalSearch.trim()) return modalAllShipments;
+    let list = modalAllShipments;
+
+    if (modalSelectedCategory) {
+      list = list.filter((s) => getShipmentPrimaryReason(s).toLowerCase() === modalSelectedCategory.toLowerCase());
+    }
+
+    if (!modalSearch.trim()) return list;
     const q = modalSearch.toLowerCase().trim();
-    return modalAllShipments.filter((s) => {
+    return list.filter((s) => {
       return (
         s.awb.toLowerCase().includes(q) ||
         s.shprName.toLowerCase().includes(q) ||
@@ -139,7 +177,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q))
       );
     });
-  }, [modalAllShipments, modalSearch]);
+  }, [modalAllShipments, modalSelectedCategory, modalSearch]);
 
   const modalTotalPages = Math.ceil(modalFilteredShipments.length / modalPageSize) || 1;
   const modalValidCurrentPage = Math.min(modalCurrentPage, modalTotalPages);
@@ -440,6 +478,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     className="h-full transition-all duration-500 cursor-pointer hover:opacity-80"
                     onClick={() => {
                       setModalResolution(res.name);
+                      setModalSelectedCategory(null);
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
@@ -465,6 +504,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     type="button"
                     onClick={() => {
                       setModalResolution(res.name);
+                      setModalSelectedCategory(null);
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
@@ -663,6 +703,75 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     <span className="text-[10px] text-slate-500 block">
                       Sorted by shipment concentration
                     </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Categorized Root-Cause / Delay Reason Breakdown (Specifically for RTS, Undelivered & All Statuses) */}
+              {modalCategoryBreakdown.length > 0 && (
+                <div className="mb-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                      <span className="text-xs font-black uppercase text-slate-200 tracking-wider">
+                        <strong>Root Cause &amp; Delay Reason Breakdown ({modalCategoryBreakdown.length} Distinct Causes)</strong>
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-400 font-semibold">
+                      Click any reason pill below to isolate AWBs:
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto no-scrollbar pt-0.5">
+                    {/* All Causes Option */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setModalSelectedCategory(null);
+                        setModalCurrentPage(1);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                        modalSelectedCategory === null
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/35 border border-blue-400/50 scale-[1.02]'
+                          : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
+                      }`}
+                    >
+                      <span><strong>All Causes</strong></span>
+                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/30 font-bold">
+                        {modalAllShipments.length}
+                      </span>
+                    </button>
+
+                    {/* Individual Reason Chips */}
+                    {modalCategoryBreakdown.map((cat) => {
+                      const isSelected = modalSelectedCategory?.toLowerCase() === cat.reason.toLowerCase();
+                      return (
+                        <button
+                          key={cat.reason}
+                          type="button"
+                          onClick={() => {
+                            setModalSelectedCategory(isSelected ? null : cat.reason);
+                            setModalCurrentPage(1);
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 group ${
+                            isSelected
+                              ? isModalNegative
+                                ? 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-600/35 border border-rose-400/60 scale-[1.02] ring-2 ring-rose-500/30'
+                                : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/35 border border-blue-400/60 scale-[1.02] ring-2 ring-blue-500/30'
+                              : 'bg-slate-800/90 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/80 hover:border-slate-500'
+                          }`}
+                        >
+                          <span><strong>{cat.reason}</strong></span>
+                          <span className={`font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                            isSelected
+                              ? 'bg-white/25 text-white font-black'
+                              : 'bg-slate-900 text-rose-300 border border-rose-900/40 group-hover:border-rose-500/40'
+                          }`}>
+                            <strong>{cat.count} AWBs ({cat.percentage}%)</strong>
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
