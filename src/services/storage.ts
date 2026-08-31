@@ -50,7 +50,7 @@ export async function clearSavedDataset(): Promise<void> {
 export function getStoredTheme(): 'dark' | 'light' {
   const stored = localStorage.getItem(STORAGE_KEY_THEME);
   if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return 'dark'; // Dark mode is default
 }
 
 export function setStoredTheme(theme: 'dark' | 'light'): void {
