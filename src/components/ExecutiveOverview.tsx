@@ -1019,53 +1019,59 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-indigo-500/50 transition-all flex items-center gap-3.5"
+          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-indigo-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group"
         >
-          <div className="p-3 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-            <Plane className="w-5 h-5" />
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 transition-transform">
+            <Plane className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-xs font-bold text-slate-400"><strong>Transit Delay Incidents</strong></div>
-            <div className="text-xl font-extrabold text-white light:text-slate-900 mt-0.5">
-              <strong>{summary.transitDelayCount.toLocaleString()}</strong>{' '}
-              <span className="text-xs font-normal text-slate-400">AWBs</span>
-            </div>
-            <span className="text-[11px] text-indigo-400 font-medium">CDG, US, Gateway bottlenecks →</span>
+          <div className="text-xs font-bold text-slate-400">
+            <strong>Transit Delay Incidents</strong>
           </div>
+          <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
+            <span><strong>{summary.transitDelayCount.toLocaleString()}</strong></span>
+            <span className="text-xs font-bold text-slate-400">AWBs</span>
+          </div>
+          <span className="text-[11px] text-indigo-400 font-semibold mt-1">
+            CDG, US, Gateway bottlenecks →
+          </span>
         </div>
 
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-amber-500/50 transition-all flex items-center gap-3.5"
+          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-amber-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group"
         >
-          <div className="p-3 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
-            <FileText className="w-5 h-5" />
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform">
+            <FileText className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-xs font-bold text-slate-400"><strong>Customs Clearance Delays</strong></div>
-            <div className="text-xl font-extrabold text-white light:text-slate-900 mt-0.5">
-              <strong>{summary.clearanceDelayCount.toLocaleString()}</strong>{' '}
-              <span className="text-xs font-normal text-slate-400">AWBs</span>
-            </div>
-            <span className="text-[11px] text-amber-400 font-medium">Invoices, KYC, Inspections →</span>
+          <div className="text-xs font-bold text-slate-400">
+            <strong>Customs Clearance Delays</strong>
           </div>
+          <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
+            <span><strong>{summary.clearanceDelayCount.toLocaleString()}</strong></span>
+            <span className="text-xs font-bold text-slate-400">AWBs</span>
+          </div>
+          <span className="text-[11px] text-amber-400 font-semibold mt-1">
+            Invoices, KYC, Inspections →
+          </span>
         </div>
 
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-rose-500/50 transition-all flex items-center gap-3.5"
+          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-rose-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group"
         >
-          <div className="p-3 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20">
-            <Truck className="w-5 h-5" />
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20 group-hover:scale-110 transition-transform">
+            <Truck className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-xs font-bold text-slate-400"><strong>Destination Final-Mile Delays</strong></div>
-            <div className="text-xl font-extrabold text-white light:text-slate-900 mt-0.5">
-              <strong>{summary.destinationDelayCount.toLocaleString()}</strong>{' '}
-              <span className="text-xs font-normal text-slate-400">AWBs</span>
-            </div>
-            <span className="text-[11px] text-rose-400 font-medium">Last-mile &amp; delivery exceptions →</span>
+          <div className="text-xs font-bold text-slate-400">
+            <strong>Destination Final-Mile Delays</strong>
           </div>
+          <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
+            <span><strong>{summary.destinationDelayCount.toLocaleString()}</strong></span>
+            <span className="text-xs font-bold text-slate-400">AWBs</span>
+          </div>
+          <span className="text-[11px] text-rose-400 font-semibold mt-1">
+            Last-mile &amp; delivery exceptions →
+          </span>
         </div>
       </div>
 
