@@ -621,38 +621,23 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setModalTarget({
-                                  category: activeCategory,
-                                  reason: item.name,
-                                  title: item.name
-                                });
-                                setModalSearch('');
-                                setModalCurrentPage(1);
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-blue-600/20 text-blue-300 hover:bg-blue-600 hover:text-white border border-blue-500/30 transition-all cursor-pointer"
-                              title="Open AWB List Modal"
-                            >
-                              <Eye className="w-3 h-3" />
-                              <span><strong>View</strong></span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => onSelectDelayFilter(activeCategory, item.name)}
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
-                                isFiltered
-                                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30'
-                                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
-                              }`}
-                              title="Toggle Dashboard Filter"
-                            >
-                              <Filter className="w-3 h-3" />
-                              <span><strong>{isFiltered ? 'Clear' : 'Filter'}</strong></span>
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalTarget({
+                                category: activeCategory,
+                                reason: item.name,
+                                title: item.name
+                              });
+                              setModalSearch('');
+                              setModalCurrentPage(1);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-blue-600/20 text-blue-300 hover:bg-blue-600 hover:text-white border border-blue-500/40 shadow-sm hover:shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer"
+                            title="Open AWB List Modal"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span><strong>View AWBs</strong></span>
+                          </button>
                         </td>
                       </tr>
                     );
