@@ -256,7 +256,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       
       {/* 1. SELECTION & CONFIGURATION PANEL */}
       <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-800/80">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-800/80 light:border-slate-200">
+        <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-800/80 light:border-slate-200 relative ${isAutoLoadDropdownOpen ? 'z-50' : 'z-20'}`}>
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 shrink-0">
               <Users className="w-5 h-5" />
@@ -326,7 +326,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
               {/* Dropdown Popup */}
               {isAutoLoadDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-[#0f172a] border border-indigo-500/40 shadow-2xl shadow-black/90 p-1.5 divide-y divide-slate-800">
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[99999] rounded-2xl bg-[#0f172a] border border-indigo-500/40 shadow-2xl shadow-black/90 p-1.5 divide-y divide-slate-800">
                   <div className="p-1.5">
                     <button
                       type="button"
@@ -392,10 +392,10 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         </div>
 
         {/* Destination & Customer Selectors */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div className={`grid grid-cols-1 md:grid-cols-12 gap-4 relative ${isAutoLoadDropdownOpen ? 'z-10' : 'z-30'}`}>
           
           {/* 1. Target Destination Search Bar */}
-          <div className="md:col-span-5 relative z-50" ref={destDropdownRef}>
+          <div className={`md:col-span-5 relative ${isDestDropdownOpen ? 'z-50' : 'z-20'}`} ref={destDropdownRef}>
             <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
               <span><strong>1. Target Destination Country</strong></span>
               <span className="text-[10px] text-slate-400 font-mono font-bold">
@@ -470,7 +470,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
               {/* Destination Dropdown Popup */}
               {isDestDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5 divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[99999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5 divide-y divide-slate-100 dark:divide-slate-800">
                   <div className="p-1.5">
                     <button
                       type="button"
@@ -535,7 +535,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           </div>
 
           {/* 2. Add Customer Search Autocomplete */}
-          <div className="md:col-span-7 relative z-50" ref={dropdownRef}>
+          <div className={`md:col-span-7 relative ${isDropdownOpen ? 'z-50' : 'z-10'}`} ref={dropdownRef}>
             <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
               <span><strong>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</strong></span>
               <span className="text-[10px] text-slate-500 font-semibold">Ranked by shipment volume</span>
@@ -571,7 +571,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
               {/* Suggestions dropdown */}
               {isDropdownOpen && availableCustomerSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[9999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5">
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[99999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-black/80 p-1.5">
                   <div className="space-y-0.5">
                     {availableCustomerSuggestions.map((item) => (
                       <button
