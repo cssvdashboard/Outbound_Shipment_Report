@@ -949,9 +949,9 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <Plane className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-slate-400">Transit Delay Incidents</div>
-            <div className="text-xl font-bold text-white light:text-slate-900 mt-0.5">
-              {summary.transitDelayCount.toLocaleString()}{' '}
+            <div className="text-xs font-bold text-slate-400"><strong>Transit Delay Incidents</strong></div>
+            <div className="text-xl font-extrabold text-white light:text-slate-900 mt-0.5">
+              <strong>{summary.transitDelayCount.toLocaleString()}</strong>{' '}
               <span className="text-xs font-normal text-slate-400">AWBs</span>
             </div>
             <span className="text-[11px] text-indigo-400 font-medium">CDG, US, Gateway bottlenecks →</span>
@@ -966,9 +966,9 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <FileText className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-slate-400">Customs Clearance Delays</div>
-            <div className="text-xl font-bold text-white light:text-slate-900 mt-0.5">
-              {summary.clearanceDelayCount.toLocaleString()}{' '}
+            <div className="text-xs font-bold text-slate-400"><strong>Customs Clearance Delays</strong></div>
+            <div className="text-xl font-extrabold text-white light:text-slate-900 mt-0.5">
+              <strong>{summary.clearanceDelayCount.toLocaleString()}</strong>{' '}
               <span className="text-xs font-normal text-slate-400">AWBs</span>
             </div>
             <span className="text-[11px] text-amber-400 font-medium">Invoices, KYC, Inspections →</span>
@@ -976,18 +976,19 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         </div>
 
         <div
-          onClick={() => onNavigateTab('country')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-all flex items-center gap-3.5"
+          onClick={() => onNavigateTab('delays')}
+          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-rose-500/50 transition-all flex items-center gap-3.5"
         >
-          <div className="p-3 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+          <div className="p-3 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20">
             <Truck className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-slate-400">Destination Delivery Matrix</div>
-            <div className="text-xl font-bold text-white light:text-slate-900 mt-0.5">
-              Country Performance
+            <div className="text-xs font-bold text-slate-400"><strong>Destination Final-Mile Delays</strong></div>
+            <div className="text-xl font-extrabold text-white light:text-slate-900 mt-0.5">
+              <strong>{summary.destinationDelayCount.toLocaleString()}</strong>{' '}
+              <span className="text-xs font-normal text-slate-400">AWBs</span>
             </div>
-            <span className="text-[11px] text-emerald-400 font-medium">View dynamic TT per Country →</span>
+            <span className="text-[11px] text-rose-400 font-medium">Last-mile &amp; delivery exceptions →</span>
           </div>
         </div>
       </div>
