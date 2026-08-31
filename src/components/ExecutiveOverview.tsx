@@ -248,100 +248,83 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total AWB Volume */}
-        <div className="glass-card p-4 rounded-2xl relative overflow-hidden group">
+        <div className="glass-card p-4 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-sky-500/10 blur-xl group-hover:bg-sky-500/20 transition-all pointer-events-none" />
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              <strong>Total Shipments</strong>
-            </span>
-            <div className="p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
-              <Package className="w-4 h-4" />
-            </div>
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
+            <Package className="w-4 h-4" />
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
-              <strong>{summary.totalCount.toLocaleString()}</strong>
-            </div>
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
-              <span><strong>{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
-            </div>
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+            <strong>Total Shipments</strong>
+          </span>
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
+            <strong>{summary.totalCount.toLocaleString()}</strong>
+          </div>
+          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+            <span><strong>{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
           </div>
         </div>
 
         {/* Transit Time Performance */}
-        <div className="glass-card p-4 rounded-2xl relative overflow-hidden group">
+        <div className="glass-card p-4 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-indigo-500/10 blur-xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              <strong>Average Transit Time</strong>
-            </span>
-            <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-              <Clock className="w-4 h-4" />
-            </div>
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+            <Clock className="w-4 h-4" />
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-indigo-400 tracking-tight flex items-baseline gap-1">
-              <span><strong>{summary.avgTT}</strong></span>
-              <span className="text-sm font-bold text-slate-400">days</span>
-            </div>
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+            <strong>Average Transit Time</strong>
+          </span>
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-indigo-400 tracking-tight flex items-baseline justify-center gap-1">
+            <span><strong>{summary.avgTT}</strong></span>
+            <span className="text-sm font-bold text-slate-400">days</span>
           </div>
         </div>
 
         {/* Delivery Timeline (Within 4-5 Days) */}
         <div
           onClick={() => onSelectTTRange('Within 4-5 Days')}
-          className={`glass-card p-4 rounded-2xl relative overflow-hidden group cursor-pointer transition-all ${
+          className={`glass-card p-4 rounded-2xl relative overflow-hidden group cursor-pointer transition-all flex flex-col items-center justify-center text-center ${
             selectedTTRange === 'Within 4-5 Days'
               ? 'ring-2 ring-emerald-500 bg-emerald-950/40 shadow-glow-emerald'
               : 'hover:border-emerald-500/50'
           }`}
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-emerald-500/10 blur-xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              <strong>On-Time Rate (≤ 5 Days)</strong>
-            </span>
-            <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+            <CheckCircle2 className="w-4 h-4" />
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight flex items-baseline gap-1">
-              <span><strong>{summary.onTimePercentage}%</strong></span>
-            </div>
-            <div className="flex items-center justify-between mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
-              <span><strong>{summary.onTimeCount.toLocaleString()}</strong> AWBs</span>
-              <span className="text-[10px] text-emerald-400 font-bold underline">
-                <strong>{selectedTTRange === 'Within 4-5 Days' ? 'Active Filter' : 'Click to Filter'}</strong>
-              </span>
-            </div>
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+            <strong>On-Time Rate (≤ 5 Days)</strong>
+          </span>
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight flex items-baseline justify-center gap-1">
+            <span><strong>{summary.onTimePercentage}%</strong></span>
+          </div>
+          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+            <span><strong>{summary.onTimeCount.toLocaleString()}</strong> AWBs</span>
           </div>
         </div>
 
         {/* Delay Bottlenecks */}
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl relative overflow-hidden group cursor-pointer hover:border-amber-500/50 transition-all"
+          className="glass-card p-4 rounded-2xl relative overflow-hidden group cursor-pointer hover:border-amber-500/50 transition-all flex flex-col items-center justify-center text-center"
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-amber-500/10 blur-xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
-              <strong>Recorded Delay Cases</strong>
-            </span>
-            <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
+            <AlertTriangle className="w-4 h-4" />
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight flex items-baseline gap-1">
-              <span><strong>{totalDelays.toLocaleString()}</strong></span>
-              <span className="text-xs font-bold text-slate-400 font-mono">({delayRate}%)</span>
-            </div>
-            <div className="flex items-center justify-between mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
-              <span><strong>Transit:</strong> {summary.transitDelayCount}</span>
-              <span><strong>Clear:</strong> {summary.clearanceDelayCount}</span>
-              <span><strong>Dest:</strong> {summary.destinationDelayCount}</span>
-            </div>
+          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+            <strong>Recorded Delay Cases</strong>
+          </span>
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-amber-400 tracking-tight flex items-baseline justify-center gap-1">
+            <span><strong>{totalDelays.toLocaleString()}</strong></span>
+            <span className="text-xs font-bold text-slate-400 font-mono">({delayRate}%)</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+            <span><strong>Transit:</strong> {summary.transitDelayCount}</span>
+            <span>•</span>
+            <span><strong>Clear:</strong> {summary.clearanceDelayCount}</span>
+            <span>•</span>
+            <span><strong>Dest:</strong> {summary.destinationDelayCount}</span>
           </div>
         </div>
 
