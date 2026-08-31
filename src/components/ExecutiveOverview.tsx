@@ -263,9 +263,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               <strong>{summary.totalCount.toLocaleString()}</strong>
             </div>
             <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
-              <span><strong>{summary.totalWeight.toLocaleString()}</strong> kg</span>
-              <span>•</span>
-              <span><strong>{summary.totalPkgs.toLocaleString()}</strong> pkgs</span>
+              <span><strong>{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
             </div>
           </div>
         </div>
@@ -285,11 +283,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <div className="text-2xl sm:text-3xl font-black text-indigo-400 tracking-tight flex items-baseline gap-1">
               <span><strong>{summary.avgTT}</strong></span>
               <span className="text-sm font-bold text-slate-400">days</span>
-            </div>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
-              <span className="text-emerald-400 font-mono"><strong>Min: {summary.minTT}d</strong></span>
-              <span>•</span>
-              <span className="text-amber-400 font-mono"><strong>Max: {summary.maxTT}d</strong></span>
             </div>
           </div>
         </div>
