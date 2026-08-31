@@ -139,6 +139,7 @@ export const App: React.FC = () => {
               {activeTab === 'delays' && (
                 <DelayHub
                   summary={summaryMetrics}
+                  filteredShipments={filteredShipments}
                   transitDelays={transitDelaysBreakdown}
                   clearanceDelays={clearanceDelaysBreakdown}
                   destinationDelays={destinationDelaysBreakdown}
