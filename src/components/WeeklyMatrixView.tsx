@@ -531,7 +531,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 {/* Fixed Column 1: Country */}
                 <th
                   rowSpan={2}
-                  className="py-3 px-4 w-40 sticky left-0 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-2xl"
+                  className="py-3 px-4 w-36 min-w-[140px] sticky left-0 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-xl"
                 >
                   <div className="text-white font-black flex items-center gap-1.5">
                     <Globe className="w-3.5 h-3.5 text-blue-400" />
@@ -539,12 +539,12 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   </div>
                 </th>
 
-                {/* Fixed Column 2: Month Total */}
+                {/* Column 2: Month Total (Scrolls naturally) */}
                 <th
                   rowSpan={2}
-                  className="py-3 px-3 w-28 text-center sticky left-40 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-2xl"
+                  className="py-3 px-3 w-28 min-w-[110px] text-center bg-slate-950/90 border-r-2 border-slate-700 text-slate-300 font-black"
                 >
-                  <div className="text-slate-300 font-black">Month Total</div>
+                  <div>Month Total</div>
                   <span className="text-[10px] text-slate-500 font-normal">July AWBs</span>
                 </th>
 
@@ -597,7 +597,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                       {/* Fixed Column 1: Country Name (Sticky on Left) */}
                       <td
                         onClick={() => handleInspectCountryTotal(row.country)}
-                        className="py-2.5 px-4 sticky left-0 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-2xl transition-colors cursor-pointer"
+                        className="py-2.5 px-4 w-36 min-w-[140px] sticky left-0 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-xl transition-colors cursor-pointer"
                         title={`Click to view all ${row.totalCount} shipments for ${row.country}`}
                       >
                         <div className="flex items-center justify-between">
@@ -613,10 +613,10 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                         </div>
                       </td>
 
-                      {/* Fixed Column 2: Total Volume & Avg TT (Sticky on Left) */}
+                      {/* Column 2: Total Volume & Avg TT (Scrolls naturally) */}
                       <td
                         onClick={() => handleInspectCountryTotal(row.country)}
-                        className="py-2 px-3 text-center sticky left-40 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-2xl transition-colors cursor-pointer font-mono"
+                        className="py-2 px-3 w-28 min-w-[110px] text-center border-r-2 border-slate-700 bg-slate-950/40 group-hover:bg-slate-900/60 transition-colors cursor-pointer font-mono"
                       >
                         <div className="font-extrabold text-white text-xs">
                           {row.totalCount.toLocaleString()}
