@@ -2,6 +2,8 @@ import { Shipment } from '../types/logistics';
 import * as XLSX from 'xlsx';
 
 export type WeekId = 'W1' | 'W2' | 'W3' | 'W4' | 'W5' | 'ALL';
+export const WEEKS_LIST = ['W1', 'W2', 'W3', 'W4', 'W5'] as const;
+export type SingleWeekId = typeof WEEKS_LIST[number];
 
 export const DAYS_OF_WEEK = [
   'Wednesday',
@@ -131,27 +133,23 @@ export interface DayMetricCell {
   hasData: boolean;
 }
 
-export interface CountryMatrixRow {
+export interface MultiWeekDayMatrixRow {
   country: string;
   totalCount: number;
   totalAvgTT: number;
   totalMinTT: number;
   totalMaxTT: number;
-  dayMetrics: Record<DayOfWeek, DayMetricCell>;
+  dayWeekMetrics: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>>;
 }
 
-export interface WeeklyMatrixSummary {
-  weekId: WeekId;
-  weekMetadata: WeekDefinition;
+export interface MultiWeekMatrixSummary {
   totalShipments: number;
   totalCountries: number;
   overallAvgTT: number;
   overallMinTT: number;
   overallMaxTT: number;
-  onTimeCount: number;
-  onTimeRate: number;
-  dailyTotals: Record<DayOfWeek, DayMetricCell>;
-  countryRows: CountryMatrixRow[];
+  dailyWeekTotals: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>>;
+  countryRows: MultiWeekDayMatrixRow[];
 }
 
 export function parsePickupDate(pickup: string | number | undefined): Date | null {
@@ -188,7 +186,7 @@ export function getDayOfWeek(date: Date): DayOfWeek {
   return dayNames[date.getUTCDay()];
 }
 
-function calculateMetricsForTTs(tts: number[]): DayMetricCell {
+export function calculateMetricsForTTs(tts: number[]): DayMetricCell {
   if (tts.length === 0) {
     return {
       count: 0,
@@ -222,46 +220,40 @@ function calculateMetricsForTTs(tts: number[]): DayMetricCell {
   };
 }
 
-export function computeWeeklyCountryMatrix(
-  shipments: Shipment[],
-  selectedWeek: WeekId
-): WeeklyMatrixSummary {
-  const weekDef = WEEKS_METADATA.find((w) => w.id === selectedWeek) || WEEKS_METADATA[0];
-
-  // 1. Filter shipments matching week
-  const weekShipments = shipments.filter((s) => {
+// -------------------------------------------------------------
+// COMPUTE FULL MULTI-WEEK SIDE-BY-SIDE MATRIX (WED..TUE x W1..W5)
+// -------------------------------------------------------------
+export function computeMultiWeekDayMatrix(shipments: Shipment[]): MultiWeekMatrixSummary {
+  // Filter for July shipments (W1..W5)
+  const julyShipments = shipments.filter((s) => {
     const d = parsePickupDate(s.pickup);
     if (!d) return false;
     const wId = getWeekIdForDate(d);
-    if (selectedWeek === 'ALL') {
-      return wId !== 'W0';
-    }
-    return wId === selectedWeek;
+    return wId !== 'W0';
   });
 
-  // 2. Aggregate overall metrics
-  const allTTs = weekShipments.map((s) => s.tt);
-  const onTimeCount = weekShipments.filter((s) => s.tt <= 5).length;
-  const onTimeRate = weekShipments.length > 0 ? Number(((onTimeCount / weekShipments.length) * 100).toFixed(1)) : 0;
+  const allTTs = julyShipments.map((s) => s.tt);
+  const overall = calculateMetricsForTTs(allTTs);
 
-  const overallMetrics = calculateMetricsForTTs(allTTs);
-
-  // 3. Compute Column Totals by Day of Week
-  const dailyTotals: Record<DayOfWeek, DayMetricCell> = {} as any;
+  // Daily Week Column Totals (ALL COUNTRIES)
+  const dailyWeekTotals: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>> = {} as any;
   DAYS_OF_WEEK.forEach((day) => {
-    const dayTTs: number[] = [];
-    for (const s of weekShipments) {
-      const d = parsePickupDate(s.pickup);
-      if (d && getDayOfWeek(d) === day) {
-        dayTTs.push(s.tt);
+    dailyWeekTotals[day] = {} as any;
+    WEEKS_LIST.forEach((wId) => {
+      const cellTTs: number[] = [];
+      for (const s of julyShipments) {
+        const d = parsePickupDate(s.pickup);
+        if (d && getWeekIdForDate(d) === wId && getDayOfWeek(d) === day) {
+          cellTTs.push(s.tt);
+        }
       }
-    }
-    dailyTotals[day] = calculateMetricsForTTs(dayTTs);
+      dailyWeekTotals[day][wId] = calculateMetricsForTTs(cellTTs);
+    });
   });
 
-  // 4. Group by Destination Country
+  // Group by Country
   const countryMap = new Map<string, Shipment[]>();
-  for (const s of weekShipments) {
+  for (const s of julyShipments) {
     const dest = (s.destination || 'UNKNOWN').toUpperCase().trim();
     if (!countryMap.has(dest)) {
       countryMap.set(dest, []);
@@ -269,23 +261,25 @@ export function computeWeeklyCountryMatrix(
     countryMap.get(dest)!.push(s);
   }
 
-  // 5. Compute Country Rows
-  const countryRows: CountryMatrixRow[] = [];
+  const countryRows: MultiWeekDayMatrixRow[] = [];
 
   countryMap.forEach((cShipments, country) => {
     const cTTs = cShipments.map((s) => s.tt);
     const cOverall = calculateMetricsForTTs(cTTs);
 
-    const dayMetrics: Record<DayOfWeek, DayMetricCell> = {} as any;
+    const dayWeekMetrics: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>> = {} as any;
     DAYS_OF_WEEK.forEach((day) => {
-      const dayTTs: number[] = [];
-      for (const s of cShipments) {
-        const d = parsePickupDate(s.pickup);
-        if (d && getDayOfWeek(d) === day) {
-          dayTTs.push(s.tt);
+      dayWeekMetrics[day] = {} as any;
+      WEEKS_LIST.forEach((wId) => {
+        const cellTTs: number[] = [];
+        for (const s of cShipments) {
+          const d = parsePickupDate(s.pickup);
+          if (d && getWeekIdForDate(d) === wId && getDayOfWeek(d) === day) {
+            cellTTs.push(s.tt);
+          }
         }
-      }
-      dayMetrics[day] = calculateMetricsForTTs(dayTTs);
+        dayWeekMetrics[day][wId] = calculateMetricsForTTs(cellTTs);
+      });
     });
 
     countryRows.push({
@@ -294,172 +288,147 @@ export function computeWeeklyCountryMatrix(
       totalAvgTT: cOverall.avgTT,
       totalMinTT: cOverall.minTT,
       totalMaxTT: cOverall.maxTT,
-      dayMetrics
+      dayWeekMetrics
     });
   });
 
-  // Default sort by total volume descending
+  // Sort descending by total volume
   countryRows.sort((a, b) => b.totalCount - a.totalCount);
 
   return {
-    weekId: selectedWeek,
-    weekMetadata: weekDef,
-    totalShipments: weekShipments.length,
+    totalShipments: julyShipments.length,
     totalCountries: countryRows.length,
-    overallAvgTT: overallMetrics.avgTT,
-    overallMinTT: overallMetrics.minTT,
-    overallMaxTT: overallMetrics.maxTT,
-    onTimeCount,
-    onTimeRate,
-    dailyTotals,
+    overallAvgTT: overall.avgTT,
+    overallMinTT: overall.minTT,
+    overallMaxTT: overall.maxTT,
+    dailyWeekTotals,
     countryRows
   };
 }
 
-export function exportMatrixToExcel(
-  matrixSummary: WeeklyMatrixSummary,
-  filenamePrefix = 'Weekly_Country_TT_Matrix'
+// -------------------------------------------------------------
+// EXCEL & CSV EXPORT FOR FULL MULTI-WEEK SIDE-BY-SIDE MATRIX
+// -------------------------------------------------------------
+export function exportMultiWeekMatrixToExcel(
+  matrixSummary: MultiWeekMatrixSummary,
+  filenamePrefix = 'Delivery_Comparison_Day_by_Day_W1_to_W5'
 ) {
-  const weekLabel = matrixSummary.weekMetadata.label;
   const sheetData: any[][] = [];
 
-  // Title & Metadata
-  sheetData.push([`Weekly Day-by-Day Transit Time (TT) Matrix — ${weekLabel}`]);
-  sheetData.push([`Date Range: ${matrixSummary.weekMetadata.dateRange}`]);
-  sheetData.push([
-    `Total Shipments: ${matrixSummary.totalShipments.toLocaleString()}`,
-    `Total Destinations: ${matrixSummary.totalCountries}`,
-    `Overall Avg TT: ${matrixSummary.overallAvgTT} days`,
-    `Min TT: ${matrixSummary.overallMinTT}d`,
-    `Max TT: ${matrixSummary.overallMaxTT}d`,
-    `On-Time Rate: ${matrixSummary.onTimeRate}%`
-  ]);
-  sheetData.push([]); // blank row
-
-  // Table Headers (Multi-row header)
-  const headerRow1 = [
-    'Destination Country',
-    'Total Volume',
-    'Week Avg TT (d)',
-    'Week Min TT (d)',
-    'Week Max TT (d)'
-  ];
-
+  // Row 1: Header - Super Groupings (Day of Week)
+  // Format: [ "Country", "Total Volume", "Overall Avg TT", "Wednesday", "", "", "", "", "Thursday", ... ]
+  const headerRow1: any[] = ['Country', 'Total Volume', 'Overall Avg TT (Days)'];
   DAYS_OF_WEEK.forEach((day) => {
-    const dateLabel = matrixSummary.weekMetadata.dayDates[day];
-    headerRow1.push(
-      `${day} (${dateLabel}) - Volume`,
-      `${day} (${dateLabel}) - Avg TT (d)`,
-      `${day} (${dateLabel}) - Min TT (d)`,
-      `${day} (${dateLabel}) - Max TT (d)`
-    );
+    headerRow1.push(day.toUpperCase(), '', '', '', '');
   });
-
   sheetData.push(headerRow1);
 
-  // Daily Aggregate Summary Row
-  const summaryRow = [
-    'ALL COUNTRIES (TOTAL)',
-    matrixSummary.totalShipments,
-    matrixSummary.overallAvgTT,
-    matrixSummary.overallMinTT,
-    matrixSummary.overallMaxTT
-  ];
-
+  // Row 2: Header - Sub-columns: W1..W5 per Day
+  // Format: [ "", "", "", "W1 Wed (07/01)", "W2 Wed (07/08)", ... ]
+  const headerRow2: any[] = ['', '', ''];
   DAYS_OF_WEEK.forEach((day) => {
-    const cell = matrixSummary.dailyTotals[day];
-    summaryRow.push(
-      cell.hasData ? cell.count : 0,
-      cell.hasData ? cell.avgTT : '-',
-      cell.hasData ? cell.minTT : '-',
-      cell.hasData ? cell.maxTT : '-'
-    );
+    WEEKS_LIST.forEach((wId) => {
+      const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
+      const dateLabel = wMeta?.dayDates[day] || '';
+      headerRow2.push(`${wId} ${day.slice(0, 3)} (${dateLabel})`);
+    });
   });
+  sheetData.push(headerRow2);
 
+  // Row 3: ALL COUNTRIES (Summary Row)
+  const summaryRow: any[] = [
+    'ALL COUNTRIES (AVG)',
+    matrixSummary.totalShipments,
+    matrixSummary.overallAvgTT
+  ];
+  DAYS_OF_WEEK.forEach((day) => {
+    WEEKS_LIST.forEach((wId) => {
+      const cell = matrixSummary.dailyWeekTotals[day][wId];
+      summaryRow.push(cell.hasData && cell.count > 0 ? cell.avgTT : '-');
+    });
+  });
   sheetData.push(summaryRow);
 
-  // Country Rows
+  // Data Rows: Per Country
   matrixSummary.countryRows.forEach((row) => {
-    const r = [
-      row.country,
-      row.totalCount,
-      row.totalAvgTT,
-      row.totalMinTT,
-      row.totalMaxTT
-    ];
-
+    const r: any[] = [row.country, row.totalCount, row.totalAvgTT];
     DAYS_OF_WEEK.forEach((day) => {
-      const cell = row.dayMetrics[day];
-      r.push(
-        cell.hasData ? cell.count : 0,
-        cell.hasData ? cell.avgTT : '-',
-        cell.hasData ? cell.minTT : '-',
-        cell.hasData ? cell.maxTT : '-'
-      );
+      WEEKS_LIST.forEach((wId) => {
+        const cell = row.dayWeekMetrics[day][wId];
+        r.push(cell.hasData && cell.count > 0 ? cell.avgTT : '-');
+      });
     });
-
     sheetData.push(r);
   });
 
   const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, matrixSummary.weekId);
 
-  const cleanFilename = `${filenamePrefix}_${matrixSummary.weekId}.xlsx`;
+  // Set column widths
+  worksheet['!cols'] = [
+    { wch: 18 }, // Country
+    { wch: 14 }, // Total Volume
+    { wch: 20 }, // Overall Avg TT
+    ...Array(35).fill({ wch: 16 }) // 35 Day-Week columns
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Day_by_Day_W1_W5');
+
+  const cleanFilename = `${filenamePrefix}.xlsx`;
   XLSX.writeFile(workbook, cleanFilename);
 }
 
-export function exportMatrixToCSV(
-  matrixSummary: WeeklyMatrixSummary,
-  filenamePrefix = 'Weekly_Country_TT_Matrix'
+export function exportMultiWeekMatrixToCSV(
+  matrixSummary: MultiWeekMatrixSummary,
+  filenamePrefix = 'Delivery_Comparison_Day_by_Day_W1_to_W5'
 ) {
-  const weekLabel = matrixSummary.weekMetadata.label;
   const rows: string[] = [];
 
-  rows.push(`"Weekly Day-by-Day Transit Time (TT) Matrix - ${weekLabel}"`);
-  rows.push(`"Date Range: ${matrixSummary.weekMetadata.dateRange}"`);
-  rows.push(`"Total Shipments: ${matrixSummary.totalShipments}","Avg TT: ${matrixSummary.overallAvgTT}d","Min TT: ${matrixSummary.overallMinTT}d","Max TT: ${matrixSummary.overallMaxTT}d"`);
-  rows.push('');
-
-  const headers = [
-    'Destination Country',
-    'Total Volume',
-    'Week Avg TT',
-    'Week Min TT',
-    'Week Max TT'
-  ];
-
+  // Row 1
+  const header1: string[] = ['"Country"', '"Total Volume"', '"Overall Avg TT (Days)"'];
   DAYS_OF_WEEK.forEach((day) => {
-    const dateLabel = matrixSummary.weekMetadata.dayDates[day];
-    headers.push(
-      `${day} (${dateLabel}) Count`,
-      `${day} (${dateLabel}) Avg TT`,
-      `${day} (${dateLabel}) Min TT`,
-      `${day} (${dateLabel}) Max TT`
-    );
+    header1.push(`"${day.toUpperCase()}"`, '""', '""', '""', '""');
   });
+  rows.push(header1.join(','));
 
-  rows.push(headers.map((h) => `"${h}"`).join(','));
-
-  matrixSummary.countryRows.forEach((row) => {
-    const cols = [
-      `"${row.country}"`,
-      row.totalCount,
-      row.totalAvgTT,
-      row.totalMinTT,
-      row.totalMaxTT
-    ];
-
-    DAYS_OF_WEEK.forEach((day) => {
-      const cell = row.dayMetrics[day];
-      cols.push(
-        cell.hasData ? cell.count : 0,
-        cell.hasData ? cell.avgTT : '"-"',
-        cell.hasData ? cell.minTT : '"-"',
-        cell.hasData ? cell.maxTT : '"-"'
-      );
+  // Row 2
+  const header2: string[] = ['""', '""', '""'];
+  DAYS_OF_WEEK.forEach((day) => {
+    WEEKS_LIST.forEach((wId) => {
+      const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
+      const dateLabel = wMeta?.dayDates[day] || '';
+      header2.push(`"${wId} ${day.slice(0, 3)} (${dateLabel})"`);
     });
+  });
+  rows.push(header2.join(','));
 
+  // Row 3 Summary
+  const summary: string[] = [
+    '"ALL COUNTRIES (AVG)"',
+    String(matrixSummary.totalShipments),
+    String(matrixSummary.overallAvgTT)
+  ];
+  DAYS_OF_WEEK.forEach((day) => {
+    WEEKS_LIST.forEach((wId) => {
+      const cell = matrixSummary.dailyWeekTotals[day][wId];
+      summary.push(cell.hasData && cell.count > 0 ? String(cell.avgTT) : '"-"');
+    });
+  });
+  rows.push(summary.join(','));
+
+  // Data Rows
+  matrixSummary.countryRows.forEach((row) => {
+    const cols: string[] = [
+      `"${row.country}"`,
+      String(row.totalCount),
+      String(row.totalAvgTT)
+    ];
+    DAYS_OF_WEEK.forEach((day) => {
+      WEEKS_LIST.forEach((wId) => {
+        const cell = row.dayWeekMetrics[day][wId];
+        cols.push(cell.hasData && cell.count > 0 ? String(cell.avgTT) : '"-"');
+      });
+    });
     rows.push(cols.join(','));
   });
 
@@ -468,7 +437,7 @@ export function exportMatrixToCSV(
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `${filenamePrefix}_${matrixSummary.weekId}.csv`);
+  link.setAttribute('download', `${filenamePrefix}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

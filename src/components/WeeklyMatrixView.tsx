@@ -7,26 +7,26 @@ import {
   Clock,
   CheckCircle2,
   TrendingUp,
-  SlidersHorizontal,
-  ChevronDown,
-  ArrowUpDown,
+  RotateCcw,
   Plane,
   X,
   Eye,
   Calendar,
   Layers,
-  RotateCcw
+  ArrowRight,
+  Filter
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import {
   DAYS_OF_WEEK,
   DayOfWeek,
-  WeekId,
+  WEEKS_LIST,
+  SingleWeekId,
   WEEKS_METADATA,
-  WeeklyMatrixSummary,
-  computeWeeklyCountryMatrix,
-  exportMatrixToExcel,
-  exportMatrixToCSV,
+  MultiWeekMatrixSummary,
+  computeMultiWeekDayMatrix,
+  exportMultiWeekMatrixToExcel,
+  exportMultiWeekMatrixToCSV,
   parsePickupDate,
   getWeekIdForDate,
   getDayOfWeek
@@ -48,33 +48,30 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   filteredShipments,
   rawShipments
 }) => {
-  const [selectedWeek, setSelectedWeek] = useState<WeekId>('W1');
+  const [selectedDayFilter, setSelectedDayFilter] = useState<'ALL' | DayOfWeek>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'volume' | 'avgTT' | 'country'>('volume');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [viewMetric, setViewMetric] = useState<'all' | 'avg' | 'minmax'>('all');
 
   // Cell Inspection Modal State
   const [inspectedCell, setInspectedCell] = useState<{
     country: string;
     day?: DayOfWeek;
+    weekId?: SingleWeekId;
     dateLabel?: string;
     shipments: Shipment[];
   } | null>(null);
 
-  // Active table filter state & reset handler
-  const hasActiveTableFilters = searchQuery.trim() !== '' || sortBy !== 'volume' || sortOrder !== 'desc';
+  // Compute Full Multi-Week Matrix (Wed..Tue x W1..W5)
+  const matrixSummary: MultiWeekMatrixSummary = useMemo(() => {
+    return computeMultiWeekDayMatrix(filteredShipments);
+  }, [filteredShipments]);
 
-  const handleResetTableFilters = () => {
-    setSearchQuery('');
-    setSortBy('volume');
-    setSortOrder('desc');
-  };
-
-  // Compute Weekly Matrix for the chosen week
-  const matrixSummary: WeeklyMatrixSummary = useMemo(() => {
-    return computeWeeklyCountryMatrix(filteredShipments, selectedWeek);
-  }, [filteredShipments, selectedWeek]);
+  // Active Days to render based on user filter
+  const activeDays: DayOfWeek[] = useMemo(() => {
+    if (selectedDayFilter === 'ALL') return [...DAYS_OF_WEEK];
+    return [selectedDayFilter];
+  }, [selectedDayFilter]);
 
   // Filter & Sort Country Rows
   const displayedRows = useMemo(() => {
@@ -98,94 +95,94 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   }, [matrixSummary.countryRows, searchQuery, sortBy, sortOrder]);
 
-  // Handler to open AWB drill-down modal for a country + specific day
-  const handleInspectCell = (country: string, day: DayOfWeek) => {
-    const weekShipments = filteredShipments.filter((s) => {
+  // Active toolbar filter check & Reset handler
+  const hasActiveFilters = searchQuery.trim() !== '' || sortBy !== 'volume' || sortOrder !== 'desc' || selectedDayFilter !== 'ALL';
+
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSortBy('volume');
+    setSortOrder('desc');
+    setSelectedDayFilter('ALL');
+  };
+
+  // Handler to open AWB drill-down for a country on a specific day & week
+  const handleInspectCell = (country: string, day: DayOfWeek, weekId: SingleWeekId) => {
+    const matchingShipments = filteredShipments.filter((s) => {
       const destMatch = (s.destination || '').toUpperCase().trim() === country.toUpperCase().trim();
       if (!destMatch) return false;
 
       const d = parsePickupDate(s.pickup);
       if (!d) return false;
 
-      const wId = getWeekIdForDate(d);
-      const isWeekMatch = selectedWeek === 'ALL' ? wId !== 'W0' : wId === selectedWeek;
-      if (!isWeekMatch) return false;
-
-      return getDayOfWeek(d) === day;
+      return getWeekIdForDate(d) === weekId && getDayOfWeek(d) === day;
     });
 
-    const dateLabel = matrixSummary.weekMetadata.dayDates[day];
+    const wMeta = WEEKS_METADATA.find((w) => w.id === weekId);
+    const dateLabel = wMeta?.dayDates[day] || '';
+
     setInspectedCell({
       country,
       day,
+      weekId,
       dateLabel,
-      shipments: weekShipments
+      shipments: matchingShipments
     });
   };
 
-  // Handler to open AWB drill-down for whole country in that week
+  // Handler to open AWB drill-down for whole country across all weeks
   const handleInspectCountryTotal = (country: string) => {
-    const weekShipments = filteredShipments.filter((s) => {
+    const matchingShipments = filteredShipments.filter((s) => {
       const destMatch = (s.destination || '').toUpperCase().trim() === country.toUpperCase().trim();
       if (!destMatch) return false;
 
       const d = parsePickupDate(s.pickup);
       if (!d) return false;
 
-      const wId = getWeekIdForDate(d);
-      return selectedWeek === 'ALL' ? wId !== 'W0' : wId === selectedWeek;
+      return getWeekIdForDate(d) !== 'W0';
     });
 
     setInspectedCell({
       country,
-      shipments: weekShipments
+      shipments: matchingShipments
     });
   };
 
-  // Daily Trend Chart Data
-  const dailyChartData = useMemo(() => {
-    const labels = DAYS_OF_WEEK.map((day) => {
-      const dateLabel = matrixSummary.weekMetadata.dayDates[day];
-      return `${day.slice(0, 3)} (${dateLabel})`;
-    });
+  // Daily Trend Comparison Chart Data (Across W1 to W5)
+  const comparisonChartData = useMemo(() => {
+    const labels = DAYS_OF_WEEK.map((d) => d.slice(0, 3));
+    const colors = [
+      { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.7)' },  // W1 Blue
+      { border: '#10b981', bg: 'rgba(16, 185, 129, 0.7)' },  // W2 Green
+      { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.7)' },  // W3 Amber
+      { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.7)' },  // W4 Purple
+      { border: '#f43f5e', bg: 'rgba(244, 63, 94, 0.7)' }    // W5 Rose
+    ];
 
-    const avgTTData = DAYS_OF_WEEK.map((day) => matrixSummary.dailyTotals[day].avgTT);
-    const volumeData = DAYS_OF_WEEK.map((day) => matrixSummary.dailyTotals[day].count);
+    const datasets = WEEKS_LIST.map((wId, idx) => {
+      const data = DAYS_OF_WEEK.map((day) => {
+        const cell = matrixSummary.dailyWeekTotals[day][wId];
+        return cell.hasData && cell.count > 0 ? cell.avgTT : null;
+      });
+
+      return {
+        label: `${wId} Avg TT`,
+        data,
+        borderColor: colors[idx].border,
+        backgroundColor: colors[idx].bg,
+        borderWidth: 2,
+        pointRadius: 4,
+        tension: 0.25,
+        spanGaps: true
+      };
+    });
 
     return {
       labels,
-      datasets: [
-        {
-          type: 'bar' as const,
-          label: 'Average Transit Time (Days)',
-          data: avgTTData,
-          backgroundColor: avgTTData.map((tt) =>
-            tt <= 5 ? 'rgba(16, 185, 129, 0.75)' : tt <= 8 ? 'rgba(245, 158, 11, 0.75)' : 'rgba(244, 63, 94, 0.75)'
-          ),
-          borderColor: avgTTData.map((tt) =>
-            tt <= 5 ? '#10b981' : tt <= 8 ? '#f59e0b' : '#f43f5e'
-          ),
-          borderWidth: 1,
-          borderRadius: 8,
-          yAxisID: 'y'
-        },
-        {
-          type: 'line' as const,
-          label: 'Shipment Volume (AWBs)',
-          data: volumeData,
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56, 189, 248, 0.2)',
-          borderWidth: 2,
-          pointBackgroundColor: '#38bdf8',
-          pointRadius: 4,
-          tension: 0.3,
-          yAxisID: 'y1'
-        }
-      ]
+      datasets
     };
   }, [matrixSummary]);
 
-  const dailyChartOptions = {
+  const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -210,33 +207,17 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     scales: {
       x: {
         grid: { color: 'rgba(51, 65, 85, 0.3)' },
-        ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' as const } }
+        ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' as const } }
       },
       y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
         title: {
           display: true,
-          text: 'Avg TT (Days)',
+          text: 'Average Transit Time (Days)',
           color: '#94a3b8',
           font: { size: 10 }
         },
         grid: { color: 'rgba(51, 65, 85, 0.3)' },
         ticks: { color: '#94a3b8', font: { size: 10 } }
-      },
-      y1: {
-        type: 'linear' as const,
-        display: true,
-        position: 'right' as const,
-        title: {
-          display: true,
-          text: 'Volume (AWBs)',
-          color: '#38bdf8',
-          font: { size: 10 }
-        },
-        grid: { drawOnChartArea: false },
-        ticks: { color: '#38bdf8', font: { size: 10 } }
       }
     }
   };
@@ -248,10 +229,17 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     return 'text-rose-400 bg-rose-500/10 border-rose-500/30';
   };
 
+  // Day background tint for visual grouping
+  const getDayHeaderBg = (dayIndex: number) => {
+    return dayIndex % 2 === 0
+      ? 'bg-slate-900/90 text-blue-300 border-blue-500/30'
+      : 'bg-slate-900/50 text-indigo-300 border-indigo-500/30';
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       
-      {/* 1. TOP HEADER & WEEK SELECTION TABS */}
+      {/* 1. TOP HEADER & DAY JUMP CONTROLS */}
       <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-5 border border-slate-800/80 bg-slate-950/70">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
           <div>
@@ -261,10 +249,10 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
-                  Weekly Day-by-Day Transit Time Matrix
+                  Delivery Comparison: Day-by-Day (W1 – W5 Side-by-Side)
                 </h2>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">
-                  Analyze Average, Min, and Max Transit Times across calendar days (Wednesday – Tuesday) for all countries.
+                  Compare Average, Min, and Max Transit Times across all 5 weekly dispatch cycles for every calendar day side by side.
                 </p>
               </div>
             </div>
@@ -274,18 +262,18 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
-              onClick={() => exportMatrixToExcel(matrixSummary)}
+              onClick={() => exportMultiWeekMatrixToExcel(matrixSummary)}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-bold transition-all shadow-sm cursor-pointer"
-              title="Download full matrix as Excel file"
+              title="Download complete Day-by-Day W1-W5 matrix as Excel file"
             >
               <Download className="w-4 h-4" />
               <span>Export Excel</span>
             </button>
             <button
               type="button"
-              onClick={() => exportMatrixToCSV(matrixSummary)}
+              onClick={() => exportMultiWeekMatrixToCSV(matrixSummary)}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 text-xs font-bold transition-all shadow-sm cursor-pointer"
-              title="Download full matrix as CSV"
+              title="Download complete matrix as CSV"
             >
               <Download className="w-4 h-4" />
               <span>Export CSV</span>
@@ -293,42 +281,52 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           </div>
         </div>
 
-        {/* Week Selector Tab Pills */}
+        {/* Day Jump / Filter Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          {WEEKS_METADATA.map((w) => {
-            const isSelected = selectedWeek === w.id;
+          <span className="text-xs font-bold text-slate-400 pr-2 shrink-0 flex items-center gap-1">
+            <Filter className="w-3.5 h-3.5 text-blue-400" />
+            <span>Day View:</span>
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setSelectedDayFilter('ALL')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+              selectedDayFilter === 'ALL'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 border-blue-400 font-black'
+                : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
+            }`}
+          >
+            All Days (35 Columns Side-by-Side)
+          </button>
+
+          {DAYS_OF_WEEK.map((day) => {
+            const isSelected = selectedDayFilter === day;
             return (
               <button
-                key={w.id}
+                key={day}
                 type="button"
-                onClick={() => setSelectedWeek(w.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                onClick={() => setSelectedDayFilter(day)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
                   isSelected
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 border-blue-400 font-black scale-[1.02]'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 border-blue-400 font-black'
                     : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
                 }`}
               >
-                <span>{w.label}</span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                  isSelected
-                    ? 'bg-white/20 text-white'
-                    : 'bg-slate-800 text-slate-400'
-                }`}>
-                  {w.dateRange}
-                </span>
+                {day} (W1–W5)
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 2. EXECUTIVE METRIC SUMMARY STRIP & DAILY TREND CHART */}
+      {/* 2. EXECUTIVE METRIC SUMMARY STRIP & MULTI-WEEK TREND CHART */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         {/* Metric Cards (Left - 5 Cols) */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-3.5">
           
-          {/* Total Volume */}
+          {/* Total July Volume */}
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Total Volume</span>
@@ -338,14 +336,14 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               <div className="text-2xl sm:text-3xl font-black text-white font-mono">
                 {matrixSummary.totalShipments.toLocaleString()}
               </div>
-              <span className="text-xs text-slate-400 font-semibold">Impacted AWBs ({matrixSummary.weekId})</span>
+              <span className="text-xs text-slate-400 font-semibold">July Dispatches (W1 – W5)</span>
             </div>
           </div>
 
           {/* Average Transit Time */}
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Average Transit Time</span>
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Month Avg TT</span>
               <Clock className="w-4 h-4 text-indigo-400" />
             </div>
             <div className="mt-2">
@@ -358,23 +356,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
             </div>
           </div>
 
-          {/* On-Time Rate */}
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">On-Time (≤5d) Rate</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            </div>
-            <div className="mt-2">
-              <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-                {matrixSummary.onTimeRate}%
-              </div>
-              <span className="text-xs text-slate-400 font-semibold">
-                {matrixSummary.onTimeCount.toLocaleString()} on-time AWBs
-              </span>
-            </div>
-          </div>
-
-          {/* Active Destinations */}
+          {/* Total Active Destinations */}
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Destinations</span>
@@ -384,20 +366,34 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               <div className="text-2xl sm:text-3xl font-black text-cyan-300 font-mono">
                 {matrixSummary.totalCountries}
               </div>
-              <span className="text-xs text-slate-400 font-semibold">Active Countries</span>
+              <span className="text-xs text-slate-400 font-semibold">Active Destination Countries</span>
             </div>
           </div>
 
-          {/* Date Range Banner (Span 2) */}
+          {/* Calendar Days Matrix */}
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Matrix Scope</span>
+              <Calendar className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="mt-2">
+              <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
+                35 <span className="text-xs font-normal text-slate-400">Slots</span>
+              </div>
+              <span className="text-xs text-slate-400 font-semibold">7 Days × 5 Weekly Cycles</span>
+            </div>
+          </div>
+
+          {/* Info Banner */}
           <div className="col-span-2 p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-900/40 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-blue-400" />
+              <Layers className="w-4 h-4 text-blue-400" />
               <span className="text-xs font-bold text-slate-300">
-                Cycle: <strong className="text-white">{matrixSummary.weekMetadata.label}</strong>
+                Weekly Cycles: <strong className="text-white">Wednesday → Tuesday</strong>
               </span>
             </div>
             <span className="text-xs font-mono font-bold text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-800">
-              {matrixSummary.weekMetadata.dateRange}
+              W1 (Jul 1) through W5 (Jul 31)
             </span>
           </div>
 
@@ -408,25 +404,25 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           <div className="flex items-center justify-between mb-2">
             <div>
               <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
-                Day-by-Day Transit Time Progression (Wednesday → Tuesday)
+                Weekly Day-by-Day Transit Time Progression (W1 to W5)
               </h3>
               <p className="text-[11px] text-slate-400">
-                Comparing daily average transit time against dispatch volume
+                Comparing average transit time trajectories from Wednesday to Tuesday across all 5 weeks
               </p>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-              {matrixSummary.weekId}
+              5-Week Curve
             </span>
           </div>
 
           <div className="h-56 relative w-full">
-            <Chart type="bar" data={dailyChartData as any} options={dailyChartOptions as any} />
+            <Chart type="line" data={comparisonChartData as any} options={chartOptions as any} />
           </div>
         </div>
 
       </div>
 
-      {/* 3. COUNTRY MATRIX TABLE VIEW */}
+      {/* 3. MULTI-WEEK SIDE-BY-SIDE COUNTRY MATRIX TABLE */}
       <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-4 border border-slate-800/80 bg-slate-950/80">
         
         {/* Table Toolbar */}
@@ -504,16 +500,16 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
             {/* Reset Toolbar Button */}
             <button
               type="button"
-              onClick={handleResetTableFilters}
-              disabled={!hasActiveTableFilters}
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                hasActiveTableFilters
+                hasActiveFilters
                   ? 'bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500/25 hover:scale-[1.02] cursor-pointer shadow-sm'
                   : 'bg-slate-900/60 text-slate-500 border-slate-800 opacity-50 cursor-not-allowed'
               }`}
-              title="Reset country search and sorting to default"
+              title="Reset country search, filters, and sorting to default"
             >
-              <RotateCcw className={`w-3.5 h-3.5 ${hasActiveTableFilters ? 'text-rose-400' : 'text-slate-500'}`} />
+              <RotateCcw className={`w-3.5 h-3.5 ${hasActiveFilters ? 'text-rose-400' : 'text-slate-500'}`} />
               <span>Reset</span>
             </button>
 
@@ -524,66 +520,118 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
 
         </div>
 
-        {/* High Density Matrix Table */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/50">
-          <table className="w-full text-left text-xs border-collapse min-w-[1100px]">
-            <thead>
-              {/* Header Row: Column Titles with Specific Dates */}
-              <tr className="bg-slate-950 border-b border-slate-800 text-[11px] uppercase tracking-wider font-extrabold text-slate-400">
-                <th className="py-3 px-4 w-48 sticky left-0 bg-slate-950 z-20 border-r border-slate-800">
-                  Destination Country
+        {/* High-Density Multi-Week Horizontal Matrix Table */}
+        <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/50 relative shadow-inner max-h-[700px] overflow-y-auto">
+          <table className="w-full text-left text-xs border-collapse border-spacing-0">
+            <thead className="sticky top-0 z-30 shadow-md">
+              
+              {/* Row 1 of Headers: Day of Week Groups (Wednesday, Thursday, Friday, etc.) */}
+              <tr className="bg-slate-950 text-[11px] uppercase tracking-wider font-black text-slate-300 border-b border-slate-800">
+                
+                {/* Fixed Column 1: Country */}
+                <th
+                  rowSpan={2}
+                  className="py-3 px-4 w-40 sticky left-0 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-2xl"
+                >
+                  <div className="text-white font-black flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Country</span>
+                  </div>
                 </th>
-                <th className="py-3 px-3 w-28 text-center bg-slate-950/90 border-r border-slate-800">
-                  Week Total
+
+                {/* Fixed Column 2: Month Total */}
+                <th
+                  rowSpan={2}
+                  className="py-3 px-3 w-28 text-center sticky left-40 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-2xl"
+                >
+                  <div className="text-slate-300 font-black">Month Total</div>
+                  <span className="text-[10px] text-slate-500 font-normal">July AWBs</span>
                 </th>
-                {DAYS_OF_WEEK.map((day) => {
-                  const dateLabel = matrixSummary.weekMetadata.dayDates[day];
+
+                {/* Day Header Super-Columns (Colspan 5 each for W1..W5) */}
+                {activeDays.map((day, dIdx) => {
                   return (
-                    <th key={day} className="py-3 px-3 text-center border-r border-slate-800/80 last:border-r-0">
-                      <div className="font-extrabold text-slate-200">{day}</div>
-                      <span className="text-[10px] font-mono text-blue-400 font-normal">
-                        {dateLabel}
-                      </span>
+                    <th
+                      key={day}
+                      colSpan={WEEKS_LIST.length}
+                      className={`py-2 px-3 text-center border-r-2 border-slate-700 ${getDayHeaderBg(dIdx)}`}
+                    >
+                      <div className="font-black text-sm tracking-wide flex items-center justify-center gap-1.5">
+                        <span>{day.toUpperCase()}</span>
+                      </div>
                     </th>
                   );
                 })}
+
               </tr>
 
-              {/* All-Country Weekly Aggregate Summary Header */}
-              <tr className="bg-slate-900/90 border-b border-slate-700/80 text-xs font-bold text-white">
-                <td className="py-3 px-4 sticky left-0 bg-slate-900 z-20 border-r border-slate-700/80">
-                  <div className="flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-blue-400" />
-                    <span className="font-black text-blue-300">ALL COUNTRIES (AVG)</span>
-                  </div>
-                </td>
-                <td className="py-3 px-3 text-center font-mono font-black border-r border-slate-700/80 bg-blue-950/20">
-                  <div className="text-white">{matrixSummary.totalShipments.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">AWBs</span></div>
-                  <div className="text-indigo-300 font-extrabold text-[11px]">{matrixSummary.overallAvgTT}d avg</div>
-                </td>
-                {DAYS_OF_WEEK.map((day) => {
-                  const cell = matrixSummary.dailyTotals[day];
-                  return (
-                    <td key={day} className="py-2.5 px-3 text-center border-r border-slate-800 bg-slate-900/60 last:border-r-0">
-                      {cell.hasData ? (
-                        <div className="space-y-0.5">
-                          <span className={`inline-block px-2 py-0.5 rounded-md font-mono font-black text-xs border ${getTTColorClass(cell.avgTT)}`}>
-                            {cell.avgTT}d
-                          </span>
-                          <div className="text-[10px] text-slate-400 font-mono">
-                            Min: {cell.minTT}d • Max: {cell.maxTT}d
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-bold">
-                            {cell.count.toLocaleString()} AWBs
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-slate-600 font-mono">-</span>
-                      )}
-                    </td>
-                  );
+              {/* Row 2 of Headers: Sub-columns (W1 Wed, W2 Wed, W3 Wed, etc.) */}
+              <tr className="bg-slate-900/95 text-[10px] uppercase font-black text-slate-400 border-b-2 border-slate-700">
+                {activeDays.map((day) => {
+                  return WEEKS_LIST.map((wId) => {
+                    const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
+                    const dateLabel = wMeta?.dayDates[day] || '';
+                    return (
+                      <th
+                        key={`${day}-${wId}`}
+                        className="py-2 px-2 text-center min-w-[100px] border-r border-slate-800 bg-slate-900/90 last:border-r-2 last:border-slate-700"
+                      >
+                        <div className="text-white font-black">{wId} {day.slice(0, 3)}</div>
+                        <div className="text-[9px] font-mono text-blue-400 font-semibold">{dateLabel}</div>
+                      </th>
+                    );
+                  });
                 })}
               </tr>
+
+              {/* Row 3: ALL COUNTRIES (Summary Aggregate Header) */}
+              <tr className="bg-slate-900 text-xs font-bold text-white border-b-2 border-slate-700">
+                
+                {/* Fixed Summary Column 1 */}
+                <td className="py-2.5 px-4 sticky left-0 z-40 bg-slate-900 border-r-2 border-slate-700 shadow-2xl">
+                  <div className="font-black text-blue-400 flex items-center gap-1">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>ALL COUNTRIES (AVG)</span>
+                  </div>
+                </td>
+
+                {/* Fixed Summary Column 2 */}
+                <td className="py-2.5 px-3 text-center sticky left-40 z-40 bg-slate-900 border-r-2 border-slate-700 shadow-2xl font-mono">
+                  <div className="text-white font-extrabold">{matrixSummary.totalShipments.toLocaleString()}</div>
+                  <div className="text-[11px] text-indigo-300 font-bold">{matrixSummary.overallAvgTT}d avg</div>
+                </td>
+
+                {/* Daily Week Aggregates */}
+                {activeDays.map((day) => {
+                  return WEEKS_LIST.map((wId) => {
+                    const cell = matrixSummary.dailyWeekTotals[day][wId];
+                    return (
+                      <td
+                        key={`total-${day}-${wId}`}
+                        className="py-2 px-1.5 text-center border-r border-slate-800 bg-slate-900/70 last:border-r-2 last:border-slate-700"
+                      >
+                        {cell.hasData && cell.count > 0 ? (
+                          <div className="space-y-0.5">
+                            <span className={`inline-block px-1.5 py-0.5 rounded font-mono font-black text-xs border ${getTTColorClass(cell.avgTT)}`}>
+                              {cell.avgTT}d
+                            </span>
+                            <div className="text-[9px] text-slate-400 font-mono">
+                              {cell.minTT}d – {cell.maxTT}d
+                            </div>
+                            <div className="text-[9px] text-slate-400 font-bold">
+                              {cell.count.toLocaleString()} AWBs
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-600 font-mono">-</span>
+                        )}
+                      </td>
+                    );
+                  });
+                })}
+
+              </tr>
+
             </thead>
 
             <tbody className="divide-y divide-slate-800/60 font-sans">
@@ -592,17 +640,17 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   return (
                     <tr
                       key={row.country}
-                      className="hover:bg-slate-800/50 transition-colors group"
+                      className="hover:bg-slate-800/40 transition-colors group"
                     >
-                      {/* Country Column */}
+                      {/* Fixed Column 1: Country Name (Sticky on Left) */}
                       <td
                         onClick={() => handleInspectCountryTotal(row.country)}
-                        className="py-3 px-4 sticky left-0 bg-slate-950/95 group-hover:bg-slate-900 z-10 border-r border-slate-800 transition-colors cursor-pointer"
+                        className="py-2.5 px-4 sticky left-0 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-2xl transition-colors cursor-pointer"
                         title={`Click to view all ${row.totalCount} shipments for ${row.country}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-slate-500 font-mono w-5">
+                            <span className="text-[10px] text-slate-500 font-mono w-4">
                               {idx + 1}.
                             </span>
                             <span className="font-mono font-black text-sm text-white group-hover:text-blue-400 transition-colors">
@@ -613,50 +661,52 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                         </div>
                       </td>
 
-                      {/* Country Total Column */}
+                      {/* Fixed Column 2: Total Volume & Avg TT (Sticky on Left) */}
                       <td
                         onClick={() => handleInspectCountryTotal(row.country)}
-                        className="py-2.5 px-3 text-center border-r border-slate-800/80 bg-slate-950/40 group-hover:bg-slate-900/60 cursor-pointer"
+                        className="py-2 px-3 text-center sticky left-40 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-2xl transition-colors cursor-pointer font-mono"
                       >
-                        <div className="font-mono font-extrabold text-white text-xs">
+                        <div className="font-extrabold text-white text-xs">
                           {row.totalCount.toLocaleString()}
                         </div>
-                        <div className={`font-mono text-[11px] font-bold ${
+                        <div className={`text-[11px] font-bold ${
                           row.totalAvgTT <= 5 ? 'text-emerald-400' : row.totalAvgTT <= 8 ? 'text-amber-400' : 'text-rose-400'
                         }`}>
                           {row.totalAvgTT}d avg
                         </div>
                       </td>
 
-                      {/* 7 Daily Cells */}
-                      {DAYS_OF_WEEK.map((day) => {
-                        const cell = row.dayMetrics[day];
-                        return (
-                          <td
-                            key={day}
-                            onClick={() => cell.hasData && handleInspectCell(row.country, day)}
-                            className={`py-2 px-2.5 text-center border-r border-slate-800/60 last:border-r-0 transition-colors ${
-                              cell.hasData ? 'hover:bg-blue-600/15 cursor-pointer' : ''
-                            }`}
-                            title={cell.hasData ? `Click to view ${cell.count} AWBs for ${row.country} on ${day}` : undefined}
-                          >
-                            {cell.hasData ? (
-                              <div className="p-1.5 rounded-xl transition-all hover:scale-[1.02]">
-                                <div className={`inline-block px-2 py-0.5 rounded-lg font-mono font-black text-xs border shadow-sm ${getTTColorClass(cell.avgTT)}`}>
-                                  {cell.avgTT}d
+                      {/* 35 Day-Week Cells (W1..W5 for each Day) */}
+                      {activeDays.map((day) => {
+                        return WEEKS_LIST.map((wId) => {
+                          const cell = row.dayWeekMetrics[day][wId];
+                          return (
+                            <td
+                              key={`${row.country}-${day}-${wId}`}
+                              onClick={() => cell.hasData && cell.count > 0 && handleInspectCell(row.country, day, wId)}
+                              className={`py-1.5 px-1.5 text-center border-r border-slate-800/60 last:border-r-2 last:border-slate-700 transition-colors ${
+                                cell.hasData && cell.count > 0 ? 'hover:bg-blue-600/15 cursor-pointer' : ''
+                              }`}
+                              title={cell.hasData && cell.count > 0 ? `Click to view ${cell.count} AWBs for ${row.country} on ${day} (${wId})` : undefined}
+                            >
+                              {cell.hasData && cell.count > 0 ? (
+                                <div className="p-1 rounded-lg transition-all hover:scale-[1.03]">
+                                  <div className={`inline-block px-1.5 py-0.5 rounded font-mono font-black text-xs border shadow-sm ${getTTColorClass(cell.avgTT)}`}>
+                                    {cell.avgTT}d
+                                  </div>
+                                  <div className="text-[9px] text-slate-400 font-mono mt-0.5">
+                                    {cell.minTT}d – {cell.maxTT}d
+                                  </div>
+                                  <div className="text-[9px] text-slate-500 font-semibold">
+                                    {cell.count} {cell.count === 1 ? 'AWB' : 'AWBs'}
+                                  </div>
                                 </div>
-                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                                  {cell.minTT}d – {cell.maxTT}d
-                                </div>
-                                <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
-                                  {cell.count} {cell.count === 1 ? 'AWB' : 'AWBs'}
-                                </div>
-                              </div>
-                            ) : (
-                              <span className="text-slate-700 font-mono">-</span>
-                            )}
-                          </td>
-                        );
+                              ) : (
+                                <span className="text-slate-700 font-mono text-xs">-</span>
+                              )}
+                            </td>
+                          );
+                        });
                       })}
 
                     </tr>
@@ -664,7 +714,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400 space-y-1">
+                  <td colSpan={37} className="py-12 text-center text-slate-400 space-y-1">
                     <p className="font-bold">No countries found matching &quot;{searchQuery}&quot;</p>
                     <p className="text-xs text-slate-500">Try searching for a different country code.</p>
                   </td>
@@ -693,7 +743,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           </div>
 
           <span className="text-slate-400 text-[11px]">
-            Click any cell or country to view the individual shipment records.
+            ← Scroll horizontally to view all calendar days (Wednesday through Tuesday) • Country column remains frozen on the left →
           </span>
         </div>
 
@@ -714,17 +764,17 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                        {selectedWeek} • {inspectedCell.country}
+                        {inspectedCell.weekId || 'All Weeks'} • {inspectedCell.country}
                       </span>
                       <h3 className="text-base sm:text-lg font-black text-white">
-                        {inspectedCell.country} {inspectedCell.day ? `• ${inspectedCell.day} (${inspectedCell.dateLabel})` : '• Full Week'}
+                        {inspectedCell.country} {inspectedCell.day ? `• ${inspectedCell.day} (${inspectedCell.weekId} - ${inspectedCell.dateLabel})` : '• Full Month'}
                       </h3>
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
                         {inspectedCell.shipments.length.toLocaleString()} Total AWBs
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Showing individual shipment records dispatched for {inspectedCell.country} in {selectedWeek}.
+                      Showing individual shipment records dispatched for {inspectedCell.country} on {inspectedCell.day || 'all days'}.
                     </p>
                   </div>
                 </div>
