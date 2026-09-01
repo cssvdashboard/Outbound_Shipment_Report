@@ -5,6 +5,8 @@ import {
   Download,
   Globe,
   Clock,
+  CheckCircle2,
+  TrendingUp,
   RotateCcw,
   Plane,
   X,
@@ -13,6 +15,7 @@ import {
   Layers,
   ChevronDown,
   Check,
+  Filter,
   CalendarRange
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
@@ -25,8 +28,18 @@ import {
   MultiWeekMatrixSummary,
   computeMultiWeekDayMatrix,
   exportMultiWeekMatrixToExcel,
-  exportMultiWeekMatrixToCSV
+  exportMultiWeekMatrixToCSV,
+  parsePickupDate,
+  getWeekIdForDate,
+  getDayOfWeek
 } from '../utils/weeklyMatrixAnalytics';
+import { Chart } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  registerables
+} from 'chart.js';
+
+ChartJS.register(...registerables);
 
 interface WeeklyMatrixViewProps {
   filteredShipments: Shipment[];
@@ -76,7 +89,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     shipments: Shipment[];
   } | null>(null);
 
-  // Compute Full Multi-Week Matrix (Fast O(N) linear time)
+  // Compute Full Multi-Week Matrix
   const matrixSummary: MultiWeekMatrixSummary = useMemo(() => {
     return computeMultiWeekDayMatrix(filteredShipments);
   }, [filteredShipments]);
@@ -149,10 +162,17 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   };
 
-  // Handler to open AWB drill-down for a country on a specific day & week (Instant O(1) Lookup)
+  // Handler to open AWB drill-down for a country on a specific day & week
   const handleInspectCell = (country: string, day: DayOfWeek, weekId: SingleWeekId) => {
-    const dwKey = `${country.toUpperCase().trim()}-${day}-${weekId}`;
-    const matchingShipments = matrixSummary.countryDayWeekShipments.get(dwKey) || [];
+    const matchingShipments = filteredShipments.filter((s) => {
+      const destMatch = (s.destination || '').toUpperCase().trim() === country.toUpperCase().trim();
+      if (!destMatch) return false;
+
+      const d = parsePickupDate(s.pickup);
+      if (!d) return false;
+
+      return getWeekIdForDate(d) === weekId && getDayOfWeek(d) === day;
+    });
 
     const wMeta = WEEKS_METADATA.find((w) => w.id === weekId);
     const dateLabel = wMeta?.dayDates[day] || '';
@@ -166,14 +186,97 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   };
 
-  // Handler to open AWB drill-down for whole country across all weeks (Instant O(1) Lookup)
+  // Handler to open AWB drill-down for whole country across all weeks
   const handleInspectCountryTotal = (country: string) => {
-    const matchingShipments = matrixSummary.countryTotalShipments.get(country.toUpperCase().trim()) || [];
+    const matchingShipments = filteredShipments.filter((s) => {
+      const destMatch = (s.destination || '').toUpperCase().trim() === country.toUpperCase().trim();
+      if (!destMatch) return false;
+
+      const d = parsePickupDate(s.pickup);
+      if (!d) return false;
+
+      return getWeekIdForDate(d) !== 'W0';
+    });
 
     setInspectedCell({
       country,
       shipments: matchingShipments
     });
+  };
+
+  // Daily Trend Comparison Chart Data (Filtered to active weeks)
+  const comparisonChartData = useMemo(() => {
+    const labels = activeDays.map((d) => d.slice(0, 3));
+    const colors: Record<SingleWeekId, { border: string; bg: string }> = {
+      W1: { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.7)' },
+      W2: { border: '#10b981', bg: 'rgba(16, 185, 129, 0.7)' },
+      W3: { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.7)' },
+      W4: { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.7)' },
+      W5: { border: '#f43f5e', bg: 'rgba(244, 63, 94, 0.7)' }
+    };
+
+    const datasets = activeWeeks.map((wId) => {
+      const data = activeDays.map((day) => {
+        const cell = matrixSummary.dailyWeekTotals[day][wId];
+        return cell.hasData && cell.count > 0 ? cell.avgTT : null;
+      });
+
+      return {
+        label: `${wId} Avg TT`,
+        data,
+        borderColor: colors[wId].border,
+        backgroundColor: colors[wId].bg,
+        borderWidth: 2,
+        pointRadius: 4,
+        tension: 0.25,
+        spanGaps: true
+      };
+    });
+
+    return {
+      labels,
+      datasets
+    };
+  }, [matrixSummary, activeDays, activeWeeks]);
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          color: '#94a3b8',
+          font: { size: 11, weight: 'bold' as const },
+          usePointStyle: true,
+          boxWidth: 8
+        }
+      },
+      tooltip: {
+        backgroundColor: '#0f172a',
+        borderColor: '#334155',
+        borderWidth: 1,
+        titleColor: '#f8fafc',
+        bodyColor: '#cbd5e1',
+        padding: 10
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(51, 65, 85, 0.3)' },
+        ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' as const } }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Average Transit Time (Days)',
+          color: '#94a3b8',
+          font: { size: 10 }
+        },
+        grid: { color: 'rgba(51, 65, 85, 0.3)' },
+        ticks: { color: '#94a3b8', font: { size: 10 } }
+      }
+    }
   };
 
   // Helper for TT cell badge color
@@ -236,9 +339,11 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
         </div>
       </div>
 
-      {/* 2. EXECUTIVE METRIC SUMMARY STRIP (All 4 Metric Cards + Info Banner) */}
-      <div className="space-y-3.5">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      {/* 2. EXECUTIVE METRIC SUMMARY STRIP & MULTI-WEEK TREND CHART */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        {/* Metric Cards (Left - 5 Cols) */}
+        <div className="lg:col-span-5 grid grid-cols-2 gap-3.5">
           
           {/* Total July Volume */}
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
@@ -300,26 +405,48 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
             </div>
           </div>
 
-        </div>
-
-        {/* Info Banner */}
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-900/40 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-blue-400" />
-            <span className="text-xs font-bold text-slate-300">
-              Weekly Cycles: <strong className="text-white">Wednesday → Tuesday</strong>
+          {/* Info Banner */}
+          <div className="col-span-2 p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-900/40 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-blue-400" />
+              <span className="text-xs font-bold text-slate-300">
+                Weekly Cycles: <strong className="text-white">Wednesday → Tuesday</strong>
+              </span>
+            </div>
+            <span className="text-xs font-mono font-bold text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-800">
+              W1 through W5 Side-by-Side
             </span>
           </div>
-          <span className="text-xs font-mono font-bold text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-800">
-            W1 through W5 Side-by-Side
-          </span>
+
         </div>
+
+        {/* Daily Trend Chart (Right - 7 Cols) */}
+        <div className="lg:col-span-7 glass-card p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
+                Weekly Day-by-Day Transit Time Progression
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Comparing average transit time trajectories across selected calendar days
+              </p>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+              {activeWeeks.join(', ')}
+            </span>
+          </div>
+
+          <div className="h-56 relative w-full">
+            <Chart type="line" data={comparisonChartData as any} options={chartOptions as any} />
+          </div>
+        </div>
+
       </div>
 
       {/* 3. MULTI-WEEK SIDE-BY-SIDE COUNTRY MATRIX TABLE */}
       <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-4 border border-slate-800/80 bg-slate-950/80">
         
-        {/* Table Toolbar with 2 Multi-Select Filter Buttons: Calendar Day & Week */}
+        {/* Table Toolbar with 2 New Multi-Select Filter Buttons: Calendar Day & Week */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pb-3 border-b border-slate-800">
           
           {/* Left Controls: Search Country */}
@@ -448,7 +575,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsDayDropdownOpen(false)}
-                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded-lg cursor-pointer"
                     >
                       Done
                     </button>
@@ -563,7 +690,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsWeekDropdownOpen(false)}
-                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-2.5 py-1 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded-lg cursor-pointer"
                     >
                       Done
                     </button>
@@ -770,7 +897,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           </div>
 
           <span className="text-slate-400 text-[11px]">
-            ← Scroll horizontally to view all selected days & weeks • Country column remains frozen on the left →
+            ← Scroll horizontally to view all calendar days • Country column remains frozen on the left →
           </span>
         </div>
 
