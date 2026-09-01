@@ -10,7 +10,8 @@ import {
   Download,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  CalendarDays
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { parseExcelBuffer } from '../utils/excelParser';
@@ -44,63 +45,65 @@ export const Header: React.FC<HeaderProps> = ({
   onTabChange
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    const file = files[0];
-    setIsUploading(true);
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    setIsUploading(true);
     try {
+      // 1. If backend server is active, upload file directly
       if (isServerConnected) {
-        // Upload directly to Express backend
-        const res = await uploadExcelToServer(file);
-        if (res.data && res.data.length > 0) {
-          onDatasetUpdate(res.data, file.name);
-          setIsUploading(false);
-          e.target.value = '';
-          return;
+        try {
+          const res = await uploadExcelToServer(file);
+          if (res && res.data.length > 0) {
+            onDatasetUpdate(res.data, file.name);
+            setIsUploading(false);
+            return;
+          }
+        } catch (serverErr) {
+          console.warn('Backend upload failed, falling back to browser parser:', serverErr);
         }
       }
 
-      // Fallback: Parse client-side in browser
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const buffer = evt.target?.result as ArrayBuffer;
-        if (buffer) {
-          const result = parseExcelBuffer(buffer);
-          if (result.shipments.length > 0) {
-            onDatasetUpdate(result.shipments, file.name);
-          } else {
-            alert(result.error || 'Could not parse Excel file.');
-          }
-        }
-        setIsUploading(false);
-      };
-      reader.readAsArrayBuffer(file);
+      // 2. Client-side fallback using ArrayBuffer
+      const buffer = await file.arrayBuffer();
+      const { shipments, error } = parseExcelBuffer(buffer);
+      if (error) {
+        alert(error);
+        return;
+      }
+      if (shipments.length > 0) {
+        onDatasetUpdate(shipments, file.name);
+      } else {
+        alert('No valid shipment rows were found in the uploaded file.');
+      }
     } catch (err: any) {
-      console.error('File upload failed:', err);
-      alert('File upload failed: ' + (err?.message || 'Unknown error'));
+      alert(`Error reading file: ${err.message}`);
+    } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-    e.target.value = '';
-  };
-
-  const handleExportCSV = () => {
-    if (filteredShipments.length === 0) return;
-    const worksheet = XLSX.utils.json_to_sheet(filteredShipments);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Filtered_Shipments');
-    XLSX.writeFile(workbook, `Logistics_Export_${new Date().toISOString().slice(0, 10)}.csv`, { bookType: 'csv' });
   };
 
   const handleExportExcel = () => {
-    if (filteredShipments.length === 0) return;
     const worksheet = XLSX.utils.json_to_sheet(filteredShipments);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Filtered_Shipments');
     XLSX.writeFile(workbook, `Logistics_Export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const handleExportCSV = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredShipments);
+    const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Logistics_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -207,6 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
               { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
               { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
+              { id: 'weekly-matrix', label: 'Weekly TT Matrix', icon: CalendarDays, color: 'text-violet-400' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
