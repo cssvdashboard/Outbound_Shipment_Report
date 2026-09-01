@@ -505,13 +505,20 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
                       Select Calendar Days
                     </span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => setSelectedDays([...DAYS_OF_WEEK])}
-                        className="text-[10px] font-bold text-blue-400 hover:text-blue-300 px-1 py-0.5 rounded hover:bg-blue-950 cursor-pointer"
+                        className="text-[10px] font-bold text-blue-400 hover:text-blue-300 px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-800/80 cursor-pointer"
                       >
                         All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDays([])}
+                        className="text-[10px] font-bold text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 cursor-pointer"
+                      >
+                        Clear
                       </button>
                     </div>
                   </div>
@@ -521,19 +528,18 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     {DAYS_OF_WEEK.map((day) => {
                       const isChecked = selectedDays.includes(day);
                       return (
-                        <label
+                        <div
                           key={day}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleDay(day);
-                          }}
-                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors group ${
                             isChecked
                               ? 'bg-blue-600/15 text-blue-300 border border-blue-500/30'
                               : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
+                          <label
+                            onClick={() => toggleDay(day)}
+                            className="flex items-center gap-2 flex-1 cursor-pointer select-none"
+                          >
                             <div className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
                               isChecked
                                 ? 'bg-blue-600 border-blue-500 text-white'
@@ -542,11 +548,24 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                               {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                             <span>{day}</span>
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-mono text-slate-500 uppercase group-hover:hidden">
+                              {day.slice(0, 3)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDays([day]);
+                              }}
+                              className="hidden group-hover:inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all cursor-pointer shadow-sm"
+                              title={`Isolate and show only ${day}`}
+                            >
+                              Only
+                            </button>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-500 uppercase">
-                            {day.slice(0, 3)}
-                          </span>
-                        </label>
+                        </div>
                       );
                     })}
                   </div>
@@ -556,7 +575,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsDayDropdownOpen(false)}
-                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded-lg cursor-pointer"
                     >
                       Done
                     </button>
@@ -597,13 +616,20 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
                       Select Weekly Cycles
                     </span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => setSelectedWeeks([...WEEKS_LIST])}
-                        className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-1 py-0.5 rounded hover:bg-indigo-950 cursor-pointer"
+                        className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/80 cursor-pointer"
                       >
                         All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedWeeks([])}
+                        className="text-[10px] font-bold text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 cursor-pointer"
+                      >
+                        Clear
                       </button>
                     </div>
                   </div>
@@ -614,19 +640,18 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                       const isChecked = selectedWeeks.includes(wId);
                       const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
                       return (
-                        <label
+                        <div
                           key={wId}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleWeek(wId);
-                          }}
-                          className={`flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          className={`flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-colors group ${
                             isChecked
                               ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30'
                               : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
+                          <label
+                            onClick={() => toggleWeek(wId)}
+                            className="flex items-center gap-2 flex-1 cursor-pointer select-none"
+                          >
                             <div className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
                               isChecked
                                 ? 'bg-indigo-600 border-indigo-500 text-white'
@@ -635,11 +660,27 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                               {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                             <span className="font-extrabold text-white">{wId}</span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              {wMeta?.dateRange.split('–')[0]?.trim()}
+                            </span>
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-mono text-slate-500 group-hover:hidden">
+                              {wMeta?.dateRange.split('–')[1]?.trim()}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedWeeks([wId]);
+                              }}
+                              className="hidden group-hover:inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer shadow-sm"
+                              title={`Isolate and show only ${wId}`}
+                            >
+                              Only
+                            </button>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-400">
-                            {wMeta?.dateRange}
-                          </span>
-                        </label>
+                        </div>
                       );
                     })}
                   </div>
@@ -649,7 +690,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsWeekDropdownOpen(false)}
-                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-2.5 py-1 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded-lg cursor-pointer"
                     >
                       Done
                     </button>
