@@ -15,7 +15,7 @@ export function filterShipments(shipments: Shipment[], filters: FilterState): Sh
         const isAgent = item.isAgent ?? /agent/i.test(item.customer || '');
         if (!isAgent) return false;
       } else if (filters.selectedCategoryType === 'PP') {
-        const type = (item.shipmentType || 'PP').toUpperCase();
+        const type = (item.shipmentType || '').toUpperCase();
         if (type !== 'PP') return false;
       } else if (filters.selectedCategoryType === 'CC') {
         const type = (item.shipmentType || '').toUpperCase();

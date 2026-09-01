@@ -70,14 +70,18 @@ export function useLogisticsData() {
           setIsServerConnected(false);
         }
 
-        // 2. Fallback to IndexedDB
+        // 2. Fallback to IndexedDB (only if custom dataset AND contains shipmentType)
         const { data, meta } = await loadSavedDataset();
-        if (data && data.length > 0 && meta) {
+        if (data && data.length > 0 && meta && meta.isCustom && data.some((s) => s.shipmentType !== undefined)) {
           setRawShipments(data);
           setDatasetMeta(meta);
         } else {
-          // 3. Fallback to static public JSON
-          const response = await fetch('./defaultData.json');
+          // If stored data is outdated or missing category fields, clear it and fetch latest default JSON
+          if (data) {
+            await clearSavedDataset();
+          }
+          // 3. Fallback to static public JSON with cache buster
+          const response = await fetch(`./defaultData.json?v=${Date.now()}`);
           if (!response.ok) throw new Error('Failed to fetch defaultData.json');
           const defaultData: Shipment[] = await response.json();
           setRawShipments(defaultData);
@@ -144,7 +148,7 @@ export function useLogisticsData() {
         }
       }
 
-      const response = await fetch('./defaultData.json');
+      const response = await fetch(`./defaultData.json?v=${Date.now()}`);
       const defaultData: Shipment[] = await response.json();
       setRawShipments(defaultData);
       setDatasetMeta({
