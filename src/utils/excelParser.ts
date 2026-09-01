@@ -84,6 +84,10 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
 
       const remarks = String(normalizeKey(row, ['REMARKS', 'Remarks', 'Comment']) || '').trim();
 
+      const rawType = String(normalizeKey(row, ['Shipment Type', 'ShipmentType', 'Type', 'PP/CC', 'Payment Type']) || '').trim().toUpperCase();
+      const shipmentType = rawType === 'CC' ? 'CC' : 'PP';
+      const isAgent = /agent/i.test(customer);
+
       return {
         awb,
         mawb,
@@ -106,7 +110,9 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
         destinationDelay,
         weekendDelay,
         finalResolution,
-        remarks
+        remarks,
+        shipmentType,
+        isAgent
       };
     }).filter(s => s.awb || s.customer || s.shprName);
 

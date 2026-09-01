@@ -32,7 +32,8 @@ export const initialFilterState: FilterState = {
   selectedTTRanges: [],
   selectedTransitDelays: [],
   selectedClearanceDelays: [],
-  selectedDestinationDelays: []
+  selectedDestinationDelays: [],
+  selectedCategoryType: 'ALL'
 };
 
 export function useLogisticsData() {
@@ -245,6 +246,13 @@ export function useLogisticsData() {
     });
   }, []);
 
+  const setCategoryTypeFilter = useCallback((categoryType: 'ALL' | 'AGENT' | 'PP' | 'CC') => {
+    setFilters((prev) => ({
+      ...prev,
+      selectedCategoryType: categoryType
+    }));
+  }, []);
+
   const resetAllFilters = useCallback(() => {
     setFilters(initialFilterState);
   }, []);
@@ -315,6 +323,7 @@ export function useLogisticsData() {
     removeCustomerFilter,
     setCustomerFilter,
     setDestinationFilter,
+    setCategoryTypeFilter,
     setFinalResolutionFilter,
     setTTRangeFilter,
     setDelayFilter,

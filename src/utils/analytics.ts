@@ -9,6 +9,20 @@ import {
 
 export function filterShipments(shipments: Shipment[], filters: FilterState): Shipment[] {
   return shipments.filter((item) => {
+    // 0. Quick Category Type Filter (Agent, PP, CC)
+    if (filters.selectedCategoryType && filters.selectedCategoryType !== 'ALL') {
+      if (filters.selectedCategoryType === 'AGENT') {
+        const isAgent = item.isAgent ?? /agent/i.test(item.customer || '');
+        if (!isAgent) return false;
+      } else if (filters.selectedCategoryType === 'PP') {
+        const type = (item.shipmentType || 'PP').toUpperCase();
+        if (type !== 'PP') return false;
+      } else if (filters.selectedCategoryType === 'CC') {
+        const type = (item.shipmentType || '').toUpperCase();
+        if (type !== 'CC') return false;
+      }
+    }
+
     // 1. Shipper Filter (supports Include and Filter Out / Exclude)
     if (filters.selectedShippers && filters.selectedShippers.length > 0) {
       const match = filters.selectedShippers.some(

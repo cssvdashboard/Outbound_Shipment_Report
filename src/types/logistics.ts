@@ -21,9 +21,13 @@ export interface Shipment {
   weekendDelay?: string;
   finalResolution: string; // "Delivered" | "RTS" | "NFBRK" etc.
   remarks?: string;
+  shipmentType?: string; // 'PP' | 'CC'
+  isAgent?: boolean;     // true if customer has 'agent'
 }
 
 export type FilterMode = 'include' | 'exclude';
+
+export type CategoryTypeFilter = 'ALL' | 'AGENT' | 'PP' | 'CC';
 
 export interface FilterState {
   searchTerm: string; // Autocomplete search keyword e.g. "Four", "Elite"
@@ -36,6 +40,7 @@ export interface FilterState {
   selectedTransitDelays: string[];
   selectedClearanceDelays: string[];
   selectedDestinationDelays: string[];
+  selectedCategoryType?: CategoryTypeFilter; // Quick filter category for Agent, PP, CC
   dateRange?: {
     start?: string;
     end?: string;

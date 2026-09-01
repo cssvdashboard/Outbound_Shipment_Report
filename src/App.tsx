@@ -28,6 +28,7 @@ export const App: React.FC = () => {
     removeCustomerFilter,
     setCustomerFilter,
     setDestinationFilter,
+    setCategoryTypeFilter,
     setFinalResolutionFilter,
     setTTRangeFilter,
     setDelayFilter,
@@ -59,10 +60,10 @@ export const App: React.FC = () => {
   }, []);
 
   const handleThemeToggle = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    setStoredTheme(nextTheme);
-    if (nextTheme === 'dark') {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    setStoredTheme(newTheme);
+    if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
     } else {
@@ -72,17 +73,9 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/40 dark:from-[#080d19] dark:via-[#0b1120] dark:to-[#0f172a] text-slate-800 dark:text-slate-100 transition-colors duration-300 flex flex-col font-sans selection:bg-blue-500/20 selection:text-blue-500 relative">
-      
-      {/* Eye-Soothing Ambient Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[15%] -left-[10%] w-[45vw] h-[45vw] rounded-full bg-blue-400/5 dark:bg-blue-600/10 blur-[130px]" />
-        <div className="absolute top-[35%] -right-[10%] w-[40vw] h-[40vw] rounded-full bg-indigo-400/5 dark:bg-indigo-600/8 blur-[140px]" />
-        <div className="absolute -bottom-[15%] left-[20%] w-[45vw] h-[45vw] rounded-full bg-cyan-400/5 dark:bg-cyan-600/8 blur-[150px]" />
-      </div>
-
-      <div className="relative z-10 flex flex-col flex-1">
-        {/* 1. STICKY APP HEADER */}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
+      <div className="flex-1 flex flex-col">
+        {/* 1. APP HEADER & NAVIGATION */}
         <Header
           datasetMeta={datasetMeta}
           totalFilteredCount={filteredShipments.length}
@@ -97,12 +90,13 @@ export const App: React.FC = () => {
           onTabChange={setActiveTab}
         />
 
-        {/* 2. CUSTOMER & DESTINATION FILTER BAR */}
+        {/* 2. CUSTOMER, DESTINATION & QUICK CATEGORY FILTER BAR */}
         <SmartFilterBar
           rawShipments={rawShipments}
           filters={filters}
           onCustomerChange={setCustomerFilter}
           onDestinationChange={setDestinationFilter}
+          onCategoryTypeChange={setCategoryTypeFilter}
           onResetFilters={resetAllFilters}
           allCustomers={allCustomers}
           allDestinations={allDestinations}

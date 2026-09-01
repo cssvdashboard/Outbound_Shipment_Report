@@ -6,9 +6,12 @@ import {
   Check,
   ChevronDown,
   Search,
-  RotateCcw
+  RotateCcw,
+  Shield,
+  Package,
+  CreditCard
 } from 'lucide-react';
-import { FilterState, Shipment } from '../types/logistics';
+import { FilterState, Shipment, CategoryTypeFilter } from '../types/logistics';
 import { searchCustomers } from '../utils/analytics';
 
 interface SmartFilterBarProps {
@@ -16,6 +19,7 @@ interface SmartFilterBarProps {
   filters: FilterState;
   onCustomerChange: (customer: string) => void;
   onDestinationChange: (dest: string) => void;
+  onCategoryTypeChange?: (categoryType: CategoryTypeFilter) => void;
   onResetFilters?: () => void;
   allCustomers?: string[];
   allDestinations?: string[];
@@ -26,6 +30,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   filters,
   onCustomerChange,
   onDestinationChange,
+  onCategoryTypeChange,
   onResetFilters,
   allCustomers = [],
   allDestinations = []
@@ -130,6 +135,20 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     }
   };
 
+  const currentCategory = filters.selectedCategoryType || 'ALL';
+
+  const agentCount = useMemo(() => {
+    return rawShipments.filter((s) => s.isAgent ?? /agent/i.test(s.customer || '')).length;
+  }, [rawShipments]);
+
+  const ppCount = useMemo(() => {
+    return rawShipments.filter((s) => (s.shipmentType || 'PP').toUpperCase() === 'PP').length;
+  }, [rawShipments]);
+
+  const ccCount = useMemo(() => {
+    return rawShipments.filter((s) => (s.shipmentType || '').toUpperCase() === 'CC').length;
+  }, [rawShipments]);
+
   // Total active filters count
   const totalActiveFilters =
     filters.selectedShippers.length +
@@ -139,7 +158,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     filters.selectedClearanceDelays.length +
     filters.selectedDestinationDelays.length +
     filters.selectedFinalResolutions.length +
-    filters.selectedTTRanges.length;
+    filters.selectedTTRanges.length +
+    (currentCategory !== 'ALL' ? 1 : 0);
 
   const handleReset = () => {
     setCustomerSearch('');
@@ -499,7 +519,90 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             )}
           </div>
 
-          {/* 3. RESET BUTTON */}
+          {/* 3. CATEGORY SWITCH BUTTONS: ALL, AGENT, PP, CC */}
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-inner shrink-0 overflow-x-auto">
+            {/* All */}
+            <button
+              type="button"
+              onClick={() => onCategoryTypeChange?.('ALL')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                currentCategory === 'ALL'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-300 dark:border-slate-700 font-black'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+              title="Show All Shipments"
+            >
+              All
+            </button>
+
+            {/* Agent Button */}
+            <button
+              type="button"
+              onClick={() => onCategoryTypeChange?.(currentCategory === 'AGENT' ? 'ALL' : 'AGENT')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                currentCategory === 'AGENT'
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-500/30 ring-2 ring-purple-400 font-black'
+                  : 'text-slate-700 hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400 hover:bg-purple-500/10'
+              }`}
+              title="Click to show only Agent shipments"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Agent</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
+                currentCategory === 'AGENT'
+                  ? 'bg-white/25 text-white'
+                  : 'bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300'
+              }`}>
+                {agentCount.toLocaleString()}
+              </span>
+            </button>
+
+            {/* PP Button */}
+            <button
+              type="button"
+              onClick={() => onCategoryTypeChange?.(currentCategory === 'PP' ? 'ALL' : 'PP')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                currentCategory === 'PP'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-400 font-black'
+                  : 'text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 hover:bg-blue-500/10'
+              }`}
+              title="Click to show PP (Prepaid) shipments"
+            >
+              <Package className="w-3.5 h-3.5" />
+              <span>PP</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
+                currentCategory === 'PP'
+                  ? 'bg-white/25 text-white'
+                  : 'bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300'
+              }`}>
+                {ppCount.toLocaleString()}
+              </span>
+            </button>
+
+            {/* CC Button */}
+            <button
+              type="button"
+              onClick={() => onCategoryTypeChange?.(currentCategory === 'CC' ? 'ALL' : 'CC')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                currentCategory === 'CC'
+                  ? 'bg-amber-600 text-white shadow-md shadow-amber-500/30 ring-2 ring-amber-400 font-black'
+                  : 'text-slate-700 hover:text-amber-600 dark:text-slate-300 dark:hover:text-amber-400 hover:bg-amber-500/10'
+              }`}
+              title="Click to show CC (Charges Collect) shipments"
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>CC</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
+                currentCategory === 'CC'
+                  ? 'bg-white/25 text-white'
+                  : 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300'
+              }`}>
+                {ccCount.toLocaleString()}
+              </span>
+            </button>
+          </div>
+
+          {/* 4. RESET BUTTON */}
           <button
             type="button"
             onClick={handleReset}
