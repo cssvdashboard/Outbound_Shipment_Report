@@ -106,22 +106,6 @@ export const WEEKS_METADATA: WeekDefinition[] = [
       Monday: '08/03',
       Tuesday: '08/04'
     }
-  },
-  {
-    id: 'ALL',
-    label: 'All July (W1 - W5)',
-    dateRange: '07/01/2026 – 07/31/2026',
-    startDate: '2026-07-01',
-    endDate: '2026-08-04',
-    dayDates: {
-      Wednesday: 'All Wed',
-      Thursday: 'All Thu',
-      Friday: 'All Fri',
-      Saturday: 'All Sat',
-      Sunday: 'All Sun',
-      Monday: 'All Mon',
-      Tuesday: 'All Tue'
-    }
   }
 ];
 
@@ -150,135 +134,186 @@ export interface MultiWeekMatrixSummary {
   overallMaxTT: number;
   dailyWeekTotals: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>>;
   countryRows: MultiWeekDayMatrixRow[];
+  countryDayWeekShipments: Map<string, Shipment[]>;
+  countryTotalShipments: Map<string, Shipment[]>;
 }
 
-export function parsePickupDate(pickup: string | number | undefined): Date | null {
+const DAY_NAMES_BY_UTC_DAY: DayOfWeek[] = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+];
+
+/**
+ * Ultra-fast Date and Week Parser (Pre-computed integer comparisons, zero regex)
+ */
+export function fastClassifyPickup(pickup: string | number | undefined): { wId: SingleWeekId; day: DayOfWeek } | null {
   if (!pickup) return null;
-  if (typeof pickup === 'number' || !isNaN(Number(pickup))) {
-    const serial = Number(pickup);
-    const utcDays = Math.floor(serial - 25569);
-    return new Date(utcDays * 86400 * 1000);
+  let d: Date;
+  if (typeof pickup === 'number') {
+    const utcDays = Math.floor(pickup - 25569);
+    d = new Date(utcDays * 86400 * 1000);
+  } else {
+    d = new Date(pickup);
   }
-  const d = new Date(pickup);
-  return isNaN(d.getTime()) ? null : d;
-}
+  const time = d.getTime();
+  if (isNaN(time)) return null;
 
-export function getWeekIdForDate(date: Date): WeekId | 'W0' {
-  const iso = date.toISOString().split('T')[0];
-  if (iso >= '2026-07-01' && iso <= '2026-07-07') return 'W1';
-  if (iso >= '2026-07-08' && iso <= '2026-07-14') return 'W2';
-  if (iso >= '2026-07-15' && iso <= '2026-07-21') return 'W3';
-  if (iso >= '2026-07-22' && iso <= '2026-07-28') return 'W4';
-  if (iso >= '2026-07-29' && iso <= '2026-08-04') return 'W5';
-  return 'W0';
-}
+  const year = d.getUTCFullYear();
+  const month = d.getUTCMonth(); // 0-indexed: July is 6, Aug is 7
+  const date = d.getUTCDate();
+  const day = DAY_NAMES_BY_UTC_DAY[d.getUTCDay()];
 
-export function getDayOfWeek(date: Date): DayOfWeek {
-  const dayNames: DayOfWeek[] = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
-  ];
-  return dayNames[date.getUTCDay()];
+  if (year !== 2026) return null;
+
+  let wId: SingleWeekId | null = null;
+  if (month === 6) {
+    if (date >= 1 && date <= 7) wId = 'W1';
+    else if (date >= 8 && date <= 14) wId = 'W2';
+    else if (date >= 15 && date <= 21) wId = 'W3';
+    else if (date >= 22 && date <= 28) wId = 'W4';
+    else if (date >= 29 && date <= 31) wId = 'W5';
+  } else if (month === 7 && date <= 4) {
+    wId = 'W5';
+  }
+
+  if (!wId) return null;
+  return { wId, day };
 }
 
 export function calculateMetricsForTTs(tts: number[]): DayMetricCell {
-  if (tts.length === 0) {
-    return {
-      count: 0,
-      avgTT: 0,
-      minTT: 0,
-      maxTT: 0,
-      hasData: false
-    };
+  const len = tts.length;
+  if (len === 0) {
+    return { count: 0, avgTT: 0, minTT: 0, maxTT: 0, hasData: false };
   }
 
-  // Filter for valid delivered transit times (excluding 0 or shipments with no POD)
-  const validTTs = tts.filter((tt) => typeof tt === 'number' && !isNaN(tt) && tt > 0);
+  let sum = 0;
+  let validCount = 0;
+  let min = Infinity;
+  let max = -Infinity;
 
-  if (validTTs.length === 0) {
-    return {
-      count: tts.length,
-      avgTT: 0,
-      minTT: 0,
-      maxTT: 0,
-      hasData: true
-    };
+  for (let i = 0; i < len; i++) {
+    const tt = tts[i];
+    if (typeof tt === 'number' && !isNaN(tt) && tt > 0) {
+      sum += tt;
+      validCount++;
+      if (tt < min) min = tt;
+      if (tt > max) max = tt;
+    }
   }
 
-  const sum = validTTs.reduce((acc, curr) => acc + curr, 0);
+  if (validCount === 0) {
+    return { count: len, avgTT: 0, minTT: 0, maxTT: 0, hasData: true };
+  }
+
   return {
-    count: tts.length,
-    avgTT: Number((sum / validTTs.length).toFixed(2)),
-    minTT: Number(Math.min(...validTTs).toFixed(2)),
-    maxTT: Number(Math.max(...validTTs).toFixed(2)),
+    count: len,
+    avgTT: Number((sum / validCount).toFixed(2)),
+    minTT: Number(min.toFixed(2)),
+    maxTT: Number(max.toFixed(2)),
     hasData: true
   };
 }
 
 // -------------------------------------------------------------
-// COMPUTE FULL MULTI-WEEK SIDE-BY-SIDE MATRIX (WED..TUE x W1..W5)
+// ULTRA-FAST SINGLE-PASS COMPUTE FOR MULTI-WEEK MATRIX (O(N) Linear Time)
 // -------------------------------------------------------------
 export function computeMultiWeekDayMatrix(shipments: Shipment[]): MultiWeekMatrixSummary {
-  // Filter for July shipments (W1..W5)
-  const julyShipments = shipments.filter((s) => {
-    const d = parsePickupDate(s.pickup);
-    if (!d) return false;
-    const wId = getWeekIdForDate(d);
-    return wId !== 'W0';
+  const allTTs: number[] = [];
+  
+  // Global day-week buckets
+  const globalDayWeekTTs: Record<DayOfWeek, Record<SingleWeekId, number[]>> = {} as any;
+  DAYS_OF_WEEK.forEach((d) => {
+    globalDayWeekTTs[d] = { W1: [], W2: [], W3: [], W4: [], W5: [] };
   });
 
-  const allTTs = julyShipments.map((s) => s.tt);
+  // Country-level buckets
+  const countryTTMap = new Map<string, number[]>();
+  const countryDayWeekTTMap = new Map<string, Record<DayOfWeek, Record<SingleWeekId, number[]>>>();
+
+  // Pre-cached shipment arrays for instant modal drill-down
+  const countryDayWeekShipments = new Map<string, Shipment[]>();
+  const countryTotalShipments = new Map<string, Shipment[]>();
+
+  // SINGLE PASS LOOP OVER SHIPMENTS (O(N))
+  const total = shipments.length;
+  for (let i = 0; i < total; i++) {
+    const s = shipments[i];
+    const classified = fastClassifyPickup(s.pickup);
+    if (!classified) continue;
+
+    const { wId, day } = classified;
+    const tt = s.tt;
+    allTTs.push(tt);
+    globalDayWeekTTs[day][wId].push(tt);
+
+    const dest = (s.destination || 'UNKNOWN').toUpperCase().trim();
+
+    // Country All TTs
+    let cTTs = countryTTMap.get(dest);
+    if (!cTTs) {
+      cTTs = [];
+      countryTTMap.set(dest, cTTs);
+    }
+    cTTs.push(tt);
+
+    // Country Day-Week Matrix TTs
+    let cDW = countryDayWeekTTMap.get(dest);
+    if (!cDW) {
+      const newCDW: Record<DayOfWeek, Record<SingleWeekId, number[]>> = {} as any;
+      DAYS_OF_WEEK.forEach((d) => {
+        newCDW[d] = { W1: [], W2: [], W3: [], W4: [], W5: [] };
+      });
+      cDW = newCDW;
+      countryDayWeekTTMap.set(dest, cDW);
+    }
+    cDW[day][wId].push(tt);
+
+    // Country Total Shipments Cache
+    let cTotalShipments = countryTotalShipments.get(dest);
+    if (!cTotalShipments) {
+      cTotalShipments = [];
+      countryTotalShipments.set(dest, cTotalShipments);
+    }
+    cTotalShipments.push(s);
+
+    // Country Day-Week Shipments Cache Key: `${dest}-${day}-${wId}`
+    const dwKey = `${dest}-${day}-${wId}`;
+    let cDWShipments = countryDayWeekShipments.get(dwKey);
+    if (!cDWShipments) {
+      cDWShipments = [];
+      countryDayWeekShipments.set(dwKey, cDWShipments);
+    }
+    cDWShipments.push(s);
+  }
+
+  // Calculate Overall Metrics
   const overall = calculateMetricsForTTs(allTTs);
 
-  // Daily Week Column Totals (ALL COUNTRIES)
+  // Calculate Daily-Week Totals (ALL COUNTRIES)
   const dailyWeekTotals: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>> = {} as any;
-  DAYS_OF_WEEK.forEach((day) => {
-    dailyWeekTotals[day] = {} as any;
+  DAYS_OF_WEEK.forEach((d) => {
+    dailyWeekTotals[d] = {} as any;
     WEEKS_LIST.forEach((wId) => {
-      const cellTTs: number[] = [];
-      for (const s of julyShipments) {
-        const d = parsePickupDate(s.pickup);
-        if (d && getWeekIdForDate(d) === wId && getDayOfWeek(d) === day) {
-          cellTTs.push(s.tt);
-        }
-      }
-      dailyWeekTotals[day][wId] = calculateMetricsForTTs(cellTTs);
+      dailyWeekTotals[d][wId] = calculateMetricsForTTs(globalDayWeekTTs[d][wId]);
     });
   });
 
-  // Group by Country
-  const countryMap = new Map<string, Shipment[]>();
-  for (const s of julyShipments) {
-    const dest = (s.destination || 'UNKNOWN').toUpperCase().trim();
-    if (!countryMap.has(dest)) {
-      countryMap.set(dest, []);
-    }
-    countryMap.get(dest)!.push(s);
-  }
-
+  // Build Country Rows
   const countryRows: MultiWeekDayMatrixRow[] = [];
-
-  countryMap.forEach((cShipments, country) => {
-    const cTTs = cShipments.map((s) => s.tt);
+  countryDayWeekTTMap.forEach((cDW, country) => {
+    const cTTs = countryTTMap.get(country) || [];
     const cOverall = calculateMetricsForTTs(cTTs);
 
     const dayWeekMetrics: Record<DayOfWeek, Record<SingleWeekId, DayMetricCell>> = {} as any;
-    DAYS_OF_WEEK.forEach((day) => {
-      dayWeekMetrics[day] = {} as any;
+    DAYS_OF_WEEK.forEach((d) => {
+      dayWeekMetrics[d] = {} as any;
       WEEKS_LIST.forEach((wId) => {
-        const cellTTs: number[] = [];
-        for (const s of cShipments) {
-          const d = parsePickupDate(s.pickup);
-          if (d && getWeekIdForDate(d) === wId && getDayOfWeek(d) === day) {
-            cellTTs.push(s.tt);
-          }
-        }
-        dayWeekMetrics[day][wId] = calculateMetricsForTTs(cellTTs);
+        dayWeekMetrics[d][wId] = calculateMetricsForTTs(cDW[d][wId]);
       });
     });
 
@@ -296,13 +331,15 @@ export function computeMultiWeekDayMatrix(shipments: Shipment[]): MultiWeekMatri
   countryRows.sort((a, b) => b.totalCount - a.totalCount);
 
   return {
-    totalShipments: julyShipments.length,
+    totalShipments: allTTs.length,
     totalCountries: countryRows.length,
     overallAvgTT: overall.avgTT,
     overallMinTT: overall.minTT,
     overallMaxTT: overall.maxTT,
     dailyWeekTotals,
-    countryRows
+    countryRows,
+    countryDayWeekShipments,
+    countryTotalShipments
   };
 }
 
@@ -316,7 +353,6 @@ export function exportMultiWeekMatrixToExcel(
   const sheetData: any[][] = [];
 
   // Row 1: Header - Super Groupings (Day of Week)
-  // Format: [ "Country", "Total Volume", "Overall Avg TT", "Wednesday", "", "", "", "", "Thursday", ... ]
   const headerRow1: any[] = ['Country', 'Total Volume', 'Overall Avg TT (Days)'];
   DAYS_OF_WEEK.forEach((day) => {
     headerRow1.push(day.toUpperCase(), '', '', '', '');
@@ -324,7 +360,6 @@ export function exportMultiWeekMatrixToExcel(
   sheetData.push(headerRow1);
 
   // Row 2: Header - Sub-columns: W1..W5 per Day
-  // Format: [ "", "", "", "W1 (07/01)", "W2 (07/08)", ... ]
   const headerRow2: any[] = ['', '', ''];
   DAYS_OF_WEEK.forEach((day) => {
     WEEKS_LIST.forEach((wId) => {
