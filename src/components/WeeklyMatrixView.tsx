@@ -25,10 +25,7 @@ import {
   MultiWeekMatrixSummary,
   computeMultiWeekDayMatrix,
   exportMultiWeekMatrixToExcel,
-  exportMultiWeekMatrixToCSV,
-  parsePickupDate,
-  getWeekIdForDate,
-  getDayOfWeek
+  exportMultiWeekMatrixToCSV
 } from '../utils/weeklyMatrixAnalytics';
 
 interface WeeklyMatrixViewProps {
@@ -152,17 +149,10 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   };
 
-  // Handler to open AWB drill-down for a country on a specific day & week
+  // Handler to open AWB drill-down for a country on a specific day & week (Instant O(1) Lookup)
   const handleInspectCell = (country: string, day: DayOfWeek, weekId: SingleWeekId) => {
-    const matchingShipments = filteredShipments.filter((s) => {
-      const destMatch = (s.destination || '').toUpperCase().trim() === country.toUpperCase().trim();
-      if (!destMatch) return false;
-
-      const d = parsePickupDate(s.pickup);
-      if (!d) return false;
-
-      return getWeekIdForDate(d) === weekId && getDayOfWeek(d) === day;
-    });
+    const dwKey = `${country.toUpperCase().trim()}-${day}-${weekId}`;
+    const matchingShipments = matrixSummary.countryDayWeekShipments.get(dwKey) || [];
 
     const wMeta = WEEKS_METADATA.find((w) => w.id === weekId);
     const dateLabel = wMeta?.dayDates[day] || '';
@@ -176,17 +166,9 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   };
 
-  // Handler to open AWB drill-down for whole country across all weeks
+  // Handler to open AWB drill-down for whole country across all weeks (Instant O(1) Lookup)
   const handleInspectCountryTotal = (country: string) => {
-    const matchingShipments = filteredShipments.filter((s) => {
-      const destMatch = (s.destination || '').toUpperCase().trim() === country.toUpperCase().trim();
-      if (!destMatch) return false;
-
-      const d = parsePickupDate(s.pickup);
-      if (!d) return false;
-
-      return getWeekIdForDate(d) !== 'W0';
-    });
+    const matchingShipments = matrixSummary.countryTotalShipments.get(country.toUpperCase().trim()) || [];
 
     setInspectedCell({
       country,
