@@ -5,6 +5,8 @@ import {
   Download,
   Globe,
   Clock,
+  CheckCircle2,
+  TrendingUp,
   RotateCcw,
   Plane,
   X,
@@ -13,8 +15,8 @@ import {
   Layers,
   ChevronDown,
   Check,
-  CalendarRange,
-  MousePointerClick
+  Filter,
+  CalendarRange
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import {
@@ -48,9 +50,9 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   filteredShipments,
   rawShipments
 }) => {
-  // Multi-select state for Calendar Days and Weeks (Starts UNSELECTED per user request)
-  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([]);
-  const [selectedWeeks, setSelectedWeeks] = useState<SingleWeekId[]>([]);
+  // Multi-select state for Calendar Days and Weeks
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([...DAYS_OF_WEEK]);
+  const [selectedWeeks, setSelectedWeeks] = useState<SingleWeekId[]>([...WEEKS_LIST]);
 
   // Dropdown open states
   const [isDayDropdownOpen, setIsDayDropdownOpen] = useState<boolean>(false);
@@ -101,8 +103,6 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     return WEEKS_LIST.filter((w) => selectedWeeks.includes(w));
   }, [selectedWeeks]);
 
-  const isMatrixReady = activeDays.length > 0 && activeWeeks.length > 0;
-
   // Filter & Sort Country Rows
   const displayedRows = useMemo(() => {
     let rows = matrixSummary.countryRows;
@@ -126,12 +126,14 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   }, [matrixSummary.countryRows, searchQuery, sortBy, sortOrder]);
 
   // Active filter check & Reset handler
-  const hasActiveFilters = searchQuery.trim() !== '' || selectedDays.length > 0 || selectedWeeks.length > 0;
+  const isAllDaysSelected = selectedDays.length === DAYS_OF_WEEK.length;
+  const isAllWeeksSelected = selectedWeeks.length === WEEKS_LIST.length;
+  const hasActiveFilters = searchQuery.trim() !== '' || !isAllDaysSelected || !isAllWeeksSelected;
 
   const handleResetFilters = () => {
     setSearchQuery('');
-    setSelectedDays([]);
-    setSelectedWeeks([]);
+    setSelectedDays([...DAYS_OF_WEEK]);
+    setSelectedWeeks([...WEEKS_LIST]);
     setSortBy('volume');
     setSortOrder('desc');
   };
@@ -140,6 +142,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   const toggleDay = (day: DayOfWeek) => {
     setSelectedDays((prev) => {
       if (prev.includes(day)) {
+        if (prev.length === 1) return prev; // Keep at least one
         return prev.filter((d) => d !== day);
       } else {
         return [...prev, day];
@@ -151,6 +154,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   const toggleWeek = (weekId: SingleWeekId) => {
     setSelectedWeeks((prev) => {
       if (prev.includes(weekId)) {
+        if (prev.length === 1) return prev; // Keep at least one
         return prev.filter((w) => w !== weekId);
       } else {
         return [...prev, weekId];
@@ -202,10 +206,6 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
 
   // Daily Trend Comparison Chart Data (Filtered to active weeks)
   const comparisonChartData = useMemo(() => {
-    if (!isMatrixReady) {
-      return { labels: [], datasets: [] };
-    }
-
     const labels = activeDays.map((d) => d.slice(0, 3));
     const colors: Record<SingleWeekId, { border: string; bg: string }> = {
       W1: { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.7)' },
@@ -237,7 +237,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
       labels,
       datasets
     };
-  }, [matrixSummary, activeDays, activeWeeks, isMatrixReady]);
+  }, [matrixSummary, activeDays, activeWeeks]);
 
   const chartOptions = {
     responsive: true,
@@ -309,7 +309,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   Delivery Comparison: Day-by-Day (W1 – W5 Side-by-Side)
                 </h2>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">
-                  Select Calendar Days and Weekly Cycles using the filter buttons to customize your side-by-side view.
+                  Multi-week daily dispatch analysis across all calendar days and weekly cycles.
                 </p>
               </div>
             </div>
@@ -389,10 +389,10 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
             </div>
           </div>
 
-          {/* Selected Columns Counter */}
+          {/* Calendar Days Matrix */}
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Selected Slots</span>
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Visible Matrix</span>
               <Calendar className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="mt-2">
@@ -400,7 +400,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 {activeDays.length * activeWeeks.length} <span className="text-xs font-normal text-slate-400">Columns</span>
               </div>
               <span className="text-xs text-slate-400 font-semibold">
-                {activeDays.length} {activeDays.length === 1 ? 'Day' : 'Days'} × {activeWeeks.length} {activeWeeks.length === 1 ? 'Week' : 'Weeks'}
+                {activeDays.length} Days × {activeWeeks.length} Weeks
               </span>
             </div>
           </div>
@@ -414,7 +414,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               </span>
             </div>
             <span className="text-xs font-mono font-bold text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-800">
-              Select days & weeks to view
+              W1 through W5 Side-by-Side
             </span>
           </div>
 
@@ -428,30 +428,16 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 Weekly Day-by-Day Transit Time Progression
               </h3>
               <p className="text-[11px] text-slate-400">
-                {isMatrixReady
-                  ? 'Comparing average transit time trajectories across selected calendar days'
-                  : 'Select at least one Calendar Day and Week to view progression curve'}
+                Comparing average transit time trajectories across selected calendar days
               </p>
             </div>
-            {isMatrixReady && (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                {activeWeeks.join(', ')}
-              </span>
-            )}
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+              {activeWeeks.join(', ')}
+            </span>
           </div>
 
-          <div className="h-56 relative w-full flex items-center justify-center">
-            {isMatrixReady ? (
-              <Chart type="line" data={comparisonChartData as any} options={chartOptions as any} />
-            ) : (
-              <div className="text-center p-6 space-y-2 text-slate-500">
-                <CalendarRange className="w-8 h-8 mx-auto text-slate-600 opacity-60" />
-                <p className="text-xs font-bold text-slate-400">No days or weeks selected</p>
-                <p className="text-[11px] text-slate-500">
-                  Pick days from <span className="text-blue-400 font-semibold">Calendar Day</span> and weeks from <span className="text-indigo-400 font-semibold">Week</span> dropdowns.
-                </p>
-              </div>
-            )}
+          <div className="h-56 relative w-full">
+            <Chart type="line" data={comparisonChartData as any} options={chartOptions as any} />
           </div>
         </div>
 
@@ -460,7 +446,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
       {/* 3. MULTI-WEEK SIDE-BY-SIDE COUNTRY MATRIX TABLE */}
       <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-4 border border-slate-800/80 bg-slate-950/80">
         
-        {/* Table Toolbar with 2 Multi-Select Filter Buttons: Calendar Day & Week */}
+        {/* Table Toolbar with 2 New Multi-Select Filter Buttons: Calendar Day & Week */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pb-3 border-b border-slate-800">
           
           {/* Left Controls: Search Country */}
@@ -496,20 +482,18 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   setIsWeekDropdownOpen(false);
                 }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                  selectedDays.length > 0
+                  !isAllDaysSelected
                     ? 'bg-blue-600 text-white border-blue-400 shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30'
-                    : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+                    : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
                 }`}
-                title="Select Calendar Days to compare (Wednesday – Tuesday)"
+                title="Filter by Calendar Days (Wednesday – Tuesday)"
               >
-                <Calendar className={`w-3.5 h-3.5 ${selectedDays.length > 0 ? 'text-white' : 'text-blue-400'}`} />
+                <Calendar className="w-3.5 h-3.5 text-blue-400" />
                 <span>Calendar Day</span>
                 <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
-                  selectedDays.length > 0
-                    ? 'bg-white/20 text-white'
-                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                  !isAllDaysSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'
                 }`}>
-                  {selectedDays.length === 0 ? 'Select Day' : `${selectedDays.length} selected`}
+                  {selectedDays.length === DAYS_OF_WEEK.length ? 'All 7' : `${selectedDays.length}/7`}
                 </span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isDayDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -521,20 +505,13 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
                       Select Calendar Days
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => setSelectedDays([...DAYS_OF_WEEK])}
-                        className="text-[10px] font-bold text-blue-400 hover:text-blue-300 px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-800/80 cursor-pointer"
+                        className="text-[10px] font-bold text-blue-400 hover:text-blue-300 px-1 py-0.5 rounded hover:bg-blue-950 cursor-pointer"
                       >
                         All
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDays([])}
-                        className="text-[10px] font-bold text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 cursor-pointer"
-                      >
-                        Clear
                       </button>
                     </div>
                   </div>
@@ -579,7 +556,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsDayDropdownOpen(false)}
-                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg cursor-pointer"
                     >
                       Done
                     </button>
@@ -597,20 +574,18 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   setIsDayDropdownOpen(false);
                 }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                  selectedWeeks.length > 0
+                  !isAllWeeksSelected
                     ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-500/25 ring-2 ring-indigo-500/30'
-                    : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+                    : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
                 }`}
-                title="Select Weekly Cycles to compare (W1 through W5)"
+                title="Filter by Weekly Cycles (W1 through W5)"
               >
-                <CalendarRange className={`w-3.5 h-3.5 ${selectedWeeks.length > 0 ? 'text-white' : 'text-indigo-400'}`} />
+                <CalendarRange className="w-3.5 h-3.5 text-indigo-400" />
                 <span>Week</span>
                 <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
-                  selectedWeeks.length > 0
-                    ? 'bg-white/20 text-white'
-                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                  !isAllWeeksSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'
                 }`}>
-                  {selectedWeeks.length === 0 ? 'Select Week' : `${selectedWeeks.length} selected`}
+                  {selectedWeeks.length === WEEKS_LIST.length ? 'All 5' : `${selectedWeeks.length}/5`}
                 </span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isWeekDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -622,20 +597,13 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
                       Select Weekly Cycles
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => setSelectedWeeks([...WEEKS_LIST])}
-                        className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/80 cursor-pointer"
+                        className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-1 py-0.5 rounded hover:bg-indigo-950 cursor-pointer"
                       >
                         All
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedWeeks([])}
-                        className="text-[10px] font-bold text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 cursor-pointer"
-                      >
-                        Clear
                       </button>
                     </div>
                   </div>
@@ -681,7 +649,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsWeekDropdownOpen(false)}
-                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-2.5 py-1 rounded-lg cursor-pointer"
                     >
                       Done
                     </button>
@@ -700,7 +668,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   ? 'bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500/25 hover:scale-[1.02] cursor-pointer shadow-sm'
                   : 'bg-slate-900/60 text-slate-500 border-slate-800 opacity-50 cursor-not-allowed'
               }`}
-              title="Reset day and week selections to empty"
+              title="Reset day/week filters and search to default"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${hasActiveFilters ? 'text-rose-400' : 'text-slate-500'}`} />
               <span>Reset</span>
@@ -715,197 +683,158 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
 
         {/* High-Density Multi-Week Horizontal Matrix Table */}
         <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/50 relative shadow-inner max-h-[700px] overflow-y-auto">
-          {isMatrixReady ? (
-            <table className="w-full text-left text-xs border-collapse border-spacing-0">
-              <thead className="sticky top-0 z-30 shadow-md">
+          <table className="w-full text-left text-xs border-collapse border-spacing-0">
+            <thead className="sticky top-0 z-30 shadow-md">
+              
+              {/* Row 1 of Headers: Day of Week Groups (Wednesday, Thursday, Friday, etc.) */}
+              <tr className="bg-slate-950 text-[11px] uppercase tracking-wider font-black text-slate-300 border-b border-slate-800">
                 
-                {/* Row 1 of Headers: Day of Week Groups (Wednesday, Thursday, Friday, etc.) */}
-                <tr className="bg-slate-950 text-[11px] uppercase tracking-wider font-black text-slate-300 border-b border-slate-800">
-                  
-                  {/* Fixed Column 1: Country */}
-                  <th
-                    rowSpan={2}
-                    className="py-3 px-4 w-36 min-w-[140px] sticky left-0 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-xl"
-                  >
-                    <div className="text-white font-black flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Country</span>
-                    </div>
-                  </th>
+                {/* Fixed Column 1: Country */}
+                <th
+                  rowSpan={2}
+                  className="py-3 px-4 w-36 min-w-[140px] sticky left-0 z-40 bg-slate-950 border-r-2 border-slate-700 shadow-xl"
+                >
+                  <div className="text-white font-black flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Country</span>
+                  </div>
+                </th>
 
-                  {/* Column 2: Month Total (Scrolls naturally) */}
-                  <th
-                    rowSpan={2}
-                    className="py-3 px-3 w-28 min-w-[110px] text-center bg-slate-950/90 border-r-2 border-slate-700 text-slate-300 font-black"
-                  >
-                    <div>Month Total</div>
-                    <span className="text-[10px] text-slate-500 font-normal">July AWBs</span>
-                  </th>
+                {/* Column 2: Month Total (Scrolls naturally) */}
+                <th
+                  rowSpan={2}
+                  className="py-3 px-3 w-28 min-w-[110px] text-center bg-slate-950/90 border-r-2 border-slate-700 text-slate-300 font-black"
+                >
+                  <div>Month Total</div>
+                  <span className="text-[10px] text-slate-500 font-normal">July AWBs</span>
+                </th>
 
-                  {/* Day Header Super-Columns (Colspan matching activeWeeks.length) */}
-                  {activeDays.map((day, dIdx) => {
+                {/* Day Header Super-Columns (Colspan matching activeWeeks.length) */}
+                {activeDays.map((day, dIdx) => {
+                  return (
+                    <th
+                      key={day}
+                      colSpan={activeWeeks.length}
+                      className={`py-2 px-3 text-center border-r-2 border-slate-700 ${getDayHeaderBg(dIdx)}`}
+                    >
+                      <div className="font-black text-sm tracking-wide flex items-center justify-center gap-1.5">
+                        <span>{day.toUpperCase()}</span>
+                      </div>
+                    </th>
+                  );
+                })}
+
+              </tr>
+
+              {/* Row 2 of Headers: Sub-columns (W1, W2, W3, etc.) */}
+              <tr className="bg-slate-900/95 text-[10px] uppercase font-black text-slate-400 border-b-2 border-slate-700">
+                {activeDays.map((day) => {
+                  return activeWeeks.map((wId) => {
+                    const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
+                    const dateLabel = wMeta?.dayDates[day] || '';
                     return (
                       <th
-                        key={day}
-                        colSpan={activeWeeks.length}
-                        className={`py-2 px-3 text-center border-r-2 border-slate-700 ${getDayHeaderBg(dIdx)}`}
+                        key={`${day}-${wId}`}
+                        className="py-2 px-2 text-center min-w-[90px] border-r border-slate-800 bg-slate-900/90 last:border-r-2 last:border-slate-700"
                       >
-                        <div className="font-black text-sm tracking-wide flex items-center justify-center gap-1.5">
-                          <span>{day.toUpperCase()}</span>
-                        </div>
+                        <div className="text-white font-black">{wId}</div>
+                        <div className="text-[9px] font-mono text-blue-400 font-semibold">{dateLabel}</div>
                       </th>
                     );
-                  })}
+                  });
+                })}
+              </tr>
 
-                </tr>
+            </thead>
 
-                {/* Row 2 of Headers: Sub-columns (W1, W2, W3, etc.) */}
-                <tr className="bg-slate-900/95 text-[10px] uppercase font-black text-slate-400 border-b-2 border-slate-700">
-                  {activeDays.map((day) => {
-                    return activeWeeks.map((wId) => {
-                      const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
-                      const dateLabel = wMeta?.dayDates[day] || '';
-                      return (
-                        <th
-                          key={`${day}-${wId}`}
-                          className="py-2 px-2 text-center min-w-[90px] border-r border-slate-800 bg-slate-900/90 last:border-r-2 last:border-slate-700"
-                        >
-                          <div className="text-white font-black">{wId}</div>
-                          <div className="text-[9px] font-mono text-blue-400 font-semibold">{dateLabel}</div>
-                        </th>
-                      );
-                    });
-                  })}
-                </tr>
-
-              </thead>
-
-              <tbody className="divide-y divide-slate-800/60 font-sans">
-                {displayedRows.length > 0 ? (
-                  displayedRows.map((row, idx) => {
-                    return (
-                      <tr
-                        key={row.country}
-                        className="hover:bg-slate-800/40 transition-colors group"
+            <tbody className="divide-y divide-slate-800/60 font-sans">
+              {displayedRows.length > 0 ? (
+                displayedRows.map((row, idx) => {
+                  return (
+                    <tr
+                      key={row.country}
+                      className="hover:bg-slate-800/40 transition-colors group"
+                    >
+                      {/* Fixed Column 1: Country Name (Sticky on Left) */}
+                      <td
+                        onClick={() => handleInspectCountryTotal(row.country)}
+                        className="py-2.5 px-4 w-36 min-w-[140px] sticky left-0 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-xl transition-colors cursor-pointer"
+                        title={`Click to view all ${row.totalCount} shipments for ${row.country}`}
                       >
-                        {/* Fixed Column 1: Country Name (Sticky on Left) */}
-                        <td
-                          onClick={() => handleInspectCountryTotal(row.country)}
-                          className="py-2.5 px-4 w-36 min-w-[140px] sticky left-0 z-20 bg-slate-950 group-hover:bg-slate-900 border-r-2 border-slate-700 shadow-xl transition-colors cursor-pointer"
-                          title={`Click to view all ${row.totalCount} shipments for ${row.country}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-slate-500 font-mono w-4">
-                                {idx + 1}.
-                              </span>
-                              <span className="font-mono font-black text-sm text-white group-hover:text-blue-400 transition-colors">
-                                {row.country}
-                              </span>
-                            </div>
-                            <Eye className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity text-blue-400" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-500 font-mono w-4">
+                              {idx + 1}.
+                            </span>
+                            <span className="font-mono font-black text-sm text-white group-hover:text-blue-400 transition-colors">
+                              {row.country}
+                            </span>
                           </div>
-                        </td>
+                          <Eye className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity text-blue-400" />
+                        </div>
+                      </td>
 
-                        {/* Column 2: Total Volume & Avg TT (Scrolls naturally) */}
-                        <td
-                          onClick={() => handleInspectCountryTotal(row.country)}
-                          className="py-2 px-3 w-28 min-w-[110px] text-center border-r-2 border-slate-700 bg-slate-950/40 group-hover:bg-slate-900/60 transition-colors cursor-pointer font-mono"
-                        >
-                          <div className="font-extrabold text-white text-xs">
-                            {row.totalCount.toLocaleString()}
-                          </div>
-                          <div className={`text-[11px] font-bold ${
-                            row.totalAvgTT <= 5 ? 'text-emerald-400' : row.totalAvgTT <= 8 ? 'text-amber-400' : 'text-rose-400'
-                          }`}>
-                            {row.totalAvgTT}d avg
-                          </div>
-                        </td>
+                      {/* Column 2: Total Volume & Avg TT (Scrolls naturally) */}
+                      <td
+                        onClick={() => handleInspectCountryTotal(row.country)}
+                        className="py-2 px-3 w-28 min-w-[110px] text-center border-r-2 border-slate-700 bg-slate-950/40 group-hover:bg-slate-900/60 transition-colors cursor-pointer font-mono"
+                      >
+                        <div className="font-extrabold text-white text-xs">
+                          {row.totalCount.toLocaleString()}
+                        </div>
+                        <div className={`text-[11px] font-bold ${
+                          row.totalAvgTT <= 5 ? 'text-emerald-400' : row.totalAvgTT <= 8 ? 'text-amber-400' : 'text-rose-400'
+                        }`}>
+                          {row.totalAvgTT}d avg
+                        </div>
+                      </td>
 
-                        {/* Dynamic Day-Week Cells based on user selection */}
-                        {activeDays.map((day) => {
-                          return activeWeeks.map((wId) => {
-                            const cell = row.dayWeekMetrics[day][wId];
-                            return (
-                              <td
-                                key={`${row.country}-${day}-${wId}`}
-                                onClick={() => cell.hasData && cell.count > 0 && handleInspectCell(row.country, day, wId)}
-                                className={`py-1.5 px-1.5 text-center border-r border-slate-800/60 last:border-r-2 last:border-slate-700 transition-colors ${
-                                  cell.hasData && cell.count > 0 ? 'hover:bg-blue-600/15 cursor-pointer' : ''
-                                }`}
-                                title={cell.hasData && cell.count > 0 ? `Click to view ${cell.count} AWBs for ${row.country} on ${day} (${wId})` : undefined}
-                              >
-                                {cell.hasData && cell.count > 0 ? (
-                                  <div className="p-1 rounded-lg transition-all hover:scale-[1.03]">
-                                    <div className={`inline-block px-1.5 py-0.5 rounded font-mono font-black text-xs border shadow-sm ${getTTColorClass(cell.avgTT)}`}>
-                                      {cell.avgTT}d
-                                    </div>
-                                    <div className="text-[9px] text-slate-400 font-mono mt-0.5">
-                                      {cell.minTT}d – {cell.maxTT}d
-                                    </div>
-                                    <div className="text-[9px] text-slate-500 font-semibold">
-                                      {cell.count} {cell.count === 1 ? 'AWB' : 'AWBs'}
-                                    </div>
+                      {/* Dynamic Day-Week Cells based on user selection */}
+                      {activeDays.map((day) => {
+                        return activeWeeks.map((wId) => {
+                          const cell = row.dayWeekMetrics[day][wId];
+                          return (
+                            <td
+                              key={`${row.country}-${day}-${wId}`}
+                              onClick={() => cell.hasData && cell.count > 0 && handleInspectCell(row.country, day, wId)}
+                              className={`py-1.5 px-1.5 text-center border-r border-slate-800/60 last:border-r-2 last:border-slate-700 transition-colors ${
+                                cell.hasData && cell.count > 0 ? 'hover:bg-blue-600/15 cursor-pointer' : ''
+                              }`}
+                              title={cell.hasData && cell.count > 0 ? `Click to view ${cell.count} AWBs for ${row.country} on ${day} (${wId})` : undefined}
+                            >
+                              {cell.hasData && cell.count > 0 ? (
+                                <div className="p-1 rounded-lg transition-all hover:scale-[1.03]">
+                                  <div className={`inline-block px-1.5 py-0.5 rounded font-mono font-black text-xs border shadow-sm ${getTTColorClass(cell.avgTT)}`}>
+                                    {cell.avgTT}d
                                   </div>
-                                ) : (
-                                  <span className="text-slate-700 font-mono text-xs">-</span>
-                                )}
-                              </td>
-                            );
-                          });
-                        })}
+                                  <div className="text-[9px] text-slate-400 font-mono mt-0.5">
+                                    {cell.minTT}d – {cell.maxTT}d
+                                  </div>
+                                  <div className="text-[9px] text-slate-500 font-semibold">
+                                    {cell.count} {cell.count === 1 ? 'AWB' : 'AWBs'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-slate-700 font-mono text-xs">-</span>
+                              )}
+                            </td>
+                          );
+                        });
+                      })}
 
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={2 + activeDays.length * activeWeeks.length} className="py-12 text-center text-slate-400 space-y-1">
-                      <p className="font-bold">No countries found matching &quot;{searchQuery}&quot;</p>
-                      <p className="text-xs text-slate-500">Try searching for a different country code.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          ) : (
-            /* Friendly Interactive Prompt when no days or weeks are selected */
-            <div className="py-16 px-6 text-center space-y-4 max-w-lg mx-auto">
-              <div className="w-14 h-14 mx-auto rounded-3xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-glow">
-                <MousePointerClick className="w-7 h-7" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-white">
-                  Select Days and Weeks to Begin
-                </h4>
-                <p className="text-xs text-slate-400 font-medium">
-                  {selectedDays.length === 0 && selectedWeeks.length === 0
-                    ? 'Please select one or more Calendar Days and Weeks from the filter buttons above.'
-                    : selectedDays.length === 0
-                    ? 'Now select one or more Calendar Days (e.g. Wednesday, Thursday) from the Calendar Day button.'
-                    : 'Now select one or more Weeks (e.g. W1, W2, W3) from the Week button.'}
-                </p>
-              </div>
-
-              {/* Quick Preset Buttons */}
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDays([...DAYS_OF_WEEK])}
-                  className="px-3.5 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 text-xs font-bold transition-all cursor-pointer"
-                >
-                  Select All 7 Days
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedWeeks([...WEEKS_LIST])}
-                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs font-bold transition-all cursor-pointer"
-                >
-                  Select All 5 Weeks
-                </button>
-              </div>
-            </div>
-          )}
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={2 + activeDays.length * activeWeeks.length} className="py-12 text-center text-slate-400 space-y-1">
+                    <p className="font-bold">No countries found matching &quot;{searchQuery}&quot;</p>
+                    <p className="text-xs text-slate-500">Try searching for a different country code.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* Legend / Color Code Guide */}
@@ -927,7 +856,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           </div>
 
           <span className="text-slate-400 text-[11px]">
-            ← Scroll horizontally to view all selected days & weeks • Country column remains frozen on the left →
+            ← Scroll horizontally to view all calendar days • Country column remains frozen on the left →
           </span>
         </div>
 
