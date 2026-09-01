@@ -198,12 +198,26 @@ function calculateMetricsForTTs(tts: number[]): DayMetricCell {
       hasData: false
     };
   }
-  const sum = tts.reduce((acc, curr) => acc + curr, 0);
+
+  // Filter for valid delivered transit times (excluding 0 or shipments with no POD)
+  const validTTs = tts.filter((tt) => typeof tt === 'number' && !isNaN(tt) && tt > 0);
+
+  if (validTTs.length === 0) {
+    return {
+      count: tts.length,
+      avgTT: 0,
+      minTT: 0,
+      maxTT: 0,
+      hasData: true
+    };
+  }
+
+  const sum = validTTs.reduce((acc, curr) => acc + curr, 0);
   return {
     count: tts.length,
-    avgTT: Number((sum / tts.length).toFixed(2)),
-    minTT: Number(Math.min(...tts).toFixed(2)),
-    maxTT: Number(Math.max(...tts).toFixed(2)),
+    avgTT: Number((sum / validTTs.length).toFixed(2)),
+    minTT: Number(Math.min(...validTTs).toFixed(2)),
+    maxTT: Number(Math.max(...validTTs).toFixed(2)),
     hasData: true
   };
 }
