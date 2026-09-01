@@ -14,7 +14,8 @@ import {
   X,
   Eye,
   Calendar,
-  Layers
+  Layers,
+  RotateCcw
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import {
@@ -60,6 +61,15 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     dateLabel?: string;
     shipments: Shipment[];
   } | null>(null);
+
+  // Active table filter state & reset handler
+  const hasActiveTableFilters = searchQuery.trim() !== '' || sortBy !== 'volume' || sortOrder !== 'desc';
+
+  const handleResetTableFilters = () => {
+    setSearchQuery('');
+    setSortBy('volume');
+    setSortOrder('desc');
+  };
 
   // Compute Weekly Matrix for the chosen week
   const matrixSummary: WeeklyMatrixSummary = useMemo(() => {
@@ -490,6 +500,22 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 Country {sortBy === 'country' && (sortOrder === 'desc' ? '↓' : '↑')}
               </button>
             </div>
+
+            {/* Reset Toolbar Button */}
+            <button
+              type="button"
+              onClick={handleResetTableFilters}
+              disabled={!hasActiveTableFilters}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                hasActiveTableFilters
+                  ? 'bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500/25 hover:scale-[1.02] cursor-pointer shadow-sm'
+                  : 'bg-slate-900/60 text-slate-500 border-slate-800 opacity-50 cursor-not-allowed'
+              }`}
+              title="Reset country search and sorting to default"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${hasActiveTableFilters ? 'text-rose-400' : 'text-slate-500'}`} />
+              <span>Reset</span>
+            </button>
 
             <div className="text-xs text-slate-400 font-semibold px-2">
               Showing <strong className="text-white">{displayedRows.length}</strong> of <strong className="text-white">{matrixSummary.totalCountries}</strong> countries
