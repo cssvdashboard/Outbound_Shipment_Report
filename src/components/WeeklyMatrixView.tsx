@@ -584,54 +584,6 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 })}
               </tr>
 
-              {/* Row 3: ALL COUNTRIES (Summary Aggregate Header) */}
-              <tr className="bg-slate-900 text-xs font-bold text-white border-b-2 border-slate-700">
-                
-                {/* Fixed Summary Column 1 */}
-                <td className="py-2.5 px-4 sticky left-0 z-40 bg-slate-900 border-r-2 border-slate-700 shadow-2xl">
-                  <div className="font-black text-blue-400 flex items-center gap-1">
-                    <Globe className="w-3.5 h-3.5" />
-                    <span>ALL COUNTRIES (AVG)</span>
-                  </div>
-                </td>
-
-                {/* Fixed Summary Column 2 */}
-                <td className="py-2.5 px-3 text-center sticky left-40 z-40 bg-slate-900 border-r-2 border-slate-700 shadow-2xl font-mono">
-                  <div className="text-white font-extrabold">{matrixSummary.totalShipments.toLocaleString()}</div>
-                  <div className="text-[11px] text-indigo-300 font-bold">{matrixSummary.overallAvgTT}d avg</div>
-                </td>
-
-                {/* Daily Week Aggregates */}
-                {activeDays.map((day) => {
-                  return WEEKS_LIST.map((wId) => {
-                    const cell = matrixSummary.dailyWeekTotals[day][wId];
-                    return (
-                      <td
-                        key={`total-${day}-${wId}`}
-                        className="py-2 px-1.5 text-center border-r border-slate-800 bg-slate-900/70 last:border-r-2 last:border-slate-700"
-                      >
-                        {cell.hasData && cell.count > 0 ? (
-                          <div className="space-y-0.5">
-                            <span className={`inline-block px-1.5 py-0.5 rounded font-mono font-black text-xs border ${getTTColorClass(cell.avgTT)}`}>
-                              {cell.avgTT}d
-                            </span>
-                            <div className="text-[9px] text-slate-400 font-mono">
-                              {cell.minTT}d – {cell.maxTT}d
-                            </div>
-                            <div className="text-[9px] text-slate-400 font-bold">
-                              {cell.count.toLocaleString()} AWBs
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-slate-600 font-mono">-</span>
-                        )}
-                      </td>
-                    );
-                  });
-                })}
-
-              </tr>
-
             </thead>
 
             <tbody className="divide-y divide-slate-800/60 font-sans">
