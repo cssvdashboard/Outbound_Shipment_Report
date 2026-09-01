@@ -324,30 +324,16 @@ export function exportMultiWeekMatrixToExcel(
   sheetData.push(headerRow1);
 
   // Row 2: Header - Sub-columns: W1..W5 per Day
-  // Format: [ "", "", "", "W1 Wed (07/01)", "W2 Wed (07/08)", ... ]
+  // Format: [ "", "", "", "W1 (07/01)", "W2 (07/08)", ... ]
   const headerRow2: any[] = ['', '', ''];
   DAYS_OF_WEEK.forEach((day) => {
     WEEKS_LIST.forEach((wId) => {
       const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
       const dateLabel = wMeta?.dayDates[day] || '';
-      headerRow2.push(`${wId} ${day.slice(0, 3)} (${dateLabel})`);
+      headerRow2.push(`${wId} (${dateLabel})`);
     });
   });
   sheetData.push(headerRow2);
-
-  // Row 3: ALL COUNTRIES (Summary Row)
-  const summaryRow: any[] = [
-    'ALL COUNTRIES (AVG)',
-    matrixSummary.totalShipments,
-    matrixSummary.overallAvgTT
-  ];
-  DAYS_OF_WEEK.forEach((day) => {
-    WEEKS_LIST.forEach((wId) => {
-      const cell = matrixSummary.dailyWeekTotals[day][wId];
-      summaryRow.push(cell.hasData && cell.count > 0 ? cell.avgTT : '-');
-    });
-  });
-  sheetData.push(summaryRow);
 
   // Data Rows: Per Country
   matrixSummary.countryRows.forEach((row) => {
@@ -368,7 +354,7 @@ export function exportMultiWeekMatrixToExcel(
     { wch: 18 }, // Country
     { wch: 14 }, // Total Volume
     { wch: 20 }, // Overall Avg TT
-    ...Array(35).fill({ wch: 16 }) // 35 Day-Week columns
+    ...Array(35).fill({ wch: 14 }) // 35 Day-Week columns
   ];
 
   const workbook = XLSX.utils.book_new();
@@ -397,24 +383,10 @@ export function exportMultiWeekMatrixToCSV(
     WEEKS_LIST.forEach((wId) => {
       const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
       const dateLabel = wMeta?.dayDates[day] || '';
-      header2.push(`"${wId} ${day.slice(0, 3)} (${dateLabel})"`);
+      header2.push(`"${wId} (${dateLabel})"`);
     });
   });
   rows.push(header2.join(','));
-
-  // Row 3 Summary
-  const summary: string[] = [
-    '"ALL COUNTRIES (AVG)"',
-    String(matrixSummary.totalShipments),
-    String(matrixSummary.overallAvgTT)
-  ];
-  DAYS_OF_WEEK.forEach((day) => {
-    WEEKS_LIST.forEach((wId) => {
-      const cell = matrixSummary.dailyWeekTotals[day][wId];
-      summary.push(cell.hasData && cell.count > 0 ? String(cell.avgTT) : '"-"');
-    });
-  });
-  rows.push(summary.join(','));
 
   // Data Rows
   matrixSummary.countryRows.forEach((row) => {

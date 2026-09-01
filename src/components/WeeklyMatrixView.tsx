@@ -574,9 +574,9 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                     return (
                       <th
                         key={`${day}-${wId}`}
-                        className="py-2 px-2 text-center min-w-[100px] border-r border-slate-800 bg-slate-900/90 last:border-r-2 last:border-slate-700"
+                        className="py-2 px-2 text-center min-w-[90px] border-r border-slate-800 bg-slate-900/90 last:border-r-2 last:border-slate-700"
                       >
-                        <div className="text-white font-black">{wId} {day.slice(0, 3)}</div>
+                        <div className="text-white font-black">{wId}</div>
                         <div className="text-[9px] font-mono text-blue-400 font-semibold">{dateLabel}</div>
                       </th>
                     );
