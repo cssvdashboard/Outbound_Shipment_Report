@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   CalendarDays,
   Search,
@@ -13,8 +13,10 @@ import {
   Eye,
   Calendar,
   Layers,
-  ArrowRight,
-  Filter
+  ChevronDown,
+  Check,
+  Filter,
+  CalendarRange
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import {
@@ -48,10 +50,35 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   filteredShipments,
   rawShipments
 }) => {
-  const [selectedDayFilter, setSelectedDayFilter] = useState<'ALL' | DayOfWeek>('ALL');
+  // Multi-select state for Calendar Days and Weeks
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([...DAYS_OF_WEEK]);
+  const [selectedWeeks, setSelectedWeeks] = useState<SingleWeekId[]>([...WEEKS_LIST]);
+
+  // Dropdown open states
+  const [isDayDropdownOpen, setIsDayDropdownOpen] = useState<boolean>(false);
+  const [isWeekDropdownOpen, setIsWeekDropdownOpen] = useState<boolean>(false);
+
+  const dayDropdownRef = useRef<HTMLDivElement>(null);
+  const weekDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Search and Sort
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'volume' | 'avgTT' | 'country'>('volume');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dayDropdownRef.current && !dayDropdownRef.current.contains(event.target as Node)) {
+        setIsDayDropdownOpen(false);
+      }
+      if (weekDropdownRef.current && !weekDropdownRef.current.contains(event.target as Node)) {
+        setIsWeekDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Cell Inspection Modal State
   const [inspectedCell, setInspectedCell] = useState<{
@@ -62,16 +89,19 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     shipments: Shipment[];
   } | null>(null);
 
-  // Compute Full Multi-Week Matrix (Wed..Tue x W1..W5)
+  // Compute Full Multi-Week Matrix
   const matrixSummary: MultiWeekMatrixSummary = useMemo(() => {
     return computeMultiWeekDayMatrix(filteredShipments);
   }, [filteredShipments]);
 
-  // Active Days to render based on user filter
-  const activeDays: DayOfWeek[] = useMemo(() => {
-    if (selectedDayFilter === 'ALL') return [...DAYS_OF_WEEK];
-    return [selectedDayFilter];
-  }, [selectedDayFilter]);
+  // Active Days and Weeks to render in table
+  const activeDays = useMemo(() => {
+    return DAYS_OF_WEEK.filter((d) => selectedDays.includes(d));
+  }, [selectedDays]);
+
+  const activeWeeks = useMemo(() => {
+    return WEEKS_LIST.filter((w) => selectedWeeks.includes(w));
+  }, [selectedWeeks]);
 
   // Filter & Sort Country Rows
   const displayedRows = useMemo(() => {
@@ -95,14 +125,41 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   }, [matrixSummary.countryRows, searchQuery, sortBy, sortOrder]);
 
-  // Active toolbar filter check & Reset handler
-  const hasActiveFilters = searchQuery.trim() !== '' || sortBy !== 'volume' || sortOrder !== 'desc' || selectedDayFilter !== 'ALL';
+  // Active filter check & Reset handler
+  const isAllDaysSelected = selectedDays.length === DAYS_OF_WEEK.length;
+  const isAllWeeksSelected = selectedWeeks.length === WEEKS_LIST.length;
+  const hasActiveFilters = searchQuery.trim() !== '' || !isAllDaysSelected || !isAllWeeksSelected;
 
   const handleResetFilters = () => {
     setSearchQuery('');
+    setSelectedDays([...DAYS_OF_WEEK]);
+    setSelectedWeeks([...WEEKS_LIST]);
     setSortBy('volume');
     setSortOrder('desc');
-    setSelectedDayFilter('ALL');
+  };
+
+  // Day Toggle Handler
+  const toggleDay = (day: DayOfWeek) => {
+    setSelectedDays((prev) => {
+      if (prev.includes(day)) {
+        if (prev.length === 1) return prev; // Keep at least one
+        return prev.filter((d) => d !== day);
+      } else {
+        return [...prev, day];
+      }
+    });
+  };
+
+  // Week Toggle Handler
+  const toggleWeek = (weekId: SingleWeekId) => {
+    setSelectedWeeks((prev) => {
+      if (prev.includes(weekId)) {
+        if (prev.length === 1) return prev; // Keep at least one
+        return prev.filter((w) => w !== weekId);
+      } else {
+        return [...prev, weekId];
+      }
+    });
   };
 
   // Handler to open AWB drill-down for a country on a specific day & week
@@ -147,19 +204,19 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
     });
   };
 
-  // Daily Trend Comparison Chart Data (Across W1 to W5)
+  // Daily Trend Comparison Chart Data (Filtered to active weeks)
   const comparisonChartData = useMemo(() => {
-    const labels = DAYS_OF_WEEK.map((d) => d.slice(0, 3));
-    const colors = [
-      { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.7)' },  // W1 Blue
-      { border: '#10b981', bg: 'rgba(16, 185, 129, 0.7)' },  // W2 Green
-      { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.7)' },  // W3 Amber
-      { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.7)' },  // W4 Purple
-      { border: '#f43f5e', bg: 'rgba(244, 63, 94, 0.7)' }    // W5 Rose
-    ];
+    const labels = activeDays.map((d) => d.slice(0, 3));
+    const colors: Record<SingleWeekId, { border: string; bg: string }> = {
+      W1: { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.7)' },
+      W2: { border: '#10b981', bg: 'rgba(16, 185, 129, 0.7)' },
+      W3: { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.7)' },
+      W4: { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.7)' },
+      W5: { border: '#f43f5e', bg: 'rgba(244, 63, 94, 0.7)' }
+    };
 
-    const datasets = WEEKS_LIST.map((wId, idx) => {
-      const data = DAYS_OF_WEEK.map((day) => {
+    const datasets = activeWeeks.map((wId) => {
+      const data = activeDays.map((day) => {
         const cell = matrixSummary.dailyWeekTotals[day][wId];
         return cell.hasData && cell.count > 0 ? cell.avgTT : null;
       });
@@ -167,8 +224,8 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
       return {
         label: `${wId} Avg TT`,
         data,
-        borderColor: colors[idx].border,
-        backgroundColor: colors[idx].bg,
+        borderColor: colors[wId].border,
+        backgroundColor: colors[wId].bg,
         borderWidth: 2,
         pointRadius: 4,
         tension: 0.25,
@@ -180,7 +237,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
       labels,
       datasets
     };
-  }, [matrixSummary]);
+  }, [matrixSummary, activeDays, activeWeeks]);
 
   const chartOptions = {
     responsive: true,
@@ -239,9 +296,9 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
   return (
     <div className="space-y-6 animate-fade-in">
       
-      {/* 1. TOP HEADER & DAY JUMP CONTROLS */}
-      <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-5 border border-slate-800/80 bg-slate-950/70">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      {/* 1. TOP HEADER & EXPORT ACTIONS */}
+      <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-4 border border-slate-800/80 bg-slate-950/70">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="p-2.5 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/30 text-indigo-400 shadow-glow">
@@ -252,7 +309,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   Delivery Comparison: Day-by-Day (W1 – W5 Side-by-Side)
                 </h2>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">
-                  Compare Average, Min, and Max Transit Times across all 5 weekly dispatch cycles for every calendar day side by side.
+                  Multi-week daily dispatch analysis across all calendar days and weekly cycles.
                 </p>
               </div>
             </div>
@@ -264,7 +321,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               type="button"
               onClick={() => exportMultiWeekMatrixToExcel(matrixSummary)}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-bold transition-all shadow-sm cursor-pointer"
-              title="Download complete Day-by-Day W1-W5 matrix as Excel file"
+              title="Download Day-by-Day W1-W5 matrix as Excel file"
             >
               <Download className="w-4 h-4" />
               <span>Export Excel</span>
@@ -279,44 +336,6 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               <span>Export CSV</span>
             </button>
           </div>
-        </div>
-
-        {/* Day Jump / Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          <span className="text-xs font-bold text-slate-400 pr-2 shrink-0 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5 text-blue-400" />
-            <span>Day View:</span>
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setSelectedDayFilter('ALL')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
-              selectedDayFilter === 'ALL'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 border-blue-400 font-black'
-                : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
-            }`}
-          >
-            All Days (35 Columns Side-by-Side)
-          </button>
-
-          {DAYS_OF_WEEK.map((day) => {
-            const isSelected = selectedDayFilter === day;
-            return (
-              <button
-                key={day}
-                type="button"
-                onClick={() => setSelectedDayFilter(day)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 border-blue-400 font-black'
-                    : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
-                }`}
-              >
-                {day} (W1–W5)
-              </button>
-            );
-          })}
         </div>
       </div>
 
@@ -373,14 +392,16 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           {/* Calendar Days Matrix */}
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Matrix Scope</span>
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Visible Matrix</span>
               <Calendar className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="mt-2">
               <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-                35 <span className="text-xs font-normal text-slate-400">Slots</span>
+                {activeDays.length * activeWeeks.length} <span className="text-xs font-normal text-slate-400">Columns</span>
               </div>
-              <span className="text-xs text-slate-400 font-semibold">7 Days × 5 Weekly Cycles</span>
+              <span className="text-xs text-slate-400 font-semibold">
+                {activeDays.length} Days × {activeWeeks.length} Weeks
+              </span>
             </div>
           </div>
 
@@ -393,7 +414,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               </span>
             </div>
             <span className="text-xs font-mono font-bold text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-800">
-              W1 (Jul 1) through W5 (Jul 31)
+              W1 through W5 Side-by-Side
             </span>
           </div>
 
@@ -404,14 +425,14 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           <div className="flex items-center justify-between mb-2">
             <div>
               <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
-                Weekly Day-by-Day Transit Time Progression (W1 to W5)
+                Weekly Day-by-Day Transit Time Progression
               </h3>
               <p className="text-[11px] text-slate-400">
-                Comparing average transit time trajectories from Wednesday to Tuesday across all 5 weeks
+                Comparing average transit time trajectories across selected calendar days
               </p>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-              5-Week Curve
+              {activeWeeks.join(', ')}
             </span>
           </div>
 
@@ -425,11 +446,11 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
       {/* 3. MULTI-WEEK SIDE-BY-SIDE COUNTRY MATRIX TABLE */}
       <div className="glass-panel p-5 sm:p-6 rounded-3xl space-y-4 border border-slate-800/80 bg-slate-950/80">
         
-        {/* Table Toolbar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+        {/* Table Toolbar with 2 New Multi-Select Filter Buttons: Calendar Day & Week */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pb-3 border-b border-slate-800">
           
-          {/* Search Country */}
-          <div className="relative w-full sm:w-80">
+          {/* Left Controls: Search Country */}
+          <div className="relative w-full lg:w-72 shrink-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -442,59 +463,199 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Sort & Display Controls */}
+          {/* Right Filter Buttons: 1. Calendar Day, 2. Week, 3. Reset */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
-              <span className="text-slate-500 pl-2 font-medium">Sort:</span>
+            
+            {/* BUTTON 1: CALENDAR DAY MULTI-SELECT DROPDOWN */}
+            <div className="relative" ref={dayDropdownRef}>
               <button
                 type="button"
                 onClick={() => {
-                  if (sortBy === 'volume') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                  else { setSortBy('volume'); setSortOrder('desc'); }
+                  setIsDayDropdownOpen((prev) => !prev);
+                  setIsWeekDropdownOpen(false);
                 }}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                  sortBy === 'volume'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  !isAllDaysSelected
+                    ? 'bg-blue-600 text-white border-blue-400 shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30'
+                    : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
                 }`}
+                title="Filter by Calendar Days (Wednesday – Tuesday)"
               >
-                Volume {sortBy === 'volume' && (sortOrder === 'desc' ? '↓' : '↑')}
+                <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                <span>Calendar Day</span>
+                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
+                  !isAllDaysSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'
+                }`}>
+                  {selectedDays.length === DAYS_OF_WEEK.length ? 'All 7' : `${selectedDays.length}/7`}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isDayDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
+
+              {/* Day Dropdown Popover */}
+              {isDayDropdownOpen && (
+                <div className="absolute left-0 lg:right-0 lg:left-auto mt-2 w-64 p-3 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 animate-fade-in space-y-2">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
+                      Select Calendar Days
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDays([...DAYS_OF_WEEK])}
+                        className="text-[10px] font-bold text-blue-400 hover:text-blue-300 px-1 py-0.5 rounded hover:bg-blue-950 cursor-pointer"
+                      >
+                        All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Day Checkbox List */}
+                  <div className="space-y-1 max-h-56 overflow-y-auto">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const isChecked = selectedDays.includes(day);
+                      return (
+                        <label
+                          key={day}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleDay(day);
+                          }}
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                            isChecked
+                              ? 'bg-blue-600/15 text-blue-300 border border-blue-500/30'
+                              : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
+                              isChecked
+                                ? 'bg-blue-600 border-blue-500 text-white'
+                                : 'border-slate-600 bg-slate-800'
+                            }`}>
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span>{day}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-slate-500 uppercase">
+                            {day.slice(0, 3)}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+                    <span>{selectedDays.length} of 7 days selected</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsDayDropdownOpen(false)}
+                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* BUTTON 2: WEEK MULTI-SELECT DROPDOWN */}
+            <div className="relative" ref={weekDropdownRef}>
               <button
                 type="button"
                 onClick={() => {
-                  if (sortBy === 'avgTT') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                  else { setSortBy('avgTT'); setSortOrder('desc'); }
+                  setIsWeekDropdownOpen((prev) => !prev);
+                  setIsDayDropdownOpen(false);
                 }}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                  sortBy === 'avgTT'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  !isAllWeeksSelected
+                    ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-500/25 ring-2 ring-indigo-500/30'
+                    : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
                 }`}
+                title="Filter by Weekly Cycles (W1 through W5)"
               >
-                Avg TT {sortBy === 'avgTT' && (sortOrder === 'desc' ? '↓' : '↑')}
+                <CalendarRange className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Week</span>
+                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
+                  !isAllWeeksSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'
+                }`}>
+                  {selectedWeeks.length === WEEKS_LIST.length ? 'All 5' : `${selectedWeeks.length}/5`}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isWeekDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (sortBy === 'country') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                  else { setSortBy('country'); setSortOrder('asc'); }
-                }}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                  sortBy === 'country'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Country {sortBy === 'country' && (sortOrder === 'desc' ? '↓' : '↑')}
-              </button>
+
+              {/* Week Dropdown Popover */}
+              {isWeekDropdownOpen && (
+                <div className="absolute left-0 lg:right-0 lg:left-auto mt-2 w-72 p-3 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 animate-fade-in space-y-2">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
+                      Select Weekly Cycles
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedWeeks([...WEEKS_LIST])}
+                        className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-1 py-0.5 rounded hover:bg-indigo-950 cursor-pointer"
+                      >
+                        All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Week Checkbox List */}
+                  <div className="space-y-1 max-h-56 overflow-y-auto">
+                    {WEEKS_LIST.map((wId) => {
+                      const isChecked = selectedWeeks.includes(wId);
+                      const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
+                      return (
+                        <label
+                          key={wId}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleWeek(wId);
+                          }}
+                          className={`flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                            isChecked
+                              ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30'
+                              : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
+                              isChecked
+                                ? 'bg-indigo-600 border-indigo-500 text-white'
+                                : 'border-slate-600 bg-slate-800'
+                            }`}>
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span className="font-extrabold text-white">{wId}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-slate-400">
+                            {wMeta?.dateRange}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+                    <span>{selectedWeeks.length} of 5 weeks selected</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsWeekDropdownOpen(false)}
+                      className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-2.5 py-1 rounded-lg cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Reset Toolbar Button */}
@@ -502,12 +663,12 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
               type="button"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                 hasActiveFilters
                   ? 'bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500/25 hover:scale-[1.02] cursor-pointer shadow-sm'
                   : 'bg-slate-900/60 text-slate-500 border-slate-800 opacity-50 cursor-not-allowed'
               }`}
-              title="Reset country search, filters, and sorting to default"
+              title="Reset day/week filters and search to default"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${hasActiveFilters ? 'text-rose-400' : 'text-slate-500'}`} />
               <span>Reset</span>
@@ -548,12 +709,12 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                   <span className="text-[10px] text-slate-500 font-normal">July AWBs</span>
                 </th>
 
-                {/* Day Header Super-Columns (Colspan 5 each for W1..W5) */}
+                {/* Day Header Super-Columns (Colspan matching activeWeeks.length) */}
                 {activeDays.map((day, dIdx) => {
                   return (
                     <th
                       key={day}
-                      colSpan={WEEKS_LIST.length}
+                      colSpan={activeWeeks.length}
                       className={`py-2 px-3 text-center border-r-2 border-slate-700 ${getDayHeaderBg(dIdx)}`}
                     >
                       <div className="font-black text-sm tracking-wide flex items-center justify-center gap-1.5">
@@ -565,10 +726,10 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
 
               </tr>
 
-              {/* Row 2 of Headers: Sub-columns (W1 Wed, W2 Wed, W3 Wed, etc.) */}
+              {/* Row 2 of Headers: Sub-columns (W1, W2, W3, etc.) */}
               <tr className="bg-slate-900/95 text-[10px] uppercase font-black text-slate-400 border-b-2 border-slate-700">
                 {activeDays.map((day) => {
-                  return WEEKS_LIST.map((wId) => {
+                  return activeWeeks.map((wId) => {
                     const wMeta = WEEKS_METADATA.find((w) => w.id === wId);
                     const dateLabel = wMeta?.dayDates[day] || '';
                     return (
@@ -628,9 +789,9 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                         </div>
                       </td>
 
-                      {/* 35 Day-Week Cells (W1..W5 for each Day) */}
+                      {/* Dynamic Day-Week Cells based on user selection */}
                       {activeDays.map((day) => {
-                        return WEEKS_LIST.map((wId) => {
+                        return activeWeeks.map((wId) => {
                           const cell = row.dayWeekMetrics[day][wId];
                           return (
                             <td
@@ -666,7 +827,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={37} className="py-12 text-center text-slate-400 space-y-1">
+                  <td colSpan={2 + activeDays.length * activeWeeks.length} className="py-12 text-center text-slate-400 space-y-1">
                     <p className="font-bold">No countries found matching &quot;{searchQuery}&quot;</p>
                     <p className="text-xs text-slate-500">Try searching for a different country code.</p>
                   </td>
@@ -695,7 +856,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           </div>
 
           <span className="text-slate-400 text-[11px]">
-            ← Scroll horizontally to view all calendar days (Wednesday through Tuesday) • Country column remains frozen on the left →
+            ← Scroll horizontally to view all calendar days • Country column remains frozen on the left →
           </span>
         </div>
 
