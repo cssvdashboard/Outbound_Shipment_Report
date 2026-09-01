@@ -30,29 +30,13 @@ import {
   getWeekIdForDate,
   getDayOfWeek
 } from '../utils/weeklyMatrixAnalytics';
-import { Bar } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  PointElement,
-  LineElement
+  registerables
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(...registerables);
 
 interface WeeklyMatrixViewProps {
   filteredShipments: Shipment[];
@@ -426,7 +410,7 @@ export const WeeklyMatrixView: React.FC<WeeklyMatrixViewProps> = ({
           </div>
 
           <div className="h-56 relative w-full">
-            <Bar data={dailyChartData as any} options={dailyChartOptions} />
+            <Chart type="bar" data={dailyChartData as any} options={dailyChartOptions as any} />
           </div>
         </div>
 
