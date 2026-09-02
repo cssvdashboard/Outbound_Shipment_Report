@@ -156,9 +156,11 @@ export const App: React.FC = () => {
 
               {activeTab === 'comparison' && (
                 <CustomerComparison
+                  shipments={filteredShipments}
                   rawShipments={rawShipments}
                   allDestinations={allDestinations}
                   allCustomers={allCustomers}
+                  selectedCategoryType={filters.selectedCategoryType || 'ALL'}
                 />
               )}
 

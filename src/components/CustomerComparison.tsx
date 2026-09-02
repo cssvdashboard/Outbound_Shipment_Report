@@ -9,28 +9,31 @@ import {
   Sparkles,
   BarChart2,
   Check,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck,
+  PackageCheck,
+  CreditCard
 } from 'lucide-react';
 import { Shipment, CustomerComparisonMetric } from '../types/logistics';
 import { computeCustomerComparison, searchCustomers } from '../utils/analytics';
 import { Bar } from 'react-chartjs-2';
 
 interface CustomerComparisonProps {
-  rawShipments: Shipment[];
+  shipments: Shipment[];
+  rawShipments?: Shipment[];
   allDestinations: string[];
   allCustomers: string[];
+  selectedCategoryType?: 'ALL' | 'AGENT' | 'PP' | 'CC';
 }
 
 export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
+  shipments,
   rawShipments,
-  allDestinations
+  allDestinations,
+  selectedCategoryType = 'ALL'
 }) => {
   const [selectedDestination, setSelectedDestination] = useState<string>('US');
-  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([
-    'MOTIJHEEL WSC',
-    'EPIC GARMENTS MANUFACTURING COMPANY LTD.',
-    'M N Enterprise **Agent**'
-  ]);
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
 
   // Customer Autocomplete Search State
   const [customerSearch, setCustomerSearch] = useState<string>('');
@@ -67,17 +70,17 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Compute destination counts from dataset
+  // Compute destination counts strictly from active filtered dataset (PP / CC / Agent / All)
   const destinationCounts = useMemo(() => {
     const map = new Map<string, number>();
-    for (const s of rawShipments) {
+    for (const s of shipments) {
       if (s.destination) {
         const dest = s.destination.toUpperCase();
         map.set(dest, (map.get(dest) || 0) + 1);
       }
     }
     return map;
-  }, [rawShipments]);
+  }, [shipments]);
 
   // Filter destination list based on query
   const filteredDestinations = useMemo(() => {
@@ -107,8 +110,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
     const destShipments =
       countryCode === 'ALL'
-        ? rawShipments
-        : rawShipments.filter((s) => s.destination === countryCode);
+        ? shipments
+        : shipments.filter((s) => s.destination === countryCode);
     
     const countMap: Record<string, number> = {};
     for (const s of destShipments) {
@@ -125,17 +128,45 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     }
   };
 
-  // Filter and rank customers for autocomplete by AWB volume
-  const availableCustomerSuggestions = useMemo(() => {
-    const rawResults = searchCustomers(rawShipments, customerSearch, 25);
-    return rawResults.filter((item) => !selectedCustomers.includes(item.name));
-  }, [rawShipments, customerSearch, selectedCustomers]);
+  // Auto-initialize or refresh top customers when category filter or destination changes
+  useEffect(() => {
+    const destShipments =
+      selectedDestination === 'ALL'
+        ? shipments
+        : shipments.filter((s) => s.destination === selectedDestination);
+    
+    const countMap: Record<string, number> = {};
+    for (const s of destShipments) {
+      if (s.customer) countMap[s.customer] = (countMap[s.customer] || 0) + 1;
+    }
 
-  // Compute comparison metrics
+    // Check how many of current selected customers have > 0 AWBs in this category
+    const activeCount = selectedCustomers.filter((c) => (countMap[c] || 0) > 0).length;
+
+    // If no customers selected or none of the current customers have shipments in this category, load top 4
+    if (selectedCustomers.length === 0 || activeCount === 0) {
+      const top = Object.entries(countMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([name]) => name);
+
+      if (top.length > 0) {
+        setSelectedCustomers(top);
+      }
+    }
+  }, [selectedCategoryType, selectedDestination, shipments]);
+
+  // Filter and rank customers for autocomplete by AWB volume in active category
+  const availableCustomerSuggestions = useMemo(() => {
+    const rawResults = searchCustomers(shipments, customerSearch, 25);
+    return rawResults.filter((item) => !selectedCustomers.includes(item.name));
+  }, [shipments, customerSearch, selectedCustomers]);
+
+  // Compute comparison metrics strictly based on active category (PP / CC / Agent / All)
   const comparisonData: CustomerComparisonMetric[] = useMemo(() => {
     if (selectedCustomers.length === 0) return [];
-    return computeCustomerComparison(rawShipments, selectedDestination, selectedCustomers);
-  }, [rawShipments, selectedDestination, selectedCustomers]);
+    return computeCustomerComparison(shipments, selectedDestination, selectedCustomers);
+  }, [shipments, selectedDestination, selectedCustomers]);
 
   // Find best performer (fastest average TT among customers with > 0 AWBs)
   const fastestCustomer = useMemo(() => {
@@ -251,6 +282,14 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     }
   };
 
+  // Helper for Search Input Placeholder based on Category
+  const searchPlaceholder = useMemo(() => {
+    if (selectedCategoryType === 'AGENT') return 'Search Agent Customer...';
+    if (selectedCategoryType === 'PP') return 'Search PP Customer...';
+    if (selectedCategoryType === 'CC') return 'Search CC Customer...';
+    return 'Search Customer...';
+  }, [selectedCategoryType]);
+
   return (
     <div className="space-y-6 animate-fade-in">
       
@@ -262,11 +301,33 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white light:text-slate-900">
-                <strong>Multi-Customer Performance Comparison &amp; Transit Time Benchmark</strong>
-              </h2>
-              <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
-                Compare delivery speeds, volumes, and delay rates for any destination
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm font-black text-white light:text-slate-900">
+                  <strong>Multi-Customer Performance Comparison &amp; Transit Time Benchmark</strong>
+                </h2>
+                
+                {/* Active Category Scope Badge */}
+                {selectedCategoryType === 'PP' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                    <PackageCheck className="w-3 h-3 text-blue-400" />
+                    <span>PP Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
+                  </span>
+                )}
+                {selectedCategoryType === 'CC' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    <CreditCard className="w-3 h-3 text-amber-400" />
+                    <span>CC Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
+                  </span>
+                )}
+                {selectedCategoryType === 'AGENT' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                    <ShieldCheck className="w-3 h-3 text-purple-400" />
+                    <span>Agent Customers Only ({shipments.length.toLocaleString()} AWBs)</span>
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 light:text-slate-500 font-medium mt-0.5">
+                Compare delivery speeds, volumes, and delay rates for any destination across {selectedCategoryType === 'ALL' ? 'all' : selectedCategoryType} shipments
               </p>
             </div>
           </div>
@@ -342,7 +403,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                         <span className="font-bold"><strong>Global (All Destinations)</strong></span>
                       </div>
                       <span className="text-[10px] font-mono font-bold text-indigo-300">
-                        <strong>{rawShipments.length.toLocaleString()} AWBs</strong>
+                        <strong>{shipments.length.toLocaleString()} AWBs</strong>
                       </span>
                     </button>
                   </div>
@@ -395,7 +456,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
               <span><strong>1. Target Destination Country</strong></span>
               <span className="text-[10px] text-slate-400 font-mono font-bold">
-                <strong>{selectedDestination === 'ALL' ? 'Global' : `${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs`}</strong>
+                <strong>{selectedDestination === 'ALL' ? `${shipments.length.toLocaleString()} AWBs` : `${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs`}</strong>
               </span>
             </label>
             <div className="relative">
@@ -486,7 +547,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                         <span className="font-bold"><strong>All Destinations Globally</strong></span>
                       </div>
                       <span className="text-[10px] font-mono font-bold text-slate-400">
-                        <strong>{rawShipments.length.toLocaleString()} AWBs</strong>
+                        <strong>{shipments.length.toLocaleString()} AWBs</strong>
                       </span>
                     </button>
                   </div>
@@ -530,10 +591,21 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             </div>
           </div>
 
-          {/* 2. Add Customer Search Autocomplete */}
+          {/* 2. Add Customer Search Autocomplete (Strictly filtered to active category: Agent / PP / CC) */}
           <div className={`md:col-span-7 relative ${isDropdownOpen ? 'z-50' : 'z-10'}`} ref={dropdownRef}>
             <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
-              <span><strong>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</strong></span>
+              <span>
+                <strong>2. Add Customer Accounts to Compare ({selectedCustomers.length} selected)</strong>
+                {selectedCategoryType === 'AGENT' && (
+                  <span className="ml-1 text-purple-400 text-[10px] font-mono font-extrabold">(Agent Only)</span>
+                )}
+                {selectedCategoryType === 'PP' && (
+                  <span className="ml-1 text-blue-400 text-[10px] font-mono font-extrabold">(PP Only)</span>
+                )}
+                {selectedCategoryType === 'CC' && (
+                  <span className="ml-1 text-amber-400 text-[10px] font-mono font-extrabold">(CC Only)</span>
+                )}
+              </span>
               <span className="text-[10px] text-slate-500 font-semibold">Ranked by shipment volume</span>
             </label>
             <div className="relative">
@@ -547,7 +619,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 }}
                 onFocus={() => setIsDropdownOpen(true)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search Customer"
+                placeholder={searchPlaceholder}
                 className="w-full pl-9 pr-10 py-2.5 text-xs font-bold rounded-xl bg-slate-50 border border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 shadow-inner"
               />
               <Users className="w-4 h-4 text-emerald-500 dark:text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
