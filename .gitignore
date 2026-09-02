@@ -9,3 +9,6 @@ dist/
 Thumbs.db
 *.local
 *.tsbuildinfo
+__pycache__/
+*.pyc
+

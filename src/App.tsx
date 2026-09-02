@@ -3,6 +3,7 @@ import { useLogisticsData } from './hooks/useLogisticsData';
 import { Header } from './components/Header';
 import { SmartFilterBar } from './components/SmartFilterBar';
 import { ExecutiveOverview } from './components/ExecutiveOverview';
+import { ExecutiveReportHub } from './components/ExecutiveReportHub';
 import { DelayHub } from './components/DelayHub';
 import { CountryMatrix } from './components/CountryMatrix';
 import { CustomerComparison } from './components/CustomerComparison';
@@ -46,7 +47,7 @@ export const App: React.FC = () => {
     allCustomers
   } = useLogisticsData();
 
-  // Initialize theme from storage
+  // 1. Initialize theme from storage
   useEffect(() => {
     const saved = getStoredTheme();
     setTheme(saved);
@@ -58,6 +59,54 @@ export const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, []);
+
+  // 2. Initialize state from URL Search Params (for shareable links)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && ['overview', 'reports', 'delays', 'country', 'comparison', 'explorer'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+    const custParam = params.get('cust');
+    if (custParam) {
+      setCustomerFilter(custParam);
+    }
+    const destParam = params.get('dest');
+    if (destParam) {
+      setDestinationFilter(destParam);
+    }
+    const catParam = params.get('cat');
+    if (catParam && ['ALL', 'AGENT', 'PP', 'CC'].includes(catParam)) {
+      setCategoryTypeFilter(catParam as any);
+    }
+  }, []);
+
+  // 3. Keep URL query parameters in sync with active tab and filters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', activeTab);
+    
+    if (filters.selectedCustomers.length > 0) {
+      params.set('cust', filters.selectedCustomers[0]);
+    } else {
+      params.delete('cust');
+    }
+
+    if (filters.selectedDestinations.length > 0) {
+      params.set('dest', filters.selectedDestinations[0]);
+    } else {
+      params.delete('dest');
+    }
+
+    if (filters.selectedCategoryType && filters.selectedCategoryType !== 'ALL') {
+      params.set('cat', filters.selectedCategoryType);
+    } else {
+      params.delete('cat');
+    }
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+  }, [activeTab, filters.selectedCustomers, filters.selectedDestinations, filters.selectedCategoryType]);
 
   const handleThemeToggle = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -127,6 +176,22 @@ export const App: React.FC = () => {
                   onSelectResolution={setFinalResolutionFilter}
                   onSelectTTRange={setTTRangeFilter}
                   onNavigateTab={setActiveTab}
+                />
+              )}
+
+              {activeTab === 'reports' && (
+                <ExecutiveReportHub
+                  shipments={filteredShipments}
+                  rawShipments={rawShipments}
+                  metrics={summaryMetrics}
+                  countryPerformance={countryPerformance}
+                  deliveryTimeline={deliveryTimeline}
+                  finalResolutions={finalResolutions}
+                  allCustomers={allCustomers}
+                  allDestinations={allDestinations}
+                  activeFilters={filters}
+                  onApplyCustomerFilter={setCustomerFilter}
+                  onApplyDestinationFilter={setDestinationFilter}
                 />
               )}
 

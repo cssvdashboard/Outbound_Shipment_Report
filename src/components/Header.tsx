@@ -11,7 +11,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  CalendarDays
+  CalendarDays,
+  FileText,
+  Share2
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { parseExcelBuffer } from '../utils/excelParser';
@@ -206,6 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 dark:bg-[#070c18]/90 rounded-2xl border border-slate-200 dark:border-slate-800/90 shadow-inner w-fit min-w-full sm:min-w-0">
             {[
               { id: 'overview', label: 'Overview (July 2026)', icon: Package, color: 'text-sky-500' },
+              { id: 'reports', label: 'Executive Reports & Share', icon: FileText, color: 'text-rose-500' },
               { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
               { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
