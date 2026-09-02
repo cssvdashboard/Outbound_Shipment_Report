@@ -210,7 +210,6 @@ export const Header: React.FC<HeaderProps> = ({
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
               { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
               { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
-              { id: 'weekly-matrix', label: 'Weekly TT Matrix', icon: CalendarDays, color: 'text-violet-400' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

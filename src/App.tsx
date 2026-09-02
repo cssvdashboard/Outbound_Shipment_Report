@@ -7,7 +7,6 @@ import { DelayHub } from './components/DelayHub';
 import { CountryMatrix } from './components/CountryMatrix';
 import { CustomerComparison } from './components/CustomerComparison';
 import { ShipmentExplorer } from './components/ShipmentExplorer';
-import { WeeklyMatrixView } from './components/WeeklyMatrixView';
 import { getStoredTheme, setStoredTheme } from './services/storage';
 import { Loader2 } from 'lucide-react';
 
@@ -167,13 +166,6 @@ export const App: React.FC = () => {
                 <ShipmentExplorer
                   shipments={filteredShipments}
                   totalRawCount={rawShipments.length}
-                />
-              )}
-
-              {activeTab === 'weekly-matrix' && (
-                <WeeklyMatrixView
-                  filteredShipments={filteredShipments}
-                  rawShipments={rawShipments}
                 />
               )}
             </>
