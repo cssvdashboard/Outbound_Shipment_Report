@@ -221,62 +221,62 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
       </div>
 
-      {/* Table Container with high-contrast, prominent grid borders */}
+      {/* Table Container with high-contrast, prominent grid borders and centered content */}
       <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-600 dark:border-slate-600 bg-slate-950/40">
         <div className="max-h-[580px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-left text-xs min-w-[1000px] border-collapse border-spacing-0">
+          <table className="w-full text-center text-xs min-w-[1000px] border-collapse border-spacing-0">
             <thead className="sticky top-0 bg-[#0f172a] border-b-2 border-slate-500 text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-md">
               <tr className="border-b-2 border-slate-500">
                 <th
                   onClick={() => handleSort('countryCode')}
-                  className="py-3 px-3 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
+                  className="py-3 px-3 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600 text-center"
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span><strong>Country</strong></span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('awbCount')}
-                  className="py-3 px-3 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span><strong>Volume (AWB)</strong></span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('avgTT')}
-                  className="py-3 px-3 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span><strong>Avg TT</strong></span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('minTT')}
-                  className="py-3 px-2 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span><strong>Min TT</strong></span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('maxTT')}
-                  className="py-3 px-2 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r border-slate-600"
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span><strong>Max TT</strong></span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('onTimePercentage')}
-                  className="py-3 px-3 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r-2 border-slate-500"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-800 hover:text-white transition-colors font-black border-r-2 border-slate-500"
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span><strong>On-Time %</strong></span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
@@ -349,23 +349,27 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     className="hover:bg-slate-800/60 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80"
                   >
                     {/* Country Code */}
-                    <td className="py-2.5 px-3 font-bold text-white flex items-center gap-2 border-r border-slate-600">
-                      <span className="w-7 h-7 rounded-lg bg-slate-800 border-2 border-slate-600 flex items-center justify-center font-mono text-xs text-sky-400 font-black shadow-inner">
-                        {c.countryCode}
-                      </span>
-                      <span><strong>{c.countryCode}</strong></span>
+                    <td className="py-2.5 px-3 font-bold text-white text-center align-middle border-r border-slate-600">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-slate-800 border-2 border-slate-600 flex items-center justify-center font-mono text-xs text-sky-400 font-black shadow-inner shrink-0">
+                          {c.countryCode}
+                        </span>
+                        <span><strong>{c.countryCode}</strong></span>
+                      </div>
                     </td>
 
                     {/* Volume */}
-                    <td className="py-2.5 px-3 text-right font-extrabold text-white font-mono border-r border-slate-600">
-                      <div><strong>{c.awbCount.toLocaleString()}</strong></div>
-                      <div className="text-[10px] text-slate-400 font-semibold font-sans">
-                        {sharePct}% of total
+                    <td className="py-2.5 px-3 text-center align-middle font-extrabold text-white font-mono border-r border-slate-600">
+                      <div className="flex flex-col items-center justify-center">
+                        <div><strong>{c.awbCount.toLocaleString()}</strong></div>
+                        <div className="text-[10px] text-slate-400 font-semibold font-sans">
+                          {sharePct}% of total
+                        </div>
                       </div>
                     </td>
 
                     {/* Avg TT */}
-                    <td className="py-2.5 px-3 text-right font-mono font-bold border-r border-slate-600">
+                    <td className="py-2.5 px-3 text-center align-middle font-mono font-bold border-r border-slate-600">
                       <span
                         className={
                           c.avgTT <= 4.5
@@ -380,18 +384,18 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Min TT */}
-                    <td className="py-2.5 px-2 text-right font-mono text-slate-300 font-bold border-r border-slate-600">
+                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-300 font-bold border-r border-slate-600">
                       {c.minTT} d
                     </td>
 
                     {/* Max TT */}
-                    <td className="py-2.5 px-2 text-right font-mono text-slate-300 font-bold border-r border-slate-600">
+                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-300 font-bold border-r border-slate-600">
                       {c.maxTT} d
                     </td>
 
                     {/* On-Time Rate */}
-                    <td className="py-2.5 px-3 text-right border-r-2 border-slate-500">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="py-2.5 px-3 text-center align-middle border-r-2 border-slate-500">
+                      <div className="flex items-center justify-center gap-1.5">
                         <span className="font-mono font-bold text-emerald-400">
                           <strong>{c.onTimePercentage}%</strong>
                         </span>
@@ -405,9 +409,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Clearance Delays */}
-                    <td className="py-2.5 px-2 text-center bg-purple-950/20 border-r border-slate-600">
+                    <td className="py-2.5 px-2 text-center align-middle bg-purple-950/20 border-r border-slate-600">
                       {c.clearanceDelays > 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-sm">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-sm">
                           {c.clearanceDelays}
                         </span>
                       ) : (
@@ -416,9 +420,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Transit Delays */}
-                    <td className="py-2.5 px-2 text-center bg-sky-950/20 border-r border-slate-600">
+                    <td className="py-2.5 px-2 text-center align-middle bg-sky-950/20 border-r border-slate-600">
                       {c.transitDelays > 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-sky-500/25 text-sky-200 border border-sky-400/40 shadow-sm">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-sky-500/25 text-sky-200 border border-sky-400/40 shadow-sm">
                           {c.transitDelays}
                         </span>
                       ) : (
@@ -427,9 +431,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Destination Delays */}
-                    <td className="py-2.5 px-2 text-center bg-amber-950/20 border-r border-slate-600">
+                    <td className="py-2.5 px-2 text-center align-middle bg-amber-950/20 border-r border-slate-600">
                       {c.destinationDelays > 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-amber-500/25 text-amber-200 border border-amber-400/40 shadow-sm">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-amber-500/25 text-amber-200 border border-amber-400/40 shadow-sm">
                           {c.destinationDelays}
                         </span>
                       ) : (
@@ -438,9 +442,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Weekend Delays */}
-                    <td className="py-2.5 px-2 text-center bg-rose-950/20 border-r border-slate-600">
+                    <td className="py-2.5 px-2 text-center align-middle bg-rose-950/20 border-r border-slate-600">
                       {c.weekendDelays > 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-rose-500/25 text-rose-200 border border-rose-400/40 shadow-sm">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-rose-500/25 text-rose-200 border border-rose-400/40 shadow-sm">
                           {c.weekendDelays}
                         </span>
                       ) : (
@@ -449,10 +453,10 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Total Delays */}
-                    <td className="py-2.5 px-3 text-center bg-yellow-950/20">
+                    <td className="py-2.5 px-3 text-center align-middle bg-yellow-950/20">
                       {c.totalDelays > 0 ? (
-                        <div className="flex flex-col items-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/30 text-yellow-200 border border-yellow-400/60 shadow-sm">
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/30 text-yellow-200 border border-yellow-400/60 shadow-sm">
                             {c.totalDelays}
                           </span>
                           <span className="text-[10px] text-yellow-400 font-mono font-black mt-0.5">
