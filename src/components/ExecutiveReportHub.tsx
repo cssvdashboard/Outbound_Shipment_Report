@@ -565,6 +565,8 @@ export const ExecutiveReportHub: React.FC<ExecutiveReportHubProps> = ({
                     <th className="px-4 py-3">Clearance Delays</th>
                     <th className="px-4 py-3">Transit Delays</th>
                     <th className="px-4 py-3">Dest Delays</th>
+                    <th className="px-4 py-3">Weekend Delays</th>
+                    <th className="px-4 py-3">Total Delays</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-900/40">
@@ -577,6 +579,8 @@ export const ExecutiveReportHub: React.FC<ExecutiveReportHubProps> = ({
                       <td className="px-4 py-3">{c.clearanceDelays}</td>
                       <td className="px-4 py-3">{c.transitDelays}</td>
                       <td className="px-4 py-3">{c.destinationDelays}</td>
+                      <td className="px-4 py-3">{c.weekendDelays}</td>
+                      <td className="px-4 py-3 font-bold text-yellow-400">{c.totalDelays}</td>
                     </tr>
                   ))}
                 </tbody>

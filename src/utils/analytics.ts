@@ -257,6 +257,7 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
       transitDelays: number;
       clearanceDelays: number;
       destinationDelays: number;
+      weekendDelays: number;
     }
   > = {};
 
@@ -271,7 +272,8 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
         onTime: 0,
         transitDelays: 0,
         clearanceDelays: 0,
-        destinationDelays: 0
+        destinationDelays: 0,
+        weekendDelays: 0
       };
     }
 
@@ -295,21 +297,29 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
     if (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') {
       c.destinationDelays++;
     }
+    if (s.weekendDelay && (s.weekendDelay.toLowerCase() === 'yes' || s.weekendDelay.trim() === '1' || s.weekendDelay.toLowerCase() === 'true')) {
+      c.weekendDelays++;
+    }
   }
 
   return Object.entries(map)
-    .map(([countryCode, d]) => ({
-      countryCode,
-      awbCount: d.count,
-      avgTT: Math.round((d.sumTT / d.count) * 100) / 100,
-      minTT: d.minTT === Number.MAX_VALUE ? 0 : Math.round(d.minTT * 100) / 100,
-      maxTT: Math.round(d.maxTT * 100) / 100,
-      onTimeCount: d.onTime,
-      onTimePercentage: Math.round((d.onTime / d.count) * 10000) / 100,
-      transitDelays: d.transitDelays,
-      clearanceDelays: d.clearanceDelays,
-      destinationDelays: d.destinationDelays
-    }))
+    .map(([countryCode, d]) => {
+      const totalDelays = d.transitDelays + d.clearanceDelays + d.destinationDelays + d.weekendDelays;
+      return {
+        countryCode,
+        awbCount: d.count,
+        avgTT: Math.round((d.sumTT / d.count) * 100) / 100,
+        minTT: d.minTT === Number.MAX_VALUE ? 0 : Math.round(d.minTT * 100) / 100,
+        maxTT: Math.round(d.maxTT * 100) / 100,
+        onTimeCount: d.onTime,
+        onTimePercentage: Math.round((d.onTime / d.count) * 10000) / 100,
+        transitDelays: d.transitDelays,
+        clearanceDelays: d.clearanceDelays,
+        destinationDelays: d.destinationDelays,
+        weekendDelays: d.weekendDelays,
+        totalDelays
+      };
+    })
     .sort((a, b) => b.awbCount - a.awbCount);
 }
 

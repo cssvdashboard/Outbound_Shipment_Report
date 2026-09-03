@@ -83,6 +83,8 @@ export interface CountryPerformance {
   transitDelays: number;
   clearanceDelays: number;
   destinationDelays: number;
+  weekendDelays: number;
+  totalDelays: number;
 }
 
 export interface CustomerComparisonMetric {
