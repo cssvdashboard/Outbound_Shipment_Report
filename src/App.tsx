@@ -3,7 +3,6 @@ import { useLogisticsData } from './hooks/useLogisticsData';
 import { Header } from './components/Header';
 import { SmartFilterBar } from './components/SmartFilterBar';
 import { ExecutiveOverview } from './components/ExecutiveOverview';
-import { ExecutiveReportHub } from './components/ExecutiveReportHub';
 import { DelayHub } from './components/DelayHub';
 import { CountryMatrix } from './components/CountryMatrix';
 import { CustomerComparison } from './components/CustomerComparison';
@@ -64,7 +63,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
-    if (tabParam && ['overview', 'reports', 'delays', 'country', 'comparison', 'explorer'].includes(tabParam)) {
+    if (tabParam && ['overview', 'delays', 'country', 'comparison', 'explorer'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
     const custParam = params.get('cust');
@@ -176,22 +175,6 @@ export const App: React.FC = () => {
                   onSelectResolution={setFinalResolutionFilter}
                   onSelectTTRange={setTTRangeFilter}
                   onNavigateTab={setActiveTab}
-                />
-              )}
-
-              {activeTab === 'reports' && (
-                <ExecutiveReportHub
-                  shipments={filteredShipments}
-                  rawShipments={rawShipments}
-                  metrics={summaryMetrics}
-                  countryPerformance={countryPerformance}
-                  deliveryTimeline={deliveryTimeline}
-                  finalResolutions={finalResolutions}
-                  allCustomers={allCustomers}
-                  allDestinations={allDestinations}
-                  activeFilters={filters}
-                  onApplyCustomerFilter={setCustomerFilter}
-                  onApplyDestinationFilter={setDestinationFilter}
                 />
               )}
 
