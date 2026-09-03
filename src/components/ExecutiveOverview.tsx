@@ -111,7 +111,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     cutout: '72%'
   };
 
-  const totalDelays = summary.transitDelayCount + summary.clearanceDelayCount + summary.destinationDelayCount;
+  const totalDelays = summary.transitDelayCount + summary.clearanceDelayCount + summary.destinationDelayCount + (summary.weekendDelayCount || 0);
   const delayRate = summary.totalCount > 0 ? ((totalDelays / summary.totalCount) * 100).toFixed(2) : '0';
 
   // Filter shipments for the active popup modal resolution based on current active filters
@@ -320,12 +320,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <span><strong>{totalDelays.toLocaleString()}</strong></span>
             <span className="text-xs font-bold text-slate-400 font-mono">({delayRate}%)</span>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
             <span><strong>Transit:</strong> {summary.transitDelayCount}</span>
             <span>•</span>
             <span><strong>Clear:</strong> {summary.clearanceDelayCount}</span>
             <span>•</span>
             <span><strong>Dest:</strong> {summary.destinationDelayCount}</span>
+            <span>•</span>
+            <span><strong>Wknd:</strong> {summary.weekendDelayCount}</span>
           </div>
         </div>
 
