@@ -462,9 +462,14 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     {/* Total Delays */}
                     <td className="py-2.5 px-3 text-center bg-yellow-500/5 border-r border-yellow-500/10">
                       {c.totalDelays > 0 ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 shadow-sm shadow-yellow-500/10">
-                          {c.totalDelays}
-                        </span>
+                        <div className="flex flex-col items-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 shadow-sm shadow-yellow-500/10">
+                            {c.totalDelays}
+                          </span>
+                          <span className="text-[10px] text-yellow-500/80 font-mono font-bold mt-0.5">
+                            {c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : 0}%
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-slate-600 font-mono text-xs">-</span>
                       )}

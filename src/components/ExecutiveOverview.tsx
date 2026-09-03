@@ -260,8 +260,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="mt-2 text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
             <strong>{summary.totalCount.toLocaleString()}</strong>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
             <span><strong>{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
+            <span className="text-slate-600">•</span>
+            <span><strong>{summary.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</strong> Kg</span>
           </div>
         </div>
 
