@@ -4,7 +4,6 @@ import {
   Search,
   ArrowUpDown,
   Download,
-  Filter,
   ShieldAlert,
   Plane,
   MapPin,
@@ -17,8 +16,6 @@ import * as XLSX from 'xlsx';
 interface CountryMatrixProps {
   countryData: CountryPerformance[];
   totalAWBs: number;
-  onSelectCountry: (countryCode: string) => void;
-  selectedDestination: string | null;
 }
 
 type SortField =
@@ -38,9 +35,7 @@ type SortOrder = 'asc' | 'desc';
 
 export const CountryMatrix: React.FC<CountryMatrixProps> = ({
   countryData,
-  totalAWBs,
-  onSelectCountry,
-  selectedDestination
+  totalAWBs
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('awbCount');
@@ -51,7 +46,6 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      // For delay columns and volume/TT, default to descending
       setSortOrder('desc');
     }
   };
@@ -128,7 +122,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     <div className="space-y-4 animate-fade-in">
       
       {/* Header & Search/Export Bar */}
-      <div className="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
             <Globe className="w-5 h-5" />
@@ -172,7 +166,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
       {/* Delay Summary KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {/* Total Delays */}
-        <div className="glass-card p-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-3">
+        <div className="glass-card p-3 rounded-xl border border-yellow-500/30 bg-yellow-500/5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-4 h-4 text-yellow-400" />
           </div>
@@ -183,7 +177,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
 
         {/* Clearance Delays */}
-        <div className="glass-card p-3 rounded-xl border border-purple-500/20 bg-purple-500/5 flex items-center gap-3">
+        <div className="glass-card p-3 rounded-xl border border-purple-500/30 bg-purple-500/5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center shrink-0">
             <ShieldAlert className="w-4 h-4 text-purple-400" />
           </div>
@@ -194,7 +188,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
 
         {/* Transit Delays */}
-        <div className="glass-card p-3 rounded-xl border border-sky-500/20 bg-sky-500/5 flex items-center gap-3">
+        <div className="glass-card p-3 rounded-xl border border-sky-500/30 bg-sky-500/5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0">
             <Plane className="w-4 h-4 text-sky-400" />
           </div>
@@ -205,7 +199,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
 
         {/* Destination Delays */}
-        <div className="glass-card p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center gap-3">
+        <div className="glass-card p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
             <MapPin className="w-4 h-4 text-amber-400" />
           </div>
@@ -216,7 +210,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
 
         {/* Weekend Delays */}
-        <div className="glass-card p-3 rounded-xl border border-rose-500/20 bg-rose-500/5 flex items-center gap-3 col-span-2 sm:col-span-1">
+        <div className="glass-card p-3 rounded-xl border border-rose-500/30 bg-rose-500/5 flex items-center gap-3 col-span-2 sm:col-span-1">
           <div className="w-9 h-9 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center shrink-0">
             <Calendar className="w-4 h-4 text-rose-400" />
           </div>
@@ -227,15 +221,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="glass-card rounded-2xl overflow-hidden shadow-xl border border-slate-800/80">
+      {/* Table Container with full grid borders */}
+      <div className="glass-card rounded-2xl overflow-hidden shadow-xl border border-slate-700/80 dark:border-slate-800">
         <div className="max-h-[580px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-left text-xs min-w-[1100px]">
-            <thead className="sticky top-0 bg-[#0b0f19]/95 backdrop-blur-md border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10">
-              <tr>
+          <table className="w-full text-left text-xs min-w-[1000px] border-collapse">
+            <thead className="sticky top-0 bg-[#0b0f19]/95 backdrop-blur-md border-b border-slate-700/80 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10">
+              <tr className="border-b border-slate-700/80 dark:border-slate-800">
                 <th
                   onClick={() => handleSort('countryCode')}
-                  className="py-3 px-3 cursor-pointer hover:text-white transition-colors font-bold"
+                  className="py-3 px-3 cursor-pointer hover:text-white transition-colors font-bold border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center gap-1">
                     <span><strong>Country</strong></span>
@@ -244,7 +238,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 </th>
                 <th
                   onClick={() => handleSort('awbCount')}
-                  className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors font-bold"
+                  className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors font-bold border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-end gap-1">
                     <span><strong>Volume (AWB)</strong></span>
@@ -253,7 +247,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 </th>
                 <th
                   onClick={() => handleSort('avgTT')}
-                  className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors font-bold"
+                  className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors font-bold border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-end gap-1">
                     <span><strong>Avg TT</strong></span>
@@ -262,7 +256,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 </th>
                 <th
                   onClick={() => handleSort('minTT')}
-                  className="py-3 px-2 text-right cursor-pointer hover:text-white transition-colors font-bold"
+                  className="py-3 px-2 text-right cursor-pointer hover:text-white transition-colors font-bold border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-end gap-1">
                     <span><strong>Min TT</strong></span>
@@ -271,7 +265,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 </th>
                 <th
                   onClick={() => handleSort('maxTT')}
-                  className="py-3 px-2 text-right cursor-pointer hover:text-white transition-colors font-bold"
+                  className="py-3 px-2 text-right cursor-pointer hover:text-white transition-colors font-bold border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-end gap-1">
                     <span><strong>Max TT</strong></span>
@@ -280,7 +274,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 </th>
                 <th
                   onClick={() => handleSort('onTimePercentage')}
-                  className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors font-bold"
+                  className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors font-bold border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-end gap-1">
                     <span><strong>On-Time %</strong></span>
@@ -291,7 +285,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 {/* Delay Breakdowns */}
                 <th
                   onClick={() => handleSort('clearanceDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:text-purple-300 transition-colors font-bold bg-purple-500/5 border-l border-purple-500/10"
+                  className="py-3 px-2 text-center cursor-pointer hover:text-purple-300 transition-colors font-bold bg-purple-500/5 border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-center gap-1 text-purple-400">
                     <ShieldAlert className="w-3 h-3" />
@@ -302,7 +296,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
                 <th
                   onClick={() => handleSort('transitDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:text-sky-300 transition-colors font-bold bg-sky-500/5"
+                  className="py-3 px-2 text-center cursor-pointer hover:text-sky-300 transition-colors font-bold bg-sky-500/5 border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-center gap-1 text-sky-400">
                     <Plane className="w-3 h-3" />
@@ -313,7 +307,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
                 <th
                   onClick={() => handleSort('destinationDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:text-amber-300 transition-colors font-bold bg-amber-500/5"
+                  className="py-3 px-2 text-center cursor-pointer hover:text-amber-300 transition-colors font-bold bg-amber-500/5 border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-center gap-1 text-amber-400">
                     <MapPin className="w-3 h-3" />
@@ -324,7 +318,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
                 <th
                   onClick={() => handleSort('weekendDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:text-rose-300 transition-colors font-bold bg-rose-500/5"
+                  className="py-3 px-2 text-center cursor-pointer hover:text-rose-300 transition-colors font-bold bg-rose-500/5 border-r border-slate-700/80 dark:border-slate-800"
                 >
                   <div className="flex items-center justify-center gap-1 text-rose-400">
                     <Calendar className="w-3 h-3" />
@@ -335,7 +329,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
                 <th
                   onClick={() => handleSort('totalDelays')}
-                  className="py-3 px-3 text-center cursor-pointer hover:text-yellow-300 transition-colors font-bold bg-yellow-500/5 border-r border-yellow-500/10"
+                  className="py-3 px-3 text-center cursor-pointer hover:text-yellow-300 transition-colors font-bold bg-yellow-500/5"
                 >
                   <div className="flex items-center justify-center gap-1 text-yellow-400">
                     <AlertTriangle className="w-3 h-3" />
@@ -343,24 +337,19 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-yellow-500/70" />
                   </div>
                 </th>
-
-                <th className="py-3 px-3 text-center font-bold"><strong>Action</strong></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody>
               {filteredAndSortedData.map((c) => {
-                const isSelected = selectedDestination === c.countryCode;
                 const sharePct = totalAWBs > 0 ? ((c.awbCount / totalAWBs) * 100).toFixed(1) : 0;
 
                 return (
                   <tr
                     key={c.countryCode}
-                    className={`hover:bg-slate-800/40 transition-colors ${
-                      isSelected ? 'bg-blue-600/15' : ''
-                    }`}
+                    className="hover:bg-slate-800/40 transition-colors border-b border-slate-700/50 dark:border-slate-800/80"
                   >
                     {/* Country Code */}
-                    <td className="py-2.5 px-3 font-bold text-white flex items-center gap-2">
+                    <td className="py-2.5 px-3 font-bold text-white flex items-center gap-2 border-r border-slate-700/50 dark:border-slate-800/80">
                       <span className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-mono text-xs text-sky-400 font-extrabold">
                         {c.countryCode}
                       </span>
@@ -368,7 +357,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Volume */}
-                    <td className="py-2.5 px-3 text-right font-extrabold text-white font-mono">
+                    <td className="py-2.5 px-3 text-right font-extrabold text-white font-mono border-r border-slate-700/50 dark:border-slate-800/80">
                       <div><strong>{c.awbCount.toLocaleString()}</strong></div>
                       <div className="text-[10px] text-slate-500 font-semibold font-sans">
                         {sharePct}% of total
@@ -376,7 +365,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Avg TT */}
-                    <td className="py-2.5 px-3 text-right font-mono font-bold">
+                    <td className="py-2.5 px-3 text-right font-mono font-bold border-r border-slate-700/50 dark:border-slate-800/80">
                       <span
                         className={
                           c.avgTT <= 4.5
@@ -391,17 +380,17 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Min TT */}
-                    <td className="py-2.5 px-2 text-right font-mono text-slate-400 font-bold">
+                    <td className="py-2.5 px-2 text-right font-mono text-slate-400 font-bold border-r border-slate-700/50 dark:border-slate-800/80">
                       {c.minTT} d
                     </td>
 
                     {/* Max TT */}
-                    <td className="py-2.5 px-2 text-right font-mono text-slate-400 font-bold">
+                    <td className="py-2.5 px-2 text-right font-mono text-slate-400 font-bold border-r border-slate-700/50 dark:border-slate-800/80">
                       {c.maxTT} d
                     </td>
 
                     {/* On-Time Rate */}
-                    <td className="py-2.5 px-3 text-right">
+                    <td className="py-2.5 px-3 text-right border-r border-slate-700/50 dark:border-slate-800/80">
                       <div className="flex items-center justify-end gap-1.5">
                         <span className="font-mono font-bold text-emerald-400">
                           <strong>{c.onTimePercentage}%</strong>
@@ -416,7 +405,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Clearance Delays */}
-                    <td className="py-2.5 px-2 text-center bg-purple-500/5 border-l border-purple-500/10">
+                    <td className="py-2.5 px-2 text-center bg-purple-500/5 border-r border-slate-700/50 dark:border-slate-800/80">
                       {c.clearanceDelays > 0 ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
                           {c.clearanceDelays}
@@ -427,7 +416,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Transit Delays */}
-                    <td className="py-2.5 px-2 text-center bg-sky-500/5">
+                    <td className="py-2.5 px-2 text-center bg-sky-500/5 border-r border-slate-700/50 dark:border-slate-800/80">
                       {c.transitDelays > 0 ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
                           {c.transitDelays}
@@ -438,7 +427,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Destination Delays */}
-                    <td className="py-2.5 px-2 text-center bg-amber-500/5">
+                    <td className="py-2.5 px-2 text-center bg-amber-500/5 border-r border-slate-700/50 dark:border-slate-800/80">
                       {c.destinationDelays > 0 ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                           {c.destinationDelays}
@@ -449,7 +438,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Weekend Delays */}
-                    <td className="py-2.5 px-2 text-center bg-rose-500/5">
+                    <td className="py-2.5 px-2 text-center bg-rose-500/5 border-r border-slate-700/50 dark:border-slate-800/80">
                       {c.weekendDelays > 0 ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
                           {c.weekendDelays}
@@ -460,7 +449,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Total Delays */}
-                    <td className="py-2.5 px-3 text-center bg-yellow-500/5 border-r border-yellow-500/10">
+                    <td className="py-2.5 px-3 text-center bg-yellow-500/5">
                       {c.totalDelays > 0 ? (
                         <div className="flex flex-col items-center">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 shadow-sm shadow-yellow-500/10">
@@ -473,22 +462,6 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                       ) : (
                         <span className="text-slate-600 font-mono text-xs">-</span>
                       )}
-                    </td>
-
-                    {/* Action */}
-                    <td className="py-2.5 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => onSelectCountry(isSelected ? 'ALL' : c.countryCode)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30'
-                            : 'bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600 hover:text-white'
-                        }`}
-                      >
-                        <Filter className="w-3 h-3" />
-                        <span><strong>{isSelected ? 'Clear' : 'Filter'}</strong></span>
-                      </button>
                     </td>
                   </tr>
                 );

@@ -197,8 +197,6 @@ export const App: React.FC = () => {
                 <CountryMatrix
                   countryData={countryPerformance}
                   totalAWBs={filteredShipments.length}
-                  onSelectCountry={setDestinationFilter}
-                  selectedDestination={filters.selectedDestinations[0] || null}
                 />
               )}
 
