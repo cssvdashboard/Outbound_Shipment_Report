@@ -288,34 +288,15 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   return (
     <div className="space-y-6 animate-fade-in">
       
-      {/* 1. COMPONENT TITLE & ACTION BAR */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/25 shrink-0">
-            <CalendarDays className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Calendar Days Transit Time Comparison
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-400 border border-violet-200 dark:border-violet-800">
-                Weekday & Weekly Matrix
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action: Export Matrix Table */}
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={handleExportMatrixExcel}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Export Matrix (.xlsx)</span>
-          </button>
-        </div>
+      {/* Action: Export Matrix Table */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleExportMatrixExcel}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          <span>Export Matrix (.xlsx)</span>
+        </button>
       </div>
 
       {/* 2. DEDICATED SUNDAY & FLEET KPI RIBBON */}
