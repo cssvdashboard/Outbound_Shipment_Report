@@ -289,7 +289,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     <div className="space-y-6 animate-fade-in">
       
       {/* 1. COMPONENT TITLE & ACTION BAR */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#0c1222] p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/25 shrink-0">
             <CalendarDays className="w-6 h-6" />
@@ -433,8 +433,8 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 3. DYNAMIC CUSTOMER, DESTINATION & MONTH FILTER CONTROLS */}
-      <div className="bg-white dark:bg-[#0c1222] p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80">
+      <div className="glass-card p-4 sm:p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b-2 border-slate-600">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-violet-500" />
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -619,19 +619,19 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 4. MAIN CALENDAR TRANSIT MATRIX TABLE (Sunday–Saturday Vertically at Left) */}
-      <div className="bg-white dark:bg-[#0c1222] rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-600 dark:border-slate-600 bg-slate-950/40">
+        <div className="p-4 sm:p-5 border-b-2 border-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#0f172a]">
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-violet-500" />
+            <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-violet-400" />
               Calendar Days vs Weekly Transit Matrix
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-xs text-slate-400 font-medium">
               Click any cell to view detailed shipments and delivery breakdown for that day & week.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-bold text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               <span>Fast (&le; 4.0d)</span>
@@ -648,68 +648,66 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                <th className="py-3.5 px-4 sticky left-0 bg-slate-50 dark:bg-slate-900 z-10 w-44">
+          <table className="w-full text-center text-xs min-w-[1000px] border-collapse border-spacing-0">
+            <thead className="sticky top-0 bg-[#0f172a] border-b-2 border-slate-500 text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-md">
+              <tr className="border-b-2 border-slate-500">
+                <th className="py-3.5 px-4 sticky left-0 bg-[#0f172a] z-20 w-44 font-black border-r border-slate-600 text-center">
                   Calendar Weekday
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black border-r border-slate-600">
                   <div>Week 1 Avg TT</div>
                   <div className="text-[10px] text-slate-400 font-normal">Days 1–7</div>
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black border-r border-slate-600">
                   <div>Week 2 Avg TT</div>
                   <div className="text-[10px] text-slate-400 font-normal">Days 8–14</div>
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black border-r border-slate-600">
                   <div>Week 3 Avg TT</div>
                   <div className="text-[10px] text-slate-400 font-normal">Days 15–21</div>
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black border-r border-slate-600">
                   <div>Week 4 Avg TT</div>
                   <div className="text-[10px] text-slate-400 font-normal">Days 22–28</div>
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black border-r border-slate-600">
                   <div>Week 5 Avg TT</div>
                   <div className="text-[10px] text-slate-400 font-normal">Days 29–31</div>
                 </th>
-                <th className="py-3.5 px-4 text-center bg-violet-50/50 dark:bg-violet-950/20 font-black text-violet-700 dark:text-violet-300">
+                <th className="py-3.5 px-4 text-center font-black border-r-2 border-slate-500 bg-violet-950/40 text-violet-300">
                   Overall Day Avg TT
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black border-r border-slate-600">
                   Total Shipments
                 </th>
-                <th className="py-3.5 px-4 text-center">
+                <th className="py-3.5 px-4 text-center font-black">
                   On-Time Rate
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70 text-xs font-semibold">
+            <tbody className="divide-y divide-slate-600">
               {rows.map((row) => {
                 const isSunday = row.dayName === 'Sunday';
                 return (
                   <tr
                     key={row.dayName}
-                    className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40 ${
-                      isSunday ? 'bg-indigo-50/30 dark:bg-indigo-950/10' : ''
-                    }`}
+                    className="hover:bg-slate-800/60 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80"
                   >
                     {/* Vertically Left: Weekday Name */}
-                    <td className={`py-4 px-4 font-black sticky left-0 z-10 ${
+                    <td className={`py-3.5 px-4 font-black sticky left-0 z-10 border-r border-slate-600 text-center ${
                       isSunday
-                        ? 'bg-indigo-50/90 dark:bg-[#0e1628] text-indigo-700 dark:text-indigo-400 border-r border-indigo-100 dark:border-indigo-900/50'
-                        : 'bg-white dark:bg-[#0c1222] text-slate-900 dark:text-slate-100 border-r border-slate-100 dark:border-slate-800/60'
+                        ? 'bg-[#131d38] text-violet-300'
+                        : 'bg-[#0f172a] text-slate-200'
                     }`}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <span className={`w-2.5 h-2.5 rounded-full ${
                           isSunday
-                            ? 'bg-violet-600 shadow-sm shadow-violet-500/50'
-                            : 'bg-slate-400 dark:bg-slate-600'
+                            ? 'bg-violet-400 shadow-sm shadow-violet-400/50'
+                            : 'bg-slate-400'
                         }`}></span>
                         <span className="text-sm font-extrabold">{row.dayName}</span>
                         {isSunday && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-violet-600 text-white">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-violet-600 text-white">
                             Target
                           </span>
                         )}
@@ -721,7 +719,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                       const wData: WeekStats = row.weeks[w] || { weekNum: w, avgTT: 0, count: 0, shipments: [] };
                       const hasData = wData.count > 0;
                       return (
-                        <td key={w} className="py-3.5 px-3 text-center">
+                        <td key={w} className="py-3 px-3 text-center border-r border-slate-600">
                           {hasData ? (
                             <button
                               onClick={() =>
@@ -736,15 +734,15 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                               )}`}
                               title={`Click to inspect ${wData.count} shipments`}
                             >
-                              <span className="text-xs font-black tracking-tight group-hover:underline">
+                              <span className="text-xs font-black tracking-tight group-hover:underline font-mono">
                                 {wData.avgTT.toFixed(2)}d
                               </span>
-                              <span className="text-[10px] opacity-75 font-mono">
+                              <span className="text-[10px] opacity-80 font-mono">
                                 {wData.count.toLocaleString()} pkgs
                               </span>
                             </button>
                           ) : (
-                            <span className="text-slate-300 dark:text-slate-600 font-mono text-xs">
+                            <span className="text-slate-500 font-mono text-xs">
                               -
                             </span>
                           )}
@@ -753,7 +751,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                     })}
 
                     {/* Overall Day Avg TT */}
-                    <td className="py-3.5 px-4 text-center bg-violet-50/40 dark:bg-violet-950/20">
+                    <td className="py-3 px-4 text-center border-r-2 border-slate-500 bg-violet-950/20">
                       {row.totalCount > 0 ? (
                         <button
                           onClick={() =>
@@ -764,31 +762,31 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                           }
                           className="group inline-flex flex-col items-center justify-center px-3 py-1.5 rounded-xl bg-violet-600 text-white shadow-sm hover:bg-violet-500 transition-all cursor-pointer hover:scale-105"
                         >
-                          <span className="text-xs font-black tracking-tight group-hover:underline">
+                          <span className="text-xs font-black tracking-tight group-hover:underline font-mono">
                             {row.overallAvgTT.toFixed(2)}d
                           </span>
                           <span className="text-[10px] text-violet-200">Overall Avg</span>
                         </button>
                       ) : (
-                        <span className="text-slate-300 dark:text-slate-600 font-mono text-xs">0.00</span>
+                        <span className="text-slate-500 font-mono text-xs">0.00</span>
                       )}
                     </td>
 
                     {/* Total Shipments */}
-                    <td className="py-3.5 px-4 text-center font-bold text-slate-800 dark:text-slate-200">
+                    <td className="py-3 px-4 text-center font-extrabold text-white font-mono border-r border-slate-600">
                       {row.totalCount.toLocaleString()}
                     </td>
 
                     {/* On-Time Rate */}
-                    <td className="py-3.5 px-4 text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-4 text-center">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black bg-slate-800 border border-slate-600 text-slate-200 font-mono">
                         {row.totalCount > 0 ? (
                           <>
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                             <span>{row.onTimePercentage}%</span>
                           </>
                         ) : (
-                          <span className="text-slate-400">-</span>
+                          <span className="text-slate-500">-</span>
                         )}
                       </div>
                     </td>
@@ -802,7 +800,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 5. VISUAL CHART: WEEKLY COMPARISON BAR CHART */}
-      <div className="bg-white dark:bg-[#0c1222] p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-4">
+      <div className="glass-card p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
