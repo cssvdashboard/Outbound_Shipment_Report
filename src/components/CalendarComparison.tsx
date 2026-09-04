@@ -14,7 +14,6 @@ import {
   Download,
   FileSpreadsheet,
   Layers,
-  Sparkles,
   BarChart2,
   Calendar,
   Truck,
@@ -299,114 +298,79 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
         </button>
       </div>
 
-      {/* 2. DEDICATED SUNDAY & FLEET KPI RIBBON */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* Card 1: Sunday Transit Time Highlight (Requested specifically by user) */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700 p-5 text-white shadow-xl shadow-indigo-500/20 flex flex-col justify-between border border-indigo-400/30">
-          <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-white/10 blur-xl"></div>
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-indigo-200 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Sunday Pickup Metric
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 backdrop-blur-md border border-white/20">
-                {sundayMetrics.totalCount.toLocaleString()} Shipments
-              </span>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl sm:text-4xl font-black tracking-tight">
-                {sundayMetrics.totalCount > 0 ? sundayMetrics.avgTT.toFixed(2) : '0.00'}
-              </span>
-              <span className="text-sm font-bold text-indigo-200">Days Avg TT</span>
-            </div>
-          </div>
+      {/* 2. FLEET KPI RIBBON */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-          <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-[11px] font-bold text-indigo-100">
-            <span>Weekly:</span>
-            <div className="flex gap-2 font-mono">
-              <span>W1: {sundayMetrics.weekBreakdown[0]?.avgTT ? `${sundayMetrics.weekBreakdown[0].avgTT}d` : '-'}</span>
-              <span>•</span>
-              <span>W2: {sundayMetrics.weekBreakdown[1]?.avgTT ? `${sundayMetrics.weekBreakdown[1].avgTT}d` : '-'}</span>
-              <span>•</span>
-              <span>W3: {sundayMetrics.weekBreakdown[2]?.avgTT ? `${sundayMetrics.weekBreakdown[2].avgTT}d` : '-'}</span>
-              <span>•</span>
-              <span>W4: {sundayMetrics.weekBreakdown[3]?.avgTT ? `${sundayMetrics.weekBreakdown[3].avgTT}d` : '-'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Overall Fleet Average Transit Time */}
-        <div className="bg-white dark:bg-[#0c1222] p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+        {/* Card 1: Overall Fleet Average Transit Time */}
+        <div className="glass-card p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-sky-500" />
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-sky-400" />
               Overall Fleet Avg TT
             </span>
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold text-slate-400 font-mono">
               {fleetMetrics.totalCount.toLocaleString()} AWBs
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
+            <span className="text-3xl sm:text-4xl font-black text-white font-mono">
               {fleetMetrics.overallAvgTT.toFixed(2)}
             </span>
-            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Days Fleet Avg</span>
+            <span className="text-sm font-bold text-slate-400">Days Fleet Avg</span>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-700/60 text-[11px] font-medium text-slate-400">
             Across all 7 calendar weekdays
           </div>
         </div>
 
-        {/* Card 3: Fastest Day of Week */}
-        <div className="bg-white dark:bg-[#0c1222] p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+        {/* Card 2: Fastest Day of Week */}
+        <div className="glass-card p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <TrendingDown className="w-3.5 h-3.5 text-emerald-500" />
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
               Fastest Weekday
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-950/50 text-emerald-400 border border-emerald-600">
               Optimal Day
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400">
               {fleetMetrics.fastestDay ? fleetMetrics.fastestDay.day : 'N/A'}
             </span>
             {fleetMetrics.fastestDay && (
-              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+              <span className="text-sm font-bold text-emerald-300 font-mono">
                 ({fleetMetrics.fastestDay.avgTT.toFixed(2)}d)
               </span>
             )}
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-700/60 text-[11px] font-medium text-slate-400">
             Lowest average transit turnaround
           </div>
         </div>
 
-        {/* Card 4: Peak Volume Day */}
-        <div className="bg-white dark:bg-[#0c1222] p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+        {/* Card 3: Peak Volume Day */}
+        <div className="glass-card p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-              <Truck className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <Truck className="w-3.5 h-3.5 text-amber-400" />
               Peak Pickup Volume
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-950/50 text-amber-400 border border-amber-600">
               Heaviest Day
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400">
+            <span className="text-2xl sm:text-3xl font-black text-amber-400">
               {fleetMetrics.peakVolumeDay ? fleetMetrics.peakVolumeDay.day : 'N/A'}
             </span>
             {fleetMetrics.peakVolumeDay && (
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
+              <span className="text-sm font-bold text-slate-300 font-mono">
                 ({fleetMetrics.peakVolumeDay.count.toLocaleString()} pkgs)
               </span>
             )}
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-700/60 text-[11px] font-medium text-slate-400">
             Highest parcel distribution traffic
           </div>
         </div>
