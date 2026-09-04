@@ -303,9 +303,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                 Weekday & Weekly Matrix
               </span>
             </div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-              Pickup weekday correlation vs weekly transit time (Sunday–Saturday across Week 1–4/5) with dynamic customer & destination filtering.
-            </p>
           </div>
         </div>
 
