@@ -10,7 +10,8 @@ import {
   Download,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  CalendarDays
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { parseExcelBuffer } from '../utils/excelParser';
@@ -209,6 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
               { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
               { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
+              { id: 'calendar', label: 'Calendar TT Comparison', icon: CalendarDays, color: 'text-violet-500' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

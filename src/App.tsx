@@ -7,6 +7,7 @@ import { DelayHub } from './components/DelayHub';
 import { CountryMatrix } from './components/CountryMatrix';
 import { CustomerComparison } from './components/CustomerComparison';
 import { ShipmentExplorer } from './components/ShipmentExplorer';
+import { CalendarComparison } from './components/CalendarComparison';
 import { getStoredTheme, setStoredTheme } from './services/storage';
 import { Loader2 } from 'lucide-react';
 
@@ -63,7 +64,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
-    if (tabParam && ['overview', 'delays', 'country', 'comparison', 'explorer'].includes(tabParam)) {
+    if (tabParam && ['overview', 'delays', 'country', 'comparison', 'explorer', 'calendar'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
     const custParam = params.get('cust');
@@ -214,6 +215,19 @@ export const App: React.FC = () => {
                 <ShipmentExplorer
                   shipments={filteredShipments}
                   totalRawCount={rawShipments.length}
+                />
+              )}
+
+              {activeTab === 'calendar' && (
+                <CalendarComparison
+                  shipments={filteredShipments}
+                  rawShipments={rawShipments}
+                  allDestinations={allDestinations}
+                  allCustomers={allCustomers}
+                  selectedCustomerFromParent={filters.selectedCustomers[0] || ''}
+                  selectedDestinationFromParent={filters.selectedDestinations[0] || ''}
+                  onCustomerChange={setCustomerFilter}
+                  onDestinationChange={setDestinationFilter}
                 />
               )}
             </>
