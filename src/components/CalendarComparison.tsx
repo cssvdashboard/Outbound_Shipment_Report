@@ -619,20 +619,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           </div>
 
         </div>
-
-        {/* Filter State Tags */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 text-xs">
-          <span className="text-slate-500 font-semibold">Active Scope:</span>
-          <span className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 font-bold">
-            Customer: {selectedCustomer || 'All'}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 font-bold">
-            Destination: {selectedDestination || 'All'}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 font-bold">
-            Month: {availableMonths.find((m) => m.id === selectedMonth)?.label || 'All Months'}
-          </span>
-        </div>
       </div>
 
       {/* 4. MAIN CALENDAR TRANSIT MATRIX TABLE (Sunday–Saturday Vertically at Left) */}
