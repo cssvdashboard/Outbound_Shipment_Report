@@ -651,11 +651,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                             : 'bg-slate-400'
                         }`}></span>
                         <span className="text-sm font-extrabold">{row.dayName}</span>
-                        {isSunday && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-violet-600 text-white">
-                            Target
-                          </span>
-                        )}
                       </div>
                     </td>
 
