@@ -52,7 +52,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   // Local Filter States
   const [selectedCustomer, setSelectedCustomer] = useState<string>(selectedCustomerFromParent || '');
   const [selectedDestination, setSelectedDestination] = useState<string>(selectedDestinationFromParent || '');
-  const [selectedShipper, setSelectedShipper] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<string>('2026-07');
 
   // Customer Dropdown & Search
@@ -64,11 +63,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   const [destSearch, setDestSearch] = useState<string>('');
   const [isDestDropdownOpen, setIsDestDropdownOpen] = useState<boolean>(false);
   const destDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Shipper Dropdown & Search
-  const [shipperSearch, setShipperSearch] = useState<string>('');
-  const [isShipperDropdownOpen, setIsShipperDropdownOpen] = useState<boolean>(false);
-  const shipperDropdownRef = useRef<HTMLDivElement>(null);
 
   // Drilldown Modal State
   const [drilldownTitle, setDrilldownTitle] = useState<string | null>(null);
@@ -99,9 +93,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       if (destDropdownRef.current && !destDropdownRef.current.contains(event.target as Node)) {
         setIsDestDropdownOpen(false);
       }
-      if (shipperDropdownRef.current && !shipperDropdownRef.current.contains(event.target as Node)) {
-        setIsShipperDropdownOpen(false);
-      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -112,12 +103,11 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     return computeCalendarMatrix(rawShipments, {
       customer: selectedCustomer,
       destination: selectedDestination,
-      shipper: selectedShipper,
       month: selectedMonth
     });
-  }, [rawShipments, selectedCustomer, selectedDestination, selectedShipper, selectedMonth]);
+  }, [rawShipments, selectedCustomer, selectedDestination, selectedMonth]);
 
-  const { rows, sundayMetrics, fleetMetrics, availableMonths, availableShippers } = matrixResult;
+  const { rows, sundayMetrics, fleetMetrics, availableMonths } = matrixResult;
 
   // Filtered dropdown customer options
   const filteredCustomerList = useMemo(() => {
@@ -133,13 +123,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     return allDestinations.filter((d) => d.toLowerCase().includes(q)).slice(0, 50);
   }, [allDestinations, destSearch]);
 
-  // Filtered dropdown shipper options
-  const filteredShipperList = useMemo(() => {
-    if (!shipperSearch.trim()) return availableShippers.slice(0, 50);
-    const q = shipperSearch.toLowerCase();
-    return availableShippers.filter((s) => s.toLowerCase().includes(q)).slice(0, 50);
-  }, [availableShippers, shipperSearch]);
-
   const handleSelectCustomer = (cust: string) => {
     setSelectedCustomer(cust);
     setIsCustomerDropdownOpen(false);
@@ -154,16 +137,9 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     if (onDestinationChange) onDestinationChange(dest);
   };
 
-  const handleSelectShipper = (shpr: string) => {
-    setSelectedShipper(shpr);
-    setIsShipperDropdownOpen(false);
-    setShipperSearch('');
-  };
-
   const handleClearAllFilters = () => {
     setSelectedCustomer('');
     setSelectedDestination('');
-    setSelectedShipper('');
     if (onCustomerChange) onCustomerChange('');
     if (onDestinationChange) onDestinationChange('');
   };
@@ -465,15 +441,15 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-violet-500" />
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-              Filter By Customer, Destination or Shipper
+              Filter By Customer or Destination
             </h3>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              (Leave empty to view all shippers and destinations)
+              (Leave empty to view all customers and destinations)
             </span>
           </div>
 
           {/* Clear Filters Button */}
-          {(selectedCustomer || selectedDestination || selectedShipper) && (
+          {(selectedCustomer || selectedDestination) && (
             <button
               onClick={handleClearAllFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer w-fit"
@@ -484,7 +460,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           
           {/* A. Customer Selector Dropdown */}
           <div className="relative" ref={customerDropdownRef}>
@@ -622,75 +598,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             )}
           </div>
 
-          {/* C. Shipper Name Dropdown */}
-          <div className="relative" ref={shipperDropdownRef}>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5 text-amber-500" />
-                Shipper (Optional)
-              </span>
-              {selectedShipper && (
-                <button
-                  onClick={() => handleSelectShipper('')}
-                  className="text-[10px] text-rose-500 hover:underline font-bold"
-                >
-                  Clear
-                </button>
-              )}
-            </label>
-            <div
-              onClick={() => setIsShipperDropdownOpen(!isShipperDropdownOpen)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                selectedShipper
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
-                  : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200'
-              }`}
-            >
-              <span className="truncate">
-                {selectedShipper || 'All Shippers (Combined)'}
-              </span>
-              <ChevronDown className="w-4 h-4 shrink-0 text-slate-400" />
-            </div>
-
-            {isShipperDropdownOpen && (
-              <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden">
-                <div className="p-2 border-b border-slate-100 dark:border-slate-800">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search shipper..."
-                      value={shipperSearch}
-                      onChange={(e) => setShipperSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-                <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
-                  <button
-                    onClick={() => handleSelectShipper('')}
-                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
-                  >
-                    <span>All Shippers</span>
-                    {!selectedShipper && <span className="text-amber-500">✓</span>}
-                  </button>
-                  {filteredShipperList.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => handleSelectShipper(s)}
-                      className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between truncate"
-                    >
-                      <span className="truncate">{s}</span>
-                      {selectedShipper === s && <span className="text-amber-500 shrink-0 ml-2">✓</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* D. Month Selector */}
+          {/* C. Month Selector */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-violet-500" />
@@ -721,11 +629,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 font-bold">
             Destination: {selectedDestination || 'All'}
           </span>
-          {selectedShipper && (
-            <span className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold">
-              Shipper: {selectedShipper}
-            </span>
-          )}
           <span className="px-2.5 py-1 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 font-bold">
             Month: {availableMonths.find((m) => m.id === selectedMonth)?.label || 'All Months'}
           </span>
