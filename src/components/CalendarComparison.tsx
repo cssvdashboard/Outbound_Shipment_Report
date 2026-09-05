@@ -111,18 +111,18 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
 
   const { rows, sundayMetrics, fleetMetrics, availableMonths } = matrixResult;
 
-  // Filtered dropdown customer options
+  // Filtered dropdown customer options (Full List)
   const filteredCustomerList = useMemo(() => {
-    if (!customerSearch.trim()) return allCustomers.slice(0, 50);
+    if (!customerSearch.trim()) return allCustomers;
     const q = customerSearch.toLowerCase();
-    return allCustomers.filter((c) => c.toLowerCase().includes(q)).slice(0, 50);
+    return allCustomers.filter((c) => c.toLowerCase().includes(q));
   }, [allCustomers, customerSearch]);
 
-  // Filtered dropdown destination options
+  // Filtered dropdown destination options (Full List)
   const filteredDestList = useMemo(() => {
-    if (!destSearch.trim()) return allDestinations.slice(0, 50);
+    if (!destSearch.trim()) return allDestinations;
     const q = destSearch.toLowerCase();
-    return allDestinations.filter((d) => d.toLowerCase().includes(q)).slice(0, 50);
+    return allDestinations.filter((d) => d.toLowerCase().includes(q));
   }, [allDestinations, destSearch]);
 
   const handleSelectCustomer = (cust: string) => {
@@ -476,12 +476,12 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             {isCustomerDropdownOpen && (
               <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[100] overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                 <div className="px-3 py-2 bg-slate-50 dark:bg-slate-950/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                  <span>{customerSearch ? `Matches for "${customerSearch}"` : 'Customer List'}</span>
+                  <span>{customerSearch ? `Matches for "${customerSearch}"` : 'All Customers'}</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono">
-                    {filteredCustomerList.length} shown
+                    {filteredCustomerList.length.toLocaleString()} items
                   </span>
                 </div>
-                <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                   <button
                     type="button"
                     onClick={() => handleSelectCustomer('')}
@@ -591,12 +591,12 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             {isDestDropdownOpen && (
               <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[100] overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                 <div className="px-3 py-2 bg-slate-50 dark:bg-slate-950/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                  <span>{destSearch ? `Matches for "${destSearch}"` : 'Destination List'}</span>
+                  <span>{destSearch ? `Matches for "${destSearch}"` : 'All Destinations'}</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">
-                    {filteredDestList.length} shown
+                    {filteredDestList.length.toLocaleString()} items
                   </span>
                 </div>
-                <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                   <button
                     type="button"
                     onClick={() => handleSelectDestination('')}
