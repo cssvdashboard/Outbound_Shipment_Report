@@ -321,14 +321,14 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       {/* 2. MAIN WIDESCREEN TABLE CONTAINER */}
       <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-600 dark:border-slate-600 bg-slate-950/40">
         <div className="max-h-[640px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-left text-xs border-collapse border-spacing-0">
+          <table className="w-full text-center text-xs border-collapse border-spacing-0">
             <thead className="sticky top-0 bg-[#0f172a] border-b-2 border-slate-500 text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-md">
               <tr className="border-b-2 border-slate-500">
                 <th
                   onClick={() => handleSort('awb')}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[170px] font-black border-r border-slate-600 align-middle"
+                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[170px] font-black border-r border-slate-600 text-center align-middle"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>AWB Tracking #</strong></span>
                     {renderSortIcon('awb')}
                   </div>
@@ -346,9 +346,9 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('customer')}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-600 align-middle"
+                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-600 text-center align-middle"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Customer Account</strong></span>
                     {renderSortIcon('customer')}
                   </div>
@@ -356,23 +356,23 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('shprName')}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-600 align-middle"
+                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-600 text-center align-middle"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Shipper Name</strong></span>
                     {renderSortIcon('shprName')}
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[200px] font-black border-r border-slate-600 align-middle">
+                <th className="py-3.5 px-4 min-w-[200px] font-black border-r border-slate-600 text-center align-middle">
                   <strong>Recipient &amp; Destination City</strong>
                 </th>
 
                 <th
                   onClick={() => handleSort('tt')}
-                  className="py-3.5 px-3 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-600 align-middle"
+                  className="py-3.5 px-3 text-center cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-600 align-middle"
                 >
-                  <div className="flex items-center justify-end gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>TT (Days)</strong></span>
                     {renderSortIcon('tt')}
                   </div>
@@ -398,7 +398,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[220px] font-black border-r border-slate-600 align-middle">
+                <th className="py-3.5 px-4 min-w-[220px] font-black border-r border-slate-600 text-center align-middle">
                   <strong>Logged Exceptions &amp; Remarks</strong>
                 </th>
 
@@ -419,8 +419,8 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     className="hover:bg-slate-800/60 text-slate-200 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80 group"
                   >
                     {/* AWB with Copy Button */}
-                    <td className="py-3 px-4 font-mono font-bold text-sky-400 border-r border-slate-600 align-middle">
-                      <div className="flex items-center gap-2">
+                    <td className="py-3 px-4 font-mono font-bold text-sky-400 border-r border-slate-600 text-center align-middle">
+                      <div className="flex items-center justify-center gap-2">
                         <span><strong>{s.awb}</strong></span>
                         <button
                           type="button"
@@ -445,31 +445,31 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Customer Account Name */}
-                    <td className="py-3 px-4 font-bold text-slate-200 border-r border-slate-600 align-middle" title={s.customer}>
-                      <div className="line-clamp-2 leading-relaxed">
+                    <td className="py-3 px-4 font-bold text-slate-200 border-r border-slate-600 text-center align-middle" title={s.customer}>
+                      <div className="line-clamp-2 leading-relaxed text-center">
                         <strong>{s.customer}</strong>
                       </div>
                     </td>
 
                     {/* Shipper Name */}
-                    <td className="py-3 px-4 text-slate-300 font-medium border-r border-slate-600 align-middle" title={s.shprName}>
-                      <div className="line-clamp-2 leading-relaxed font-normal">
+                    <td className="py-3 px-4 text-slate-300 font-medium border-r border-slate-600 text-center align-middle" title={s.shprName}>
+                      <div className="line-clamp-2 leading-relaxed font-normal text-center">
                         {s.shprName}
                       </div>
                     </td>
 
                     {/* Recipient & City */}
-                    <td className="py-3 px-4 border-r border-slate-600 align-middle">
-                      <div className="font-semibold text-slate-300 line-clamp-1" title={s.recipient || 'N/A'}>
+                    <td className="py-3 px-4 border-r border-slate-600 text-center align-middle">
+                      <div className="font-semibold text-slate-300 line-clamp-1 text-center" title={s.recipient || 'N/A'}>
                         {s.recipient || '-'}
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                      <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1 text-center">
                         {s.city ? `${s.city}, ${s.destination}` : s.destination}
                       </div>
                     </td>
 
                     {/* Transit Time */}
-                    <td className="py-3 px-3 text-right font-mono font-extrabold text-sm border-r border-slate-600 align-middle">
+                    <td className="py-3 px-3 text-center font-mono font-extrabold text-sm border-r border-slate-600 align-middle">
                       <span
                         className={
                           s.tt <= 4.5
@@ -523,21 +523,21 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Logged Delays & Remarks */}
-                    <td className="py-3 px-4 text-xs font-medium border-r border-slate-600 align-middle">
+                    <td className="py-3 px-4 text-xs font-medium border-r border-slate-600 text-center align-middle">
                       {s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                        <div className="text-amber-300 font-bold line-clamp-1" title={`Clearance Delay: ${s.clearanceDelay}`}>
+                        <div className="text-amber-300 font-bold line-clamp-1 text-center" title={`Clearance Delay: ${s.clearanceDelay}`}>
                           📋 <strong>{s.clearanceDelay}</strong>
                         </div>
                       ) : s.transitDelay && s.transitDelay !== '-' ? (
-                        <div className="text-indigo-300 font-bold line-clamp-1" title={`Transit Delay: ${s.transitDelay}`}>
+                        <div className="text-indigo-300 font-bold line-clamp-1 text-center" title={`Transit Delay: ${s.transitDelay}`}>
                           ✈️ <strong>{s.transitDelay}</strong>
                         </div>
                       ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                        <div className="text-rose-300 font-bold line-clamp-1" title={`Destination Delay: ${s.destinationDelay}`}>
+                        <div className="text-rose-300 font-bold line-clamp-1 text-center" title={`Destination Delay: ${s.destinationDelay}`}>
                           🚚 <strong>{s.destinationDelay}</strong>
                         </div>
                       ) : s.remarks && s.remarks !== '-' ? (
-                        <div className="text-slate-400 line-clamp-1 font-normal" title={s.remarks}>
+                        <div className="text-slate-400 line-clamp-1 font-normal text-center" title={s.remarks}>
                           💬 {s.remarks}
                         </div>
                       ) : (
