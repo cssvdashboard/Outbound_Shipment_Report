@@ -51,7 +51,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   // Local Filter States
   const [selectedCustomer, setSelectedCustomer] = useState<string>(selectedCustomerFromParent || '');
   const [selectedDestination, setSelectedDestination] = useState<string>(selectedDestinationFromParent || '');
-  const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
+  const [selectedMonth, setSelectedMonth] = useState<string>('2026-07');
 
   // Customer Dropdown & Search
   const [customerSearch, setCustomerSearch] = useState<string>('');
@@ -139,7 +139,6 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   const handleClearAllFilters = () => {
     setSelectedCustomer('');
     setSelectedDestination('');
-    setSelectedMonth('ALL');
     if (onCustomerChange) onCustomerChange('');
     if (onDestinationChange) onDestinationChange('');
   };
@@ -392,7 +391,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           </div>
 
           {/* Clear Filters Button */}
-          {(selectedCustomer || selectedDestination || (selectedMonth && selectedMonth !== 'ALL')) && (
+          {(selectedCustomer || selectedDestination) && (
             <button
               onClick={handleClearAllFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer w-fit"
@@ -543,31 +542,21 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
 
           {/* C. Month Selector */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-violet-500" />
-                Calendar Month
-              </span>
-              {selectedMonth !== 'ALL' && (
-                <button
-                  onClick={() => setSelectedMonth('ALL')}
-                  className="text-[10px] text-violet-500 hover:underline font-bold"
-                >
-                  All Months
-                </button>
-              )}
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-violet-500" />
+              Calendar Month
             </label>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="w-full px-3 py-2 rounded-xl text-xs font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
             >
-              <option value="ALL">All Available Months (Combined)</option>
               {availableMonths.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label} ({m.count.toLocaleString()} records)
                 </option>
               ))}
+              <option value="ALL">All Available Months</option>
             </select>
           </div>
 
