@@ -319,14 +319,14 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       </div>
 
       {/* 2. MAIN WIDESCREEN TABLE CONTAINER */}
-      <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border border-slate-800/90">
+      <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-600 dark:border-slate-600 bg-slate-950/40">
         <div className="max-h-[640px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="sticky top-0 bg-[#0b0f19]/98 backdrop-blur-xl border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
-              <tr>
+          <table className="w-full text-left text-xs border-collapse border-spacing-0">
+            <thead className="sticky top-0 bg-[#0f172a] border-b-2 border-slate-500 text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-md">
+              <tr className="border-b-2 border-slate-500">
                 <th
                   onClick={() => handleSort('awb')}
-                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[150px] font-bold"
+                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[150px] font-black border-r border-slate-600"
                 >
                   <div className="flex items-center gap-1.5">
                     <span><strong>AWB Tracking #</strong></span>
@@ -336,9 +336,9 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('destination')}
-                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[90px] font-bold"
+                  className="py-3.5 px-3 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[90px] font-black border-r border-slate-600 text-center"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Dest</strong></span>
                     {renderSortIcon('destination')}
                   </div>
@@ -346,7 +346,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('customer')}
-                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[220px] font-bold"
+                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-600"
                 >
                   <div className="flex items-center gap-1.5">
                     <span><strong>Customer Account</strong></span>
@@ -356,7 +356,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('shprName')}
-                  className="py-3.5 px-4 cursor-pointer hover:text-white transition-colors min-w-[220px] font-bold"
+                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-600"
                 >
                   <div className="flex items-center gap-1.5">
                     <span><strong>Shipper Name</strong></span>
@@ -364,13 +364,13 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[200px] font-bold">
+                <th className="py-3.5 px-4 min-w-[200px] font-black border-r border-slate-600">
                   <strong>Recipient &amp; Destination City</strong>
                 </th>
 
                 <th
                   onClick={() => handleSort('tt')}
-                  className="py-3.5 px-3 text-right cursor-pointer hover:text-white transition-colors min-w-[110px] font-bold"
+                  className="py-3.5 px-3 text-right cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-600"
                 >
                   <div className="flex items-center justify-end gap-1.5">
                     <span><strong>TT (Days)</strong></span>
@@ -380,9 +380,9 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('ttRange')}
-                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[120px] font-bold"
+                  className="py-3.5 px-3 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-600 text-center"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Timeline</strong></span>
                     {renderSortIcon('ttRange')}
                   </div>
@@ -390,25 +390,25 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('finalResolution')}
-                  className="py-3.5 px-3 cursor-pointer hover:text-white transition-colors min-w-[120px] font-bold"
+                  className="py-3.5 px-3 cursor-pointer hover:bg-slate-800 hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-600 text-center"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Resolution</strong></span>
                     {renderSortIcon('finalResolution')}
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[220px] font-bold">
+                <th className="py-3.5 px-4 min-w-[220px] font-black border-r border-slate-600">
                   <strong>Logged Exceptions &amp; Remarks</strong>
                 </th>
 
-                <th className="py-3.5 px-3 text-center min-w-[80px] font-bold">
+                <th className="py-3.5 px-3 text-center min-w-[80px] font-black">
                   <strong>Inspect</strong>
                 </th>
               </tr>
             </thead>
             
-            <tbody className="divide-y divide-slate-800/60 font-sans">
+            <tbody className="divide-y divide-slate-600 font-sans">
               {paginatedData.map((s, idx) => {
                 const formattedDays = formatTT(s.tt);
                 const isCopied = copiedAWB === s.awb;
@@ -416,10 +416,10 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 return (
                   <tr
                     key={`${s.awb}-${idx}`}
-                    className="hover:bg-slate-800/40 text-slate-200 transition-colors group"
+                    className="hover:bg-slate-800/60 text-slate-200 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80 group"
                   >
                     {/* AWB with Copy Button */}
-                    <td className="py-3 px-4 font-mono font-bold text-sky-400">
+                    <td className="py-3 px-4 font-mono font-bold text-sky-400 border-r border-slate-600">
                       <div className="flex items-center gap-2">
                         <span><strong>{s.awb}</strong></span>
                         <button
@@ -438,28 +438,28 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Destination Country Badge */}
-                    <td className="py-3 px-3">
+                    <td className="py-3 px-3 text-center border-r border-slate-600">
                       <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 font-mono font-bold text-xs text-white shadow-sm">
                         <strong>{s.destination}</strong>
                       </span>
                     </td>
 
                     {/* Customer Account Name */}
-                    <td className="py-3 px-4 font-bold text-slate-200" title={s.customer}>
+                    <td className="py-3 px-4 font-bold text-slate-200 border-r border-slate-600" title={s.customer}>
                       <div className="line-clamp-2 leading-relaxed">
                         <strong>{s.customer}</strong>
                       </div>
                     </td>
 
                     {/* Shipper Name */}
-                    <td className="py-3 px-4 text-slate-300 font-medium" title={s.shprName}>
+                    <td className="py-3 px-4 text-slate-300 font-medium border-r border-slate-600" title={s.shprName}>
                       <div className="line-clamp-2 leading-relaxed font-normal">
                         {s.shprName}
                       </div>
                     </td>
 
                     {/* Recipient & City */}
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 border-r border-slate-600">
                       <div className="font-semibold text-slate-300 line-clamp-1" title={s.recipient || 'N/A'}>
                         {s.recipient || '-'}
                       </div>
@@ -469,7 +469,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Transit Time */}
-                    <td className="py-3 px-3 text-right font-mono font-extrabold text-sm">
+                    <td className="py-3 px-3 text-right font-mono font-extrabold text-sm border-r border-slate-600">
                       <span
                         className={
                           s.tt <= 4.5
@@ -484,7 +484,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Delivery Timeline Pill */}
-                    <td className="py-3 px-3">
+                    <td className="py-3 px-3 text-center border-r border-slate-600">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
                           s.ttRange === 'Within 4-5 Days' || s.tt <= 5
@@ -497,7 +497,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Final Resolution Pill */}
-                    <td className="py-3 px-3">
+                    <td className="py-3 px-3 text-center border-r border-slate-600">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
                           s.finalResolution === 'Delivered'
@@ -523,7 +523,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Logged Delays & Remarks */}
-                    <td className="py-3 px-4 text-xs font-medium">
+                    <td className="py-3 px-4 text-xs font-medium border-r border-slate-600">
                       {s.clearanceDelay && s.clearanceDelay !== '-' ? (
                         <div className="text-amber-300 font-bold line-clamp-1" title={`Clearance Delay: ${s.clearanceDelay}`}>
                           📋 <strong>{s.clearanceDelay}</strong>
