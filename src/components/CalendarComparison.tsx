@@ -381,7 +381,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 3. DYNAMIC CUSTOMER, DESTINATION & MONTH FILTER CONTROLS */}
-      <div className="glass-card p-4 sm:p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 space-y-4">
+      <div className="glass-card p-4 sm:p-5 rounded-2xl border-2 border-slate-600 dark:border-slate-600 shadow-2xl bg-slate-950/40 space-y-4 relative z-30">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b-2 border-slate-600">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-violet-500" />
@@ -408,7 +408,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           
           {/* A. Customer Selector Search Bar with Dropdown */}
-          <div className="relative" ref={customerDropdownRef}>
+          <div className={`relative ${isCustomerDropdownOpen ? 'z-50' : 'z-20'}`} ref={customerDropdownRef}>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-blue-500" />
@@ -474,7 +474,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             </div>
 
             {isCustomerDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[100] overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                 <div className="px-3 py-2 bg-slate-50 dark:bg-slate-950/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
                   <span>{customerSearch ? `Matches for "${customerSearch}"` : 'Customer List'}</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono">
@@ -523,7 +523,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           </div>
 
           {/* B. Destination Selector Search Bar with Dropdown */}
-          <div className="relative" ref={destDropdownRef}>
+          <div className={`relative ${isDestDropdownOpen ? 'z-50' : 'z-20'}`} ref={destDropdownRef}>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-emerald-500" />
@@ -589,7 +589,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             </div>
 
             {isDestDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[100] overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                 <div className="px-3 py-2 bg-slate-50 dark:bg-slate-950/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
                   <span>{destSearch ? `Matches for "${destSearch}"` : 'Destination List'}</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">
@@ -661,7 +661,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 4. MAIN CALENDAR TRANSIT MATRIX TABLE (Sunday–Saturday Vertically at Left) */}
-      <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-600 dark:border-slate-600 bg-slate-950/40">
+      <div className="glass-card rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-600 dark:border-slate-600 bg-slate-950/40 relative z-10">
         <div className="p-4 sm:p-5 border-b-2 border-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#0f172a]">
           <div>
             <h3 className="text-base font-extrabold text-white flex items-center gap-2">
