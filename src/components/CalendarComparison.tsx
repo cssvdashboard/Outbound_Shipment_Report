@@ -52,7 +52,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   // Local Filter States
   const [selectedCustomer, setSelectedCustomer] = useState<string>(selectedCustomerFromParent || '');
   const [selectedDestination, setSelectedDestination] = useState<string>(selectedDestinationFromParent || '');
-  const [selectedMonth, setSelectedMonth] = useState<string>('2026-07');
+  const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
 
   // Customer Dropdown & Search
   const [customerSearch, setCustomerSearch] = useState<string>('');
@@ -142,6 +142,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   const handleClearAllFilters = () => {
     setSelectedCustomer('');
     setSelectedDestination('');
+    setSelectedMonth('ALL');
     if (onCustomerChange) onCustomerChange('');
     if (onDestinationChange) onDestinationChange('');
   };
@@ -648,12 +649,12 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="w-full px-3 py-2 rounded-xl text-xs font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
             >
+              <option value="ALL">All Available Months</option>
               {availableMonths.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label} ({m.count.toLocaleString()} records)
                 </option>
               ))}
-              <option value="ALL">All Available Months</option>
             </select>
           </div>
 
