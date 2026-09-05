@@ -195,8 +195,8 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Calendar_TT_Comparison');
-    XLSX.writeFile(workbook, `Calendar_Days_TT_Comparison_${selectedMonth || 'All'}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Weekly_TT_Comparison');
+    XLSX.writeFile(workbook, `Weekly_TT_Comparison_${selectedMonth || 'All'}.xlsx`);
   };
 
   // Export drilldown records
