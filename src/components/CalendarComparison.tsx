@@ -631,28 +631,18 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-600">
-              {rows.map((row) => {
-                const isSunday = row.dayName === 'Sunday';
-                return (
-                  <tr
-                    key={row.dayName}
-                    className="hover:bg-slate-800/60 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80"
-                  >
-                    {/* Vertically Left: Weekday Name */}
-                    <td className={`py-3.5 px-4 font-black sticky left-0 z-10 border-r border-slate-600 text-center ${
-                      isSunday
-                        ? 'bg-[#131d38] text-violet-300'
-                        : 'bg-[#0f172a] text-slate-200'
-                    }`}>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${
-                          isSunday
-                            ? 'bg-violet-400 shadow-sm shadow-violet-400/50'
-                            : 'bg-slate-400'
-                        }`}></span>
-                        <span className="text-sm font-extrabold">{row.dayName}</span>
-                      </div>
-                    </td>
+              {rows.map((row) => (
+                <tr
+                  key={row.dayName}
+                  className="hover:bg-slate-800/60 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80"
+                >
+                  {/* Vertically Left: Weekday Name */}
+                  <td className="py-3.5 px-4 font-black sticky left-0 z-10 border-r border-slate-600 text-center bg-[#0f172a] text-slate-200">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                      <span className="text-sm font-extrabold">{row.dayName}</span>
+                    </div>
+                  </td>
 
                     {/* Week 1..5 Columns */}
                     {[1, 2, 3, 4, 5].map((w) => {
@@ -732,8 +722,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
                     </td>
 
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>
