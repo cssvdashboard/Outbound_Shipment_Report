@@ -310,7 +310,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-sky-400" />
-              Overall Fleet Avg TT
+              Average TT
             </span>
             <span className="text-xs font-bold text-slate-400 font-mono">
               {fleetMetrics.totalCount.toLocaleString()} AWBs
@@ -349,7 +349,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             )}
           </div>
           <div className="mt-4 pt-3 border-t border-slate-700/60 text-[11px] font-medium text-slate-400">
-            Lowest average transit turnaround
+            Lowest Average TT
           </div>
         </div>
 
@@ -358,7 +358,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
               <Truck className="w-3.5 h-3.5 text-amber-400" />
-              Peak Pickup Volume
+              Highest Pickup Volume
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-950/50 text-amber-400 border border-amber-600">
               Heaviest Day
@@ -375,7 +375,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             )}
           </div>
           <div className="mt-4 pt-3 border-t border-slate-700/60 text-[11px] font-medium text-slate-400">
-            Highest parcel distribution traffic
+            Highest Parcel Pickup
           </div>
         </div>
 
