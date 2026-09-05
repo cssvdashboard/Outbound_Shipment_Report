@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Search,
   X,
+  Check,
   ChevronDown,
   Download,
   FileSpreadsheet,
@@ -57,11 +58,13 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
   const [customerSearch, setCustomerSearch] = useState<string>('');
   const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState<boolean>(false);
   const customerDropdownRef = useRef<HTMLDivElement>(null);
+  const customerInputRef = useRef<HTMLInputElement>(null);
 
   // Destination Dropdown & Search
   const [destSearch, setDestSearch] = useState<string>('');
   const [isDestDropdownOpen, setIsDestDropdownOpen] = useState<boolean>(false);
   const destDropdownRef = useRef<HTMLDivElement>(null);
+  const destInputRef = useRef<HTMLInputElement>(null);
 
   // Drilldown Modal State
   const [drilldownTitle, setDrilldownTitle] = useState<string | null>(null);
@@ -404,7 +407,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           
-          {/* A. Customer Selector Dropdown */}
+          {/* A. Customer Selector Search Bar with Dropdown */}
           <div className="relative" ref={customerDropdownRef}>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
@@ -413,66 +416,113 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
               </span>
               {selectedCustomer && (
                 <button
+                  type="button"
                   onClick={() => handleSelectCustomer('')}
-                  className="text-[10px] text-rose-500 hover:underline font-bold"
+                  className="text-[10px] text-rose-500 hover:underline font-bold cursor-pointer"
                 >
                   Clear
                 </button>
               )}
             </label>
-            <div
-              onClick={() => setIsCustomerDropdownOpen(!isCustomerDropdownOpen)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                selectedCustomer
-                  ? 'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300'
-                  : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200'
-              }`}
-            >
-              <span className="truncate">
-                {selectedCustomer || 'All Customers (Combined)'}
-              </span>
-              <ChevronDown className="w-4 h-4 shrink-0 text-slate-400" />
+            <div className="relative flex items-center">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <Search className="w-3.5 h-3.5 text-blue-400" />
+              </div>
+              <input
+                ref={customerInputRef}
+                type="text"
+                value={customerSearch}
+                onChange={(e) => {
+                  setCustomerSearch(e.target.value);
+                  setIsCustomerDropdownOpen(true);
+                }}
+                onFocus={() => setIsCustomerDropdownOpen(true)}
+                placeholder={selectedCustomer ? `Customer: ${selectedCustomer}` : 'Search customer name...'}
+                className={`w-full pl-9 pr-16 py-2 rounded-xl text-xs font-bold border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                  selectedCustomer
+                    ? 'bg-blue-500/10 border-blue-500/40 text-blue-700 dark:text-blue-300 placeholder:text-blue-700 dark:placeholder:text-blue-300'
+                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500'
+                }`}
+              />
+              <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                {(customerSearch || selectedCustomer) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (customerSearch) {
+                        setCustomerSearch('');
+                      } else {
+                        handleSelectCustomer('');
+                      }
+                      customerInputRef.current?.focus();
+                    }}
+                    className="p-1 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Clear"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsCustomerDropdownOpen(!isCustomerDropdownOpen)}
+                  className="p-1 text-slate-400 hover:text-blue-400 transition-colors cursor-pointer"
+                  title="Toggle customer list"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCustomerDropdownOpen ? 'rotate-180 text-blue-400' : ''}`} />
+                </button>
+              </div>
             </div>
 
             {isCustomerDropdownOpen && (
-              <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden">
-                <div className="p-2 border-b border-slate-100 dark:border-slate-800">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search customers..."
-                      value={customerSearch}
-                      onChange={(e) => setCustomerSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      autoFocus
-                    />
-                  </div>
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="px-3 py-2 bg-slate-50 dark:bg-slate-950/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                  <span>{customerSearch ? `Matches for "${customerSearch}"` : 'Customer List'}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono">
+                    {filteredCustomerList.length} shown
+                  </span>
                 </div>
-                <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                   <button
+                    type="button"
                     onClick={() => handleSelectCustomer('')}
-                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
+                    className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between cursor-pointer ${
+                      !selectedCustomer
+                        ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
                   >
-                    <span>All Customers</span>
-                    {!selectedCustomer && <span className="text-blue-500">✓</span>}
+                    <span>All Customers (Combined)</span>
+                    {!selectedCustomer && <Check className="w-3.5 h-3.5 text-blue-500" />}
                   </button>
-                  {filteredCustomerList.map((cust) => (
-                    <button
-                      key={cust}
-                      onClick={() => handleSelectCustomer(cust)}
-                      className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between truncate"
-                    >
-                      <span className="truncate">{cust}</span>
-                      {selectedCustomer === cust && <span className="text-blue-500 shrink-0 ml-2">✓</span>}
-                    </button>
-                  ))}
+                  {filteredCustomerList.map((cust) => {
+                    const isSelected = selectedCustomer === cust;
+                    return (
+                      <button
+                        key={cust}
+                        type="button"
+                        onClick={() => handleSelectCustomer(cust)}
+                        className={`w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between truncate cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold'
+                            : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="truncate">{cust}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-blue-500 shrink-0 ml-2" />}
+                      </button>
+                    );
+                  })}
+                  {filteredCustomerList.length === 0 && (
+                    <div className="p-3 text-center text-xs text-slate-400">
+                      No matching customers found
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* B. Destination Selector Dropdown */}
+          {/* B. Destination Selector Search Bar with Dropdown */}
           <div className="relative" ref={destDropdownRef}>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
@@ -481,60 +531,107 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
               </span>
               {selectedDestination && (
                 <button
+                  type="button"
                   onClick={() => handleSelectDestination('')}
-                  className="text-[10px] text-rose-500 hover:underline font-bold"
+                  className="text-[10px] text-rose-500 hover:underline font-bold cursor-pointer"
                 >
                   Clear
                 </button>
               )}
             </label>
-            <div
-              onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                selectedDestination
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
-                  : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200'
-              }`}
-            >
-              <span className="truncate">
-                {selectedDestination ? `Destination: ${selectedDestination}` : 'All Destinations (Combined)'}
-              </span>
-              <ChevronDown className="w-4 h-4 shrink-0 text-slate-400" />
+            <div className="relative flex items-center">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <Search className="w-3.5 h-3.5 text-emerald-400" />
+              </div>
+              <input
+                ref={destInputRef}
+                type="text"
+                value={destSearch}
+                onChange={(e) => {
+                  setDestSearch(e.target.value);
+                  setIsDestDropdownOpen(true);
+                }}
+                onFocus={() => setIsDestDropdownOpen(true)}
+                placeholder={selectedDestination ? `Destination: ${selectedDestination}` : 'Search destination code (e.g. US, CA, GB)...'}
+                className={`w-full pl-9 pr-16 py-2 rounded-xl text-xs font-bold border transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+                  selectedDestination
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 placeholder:text-emerald-700 dark:placeholder:text-emerald-300'
+                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500'
+                }`}
+              />
+              <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                {(destSearch || selectedDestination) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (destSearch) {
+                        setDestSearch('');
+                      } else {
+                        handleSelectDestination('');
+                      }
+                      destInputRef.current?.focus();
+                    }}
+                    className="p-1 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Clear"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
+                  className="p-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  title="Toggle destination list"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDestDropdownOpen ? 'rotate-180 text-emerald-400' : ''}`} />
+                </button>
+              </div>
             </div>
 
             {isDestDropdownOpen && (
-              <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden">
-                <div className="p-2 border-b border-slate-100 dark:border-slate-800">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search destination code (e.g. US, CA, GB)..."
-                      value={destSearch}
-                      onChange={(e) => setDestSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                      autoFocus
-                    />
-                  </div>
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="px-3 py-2 bg-slate-50 dark:bg-slate-950/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                  <span>{destSearch ? `Matches for "${destSearch}"` : 'Destination List'}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">
+                    {filteredDestList.length} shown
+                  </span>
                 </div>
-                <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                   <button
+                    type="button"
                     onClick={() => handleSelectDestination('')}
-                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
+                    className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between cursor-pointer ${
+                      !selectedDestination
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
                   >
-                    <span>All Destinations</span>
-                    {!selectedDestination && <span className="text-emerald-500">✓</span>}
+                    <span>All Destinations (Combined)</span>
+                    {!selectedDestination && <Check className="w-3.5 h-3.5 text-emerald-500" />}
                   </button>
-                  {filteredDestList.map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => handleSelectDestination(d)}
-                      className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
-                    >
-                      <span>{d}</span>
-                      {selectedDestination === d && <span className="text-emerald-500">✓</span>}
-                    </button>
-                  ))}
+                  {filteredDestList.map((d) => {
+                    const isSelected = selectedDestination === d;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => handleSelectDestination(d)}
+                        className={`w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between truncate cursor-pointer ${
+                          isSelected
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold'
+                            : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="truncate">{d}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 ml-2" />}
+                      </button>
+                    );
+                  })}
+                  {filteredDestList.length === 0 && (
+                    <div className="p-3 text-center text-xs text-slate-400">
+                      No matching destinations found
+                    </div>
+                  )}
                 </div>
               </div>
             )}
