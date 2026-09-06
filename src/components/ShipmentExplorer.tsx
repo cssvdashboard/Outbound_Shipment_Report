@@ -657,6 +657,17 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-sky-500/20 text-sky-400 font-mono">
                       <strong>{selectedShipment.destination}</strong>
                     </span>
+                    {selectedShipment.shipmentType && (
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-black font-mono ${
+                        selectedShipment.shipmentType === 'IPD'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : selectedShipment.shipmentType === 'CC'
+                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                          : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      }`}>
+                        <strong>{selectedShipment.shipmentType}</strong>
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5 font-medium">
                     MAWB: <strong>{selectedShipment.mawb || 'N/A'}</strong> • Ramp: <strong>{selectedShipment.rampId || 'N/A'}</strong> • Dest Loc: <strong>{selectedShipment.destLocCd || 'N/A'}</strong>

@@ -9,7 +9,8 @@ import {
   RotateCcw,
   Shield,
   Package,
-  CreditCard
+  CreditCard,
+  Plane
 } from 'lucide-react';
 import { FilterState, Shipment, CategoryTypeFilter } from '../types/logistics';
 import { searchCustomers } from '../utils/analytics';
@@ -142,11 +143,18 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   }, [rawShipments]);
 
   const ppCount = useMemo(() => {
-    return rawShipments.filter((s) => (s.shipmentType || 'PP').toUpperCase() === 'PP').length;
+    return rawShipments.filter((s) => {
+      const t = (s.shipmentType || '').toUpperCase();
+      return t === 'PP' || !t;
+    }).length;
   }, [rawShipments]);
 
   const ccCount = useMemo(() => {
     return rawShipments.filter((s) => (s.shipmentType || '').toUpperCase() === 'CC').length;
+  }, [rawShipments]);
+
+  const ipdCount = useMemo(() => {
+    return rawShipments.filter((s) => (s.shipmentType || '').toUpperCase() === 'IPD').length;
   }, [rawShipments]);
 
   // Total active filters count
@@ -598,6 +606,28 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                   : 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300'
               }`}>
                 {ccCount.toLocaleString()}
+              </span>
+            </button>
+
+            {/* IPD Button */}
+            <button
+              type="button"
+              onClick={() => onCategoryTypeChange?.(currentCategory === 'IPD' ? 'ALL' : 'IPD')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                currentCategory === 'IPD'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400 font-black'
+                  : 'text-slate-700 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 hover:bg-emerald-500/10'
+              }`}
+              title="Click to show IPD (International Priority DirectDistribution) shipments"
+            >
+              <Plane className="w-3.5 h-3.5" />
+              <span>IPD</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${
+                currentCategory === 'IPD'
+                  ? 'bg-white/25 text-white'
+                  : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
+              }`}>
+                {ipdCount.toLocaleString()}
               </span>
             </button>
           </div>

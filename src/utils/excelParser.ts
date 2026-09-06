@@ -85,7 +85,11 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
       const remarks = String(normalizeKey(row, ['REMARKS', 'Remarks', 'Comment']) || '').trim();
 
       const rawType = String(normalizeKey(row, ['Shipment Type', 'ShipmentType', 'Type', 'PP/CC', 'Payment Type']) || '').trim().toUpperCase();
-      const shipmentType = rawType === 'CC' ? 'CC' : 'PP';
+      let shipmentType = 'PP';
+      if (rawType === 'CC') shipmentType = 'CC';
+      else if (rawType === 'IPD') shipmentType = 'IPD';
+      else if (rawType === 'PP') shipmentType = 'PP';
+      else if (rawType) shipmentType = rawType;
       const isAgent = /agent/i.test(customer);
 
       return {

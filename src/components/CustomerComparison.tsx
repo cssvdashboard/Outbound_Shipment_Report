@@ -12,9 +12,10 @@ import {
   ChevronDown,
   ShieldCheck,
   PackageCheck,
-  CreditCard
+  CreditCard,
+  Plane
 } from 'lucide-react';
-import { Shipment, CustomerComparisonMetric } from '../types/logistics';
+import { Shipment, CustomerComparisonMetric, CategoryTypeFilter } from '../types/logistics';
 import { computeCustomerComparison, searchCustomers } from '../utils/analytics';
 import { Bar } from 'react-chartjs-2';
 
@@ -23,7 +24,7 @@ interface CustomerComparisonProps {
   rawShipments?: Shipment[];
   allDestinations: string[];
   allCustomers: string[];
-  selectedCategoryType?: 'ALL' | 'AGENT' | 'PP' | 'CC';
+  selectedCategoryType?: CategoryTypeFilter;
 }
 
 export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
@@ -287,6 +288,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     if (selectedCategoryType === 'AGENT') return 'Search Agent Customer...';
     if (selectedCategoryType === 'PP') return 'Search PP Customer...';
     if (selectedCategoryType === 'CC') return 'Search CC Customer...';
+    if (selectedCategoryType === 'IPD') return 'Search IPD Customer...';
     return 'Search Customer...';
   }, [selectedCategoryType]);
 
@@ -317,6 +319,12 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
                     <CreditCard className="w-3 h-3 text-amber-400" />
                     <span>CC Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
+                  </span>
+                )}
+                {selectedCategoryType === 'IPD' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <Plane className="w-3 h-3 text-emerald-400" />
+                    <span>IPD Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
                   </span>
                 )}
                 {selectedCategoryType === 'AGENT' && (

@@ -21,13 +21,13 @@ export interface Shipment {
   weekendDelay?: string;
   finalResolution: string; // "Delivered" | "RTS" | "NFBRK" etc.
   remarks?: string;
-  shipmentType?: string; // 'PP' | 'CC'
+  shipmentType?: string; // 'PP' | 'CC' | 'IPD'
   isAgent?: boolean;     // true if customer has 'agent'
 }
 
 export type FilterMode = 'include' | 'exclude';
 
-export type CategoryTypeFilter = 'ALL' | 'AGENT' | 'PP' | 'CC';
+export type CategoryTypeFilter = 'ALL' | 'AGENT' | 'PP' | 'CC' | 'IPD';
 
 export interface FilterState {
   searchTerm: string; // Autocomplete search keyword e.g. "Four", "Elite"

@@ -4,7 +4,8 @@ import {
   FilterState,
   MetricSummary,
   RatioBreakdown,
-  CountryPerformance
+  CountryPerformance,
+  CategoryTypeFilter
 } from '../types/logistics';
 import {
   filterShipments,
@@ -70,7 +71,7 @@ export function useLogisticsData() {
           setIsServerConnected(false);
         }
 
-        // 2. Fallback to IndexedDB (only if custom dataset AND contains shipmentType)
+        // 2. Fallback to IndexedDB (only if custom dataset AND contains shipmentType with IPD support)
         const { data, meta } = await loadSavedDataset();
         if (data && data.length > 0 && meta && meta.isCustom && data.some((s) => s.shipmentType !== undefined)) {
           setRawShipments(data);
@@ -250,7 +251,7 @@ export function useLogisticsData() {
     });
   }, []);
 
-  const setCategoryTypeFilter = useCallback((categoryType: 'ALL' | 'AGENT' | 'PP' | 'CC') => {
+  const setCategoryTypeFilter = useCallback((categoryType: CategoryTypeFilter) => {
     setFilters((prev) => ({
       ...prev,
       selectedCategoryType: categoryType
