@@ -84,12 +84,14 @@ export function computeCalendarMatrix(
     destination?: string;
     shipper?: string;
     month?: string; // e.g. "2026-07" or "ALL"
+    categoryType?: string; // "ALL" | "AGENT" | "PP" | "CC" | "IPD"
   }
 ): CalendarMatrixResult {
   const selectedCustomer = options?.customer?.trim() || '';
   const selectedDestination = options?.destination?.trim().toUpperCase() || '';
   const selectedShipper = options?.shipper?.trim() || '';
   const selectedMonth = options?.month || '';
+  const selectedCategoryType = options?.categoryType || 'ALL';
 
   // Extract all available months from dataset
   const monthCounts: Record<string, number> = {};
@@ -113,7 +115,7 @@ export function computeCalendarMatrix(
       return { id: ym, label, count: monthCounts[ym] };
     });
 
-  // Filter shipments based on customer, destination, shipper, and month
+  // Filter shipments based on customer, destination, shipper, month, and categoryType
   const filtered = shipments.filter((s) => {
     if (selectedCustomer && s.customer !== selectedCustomer) return false;
     if (selectedDestination && s.destination.toUpperCase() !== selectedDestination) return false;
@@ -124,6 +126,13 @@ export function computeCalendarMatrix(
       if (!d) return false;
       const ym = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
       if (ym !== selectedMonth) return false;
+    }
+
+    if (selectedCategoryType && selectedCategoryType !== 'ALL') {
+      if (selectedCategoryType === 'AGENT' && !s.isAgent) return false;
+      if (selectedCategoryType === 'PP' && s.shipmentType !== 'PP') return false;
+      if (selectedCategoryType === 'CC' && s.shipmentType !== 'CC') return false;
+      if (selectedCategoryType === 'IPD' && s.shipmentType !== 'IPD') return false;
     }
 
     return true;

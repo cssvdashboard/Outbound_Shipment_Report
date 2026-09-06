@@ -231,8 +231,11 @@ export const App: React.FC = () => {
                   allCustomers={allCustomers}
                   selectedCustomerFromParent={filters.selectedCustomers[0] || ''}
                   selectedDestinationFromParent={filters.selectedDestinations[0] || ''}
+                  selectedMonthFromParent={filters.selectedMonth || 'ALL'}
+                  selectedCategoryType={filters.selectedCategoryType || 'ALL'}
                   onCustomerChange={setCustomerFilter}
                   onDestinationChange={setDestinationFilter}
+                  onMonthChange={setMonthFilter}
                 />
               )}
             </>

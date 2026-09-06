@@ -36,23 +36,30 @@ interface CalendarComparisonProps {
   allDestinations: string[];
   selectedCustomerFromParent?: string;
   selectedDestinationFromParent?: string;
+  selectedMonthFromParent?: string;
+  selectedCategoryType?: string;
   onCustomerChange?: (cust: string) => void;
   onDestinationChange?: (dest: string) => void;
+  onMonthChange?: (month: string) => void;
 }
 
 export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
+  shipments,
   rawShipments,
   allCustomers,
   allDestinations,
   selectedCustomerFromParent,
   selectedDestinationFromParent,
+  selectedMonthFromParent,
+  selectedCategoryType,
   onCustomerChange,
-  onDestinationChange
+  onDestinationChange,
+  onMonthChange
 }) => {
   // Local Filter States
   const [selectedCustomer, setSelectedCustomer] = useState<string>(selectedCustomerFromParent || '');
   const [selectedDestination, setSelectedDestination] = useState<string>(selectedDestinationFromParent || '');
-  const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
+  const [selectedMonth, setSelectedMonth] = useState<string>(selectedMonthFromParent || 'ALL');
 
   // Customer Dropdown & Search
   const [customerSearch, setCustomerSearch] = useState<string>('');
@@ -86,6 +93,12 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     }
   }, [selectedDestinationFromParent]);
 
+  useEffect(() => {
+    if (selectedMonthFromParent !== undefined) {
+      setSelectedMonth(selectedMonthFromParent || 'ALL');
+    }
+  }, [selectedMonthFromParent]);
+
   // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -105,9 +118,10 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     return computeCalendarMatrix(rawShipments, {
       customer: selectedCustomer,
       destination: selectedDestination,
-      month: selectedMonth
+      month: selectedMonth,
+      categoryType: selectedCategoryType
     });
-  }, [rawShipments, selectedCustomer, selectedDestination, selectedMonth]);
+  }, [rawShipments, selectedCustomer, selectedDestination, selectedMonth, selectedCategoryType]);
 
   const { rows, sundayMetrics, fleetMetrics, availableMonths } = matrixResult;
 
@@ -145,6 +159,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
     setSelectedMonth('ALL');
     if (onCustomerChange) onCustomerChange('');
     if (onDestinationChange) onDestinationChange('');
+    if (onMonthChange) onMonthChange('ALL');
   };
 
   // Open drilldown modal for a cell
@@ -395,7 +410,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
           </div>
 
           {/* Clear Filters Button */}
-          {(selectedCustomer || selectedDestination) && (
+          {(selectedCustomer || selectedDestination || (selectedMonth && selectedMonth !== 'ALL')) && (
             <button
               onClick={handleClearAllFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer w-fit"
@@ -646,7 +661,11 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
             </label>
             <select
               value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedMonth(val);
+                if (onMonthChange) onMonthChange(val);
+              }}
               className="w-full px-3 py-2 rounded-xl text-xs font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
             >
               <option value="ALL">All Available Months</option>

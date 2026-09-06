@@ -16,12 +16,12 @@ import {
   computeCountryPerformance
 } from '../utils/analytics';
 
-// Helper: convert Excel serial date to YYYY-MM string
+// Helper: convert Excel serial date to YYYY-MM string (UTC consistent)
 function serialToYearMonth(serial: number | null | undefined): string {
   if (!serial || typeof serial !== 'number') return '';
   const d = new Date((serial - 25569) * 86400 * 1000);
   if (isNaN(d.getTime())) return '';
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 import { loadSavedDataset, saveDataset, clearSavedDataset, DatasetMeta } from '../services/storage';
 import {
