@@ -30,11 +30,12 @@ const DATA_DIR = path.resolve(__dirname, '../../data');
 const ACTIVE_DATASET_FILE = path.join(DATA_DIR, 'active_dataset.json');
 const DEFAULT_JSON_PATH = path.resolve(__dirname, '../../public/defaultData.json');
 const DEFAULT_EXCEL_PATH = path.resolve(__dirname, '../../July Final Draft.xlsx');
+const AUG_EXCEL_PATH = path.resolve(__dirname, '../../August Final Draft.xlsx');
 
 class DatasetStore {
   private shipments: ServerShipment[] = [];
   private meta: DatasetMeta = {
-    filename: 'July Final Draft.xlsx (Default)',
+    filename: 'July & August Final Draft (Default)',
     uploadedAt: new Date().toISOString(),
     rowCount: 0,
     isCustom: false
@@ -87,7 +88,7 @@ class DatasetStore {
         if (Array.isArray(list) && list.length > 0) {
           this.shipments = list;
           this.meta = {
-            filename: 'July Final Draft.xlsx (Default)',
+            filename: 'July & August Final Draft (Default)',
             uploadedAt: 'Preloaded Dataset',
             rowCount: list.length,
             isCustom: false
@@ -110,7 +111,7 @@ class DatasetStore {
         if (shipments && shipments.length > 0) {
           this.shipments = shipments;
           this.meta = {
-            filename: 'July Final Draft.xlsx (Default)',
+            filename: 'July & August Final Draft (Default)',
             uploadedAt: 'Parsed from Root Excel',
             rowCount: shipments.length,
             isCustom: false

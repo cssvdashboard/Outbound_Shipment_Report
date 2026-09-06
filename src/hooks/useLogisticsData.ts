@@ -87,8 +87,8 @@ export function useLogisticsData() {
           const defaultData: Shipment[] = await response.json();
           setRawShipments(defaultData);
           setDatasetMeta({
-            filename: 'July Final Draft.xlsx (Default)',
-            uploadedAt: 'Preloaded July Data',
+            filename: 'July & August Final Draft.xlsx (Default)',
+            uploadedAt: 'Preloaded July & August Data',
             rowCount: defaultData.length,
             isCustom: false
           });
@@ -153,8 +153,8 @@ export function useLogisticsData() {
       const defaultData: Shipment[] = await response.json();
       setRawShipments(defaultData);
       setDatasetMeta({
-        filename: 'July Final Draft.xlsx (Default)',
-        uploadedAt: 'Preloaded July Data',
+        filename: 'July & August Final Draft.xlsx (Default)',
+        uploadedAt: 'Preloaded July & August Data',
         rowCount: defaultData.length,
         isCustom: false
       });
