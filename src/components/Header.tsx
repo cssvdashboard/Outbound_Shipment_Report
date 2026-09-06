@@ -116,10 +116,10 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/80 bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-xl shadow-sm transition-colors duration-200">
       <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="relative flex items-center justify-between h-16 gap-4">
           
-          {/* Brand Logo & Title + Month Filter */}
-          <div className="flex items-center gap-3">
+          {/* Brand Logo & Title */}
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
               <Package className="w-5 h-5 text-white" />
             </div>
@@ -128,50 +128,51 @@ export const Header: React.FC<HeaderProps> = ({
                 <strong>Dashboard - Export</strong>
               </h1>
             </div>
-            {/* Month Filter Pill */}
-            <div className="relative group hidden sm:block">
+          </div>
+
+          {/* Month Filter Pill - Centered in Header */}
+          <div className="relative group hidden sm:flex items-center justify-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-20">
+            <button
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-600/10 to-indigo-600/10 hover:from-violet-600/20 hover:to-indigo-600/20 border border-violet-400/30 dark:border-violet-500/40 text-violet-700 dark:text-violet-300 text-xs font-bold transition-all cursor-pointer shadow-sm hover:shadow-violet-500/10"
+              title="Filter by month"
+            >
+              <CalendarDays className="w-3.5 h-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
+              <span className="max-w-[130px] truncate">
+                {selectedMonth && selectedMonth !== 'ALL'
+                  ? new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                  : 'All Months'}
+              </span>
+              <ChevronDown className="w-3 h-3 shrink-0 opacity-60 group-hover:rotate-180 transition-transform duration-200" />
+            </button>
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-48 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto before:absolute before:-top-2 before:left-0 before:right-0 before:h-2">
               <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600/10 to-indigo-600/10 hover:from-violet-600/20 hover:to-indigo-600/20 border border-violet-400/30 dark:border-violet-500/40 text-violet-700 dark:text-violet-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
-                title="Filter by month"
+                onClick={() => onMonthChange('ALL')}
+                className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors ${
+                  !selectedMonth || selectedMonth === 'ALL'
+                    ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40'
+                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
               >
-                <CalendarDays className="w-3.5 h-3.5 shrink-0" />
-                <span className="max-w-[110px] truncate">
-                  {selectedMonth && selectedMonth !== 'ALL'
-                    ? new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                    : 'All Months'}
-                </span>
-                <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
+                All Months
               </button>
-              <div className="absolute left-0 mt-1 w-44 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 divide-y divide-slate-100 dark:divide-slate-800">
+              {allMonths.map(ym => (
                 <button
-                  onClick={() => onMonthChange('ALL')}
+                  key={ym}
+                  onClick={() => onMonthChange(ym)}
                   className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors ${
-                    !selectedMonth || selectedMonth === 'ALL'
+                    selectedMonth === ym
                       ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
-                  All Months
+                  {new Date(ym + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </button>
-                {allMonths.map(ym => (
-                  <button
-                    key={ym}
-                    onClick={() => onMonthChange(ym)}
-                    className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors ${
-                      selectedMonth === ym
-                        ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    {new Date(ym + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
 
           {/* Actions: File Upload, Reset, Theme, Export */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <input
               type="file"
               ref={fileInputRef}
