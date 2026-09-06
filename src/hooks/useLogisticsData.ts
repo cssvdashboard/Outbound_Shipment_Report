@@ -15,6 +15,14 @@ import {
   computeDelayBreakdown,
   computeCountryPerformance
 } from '../utils/analytics';
+
+// Helper: convert Excel serial date to YYYY-MM string
+function serialToYearMonth(serial: number | null | undefined): string {
+  if (!serial || typeof serial !== 'number') return '';
+  const d = new Date((serial - 25569) * 86400 * 1000);
+  if (isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 import { loadSavedDataset, saveDataset, clearSavedDataset, DatasetMeta } from '../services/storage';
 import {
   checkServerHealth,
@@ -34,7 +42,8 @@ export const initialFilterState: FilterState = {
   selectedTransitDelays: [],
   selectedClearanceDelays: [],
   selectedDestinationDelays: [],
-  selectedCategoryType: 'ALL'
+  selectedCategoryType: 'ALL',
+  selectedMonth: 'ALL'
 };
 
 export function useLogisticsData() {
@@ -262,10 +271,16 @@ export function useLogisticsData() {
     setFilters(initialFilterState);
   }, []);
 
-  // Filtered dataset memo
+  // Month filter — applied before all other filters
+  const monthFilteredShipments = useMemo(() => {
+    if (!filters.selectedMonth || filters.selectedMonth === 'ALL') return rawShipments;
+    return rawShipments.filter(s => serialToYearMonth(s.pickup as number) === filters.selectedMonth);
+  }, [rawShipments, filters.selectedMonth]);
+
+  // Filtered dataset memo (month-aware)
   const filteredShipments = useMemo(() => {
-    return filterShipments(rawShipments, filters);
-  }, [rawShipments, filters]);
+    return filterShipments(monthFilteredShipments, filters);
+  }, [monthFilteredShipments, filters]);
 
   // Analytical outputs memoized for sub-second reactive performance
   const summaryMetrics: MetricSummary = useMemo(() => {
@@ -295,6 +310,20 @@ export function useLogisticsData() {
   const countryPerformance: CountryPerformance[] = useMemo(() => {
     return computeCountryPerformance(filteredShipments);
   }, [filteredShipments]);
+
+  // All available months derived from raw data
+  const allMonths = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of rawShipments) {
+      const ym = serialToYearMonth(s.pickup as number);
+      if (ym) set.add(ym);
+    }
+    return Array.from(set).sort();
+  }, [rawShipments]);
+
+  const setMonthFilter = useCallback((month: string) => {
+    setFilters(prev => ({ ...prev, selectedMonth: month || 'ALL' }));
+  }, []);
 
   // Unique lists for dropdowns
   const allDestinations = useMemo(() => {
@@ -332,6 +361,7 @@ export function useLogisticsData() {
     setFinalResolutionFilter,
     setTTRangeFilter,
     setDelayFilter,
+    setMonthFilter,
     resetAllFilters,
     handleDatasetUpdate,
     handleResetToDefault,
@@ -343,6 +373,7 @@ export function useLogisticsData() {
     destinationDelaysBreakdown,
     countryPerformance,
     allDestinations,
-    allCustomers
+    allCustomers,
+    allMonths
   };
 }

@@ -41,6 +41,7 @@ export interface FilterState {
   selectedClearanceDelays: string[];
   selectedDestinationDelays: string[];
   selectedCategoryType?: CategoryTypeFilter; // Quick filter category for Agent, PP, CC
+  selectedMonth?: string; // 'ALL' or 'YYYY-MM' format
   dateRange?: {
     start?: string;
     end?: string;

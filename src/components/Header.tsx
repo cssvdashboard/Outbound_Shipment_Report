@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  CalendarDays
+  CalendarDays,
+  ChevronDown
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { parseExcelBuffer } from '../utils/excelParser';
@@ -26,6 +27,9 @@ interface HeaderProps {
   filteredShipments: Shipment[];
   theme: 'dark' | 'light';
   isServerConnected?: boolean;
+  allMonths: string[];
+  selectedMonth: string;
+  onMonthChange: (month: string) => void;
   onThemeToggle: () => void;
   onDatasetUpdate: (shipments: Shipment[], filename: string) => void;
   onResetToDefault: () => void;
@@ -38,6 +42,9 @@ export const Header: React.FC<HeaderProps> = ({
   filteredShipments,
   theme,
   isServerConnected = false,
+  allMonths,
+  selectedMonth,
+  onMonthChange,
   onThemeToggle,
   onDatasetUpdate,
   onResetToDefault,
@@ -111,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
-          {/* Brand Logo & Title */}
+          {/* Brand Logo & Title + Month Filter */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
               <Package className="w-5 h-5 text-white" />
@@ -120,6 +127,46 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-950 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                 <strong>Dashboard - Export</strong>
               </h1>
+            </div>
+            {/* Month Filter Pill */}
+            <div className="relative group hidden sm:block">
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600/10 to-indigo-600/10 hover:from-violet-600/20 hover:to-indigo-600/20 border border-violet-400/30 dark:border-violet-500/40 text-violet-700 dark:text-violet-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
+                title="Filter by month"
+              >
+                <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+                <span className="max-w-[110px] truncate">
+                  {selectedMonth && selectedMonth !== 'ALL'
+                    ? new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                    : 'All Months'}
+                </span>
+                <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
+              </button>
+              <div className="absolute left-0 mt-1 w-44 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 divide-y divide-slate-100 dark:divide-slate-800">
+                <button
+                  onClick={() => onMonthChange('ALL')}
+                  className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors ${
+                    !selectedMonth || selectedMonth === 'ALL'
+                      ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  All Months
+                </button>
+                {allMonths.map(ym => (
+                  <button
+                    key={ym}
+                    onClick={() => onMonthChange(ym)}
+                    className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors ${
+                      selectedMonth === ym
+                        ? 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {new Date(ym + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -205,7 +252,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="py-2.5 overflow-x-auto no-scrollbar border-t border-slate-200/80 dark:border-slate-800/60">
           <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 dark:bg-[#070c18]/90 rounded-2xl border border-slate-200 dark:border-slate-800/90 shadow-inner w-fit min-w-full sm:min-w-0">
             {[
-              { id: 'overview', label: 'Overview (July 2026)', icon: Package, color: 'text-sky-500' },
+              { id: 'overview', label: 'Overview', icon: Package, color: 'text-sky-500' },
               { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
               { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },

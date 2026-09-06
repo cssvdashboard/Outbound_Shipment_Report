@@ -33,6 +33,7 @@ export const App: React.FC = () => {
     setFinalResolutionFilter,
     setTTRangeFilter,
     setDelayFilter,
+    setMonthFilter,
     resetAllFilters,
     handleDatasetUpdate,
     handleResetToDefault,
@@ -44,7 +45,8 @@ export const App: React.FC = () => {
     destinationDelaysBreakdown,
     countryPerformance,
     allDestinations,
-    allCustomers
+    allCustomers,
+    allMonths
   } = useLogisticsData();
 
   // 1. Initialize theme from storage
@@ -132,6 +134,9 @@ export const App: React.FC = () => {
           filteredShipments={filteredShipments}
           theme={theme}
           isServerConnected={isServerConnected}
+          allMonths={allMonths}
+          selectedMonth={filters.selectedMonth || 'ALL'}
+          onMonthChange={setMonthFilter}
           onThemeToggle={handleThemeToggle}
           onDatasetUpdate={handleDatasetUpdate}
           onResetToDefault={handleResetToDefault}
