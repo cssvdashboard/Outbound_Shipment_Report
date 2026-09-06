@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Loader2,
   CalendarDays,
+  CalendarRange,
   ChevronDown
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
@@ -259,6 +260,7 @@ export const Header: React.FC<HeaderProps> = ({
               { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
               { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
               { id: 'calendar', label: 'Weekly TT Comparison', icon: CalendarDays, color: 'text-violet-500' },
+              { id: 'monthly', label: 'Monthly Comparison', icon: CalendarRange, color: 'text-purple-500' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

@@ -8,6 +8,7 @@ import { CountryMatrix } from './components/CountryMatrix';
 import { CustomerComparison } from './components/CustomerComparison';
 import { ShipmentExplorer } from './components/ShipmentExplorer';
 import { CalendarComparison } from './components/CalendarComparison';
+import { MonthlyComparison } from './components/MonthlyComparison';
 import { getStoredTheme, setStoredTheme } from './services/storage';
 import { Loader2 } from 'lucide-react';
 
@@ -66,7 +67,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
-    if (tabParam && ['overview', 'delays', 'country', 'comparison', 'explorer', 'calendar'].includes(tabParam)) {
+    if (tabParam && ['overview', 'delays', 'country', 'comparison', 'explorer', 'calendar', 'monthly'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
     const custParam = params.get('cust');
@@ -236,6 +237,13 @@ export const App: React.FC = () => {
                   onCustomerChange={setCustomerFilter}
                   onDestinationChange={setDestinationFilter}
                   onMonthChange={setMonthFilter}
+                />
+              )}
+
+              {activeTab === 'monthly' && (
+                <MonthlyComparison
+                  rawShipments={rawShipments}
+                  filteredShipments={filteredShipments}
                 />
               )}
             </>
