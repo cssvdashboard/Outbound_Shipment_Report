@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   RotateCcw,
   Sun,
@@ -11,15 +11,11 @@ import {
   AlertCircle,
   CalendarDays,
   CalendarRange,
-  ChevronDown,
-  Cloud,
-  RefreshCw
+  ChevronDown
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { Shipment } from '../types/logistics';
 import * as XLSX from 'xlsx';
-import { CloudSyncModal } from './CloudSyncModal';
-import { subscribeToCloudStatus, CloudSyncStatus } from '../services/firebase';
 
 interface HeaderProps {
   datasetMeta: DatasetMeta;
@@ -50,18 +46,6 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   onTabChange
 }) => {
-  const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>({
-    state: 'disconnected',
-    totalSyncedEdits: 0
-  });
-  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToCloudStatus((s) => {
-      setCloudStatus(s);
-    });
-    return unsubscribe;
-  }, []);
 
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredShipments);
@@ -181,43 +165,6 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {/* Cloud Sync Status & Settings Button */}
-            <button
-              onClick={() => setIsCloudModalOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                cloudStatus.state === 'connected'
-                  ? 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/40 shadow-sm'
-                  : cloudStatus.state === 'connecting'
-                  ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/40'
-                  : cloudStatus.state === 'error'
-                  ? 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/40'
-                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-              }`}
-              title={
-                cloudStatus.state === 'connected'
-                  ? `Cloud Sync: Live Online (${cloudStatus.projectId}) • ${cloudStatus.totalSyncedEdits} edits`
-                  : 'Configure Cloud Database for multi-user collaboration'
-              }
-            >
-              {cloudStatus.state === 'connected' ? (
-                <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="hidden sm:inline"><strong>Live Cloud</strong></span>
-                  <span className="sm:hidden"><strong>Online</strong></span>
-                </>
-              ) : cloudStatus.state === 'connecting' ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-                  <span className="hidden sm:inline"><strong>Syncing...</strong></span>
-                </>
-              ) : (
-                <>
-                  <Cloud className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="hidden sm:inline"><strong>Cloud Sync</strong></span>
-                </>
-              )}
-            </button>
-
             {/* Theme Switcher */}
             <button
               onClick={onThemeToggle}
@@ -273,13 +220,6 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Cloud Sync Configuration Modal */}
-      <CloudSyncModal
-        isOpen={isCloudModalOpen}
-        onClose={() => setIsCloudModalOpen(false)}
-        status={cloudStatus}
-      />
     </header>
   );
 };
