@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import {
-  Upload,
   RotateCcw,
   Sun,
   Moon,
@@ -10,14 +9,11 @@ import {
   Download,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   CalendarDays,
   CalendarRange,
   ChevronDown
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
-import { parseExcelBuffer } from '../utils/excelParser';
-import { uploadExcelToServer } from '../services/api';
 import { Shipment } from '../types/logistics';
 import * as XLSX from 'xlsx';
 
@@ -32,7 +28,7 @@ interface HeaderProps {
   selectedMonth: string;
   onMonthChange: (month: string) => void;
   onThemeToggle: () => void;
-  onDatasetUpdate: (shipments: Shipment[], filename: string) => void;
+  onDatasetUpdate?: (shipments: Shipment[], filename: string) => void;
   onResetToDefault: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -42,58 +38,14 @@ export const Header: React.FC<HeaderProps> = ({
   datasetMeta,
   filteredShipments,
   theme,
-  isServerConnected = false,
   allMonths,
   selectedMonth,
   onMonthChange,
   onThemeToggle,
-  onDatasetUpdate,
   onResetToDefault,
   activeTab,
   onTabChange
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      // 1. If backend server is active, upload file directly
-      if (isServerConnected) {
-        try {
-          const res = await uploadExcelToServer(file);
-          if (res && res.data.length > 0) {
-            onDatasetUpdate(res.data, file.name);
-            setIsUploading(false);
-            return;
-          }
-        } catch (serverErr) {
-          console.warn('Backend upload failed, falling back to browser parser:', serverErr);
-        }
-      }
-
-      // 2. Client-side fallback using ArrayBuffer
-      const buffer = await file.arrayBuffer();
-      const { shipments, error } = parseExcelBuffer(buffer);
-      if (error) {
-        alert(error);
-        return;
-      }
-      if (shipments.length > 0) {
-        onDatasetUpdate(shipments, file.name);
-      } else {
-        alert('No valid shipment rows were found in the uploaded file.');
-      }
-    } catch (err: any) {
-      alert(`Error reading file: ${err.message}`);
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
 
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredShipments);
@@ -172,30 +124,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Actions: File Upload, Reset, Theme, Export */}
+          {/* Actions: Reset, Export, Theme */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-            />
-            
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50"
-              title="Upload new Excel or CSV dataset"
-            >
-              {isUploading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Upload className="w-3.5 h-3.5" />
-              )}
-              <span className="hidden sm:inline"><strong>{isUploading ? 'Uploading...' : 'Upload File'}</strong></span>
-              <span className="sm:hidden"><strong>{isUploading ? '...' : 'Upload'}</strong></span>
-            </button>
 
             {datasetMeta.isCustom && (
               <button
