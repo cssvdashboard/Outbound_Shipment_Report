@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   CalendarRange,
   TrendingUp,
@@ -16,16 +16,21 @@ import {
   Activity,
   BarChart3,
   CalendarDays,
+  Calendar,
   Sparkles,
   Filter,
   Users,
   Globe,
   X,
-  RotateCcw
+  RotateCcw,
+  ArrowRightLeft,
+  CalendarCheck,
+  ChevronRight
 } from 'lucide-react';
 import { Shipment, FilterState } from '../types/logistics';
 import { computeMonthlyComparison, MonthlyMetric } from '../utils/monthlyAnalytics';
 import { filterShipments } from '../utils/analytics';
+import { parseShipmentDate } from '../utils/calendarAnalytics';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -97,6 +102,25 @@ const MONTH_PALETTES = [
   }
 ];
 
+export const WEEKDAYS = [
+  { index: 0, name: 'Sunday', short: 'Sun' },
+  { index: 1, name: 'Monday', short: 'Mon' },
+  { index: 2, name: 'Tuesday', short: 'Tue' },
+  { index: 3, name: 'Wednesday', short: 'Wed' },
+  { index: 4, name: 'Thursday', short: 'Thu' },
+  { index: 5, name: 'Friday', short: 'Fri' },
+  { index: 6, name: 'Saturday', short: 'Sat' }
+];
+
+export const WEEK_OPTIONS = [
+  { id: 'ALL' as const, label: 'All Weeks', sub: 'W1–W5' },
+  { id: 1 as const, label: 'W1', sub: 'Days 1–7' },
+  { id: 2 as const, label: 'W2', sub: 'Days 8–14' },
+  { id: 3 as const, label: 'W3', sub: 'Days 15–21' },
+  { id: 4 as const, label: 'W4', sub: 'Days 22–28' },
+  { id: 5 as const, label: 'W5', sub: 'Days 29+' }
+];
+
 export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
   rawShipments,
   filteredShipments,
@@ -138,6 +162,97 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
   }, [effectiveShipments, allMonths]);
 
   const { months, grandTotalAWBs, overallAvgTT, overallOnTimeRate } = comparison;
+
+  // State for Side-by-Side Weekday & Week Comparison
+  const [selectedWeek, setSelectedWeek] = useState<number | 'ALL'>(1);
+  const [selectedWeekday, setSelectedWeekday] = useState<number | 'ALL'>(1); // Monday by default
+  const [leftMonthId, setLeftMonthId] = useState<string>('');
+  const [rightMonthId, setRightMonthId] = useState<string>('');
+
+  // Synchronize leftMonthId and rightMonthId when months load
+  useEffect(() => {
+    if (months.length > 0) {
+      if (!leftMonthId || !months.some(m => m.monthId === leftMonthId)) {
+        setLeftMonthId(months[0].monthId);
+      }
+      if (!rightMonthId || !months.some(m => m.monthId === rightMonthId)) {
+        setRightMonthId(months.length > 1 ? months[1].monthId : months[0].monthId);
+      }
+    }
+  }, [months, leftMonthId, rightMonthId]);
+
+  // Index effective shipments by monthId, weekday (0-6), and week (1-5) for instant retrieval
+  const weekdayShipmentsIndex = useMemo(() => {
+    const index: Record<string, Shipment[]> = {};
+
+    effectiveShipments.forEach((s) => {
+      const d = parseShipmentDate(s.pickup);
+      if (!d) return;
+      const monthKey = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+      const dayOfWeek = d.getUTCDay(); // 0 = Sun .. 6 = Sat
+      const dayOfMonth = d.getUTCDate();
+      const weekNum = Math.min(Math.ceil(dayOfMonth / 7), 5); // 1..5
+
+      // Key combinations for multi-level fast querying
+      const keys = [
+        `${monthKey}__W${weekNum}__D${dayOfWeek}`,
+        `${monthKey}__WALL__D${dayOfWeek}`,
+        `${monthKey}__W${weekNum}__DALL`,
+        `${monthKey}__WALL__DALL`
+      ];
+
+      keys.forEach((k) => {
+        if (!index[k]) index[k] = [];
+        index[k].push(s);
+      });
+    });
+
+    return index;
+  }, [effectiveShipments]);
+
+  // Helper to compute TT stats for any month, week, and weekday
+  const getStats = (mId: string, week: number | 'ALL', day: number | 'ALL') => {
+    const key = `${mId}__W${week}__D${day}`;
+    const list = weekdayShipmentsIndex[key] || [];
+    const valid = list.filter(
+      (s) => typeof s.tt === 'number' && !isNaN(s.tt) && s.tt > 0
+    );
+    const count = list.length;
+    if (valid.length === 0) {
+      return { count: 0, avgTT: 0, minTT: 0, maxTT: 0, onTimeRate: 0, delayedCount: 0 };
+    }
+    const tts = valid.map((s) => s.tt);
+    const sum = tts.reduce((a, b) => a + b, 0);
+    const avgTT = Number((sum / valid.length).toFixed(2));
+    const minTT = Number(Math.min(...tts).toFixed(2));
+    const maxTT = Number(Math.max(...tts).toFixed(2));
+    const onTimeCount = valid.filter((s) => s.tt <= 5).length;
+    const delayedCount = valid.filter((s) => s.tt > 5).length;
+    const onTimeRate = Number(((onTimeCount / valid.length) * 100).toFixed(1));
+    return { count, avgTT, minTT, maxTT, onTimeRate, delayedCount };
+  };
+
+  const activeLeftMonth = months.find((m) => m.monthId === leftMonthId) || months[0];
+  const activeRightMonth =
+    months.find((m) => m.monthId === rightMonthId) ||
+    (months.length > 1 ? months[1] : months[0]);
+
+  const leftStats = activeLeftMonth ? getStats(activeLeftMonth.monthId, selectedWeek, selectedWeekday) : null;
+  const rightStats = activeRightMonth ? getStats(activeRightMonth.monthId, selectedWeek, selectedWeekday) : null;
+
+  // Velocity deltas between Month A and Month B
+  const ttDiff =
+    leftStats && rightStats && leftStats.count > 0 && rightStats.count > 0
+      ? Number((rightStats.avgTT - leftStats.avgTT).toFixed(2))
+      : null;
+
+  const ttPercentDiff =
+    leftStats && rightStats && leftStats.avgTT > 0 && rightStats.count > 0
+      ? Number((((rightStats.avgTT - leftStats.avgTT) / leftStats.avgTT) * 100).toFixed(1))
+      : null;
+
+  const volDiff =
+    leftStats && rightStats ? rightStats.count - leftStats.count : 0;
 
   // Chart configuration: Grouped Bar Chart for Weekly TT Comparison (W1–W4/W5)
   const weeklyChartData = useMemo(() => {
@@ -278,6 +393,37 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     }));
     const delaysWs = XLSX.utils.json_to_sheet(delaysData);
     XLSX.utils.book_append_sheet(workbook, delaysWs, 'Delays_Analysis');
+
+    // Sheet 4: Weekday MoM TT Comparison (Avg, Min, Max by Week & Day)
+    const weekdayExportData: any[] = [];
+    [1, 2, 3, 4, 5].forEach((w) => {
+      WEEKDAYS.forEach((day) => {
+        const leftS = activeLeftMonth ? getStats(activeLeftMonth.monthId, w, day.index) : null;
+        const rightS = activeRightMonth ? getStats(activeRightMonth.monthId, w, day.index) : null;
+        const diff =
+          leftS && rightS && leftS.count > 0 && rightS.count > 0
+            ? Number((rightS.avgTT - leftS.avgTT).toFixed(2))
+            : 'N/A';
+
+        weekdayExportData.push({
+          Week: `Week ${w}`,
+          Weekday: day.name,
+          [`${activeLeftMonth?.monthLabel || 'Month A'} Total AWBs`]: leftS?.count || 0,
+          [`${activeLeftMonth?.monthLabel || 'Month A'} Avg TT (Days)`]: leftS?.count ? leftS.avgTT : 'N/A',
+          [`${activeLeftMonth?.monthLabel || 'Month A'} Min TT (Days)`]: leftS?.count ? leftS.minTT : 'N/A',
+          [`${activeLeftMonth?.monthLabel || 'Month A'} Max TT (Days)`]: leftS?.count ? leftS.maxTT : 'N/A',
+          [`${activeLeftMonth?.monthLabel || 'Month A'} On-Time %`]: leftS?.count ? `${leftS.onTimeRate}%` : 'N/A',
+          [`${activeRightMonth?.monthLabel || 'Month B'} Total AWBs`]: rightS?.count || 0,
+          [`${activeRightMonth?.monthLabel || 'Month B'} Avg TT (Days)`]: rightS?.count ? rightS.avgTT : 'N/A',
+          [`${activeRightMonth?.monthLabel || 'Month B'} Min TT (Days)`]: rightS?.count ? rightS.minTT : 'N/A',
+          [`${activeRightMonth?.monthLabel || 'Month B'} Max TT (Days)`]: rightS?.count ? rightS.maxTT : 'N/A',
+          [`${activeRightMonth?.monthLabel || 'Month B'} On-Time %`]: rightS?.count ? `${rightS.onTimeRate}%` : 'N/A',
+          'TT Difference (Days)': diff
+        });
+      });
+    });
+    const weekdayWs = XLSX.utils.json_to_sheet(weekdayExportData);
+    XLSX.utils.book_append_sheet(workbook, weekdayWs, 'Weekday_MoM_TT');
 
     XLSX.writeFile(workbook, `Monthly_Comparison_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
@@ -638,6 +784,507 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               })}
             </tbody>
           </table>
+        </div>
+
+      </div>
+
+      {/* 3B. SIDE-BY-SIDE MONTH TT COMPARISON BY WEEK & CALENDAR WEEKDAY */}
+      <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-indigo-500/40 bg-slate-950/70 shadow-2xl space-y-6">
+        
+        {/* Section Header & Subtitle */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+                <ArrowRightLeft className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                Side-by-Side Month TT Comparison: By Week & Calendar Weekday
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 font-medium pl-11">
+              Select any week (<span className="text-indigo-400 font-bold">W1–W5</span>) and individual calendar weekday (<span className="text-purple-400 font-bold">Sunday–Saturday</span>) to compare <span className="text-amber-400 font-bold">Avg TT</span>, <span className="text-emerald-400 font-bold">Min TT</span>, and <span className="text-rose-400 font-bold">Max TT</span> side-by-side simultaneously.
+            </p>
+          </div>
+
+          {/* Month Switcher / Swap Action */}
+          <div className="flex items-center gap-2 self-start lg:self-center shrink-0">
+            {months.length > 2 ? (
+              <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700">
+                <select
+                  value={activeLeftMonth?.monthId}
+                  onChange={(e) => setLeftMonthId(e.target.value)}
+                  className="bg-slate-950 text-xs font-bold text-sky-300 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none"
+                >
+                  {months.map((m) => (
+                    <option key={m.monthId} value={m.monthId} disabled={m.monthId === rightMonthId}>
+                      Left: {m.monthLabel}
+                    </option>
+                  ))}
+                </select>
+                <ArrowRightLeft className="w-4 h-4 text-slate-500" />
+                <select
+                  value={activeRightMonth?.monthId}
+                  onChange={(e) => setRightMonthId(e.target.value)}
+                  className="bg-slate-950 text-xs font-bold text-emerald-300 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none"
+                >
+                  {months.map((m) => (
+                    <option key={m.monthId} value={m.monthId} disabled={m.monthId === leftMonthId}>
+                      Right: {m.monthLabel}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : months.length === 2 ? (
+              <button
+                onClick={() => {
+                  const temp = leftMonthId;
+                  setLeftMonthId(rightMonthId);
+                  setRightMonthId(temp);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-indigo-500/60 text-slate-300 hover:text-white text-xs font-bold transition-all shadow-sm"
+                title="Swap Left and Right Months"
+              >
+                <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Swap Months</span>
+              </button>
+            ) : null}
+
+            {hasActiveFilters && (
+              <span className="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold flex items-center gap-1">
+                <Filter className="w-3 h-3 text-indigo-400" />
+                Filtered Active
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* INTERACTIVE CONTROLS */}
+        <div className="space-y-3.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800/80">
+          
+          {/* 1. Week Selector (W1, W2, W3, W4, W5, All Weeks) */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <div className="flex items-center gap-1.5 min-w-[130px] text-xs font-black uppercase tracking-wider text-indigo-300">
+              <CalendarDays className="w-4 h-4 text-indigo-400" />
+              <span>1. Choose Week:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 flex-1">
+              {WEEK_OPTIONS.map((opt) => {
+                const isActive = selectedWeek === opt.id;
+                return (
+                  <button
+                    key={String(opt.id)}
+                    onClick={() => setSelectedWeek(opt.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400 scale-[1.02]'
+                        : 'bg-slate-950/80 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800'
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    <span className={`text-[10px] font-normal ${isActive ? 'text-indigo-200' : 'text-slate-500'}`}>
+                      ({opt.sub})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. Calendar Weekday Selector (Sunday - Saturday, All Days) */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2 border-t border-slate-800/60">
+            <div className="flex items-center gap-1.5 min-w-[130px] text-xs font-black uppercase tracking-wider text-purple-300">
+              <CalendarCheck className="w-4 h-4 text-purple-400" />
+              <span>2. Choose Day:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 flex-1">
+              <button
+                onClick={() => setSelectedWeekday('ALL')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedWeekday === 'ALL'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400 scale-[1.02]'
+                    : 'bg-slate-950/80 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800'
+                }`}
+              >
+                All Weekdays
+              </button>
+              {WEEKDAYS.map((day) => {
+                const isActive = selectedWeekday === day.index;
+                return (
+                  <button
+                    key={day.index}
+                    onClick={() => setSelectedWeekday(day.index)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400 scale-[1.02]'
+                        : 'bg-slate-950/80 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800'
+                    }`}
+                  >
+                    <span>{day.name}</span>
+                    <span className={`text-[10px] font-mono font-medium ${isActive ? 'text-purple-200' : 'text-slate-500'}`}>
+                      {day.short}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+
+        {/* 3. SIDE-BY-SIDE HERO COMPARISON CARDS */}
+        <div className="grid grid-cols-1 lg:grid-cols-11 gap-4 items-stretch">
+          
+          {/* LEFT MONTH HERO CARD */}
+          <div className="lg:col-span-5 rounded-2xl border-2 border-sky-500/30 bg-gradient-to-br from-sky-950/20 via-slate-950 to-slate-950 p-5 shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4">
+            <div className="absolute top-0 right-0 w-36 h-36 bg-sky-500/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 relative z-10">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-sky-400 ring-4 ring-sky-400/20"></span>
+                <div>
+                  <h4 className="text-base font-black text-white flex items-center gap-2">
+                    {activeLeftMonth?.monthLabel || 'Left Month'}
+                  </h4>
+                  <div className="text-[11px] text-sky-400 font-mono font-semibold">
+                    {selectedWeek === 'ALL' ? 'All Weeks (W1–W5)' : `Week ${selectedWeek} (${WEEK_OPTIONS.find(w => w.id === selectedWeek)?.sub})`} • {selectedWeekday === 'ALL' ? 'All Weekdays' : WEEKDAYS[selectedWeekday].name}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs font-mono font-black text-white">
+                  {(leftStats?.count || 0).toLocaleString()} pkgs
+                </div>
+                <div className="text-[10px] text-slate-400">Total Volume</div>
+              </div>
+            </div>
+
+            {/* Triad Metric Tiles: Avg TT, Min TT, Max TT */}
+            <div className="grid grid-cols-3 gap-2.5 relative z-10">
+              {/* Avg TT */}
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+                  <span>Avg TT</span>
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-mono font-black text-amber-400">
+                  {leftStats && leftStats.count > 0 ? `${leftStats.avgTT.toFixed(2)}d` : 'N/A'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-medium">Mean velocity</div>
+              </div>
+
+              {/* Min TT */}
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+                  <span>Min TT</span>
+                  <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-mono font-black text-emerald-400">
+                  {leftStats && leftStats.count > 0 ? `${leftStats.minTT.toFixed(2)}d` : 'N/A'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-medium">Fastest parcel</div>
+              </div>
+
+              {/* Max TT */}
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+                  <span>Max TT</span>
+                  <TrendingUp className="w-3.5 h-3.5 text-rose-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-mono font-black text-rose-400">
+                  {leftStats && leftStats.count > 0 ? `${leftStats.maxTT.toFixed(2)}d` : 'N/A'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-medium">Slowest parcel</div>
+              </div>
+            </div>
+
+            {/* Performance Footer */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs font-mono relative z-10">
+              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-400 text-[11px]">On-Time (≤5d):</span>
+                <span className="font-bold text-emerald-400">
+                  {leftStats && leftStats.count > 0 ? `${leftStats.onTimeRate}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-400 text-[11px]">Delayed (&gt;5d):</span>
+                <span className="font-bold text-rose-400">
+                  {leftStats && leftStats.count > 0 ? `${leftStats.delayedCount} pkgs` : '0'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* CENTER DELTA / VELOCITY BRIDGE */}
+          <div className="lg:col-span-1 flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-3">
+            <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-inner">
+              <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                MoM Delta
+              </div>
+              {ttDiff !== null ? (
+                <div className="space-y-1">
+                  <div
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-mono font-black text-xs ${
+                      ttDiff < 0
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                        : ttDiff > 0
+                        ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                        : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {ttDiff < 0 ? (
+                      <TrendingDown className="w-3 h-3" />
+                    ) : ttDiff > 0 ? (
+                      <TrendingUp className="w-3 h-3" />
+                    ) : null}
+                    <span>{ttDiff > 0 ? `+${ttDiff.toFixed(2)}d` : `${ttDiff.toFixed(2)}d`}</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-bold">
+                    {ttDiff < 0 ? (
+                      <span className="text-emerald-400 font-semibold">{Math.abs(ttPercentDiff || 0)}% Faster</span>
+                    ) : ttDiff > 0 ? (
+                      <span className="text-rose-400 font-semibold">{Math.abs(ttPercentDiff || 0)}% Slower</span>
+                    ) : (
+                      'Identical'
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-xs text-slate-500 font-mono">-</span>
+              )}
+            </div>
+
+            {/* Volume Delta */}
+            <div className="text-center pt-2 border-t border-slate-800 w-full">
+              <div className="text-[9px] text-slate-500 font-mono">Vol Delta</div>
+              <div className={`text-xs font-mono font-bold ${volDiff >= 0 ? 'text-sky-400' : 'text-slate-400'}`}>
+                {volDiff > 0 ? `+${volDiff.toLocaleString()}` : volDiff.toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT MONTH HERO CARD */}
+          <div className="lg:col-span-5 rounded-2xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-slate-950 to-slate-950 p-5 shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4">
+            <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 relative z-10">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20"></span>
+                <div>
+                  <h4 className="text-base font-black text-white flex items-center gap-2">
+                    {activeRightMonth?.monthLabel || 'Right Month'}
+                  </h4>
+                  <div className="text-[11px] text-emerald-400 font-mono font-semibold">
+                    {selectedWeek === 'ALL' ? 'All Weeks (W1–W5)' : `Week ${selectedWeek} (${WEEK_OPTIONS.find(w => w.id === selectedWeek)?.sub})`} • {selectedWeekday === 'ALL' ? 'All Weekdays' : WEEKDAYS[selectedWeekday].name}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs font-mono font-black text-white">
+                  {(rightStats?.count || 0).toLocaleString()} pkgs
+                </div>
+                <div className="text-[10px] text-slate-400">Total Volume</div>
+              </div>
+            </div>
+
+            {/* Triad Metric Tiles: Avg TT, Min TT, Max TT */}
+            <div className="grid grid-cols-3 gap-2.5 relative z-10">
+              {/* Avg TT */}
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+                  <span>Avg TT</span>
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-mono font-black text-amber-400">
+                  {rightStats && rightStats.count > 0 ? `${rightStats.avgTT.toFixed(2)}d` : 'N/A'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-medium">Mean velocity</div>
+              </div>
+
+              {/* Min TT */}
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+                  <span>Min TT</span>
+                  <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-mono font-black text-emerald-400">
+                  {rightStats && rightStats.count > 0 ? `${rightStats.minTT.toFixed(2)}d` : 'N/A'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-medium">Fastest parcel</div>
+              </div>
+
+              {/* Max TT */}
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+                  <span>Max TT</span>
+                  <TrendingUp className="w-3.5 h-3.5 text-rose-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-mono font-black text-rose-400">
+                  {rightStats && rightStats.count > 0 ? `${rightStats.maxTT.toFixed(2)}d` : 'N/A'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-medium">Slowest parcel</div>
+              </div>
+            </div>
+
+            {/* Performance Footer */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs font-mono relative z-10">
+              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-400 text-[11px]">On-Time (≤5d):</span>
+                <span className="font-bold text-emerald-400">
+                  {rightStats && rightStats.count > 0 ? `${rightStats.onTimeRate}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-400 text-[11px]">Delayed (&gt;5d):</span>
+                <span className="font-bold text-rose-400">
+                  {rightStats && rightStats.count > 0 ? `${rightStats.delayedCount} pkgs` : '0'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 4. SIDE-BY-SIDE ALL WEEKDAYS COMPARISON TABLE FOR SELECTED WEEK */}
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-black text-white flex items-center gap-2">
+              <span>Detailed Calendar Weekdays for {selectedWeek === 'ALL' ? 'All Weeks' : `Week ${selectedWeek}`}</span>
+              <span className="text-xs text-slate-400 font-normal">
+                (Click any row to select that weekday above)
+              </span>
+            </h4>
+            <span className="text-xs text-indigo-400 font-bold">
+              {activeLeftMonth?.monthLabel} vs {activeRightMonth?.monthLabel}
+            </span>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/80">
+            <table className="w-full text-center text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-900/90 text-[11px] font-black uppercase text-slate-400 border-b border-slate-800">
+                  <th className="py-3 px-4 text-left">Calendar Weekday</th>
+                  <th className="py-3 px-3 text-sky-400 bg-sky-950/20 border-l border-slate-800" colSpan={4}>
+                    {activeLeftMonth?.monthLabel || 'Month A'}
+                  </th>
+                  <th className="py-3 px-3 text-emerald-400 bg-emerald-950/20 border-l border-slate-800" colSpan={4}>
+                    {activeRightMonth?.monthLabel || 'Month B'}
+                  </th>
+                  <th className="py-3 px-3 text-indigo-300 border-l border-slate-800">
+                    MoM Velocity Delta
+                  </th>
+                </tr>
+                <tr className="bg-slate-900/60 text-[10px] font-bold text-slate-400 border-b border-slate-800">
+                  <th className="py-2 px-4 text-left">Day</th>
+                  <th className="py-2 px-2 text-slate-300 border-l border-slate-800">Avg TT</th>
+                  <th className="py-2 px-2 text-emerald-400">Min TT</th>
+                  <th className="py-2 px-2 text-rose-400">Max TT</th>
+                  <th className="py-2 px-2 text-slate-400">AWBs</th>
+                  <th className="py-2 px-2 text-slate-300 border-l border-slate-800">Avg TT</th>
+                  <th className="py-2 px-2 text-emerald-400">Min TT</th>
+                  <th className="py-2 px-2 text-rose-400">Max TT</th>
+                  <th className="py-2 px-2 text-slate-400">AWBs</th>
+                  <th className="py-2 px-3 text-indigo-300 border-l border-slate-800">Δ Avg TT (Speed)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 font-mono text-slate-200">
+                {WEEKDAYS.map((day) => {
+                  const isSelected = selectedWeekday === day.index;
+                  const leftS = activeLeftMonth ? getStats(activeLeftMonth.monthId, selectedWeek, day.index) : null;
+                  const rightS = activeRightMonth ? getStats(activeRightMonth.monthId, selectedWeek, day.index) : null;
+                  const dDiff =
+                    leftS && rightS && leftS.count > 0 && rightS.count > 0
+                      ? Number((rightS.avgTT - leftS.avgTT).toFixed(2))
+                      : null;
+
+                  return (
+                    <tr
+                      key={day.index}
+                      onClick={() => setSelectedWeekday(day.index)}
+                      className={`cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-indigo-950/40 text-white font-bold ring-1 ring-inset ring-indigo-500/50'
+                          : 'hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <td className="py-2.5 px-4 text-left font-sans font-bold flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              isSelected ? 'bg-indigo-400 ring-2 ring-indigo-400/40' : 'bg-slate-600'
+                            }`}
+                          ></span>
+                          <span className={isSelected ? 'text-indigo-300' : 'text-slate-200'}>{day.name}</span>
+                        </div>
+                        {isSelected && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">
+                            ACTIVE
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Left Month: Avg, Min, Max, AWBs */}
+                      <td className="py-2.5 px-2 font-bold text-amber-400 border-l border-slate-800">
+                        {leftS && leftS.count > 0 ? `${leftS.avgTT.toFixed(2)}d` : '-'}
+                      </td>
+                      <td className="py-2.5 px-2 text-emerald-400 font-medium">
+                        {leftS && leftS.count > 0 ? `${leftS.minTT.toFixed(2)}d` : '-'}
+                      </td>
+                      <td className="py-2.5 px-2 text-rose-400 font-medium">
+                        {leftS && leftS.count > 0 ? `${leftS.maxTT.toFixed(2)}d` : '-'}
+                      </td>
+                      <td className="py-2.5 px-2 text-slate-400 text-[11px]">
+                        {leftS ? leftS.count.toLocaleString() : '0'}
+                      </td>
+
+                      {/* Right Month: Avg, Min, Max, AWBs */}
+                      <td className="py-2.5 px-2 font-bold text-amber-400 border-l border-slate-800">
+                        {rightS && rightS.count > 0 ? `${rightS.avgTT.toFixed(2)}d` : '-'}
+                      </td>
+                      <td className="py-2.5 px-2 text-emerald-400 font-medium">
+                        {rightS && rightS.count > 0 ? `${rightS.minTT.toFixed(2)}d` : '-'}
+                      </td>
+                      <td className="py-2.5 px-2 text-rose-400 font-medium">
+                        {rightS && rightS.count > 0 ? `${rightS.maxTT.toFixed(2)}d` : '-'}
+                      </td>
+                      <td className="py-2.5 px-2 text-slate-400 text-[11px]">
+                        {rightS ? rightS.count.toLocaleString() : '0'}
+                      </td>
+
+                      {/* Delta */}
+                      <td className="py-2.5 px-3 border-l border-slate-800">
+                        {dDiff !== null ? (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${
+                              dDiff < 0
+                                ? 'bg-emerald-500/10 text-emerald-400'
+                                : dDiff > 0
+                                ? 'bg-rose-500/10 text-rose-400'
+                                : 'bg-slate-800 text-slate-400'
+                            }`}
+                          >
+                            {dDiff < 0 ? '▼' : dDiff > 0 ? '▲' : '•'}{' '}
+                            {dDiff > 0 ? `+${dDiff.toFixed(2)}d` : `${dDiff.toFixed(2)}d`}{' '}
+                            <span className="text-[9px] font-normal">
+                              ({dDiff < 0 ? 'Faster' : dDiff > 0 ? 'Slower' : 'Same'})
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
