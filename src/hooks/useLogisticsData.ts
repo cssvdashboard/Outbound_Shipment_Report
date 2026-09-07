@@ -30,6 +30,11 @@ import {
   syncDatasetToServer,
   resetServerDataset
 } from '../services/api';
+import {
+  subscribeToShipmentEdits,
+  saveShipmentEditToCloud,
+  deleteShipmentEditFromCloud
+} from '../services/firebase';
 
 export const initialFilterState: FilterState = {
   searchTerm: '',
@@ -109,6 +114,62 @@ export function useLogisticsData() {
       }
     }
     initData();
+  }, []);
+
+  // Listen to real-time cloud edits from Firebase Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeToShipmentEdits((edits) => {
+      const editKeys = Object.keys(edits);
+      if (editKeys.length === 0) return;
+
+      setRawShipments((prevShipments) => {
+        if (prevShipments.length === 0) return prevShipments;
+
+        const updated = [...prevShipments];
+        const indexMap = new Map<string, number>();
+        updated.forEach((s, idx) => indexMap.set(s.awb.trim(), idx));
+
+        editKeys.forEach((awb) => {
+          const patch = edits[awb];
+          const cleanAwb = awb.trim();
+          const existingIdx = indexMap.get(cleanAwb);
+
+          if (existingIdx !== undefined) {
+            updated[existingIdx] = {
+              ...updated[existingIdx],
+              ...patch
+            };
+          } else if (patch.awb && patch.customer && patch.destination) {
+            updated.unshift(patch as Shipment);
+            indexMap.set(cleanAwb, 0);
+          }
+        });
+
+        return updated;
+      });
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Mutation handlers for collaborative edits
+  const updateShipment = useCallback(async (awb: string, patch: Partial<Shipment>) => {
+    const cleanAwb = awb.trim();
+    setRawShipments((prev) =>
+      prev.map((s) => (s.awb.trim() === cleanAwb ? { ...s, ...patch } : s))
+    );
+    await saveShipmentEditToCloud(cleanAwb, patch);
+  }, []);
+
+  const addShipment = useCallback(async (newShipment: Shipment) => {
+    setRawShipments((prev) => [newShipment, ...prev]);
+    await saveShipmentEditToCloud(newShipment.awb.trim(), newShipment);
+  }, []);
+
+  const deleteShipment = useCallback(async (awb: string) => {
+    const cleanAwb = awb.trim();
+    setRawShipments((prev) => prev.filter((s) => s.awb.trim() !== cleanAwb));
+    await deleteShipmentEditFromCloud(cleanAwb);
   }, []);
 
   // Handler for uploading a new weekly dataset
@@ -374,6 +435,9 @@ export function useLogisticsData() {
     countryPerformance,
     allDestinations,
     allCustomers,
-    allMonths
+    allMonths,
+    updateShipment,
+    addShipment,
+    deleteShipment
   };
 }

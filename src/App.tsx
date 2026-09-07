@@ -47,7 +47,10 @@ export const App: React.FC = () => {
     countryPerformance,
     allDestinations,
     allCustomers,
-    allMonths
+    allMonths,
+    updateShipment,
+    addShipment,
+    deleteShipment
   } = useLogisticsData();
 
   // 1. Initialize theme from storage
@@ -223,6 +226,9 @@ export const App: React.FC = () => {
                 <ShipmentExplorer
                   shipments={filteredShipments}
                   totalRawCount={rawShipments.length}
+                  onUpdateShipment={updateShipment}
+                  onAddShipment={addShipment}
+                  onDeleteShipment={deleteShipment}
                 />
               )}
 

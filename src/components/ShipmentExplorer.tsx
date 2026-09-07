@@ -13,15 +13,26 @@ import {
   ArrowDown,
   Copy,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  Pencil,
+  PlusCircle,
+  Save,
+  Trash2,
+  Lock,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
+import { getSavedTeamPin } from '../services/firebase';
 import * as XLSX from 'xlsx';
 
 interface ShipmentExplorerProps {
   shipments: Shipment[];
   totalRawCount: number;
+  onUpdateShipment?: (awb: string, patch: Partial<Shipment>) => Promise<void>;
+  onAddShipment?: (newShipment: Shipment) => Promise<void>;
+  onDeleteShipment?: (awb: string) => Promise<void>;
 }
 
 type SortField = 'awb' | 'destination' | 'customer' | 'shprName' | 'tt' | 'ttRange' | 'finalResolution' | 'weight';
@@ -29,13 +40,41 @@ type SortOrder = 'asc' | 'desc';
 
 export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
   shipments,
-  totalRawCount
+  totalRawCount,
+  onUpdateShipment,
+  onAddShipment,
+  onDeleteShipment
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [pageSize, setPageSize] = useState<number>(25);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [copiedAWB, setCopiedAWB] = useState<string | null>(null);
+
+  // Edit Dossier State
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editForm, setEditForm] = useState<Partial<Shipment>>({});
+  const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
+  const [editPinInput, setEditPinInput] = useState<string>('');
+  const [editError, setEditError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
+  // Add Shipment Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [newShipmentForm, setNewShipmentForm] = useState<Partial<Shipment>>({
+    awb: '',
+    customer: '',
+    shprName: '',
+    destination: 'US',
+    tt: 4,
+    finalResolution: 'Delivered',
+    remarks: '',
+    pkgCount: 1,
+    weight: 1
+  });
+  const [isAddingShipment, setIsAddingShipment] = useState<boolean>(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [addSuccess, setAddSuccess] = useState<boolean>(false);
   
   // Sort state
   const [sortField, setSortField] = useState<SortField>('tt');
@@ -50,6 +89,149 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
     navigator.clipboard.writeText(awb);
     setCopiedAWB(awb);
     setTimeout(() => setCopiedAWB(null), 2000);
+  };
+
+  // Open edit mode in dossier
+  const handleStartEdit = () => {
+    if (!selectedShipment) return;
+    setEditForm({
+      tt: selectedShipment.tt,
+      finalResolution: selectedShipment.finalResolution || 'Delivered',
+      clearanceDelay: selectedShipment.clearanceDelay || '',
+      transitDelay: selectedShipment.transitDelay || '',
+      destinationDelay: selectedShipment.destinationDelay || '',
+      weekendDelay: selectedShipment.weekendDelay || 'No',
+      remarks: selectedShipment.remarks || ''
+    });
+    setEditPinInput('');
+    setEditError(null);
+    setSaveSuccess(false);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedShipment) return;
+    const requiredPin = await getSavedTeamPin();
+    if (requiredPin && editPinInput.trim() !== requiredPin.trim()) {
+      setEditError('Incorrect Team PIN. Please enter the valid PIN to save edits.');
+      return;
+    }
+
+    setIsSavingEdit(true);
+    setEditError(null);
+    try {
+      const parsedTT = Number(editForm.tt) || selectedShipment.tt;
+      const ttRange = parsedTT <= 5 ? 'Within 4-5 Days' : 'More Than 5 Days';
+      const patch: Partial<Shipment> = {
+        ...editForm,
+        tt: parsedTT,
+        ttRange
+      };
+
+      if (onUpdateShipment) {
+        await onUpdateShipment(selectedShipment.awb, patch);
+      }
+
+      setSelectedShipment((prev) => (prev ? { ...prev, ...patch } : null));
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setIsEditing(false);
+        setSaveSuccess(false);
+      }, 1000);
+    } catch (err: any) {
+      setEditError(err?.message || 'Failed to save changes.');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleDeleteShipment = async () => {
+    if (!selectedShipment) return;
+    const requiredPin = await getSavedTeamPin();
+    if (requiredPin && editPinInput.trim() !== requiredPin.trim()) {
+      setEditError('Incorrect Team PIN. Please enter the valid PIN to delete.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete shipment #${selectedShipment.awb}? This will update the online database for everyone.`)) {
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      if (onDeleteShipment) {
+        await onDeleteShipment(selectedShipment.awb);
+      }
+      setSelectedShipment(null);
+      setIsEditing(false);
+    } catch (err: any) {
+      setEditError(err?.message || 'Failed to delete shipment.');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleCreateShipment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newShipmentForm.awb?.trim() || !newShipmentForm.customer?.trim() || !newShipmentForm.destination?.trim()) {
+      setAddError('AWB, Customer, and Destination are required.');
+      return;
+    }
+
+    const requiredPin = await getSavedTeamPin();
+    if (requiredPin && editPinInput.trim() !== requiredPin.trim()) {
+      setAddError('Incorrect Team PIN. Please enter the valid PIN to create shipments.');
+      return;
+    }
+
+    setIsAddingShipment(true);
+    setAddError(null);
+    try {
+      const parsedTT = Number(newShipmentForm.tt) || 4;
+      const ttRange = parsedTT <= 5 ? 'Within 4-5 Days' : 'More Than 5 Days';
+      const createdShipment: Shipment = {
+        awb: newShipmentForm.awb.trim(),
+        customer: newShipmentForm.customer.trim(),
+        shprName: newShipmentForm.shprName?.trim() || newShipmentForm.customer.trim(),
+        destination: newShipmentForm.destination.trim().toUpperCase(),
+        tt: parsedTT,
+        ttRange,
+        finalResolution: newShipmentForm.finalResolution || 'Delivered',
+        remarks: newShipmentForm.remarks?.trim() || '',
+        pkgCount: Number(newShipmentForm.pkgCount) || 1,
+        weight: Number(newShipmentForm.weight) || 1,
+        pickup: new Date().toISOString().slice(0, 10),
+        clearanceDelay: newShipmentForm.clearanceDelay?.trim() || '',
+        transitDelay: newShipmentForm.transitDelay?.trim() || '',
+        destinationDelay: newShipmentForm.destinationDelay?.trim() || '',
+        weekendDelay: newShipmentForm.weekendDelay || 'No'
+      };
+
+      if (onAddShipment) {
+        await onAddShipment(createdShipment);
+      }
+
+      setAddSuccess(true);
+      setTimeout(() => {
+        setIsAddModalOpen(false);
+        setAddSuccess(false);
+        setNewShipmentForm({
+          awb: '',
+          customer: '',
+          shprName: '',
+          destination: 'US',
+          tt: 4,
+          finalResolution: 'Delivered',
+          remarks: '',
+          pkgCount: 1,
+          weight: 1
+        });
+      }, 1000);
+    } catch (err: any) {
+      setAddError(err?.message || 'Failed to add shipment.');
+    } finally {
+      setIsAddingShipment(false);
+    }
   };
 
   // Sort Handler
@@ -213,8 +395,22 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
             </div>
           </div>
 
-          {/* Quick Action Export Buttons */}
-          <div className="flex items-center gap-2 self-stretch sm:self-auto">
+          {/* Quick Action Export & Add Buttons */}
+          <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                setAddError(null);
+                setAddSuccess(false);
+                setIsAddModalOpen(true);
+              }}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+              title="Add a new shipment record to the online database"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span><strong>Add Shipment</strong></span>
+            </button>
+
             <button
               type="button"
               onClick={handleExportExcel}
@@ -675,124 +871,460 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 </div>
               </div>
 
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={isEditing ? () => setIsEditing(false) : handleStartEdit}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                    isEditing
+                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                      : 'bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30'
+                  }`}
+                  title={isEditing ? 'Cancel editing' : 'Edit this shipment in cloud database'}
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>{isEditing ? 'Cancel' : 'Edit Record'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedShipment(null);
+                    setIsEditing(false);
+                  }}
+                  className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Dossier Content: Edit Mode vs View Mode */}
+            {isEditing ? (
+              <div className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-slate-300 font-bold block mb-1">Transit Time (Days)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editForm.tt ?? ''}
+                      onChange={(e) => setEditForm({ ...editForm, tt: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-bold block mb-1">Final Resolution</label>
+                    <select
+                      value={editForm.finalResolution || 'Delivered'}
+                      onChange={(e) => setEditForm({ ...editForm, finalResolution: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="Delivered">Delivered</option>
+                      <option value="RTS">RTS</option>
+                      <option value="Lost">Lost</option>
+                      <option value="Destroyed">Destroyed</option>
+                      <option value="Seized">Seized</option>
+                      <option value="Undelivered">Undelivered</option>
+                      <option value="NFBRK">NFBRK</option>
+                      <option value="Re-route">Re-route</option>
+                      <option value="Available For Pickup">Available For Pickup</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-bold block mb-1">Clearance Delay Reason</label>
+                    <input
+                      type="text"
+                      value={editForm.clearanceDelay || ''}
+                      onChange={(e) => setEditForm({ ...editForm, clearanceDelay: e.target.value })}
+                      placeholder="e.g. Customs Inspection, Doc Issue"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-bold block mb-1">Transit Delay Reason</label>
+                    <input
+                      type="text"
+                      value={editForm.transitDelay || ''}
+                      onChange={(e) => setEditForm({ ...editForm, transitDelay: e.target.value })}
+                      placeholder="e.g. Flight Cancellation, Hub Misroute"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-bold block mb-1">Destination Delay Reason</label>
+                    <input
+                      type="text"
+                      value={editForm.destinationDelay || ''}
+                      onChange={(e) => setEditForm({ ...editForm, destinationDelay: e.target.value })}
+                      placeholder="e.g. Consignee Closed, Bad Address"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-bold block mb-1">Weekend Delay</label>
+                    <select
+                      value={editForm.weekendDelay || 'No'}
+                      onChange={(e) => setEditForm({ ...editForm, weekendDelay: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="No">No</option>
+                      <option value="Yes">Yes (Held over non-working weekend)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">Operational Remarks</label>
+                  <textarea
+                    rows={2}
+                    value={editForm.remarks || ''}
+                    onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
+                    placeholder="Add tracking notes, customer feedback, or incident details..."
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                {/* Optional Team PIN verification */}
+                <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span className="text-[11px] text-slate-300">Team PIN (if required by administrator):</span>
+                  </div>
+                  <input
+                    type="password"
+                    value={editPinInput}
+                    onChange={(e) => setEditPinInput(e.target.value)}
+                    placeholder="Enter PIN..."
+                    className="w-32 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                {/* Error / Success Feedback */}
+                {editError && (
+                  <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{editError}</span>
+                  </div>
+                )}
+                {saveSuccess && (
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>Saved! Update broadcasted live to all collaborators.</span>
+                  </div>
+                )}
+
+                {/* Edit Mode Buttons */}
+                <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                  <button
+                    type="button"
+                    onClick={handleDeleteShipment}
+                    disabled={isSavingEdit}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete AWB</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      disabled={isSavingEdit}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      disabled={isSavingEdit}
+                      className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{isSavingEdit ? 'Saving...' : 'Save & Sync Online'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Read-only Dossier Grid */
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Customer Account</strong></span>
+                    <span className="font-black text-white mt-1 block text-sm"><strong>{selectedShipment.customer}</strong></span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Shipper Name</strong></span>
+                    <span className="font-black text-white mt-1 block text-sm"><strong>{selectedShipment.shprName}</strong></span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Recipient &amp; Delivery City</strong></span>
+                    <span className="font-bold text-white mt-1 block text-sm">
+                      <strong>{selectedShipment.recipient || 'N/A'}</strong>
+                    </span>
+                    <span className="text-slate-400 text-xs block mt-0.5 font-medium">
+                      City: {selectedShipment.city || 'N/A'} ({selectedShipment.destination})
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Transit Time &amp; Resolution</strong></span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="font-black text-indigo-400 font-mono text-base">
+                        <strong>{formatTT(selectedShipment.tt)} days</strong>
+                      </span>
+                      <span className="text-xs text-slate-400 font-bold"><strong>({selectedShipment.ttRange})</strong></span>
+                    </div>
+                    <span className={`font-black text-xs block mt-0.5 ${
+                      selectedShipment.finalResolution === 'Delivered'
+                        ? 'text-emerald-400'
+                        : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(selectedShipment.finalResolution)
+                        ? 'text-rose-400 font-black'
+                        : 'text-amber-400'
+                    }`}>
+                      <strong>Status: {selectedShipment.finalResolution}</strong>
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Pickup Date</strong></span>
+                    <span className="font-bold text-white mt-1 block font-mono">
+                      <strong>{formatExcelDate(selectedShipment.pickup)}</strong>
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>POD / Delivery Date</strong></span>
+                    <span className="font-bold text-white mt-1 block font-mono">
+                      <strong>{formatExcelDate(selectedShipment.pod)}</strong>
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Package Pieces</strong></span>
+                    <span className="font-black text-white mt-1 block font-mono text-sm">
+                      <strong>{selectedShipment.pkgCount || 1} pcs</strong>
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Gross Weight</strong></span>
+                    <span className="font-black text-white mt-1 block font-mono text-sm">
+                      <strong>{formatWeight(selectedShipment.weight)} kg</strong>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Delays section */}
+                {(selectedShipment.clearanceDelay || selectedShipment.transitDelay || selectedShipment.destinationDelay || selectedShipment.remarks) && (
+                  <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-2">
+                    <div className="font-black text-amber-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span><strong>Logged Delay Exceptions &amp; Remarks</strong></span>
+                    </div>
+                    {selectedShipment.clearanceDelay && selectedShipment.clearanceDelay !== '-' && (
+                      <div className="text-slate-300">📋 Clearance Delay: <span className="text-white font-bold"><strong>{selectedShipment.clearanceDelay}</strong></span></div>
+                    )}
+                    {selectedShipment.transitDelay && selectedShipment.transitDelay !== '-' && (
+                      <div className="text-slate-300">✈️ Transit Delay: <span className="text-white font-bold"><strong>{selectedShipment.transitDelay}</strong></span></div>
+                    )}
+                    {selectedShipment.destinationDelay && selectedShipment.destinationDelay !== '-' && (
+                      <div className="text-slate-300">🚚 Destination Delay: <span className="text-white font-bold"><strong>{selectedShipment.destinationDelay}</strong></span></div>
+                    )}
+                    {selectedShipment.remarks && selectedShipment.remarks !== '-' && (
+                      <div className="text-slate-300">💬 Remarks: <span className="text-white font-bold"><strong>{selectedShipment.remarks}</strong></span></div>
+                    )}
+                  </div>
+                )}
+
+                {/* Description */}
+                {selectedShipment.description && (
+                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Description of Goods</strong></span>
+                    <p className="text-slate-200 mt-1 leading-relaxed font-medium">{selectedShipment.description}</p>
+                  </div>
+                )}
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedShipment(null)}
+                    className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md shadow-sky-500/20 cursor-pointer"
+                  >
+                    <strong>Close Dossier</strong>
+                  </button>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* 5. ADD SHIPMENT MODAL */}
+      {isAddModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsAddModalOpen(false);
+          }}
+        >
+          <div className="glass-panel w-full max-w-xl p-6 rounded-3xl space-y-4 shadow-2xl relative bg-slate-950 border border-indigo-500/40">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <PlusCircle className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-base font-black text-white">Add New Shipment Record</h3>
+              </div>
               <button
                 type="button"
-                onClick={() => setSelectedShipment(null)}
-                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors cursor-pointer"
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Dossier Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Customer Account</strong></span>
-                <span className="font-black text-white mt-1 block text-sm"><strong>{selectedShipment.customer}</strong></span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Shipper Name</strong></span>
-                <span className="font-black text-white mt-1 block text-sm"><strong>{selectedShipment.shprName}</strong></span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Recipient &amp; Delivery City</strong></span>
-                <span className="font-bold text-white mt-1 block text-sm">
-                  <strong>{selectedShipment.recipient || 'N/A'}</strong>
-                </span>
-                <span className="text-slate-400 text-xs block mt-0.5 font-medium">
-                  City: {selectedShipment.city || 'N/A'} ({selectedShipment.destination})
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Transit Time &amp; Resolution</strong></span>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="font-black text-indigo-400 font-mono text-base">
-                    <strong>{formatTT(selectedShipment.tt)} days</strong>
-                  </span>
-                  <span className="text-xs text-slate-400 font-bold"><strong>({selectedShipment.ttRange})</strong></span>
+            <form onSubmit={handleCreateShipment} className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">AWB Number *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newShipmentForm.awb}
+                    onChange={(e) => setNewShipmentForm({ ...newShipmentForm, awb: e.target.value })}
+                    placeholder="e.g. 770123456789"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  />
                 </div>
-                <span className={`font-black text-xs block mt-0.5 ${
-                  selectedShipment.finalResolution === 'Delivered'
-                    ? 'text-emerald-400'
-                    : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(selectedShipment.finalResolution)
-                    ? 'text-rose-400 font-black'
-                    : 'text-amber-400'
-                }`}>
-                  <strong>Status: {selectedShipment.finalResolution}</strong>
-                </span>
-              </div>
 
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Pickup Date</strong></span>
-                <span className="font-bold text-white mt-1 block font-mono">
-                  <strong>{formatExcelDate(selectedShipment.pickup)}</strong>
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>POD / Delivery Date</strong></span>
-                <span className="font-bold text-white mt-1 block font-mono">
-                  <strong>{formatExcelDate(selectedShipment.pod)}</strong>
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Package Pieces</strong></span>
-                <span className="font-black text-white mt-1 block font-mono text-sm">
-                  <strong>{selectedShipment.pkgCount || 1} pcs</strong>
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Gross Weight</strong></span>
-                <span className="font-black text-white mt-1 block font-mono text-sm">
-                  <strong>{formatWeight(selectedShipment.weight)} kg</strong>
-                </span>
-              </div>
-            </div>
-
-            {/* Delays section */}
-            {(selectedShipment.clearanceDelay || selectedShipment.transitDelay || selectedShipment.destinationDelay || selectedShipment.remarks) && (
-              <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-2">
-                <div className="font-black text-amber-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span><strong>Logged Delay Exceptions &amp; Remarks</strong></span>
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">Destination Country *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newShipmentForm.destination}
+                    onChange={(e) => setNewShipmentForm({ ...newShipmentForm, destination: e.target.value })}
+                    placeholder="e.g. US, CA, DE"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  />
                 </div>
-                {selectedShipment.clearanceDelay && selectedShipment.clearanceDelay !== '-' && (
-                  <div className="text-slate-300">📋 Clearance Delay: <span className="text-white font-bold"><strong>{selectedShipment.clearanceDelay}</strong></span></div>
-                )}
-                {selectedShipment.transitDelay && selectedShipment.transitDelay !== '-' && (
-                  <div className="text-slate-300">✈️ Transit Delay: <span className="text-white font-bold"><strong>{selectedShipment.transitDelay}</strong></span></div>
-                )}
-                {selectedShipment.destinationDelay && selectedShipment.destinationDelay !== '-' && (
-                  <div className="text-slate-300">🚚 Destination Delay: <span className="text-white font-bold"><strong>{selectedShipment.destinationDelay}</strong></span></div>
-                )}
-                {selectedShipment.remarks && selectedShipment.remarks !== '-' && (
-                  <div className="text-slate-300">💬 Remarks: <span className="text-white font-bold"><strong>{selectedShipment.remarks}</strong></span></div>
-                )}
-              </div>
-            )}
 
-            {/* Description */}
-            {selectedShipment.description && (
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block"><strong>Description of Goods</strong></span>
-                <p className="text-slate-200 mt-1 leading-relaxed font-medium">{selectedShipment.description}</p>
-              </div>
-            )}
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">Customer Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newShipmentForm.customer}
+                    onChange={(e) => setNewShipmentForm({ ...newShipmentForm, customer: e.target.value })}
+                    placeholder="e.g. Apex Logistics"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
 
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedShipment(null)}
-                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md shadow-sky-500/20 cursor-pointer"
-              >
-                <strong>Close Dossier</strong>
-              </button>
-            </div>
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">Shipper Name</label>
+                  <input
+                    type="text"
+                    value={newShipmentForm.shprName}
+                    onChange={(e) => setNewShipmentForm({ ...newShipmentForm, shprName: e.target.value })}
+                    placeholder="Leave blank to match Customer"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">Transit Time (Days)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={newShipmentForm.tt}
+                    onChange={(e) => setNewShipmentForm({ ...newShipmentForm, tt: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1">Final Resolution</label>
+                  <select
+                    value={newShipmentForm.finalResolution || 'Delivered'}
+                    onChange={(e) => setNewShipmentForm({ ...newShipmentForm, finalResolution: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="Delivered">Delivered</option>
+                    <option value="RTS">RTS</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Destroyed">Destroyed</option>
+                    <option value="Seized">Seized</option>
+                    <option value="Undelivered">Undelivered</option>
+                    <option value="NFBRK">NFBRK</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-300 font-bold block mb-1">Delay / Status Remarks</label>
+                <input
+                  type="text"
+                  value={newShipmentForm.remarks || ''}
+                  onChange={(e) => setNewShipmentForm({ ...newShipmentForm, remarks: e.target.value })}
+                  placeholder="Optional operational remarks"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Optional Team PIN */}
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-slate-300">Team PIN (if configured):</span>
+                <input
+                  type="password"
+                  value={editPinInput}
+                  onChange={(e) => setEditPinInput(e.target.value)}
+                  placeholder="PIN..."
+                  className="w-28 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {addError && (
+                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{addError}</span>
+                </div>
+              )}
+              {addSuccess && (
+                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Shipment added! Synced to cloud Firestore.</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAddingShipment}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-500/25 cursor-pointer"
+                >
+                  {isAddingShipment ? 'Adding...' : 'Add & Broadcast'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
