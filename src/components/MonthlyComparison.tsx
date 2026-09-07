@@ -16,10 +16,16 @@ import {
   Activity,
   BarChart3,
   CalendarDays,
-  Sparkles
+  Sparkles,
+  Filter,
+  Users,
+  Globe,
+  X,
+  RotateCcw
 } from 'lucide-react';
-import { Shipment } from '../types/logistics';
+import { Shipment, FilterState } from '../types/logistics';
 import { computeMonthlyComparison, MonthlyMetric } from '../utils/monthlyAnalytics';
+import { filterShipments } from '../utils/analytics';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -38,6 +44,13 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 interface MonthlyComparisonProps {
   rawShipments: Shipment[];
   filteredShipments?: Shipment[];
+  filters?: FilterState;
+  allCustomers?: string[];
+  allDestinations?: string[];
+  allMonths?: string[];
+  onCustomerChange?: (customer: string) => void;
+  onDestinationChange?: (dest: string) => void;
+  onResetFilters?: () => void;
 }
 
 // Curated palette for comparing up to 8 distinct months
@@ -84,10 +97,45 @@ const MONTH_PALETTES = [
   }
 ];
 
-export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({ rawShipments }) => {
+export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
+  rawShipments,
+  filteredShipments,
+  filters,
+  allMonths,
+  onCustomerChange,
+  onDestinationChange,
+  onResetFilters
+}) => {
+  // Extract active customer and destination filters
+  const selectedCustomer = filters?.selectedCustomers?.[0] || '';
+  const selectedDestination = filters?.selectedDestinations?.[0] || '';
+  const selectedCategoryType = filters?.selectedCategoryType || 'ALL';
+  const hasActiveFilters = Boolean(
+    selectedCustomer ||
+    selectedDestination ||
+    (selectedCategoryType && selectedCategoryType !== 'ALL') ||
+    (filters?.selectedShippers && filters.selectedShippers.length > 0)
+  );
+
+  // Compute filtered dataset across all months for the comparative analysis
+  const effectiveShipments = useMemo(() => {
+    if (!filters) {
+      return filteredShipments && filteredShipments.length > 0 ? filteredShipments : rawShipments;
+    }
+
+    // Apply customer, destination, category, shipper, and delay filters
+    // Keep selectedMonth: 'ALL' so all tracked months (e.g. July & August) are compared side-by-side!
+    const comparisonFilters: FilterState = {
+      ...filters,
+      selectedMonth: 'ALL'
+    };
+
+    return filterShipments(rawShipments, comparisonFilters);
+  }, [rawShipments, filteredShipments, filters]);
+
   const comparison = useMemo(() => {
-    return computeMonthlyComparison(rawShipments);
-  }, [rawShipments]);
+    return computeMonthlyComparison(effectiveShipments, allMonths);
+  }, [effectiveShipments, allMonths]);
 
   const { months, grandTotalAWBs, overallAvgTT, overallOnTimeRate } = comparison;
 
@@ -267,8 +315,97 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({ rawShipmen
         </button>
       </div>
 
-      {/* 2. EXECUTIVE MONTH-OVER-MONTH KPI CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* 1.1 ACTIVE SEARCH / FILTER STATUS BAR */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 shadow-lg">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 mr-1">
+              <Filter className="w-3.5 h-3.5 text-indigo-400" />
+              Active Filters:
+            </span>
+
+            {selectedCustomer && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 shadow-sm">
+                <Users className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Customer: <strong className="text-white">{selectedCustomer}</strong></span>
+                {onCustomerChange && (
+                  <button
+                    onClick={() => onCustomerChange('ALL')}
+                    className="ml-1 p-0.5 rounded-full hover:bg-emerald-500/30 text-emerald-300 hover:text-white transition-colors cursor-pointer"
+                    title="Clear customer filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </span>
+            )}
+
+            {selectedDestination && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-300 border border-blue-500/40 shadow-sm">
+                <Globe className="w-3.5 h-3.5 text-blue-400" />
+                <span>Destination: <strong className="text-white">{selectedDestination}</strong></span>
+                {onDestinationChange && (
+                  <button
+                    onClick={() => onDestinationChange('ALL')}
+                    className="ml-1 p-0.5 rounded-full hover:bg-blue-500/30 text-blue-300 hover:text-white transition-colors cursor-pointer"
+                    title="Clear destination filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </span>
+            )}
+
+            {selectedCategoryType && selectedCategoryType !== 'ALL' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/40 shadow-sm">
+                <Package className="w-3.5 h-3.5 text-purple-400" />
+                <span>Category: <strong className="text-white">{selectedCategoryType}</strong></span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-300 font-bold">
+              <span className="font-mono text-white text-sm font-extrabold">{grandTotalAWBs.toLocaleString()}</span> AWBs matched
+            </span>
+            {onResetFilters && (
+              <button
+                onClick={onResetFilters}
+                className="flex items-center gap-1 text-xs font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-rose-500/10"
+                title="Reset all filters"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Filters
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {grandTotalAWBs === 0 ? (
+        <div className="p-12 rounded-2xl bg-slate-900/60 border border-slate-800 text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
+            <Filter className="w-6 h-6 text-indigo-400" />
+          </div>
+          <h3 className="text-base font-extrabold text-white">
+            No Shipments Found
+          </h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            No shipments match the selected filters {selectedCustomer ? `for customer "${selectedCustomer}"` : ''} {selectedDestination ? `to destination "${selectedDestination}"` : ''} across tracked months.
+          </p>
+          {onResetFilters && (
+            <button
+              onClick={onResetFilters}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* 2. EXECUTIVE MONTH-OVER-MONTH KPI CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {months.map((m, idx) => {
           const palette = MONTH_PALETTES[idx % MONTH_PALETTES.length];
           return (
@@ -758,6 +895,8 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({ rawShipmen
           </table>
         </div>
       </div>
+      </>
+      )}
 
     </div>
   );

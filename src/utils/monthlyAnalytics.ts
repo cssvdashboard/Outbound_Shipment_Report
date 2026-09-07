@@ -63,9 +63,18 @@ export interface MonthlyComparisonResult {
 /**
  * Computes comparative monthly metrics across all available months in the dataset.
  */
-export function computeMonthlyComparison(shipments: Shipment[]): MonthlyComparisonResult {
+export function computeMonthlyComparison(
+  shipments: Shipment[],
+  knownMonths?: string[]
+): MonthlyComparisonResult {
   // 1. Group shipments by month (YYYY-MM)
   const monthGroups: Record<string, Shipment[]> = {};
+
+  if (knownMonths && knownMonths.length > 0) {
+    knownMonths.forEach((ym) => {
+      monthGroups[ym] = [];
+    });
+  }
 
   shipments.forEach((s) => {
     const d = parseShipmentDate(s.pickup);
@@ -234,15 +243,17 @@ export function computeMonthlyComparison(shipments: Shipment[]): MonthlyComparis
     if (index > 0) {
       const prevMonthShipments = monthGroups[sortedMonthIds[index - 1]];
       const prevAWB = prevMonthShipments.length;
-      if (prevAWB > 0) {
+      if (prevAWB > 0 && totalAWBs > 0) {
         momChangeAWB = parseFloat((((totalAWBs - prevAWB) / prevAWB) * 100).toFixed(1));
+      } else if (prevAWB === 0 && totalAWBs > 0) {
+        momChangeAWB = 100;
       }
 
       const prevTTList = prevMonthShipments
         .map((s) => (typeof s.tt === 'number' && !isNaN(s.tt) ? s.tt : 0))
         .filter((tt) => tt >= 0);
       const prevAvgTT = prevTTList.length > 0 ? prevTTList.reduce((a, b) => a + b, 0) / prevTTList.length : 0;
-      if (prevAvgTT > 0) {
+      if (prevAvgTT > 0 && avgTT > 0) {
         momChangeTT = parseFloat((((avgTT - prevAvgTT) / prevAvgTT) * 100).toFixed(1));
       }
     }

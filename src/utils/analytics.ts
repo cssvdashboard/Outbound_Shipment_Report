@@ -46,7 +46,7 @@ export function filterShipments(shipments: Shipment[], filters: FilterState): Sh
 
     // 3. Destination Country Filter
     if (filters.selectedDestinations && filters.selectedDestinations.length > 0) {
-      if (!filters.selectedDestinations.includes(item.destination)) return false;
+      if (!filters.selectedDestinations.some((d) => d.trim().toUpperCase() === (item.destination || '').trim().toUpperCase())) return false;
     }
 
     // 4. TT Range Filter

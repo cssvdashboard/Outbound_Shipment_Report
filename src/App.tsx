@@ -244,6 +244,13 @@ export const App: React.FC = () => {
                 <MonthlyComparison
                   rawShipments={rawShipments}
                   filteredShipments={filteredShipments}
+                  filters={filters}
+                  allCustomers={allCustomers}
+                  allDestinations={allDestinations}
+                  allMonths={allMonths}
+                  onCustomerChange={setCustomerFilter}
+                  onDestinationChange={setDestinationFilter}
+                  onResetFilters={resetAllFilters}
                 />
               )}
             </>
