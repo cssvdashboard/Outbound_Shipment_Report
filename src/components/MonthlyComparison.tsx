@@ -650,14 +650,6 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             </p>
           </div>
         </div>
-
-        <button
-          onClick={handleExportExcel}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-600/25 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0 w-fit"
-        >
-          <FileSpreadsheet className="w-4 h-4" />
-          <span>Export Monthly Comparison (.xlsx)</span>
-        </button>
       </div>
 
       {/* 1.1 ACTIVE SEARCH / FILTER STATUS BAR */}
