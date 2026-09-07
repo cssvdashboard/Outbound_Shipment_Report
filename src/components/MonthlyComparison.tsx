@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   CalendarRange,
   TrendingUp,
@@ -25,11 +25,14 @@ import {
   RotateCcw,
   ArrowRightLeft,
   CalendarCheck,
-  ChevronRight
+  ChevronRight,
+  Search,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { Shipment, FilterState } from '../types/logistics';
 import { computeMonthlyComparison, MonthlyMetric } from '../utils/monthlyAnalytics';
-import { filterShipments } from '../utils/analytics';
+import { filterShipments, searchCustomers } from '../utils/analytics';
 import { parseShipmentDate } from '../utils/calendarAnalytics';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -125,6 +128,8 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
   rawShipments,
   filteredShipments,
   filters,
+  allCustomers,
+  allDestinations,
   allMonths,
   onCustomerChange,
   onDestinationChange,
@@ -180,6 +185,95 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       }
     }
   }, [months, leftMonthId, rightMonthId]);
+
+  // Local search states for Section 3B Customer & Destination inputs
+  const [sectionCustomerSearch, setSectionCustomerSearch] = useState('');
+  const [sectionDestSearch, setSectionDestSearch] = useState('');
+  const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
+  const [isDestDropdownOpen, setIsDestDropdownOpen] = useState(false);
+  const customerDropdownRef = useRef<HTMLDivElement>(null);
+  const destDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click-outside handlers for customer & destination dropdowns
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (customerDropdownRef.current && !customerDropdownRef.current.contains(event.target as Node)) {
+        setIsCustomerDropdownOpen(false);
+      }
+      if (destDropdownRef.current && !destDropdownRef.current.contains(event.target as Node)) {
+        setIsDestDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Compute matching customers
+  const matchingCustomers = useMemo(() => {
+    return searchCustomers(rawShipments, sectionCustomerSearch, 40);
+  }, [rawShipments, sectionCustomerSearch]);
+
+  const totalDistinctCustomersCount = useMemo(() => {
+    if (allCustomers && allCustomers.length > 0) return allCustomers.length;
+    const set = new Set<string>();
+    rawShipments.forEach((s) => {
+      if (s.customer) set.add(s.customer.trim());
+    });
+    return set.size;
+  }, [allCustomers, rawShipments]);
+
+  // Compute destination counts from raw shipments
+  const destinationCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of rawShipments) {
+      if (s.destination) {
+        const dest = s.destination.trim().toUpperCase();
+        map.set(dest, (map.get(dest) || 0) + 1);
+      }
+    }
+    return map;
+  }, [rawShipments]);
+
+  const distinctDestinations = useMemo(() => {
+    if (allDestinations && allDestinations.length > 0) return allDestinations;
+    return Array.from(destinationCounts.keys()).sort();
+  }, [allDestinations, destinationCounts]);
+
+  const matchingDestinations: string[] = useMemo(() => {
+    if (!sectionDestSearch.trim()) return distinctDestinations.slice(0, 40);
+    const q = sectionDestSearch.trim().toUpperCase();
+    return distinctDestinations.filter((d: string) => d.includes(q)).slice(0, 40);
+  }, [distinctDestinations, sectionDestSearch]);
+
+  const handleCustomerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsCustomerDropdownOpen(false);
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (matchingCustomers.length > 0) {
+        onCustomerChange?.(matchingCustomers[0].name);
+        setSectionCustomerSearch('');
+        setIsCustomerDropdownOpen(false);
+      }
+    }
+  };
+
+  const handleDestKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsDestDropdownOpen(false);
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (matchingDestinations.length > 0) {
+        onDestinationChange?.(matchingDestinations[0]);
+        setSectionDestSearch('');
+        setIsDestDropdownOpen(false);
+      }
+    }
+  };
 
   // Index effective shipments by monthId, weekday (0-6), and week (1-5) for instant retrieval
   const weekdayShipmentsIndex = useMemo(() => {
@@ -807,55 +901,353 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             </p>
           </div>
 
-          {/* Month Switcher / Swap Action */}
+          {/* Month Switcher Controls: [Left: Month v] ⇄ [Right: Month v] */}
           <div className="flex items-center gap-2 self-start lg:self-center shrink-0">
-            {months.length > 2 ? (
-              <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700">
-                <select
-                  value={activeLeftMonth?.monthId}
-                  onChange={(e) => setLeftMonthId(e.target.value)}
-                  className="bg-slate-950 text-xs font-bold text-sky-300 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none"
-                >
-                  {months.map((m) => (
-                    <option key={m.monthId} value={m.monthId} disabled={m.monthId === rightMonthId}>
-                      Left: {m.monthLabel}
-                    </option>
-                  ))}
-                </select>
-                <ArrowRightLeft className="w-4 h-4 text-slate-500" />
-                <select
-                  value={activeRightMonth?.monthId}
-                  onChange={(e) => setRightMonthId(e.target.value)}
-                  className="bg-slate-950 text-xs font-bold text-emerald-300 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none"
-                >
-                  {months.map((m) => (
-                    <option key={m.monthId} value={m.monthId} disabled={m.monthId === leftMonthId}>
-                      Right: {m.monthLabel}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : months.length === 2 ? (
+            <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700 shadow-sm">
+              <select
+                value={activeLeftMonth?.monthId}
+                onChange={(e) => setLeftMonthId(e.target.value)}
+                className="bg-slate-950 text-xs font-bold text-sky-400 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500 cursor-pointer"
+              >
+                {months.map((m) => (
+                  <option key={m.monthId} value={m.monthId} disabled={m.monthId === rightMonthId}>
+                    Left: {m.monthLabel}
+                  </option>
+                ))}
+              </select>
+
               <button
+                type="button"
                 onClick={() => {
                   const temp = leftMonthId;
                   setLeftMonthId(rightMonthId);
                   setRightMonthId(temp);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-indigo-500/60 text-slate-300 hover:text-white text-xs font-bold transition-all shadow-sm"
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
                 title="Swap Left and Right Months"
               >
                 <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Swap Months</span>
               </button>
-            ) : null}
+
+              <select
+                value={activeRightMonth?.monthId}
+                onChange={(e) => setRightMonthId(e.target.value)}
+                className="bg-slate-950 text-xs font-bold text-emerald-400 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                {months.map((m) => (
+                  <option key={m.monthId} value={m.monthId} disabled={m.monthId === leftMonthId}>
+                    Right: {m.monthLabel}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {hasActiveFilters && (
-              <span className="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold flex items-center gap-1">
+              <span className="text-[11px] px-2.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold flex items-center gap-1">
                 <Filter className="w-3 h-3 text-indigo-400" />
                 Filtered Active
               </span>
             )}
+          </div>
+        </div>
+
+        {/* CUSTOMER & DESTINATION SEARCH BAR (Directly under Month Switcher) */}
+        <div className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 shadow-inner space-y-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-300">
+              <Filter className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Search Customer & Destination:</span>
+            </div>
+            {(selectedCustomer || selectedDestination || sectionCustomerSearch || sectionDestSearch) && (
+              <button
+                type="button"
+                onClick={() => {
+                  onCustomerChange?.('ALL');
+                  onDestinationChange?.('ALL');
+                  setSectionCustomerSearch('');
+                  setSectionDestSearch('');
+                }}
+                className="text-[11px] font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1 self-start sm:self-auto cursor-pointer transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Clear Search Filters
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Customer Search Bar */}
+            <div className="relative" ref={customerDropdownRef}>
+              <div className="relative flex items-center">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-400">
+                  <Users className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={sectionCustomerSearch !== '' ? sectionCustomerSearch : (selectedCustomer || '')}
+                  onChange={(e) => {
+                    setSectionCustomerSearch(e.target.value);
+                    setIsCustomerDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsCustomerDropdownOpen(true)}
+                  onKeyDown={handleCustomerKeyDown}
+                  placeholder="Search customer (e.g. Expeditors, Elite, DSV...)"
+                  className={`w-full pl-9 pr-16 py-2 rounded-xl text-xs bg-slate-950 text-slate-100 placeholder-slate-500 border transition-all focus:outline-none ${
+                    selectedCustomer
+                      ? 'border-emerald-500/60 ring-1 ring-emerald-500/30'
+                      : 'border-slate-700 hover:border-slate-600 focus:border-indigo-500'
+                  }`}
+                />
+                <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                  {(sectionCustomerSearch || selectedCustomer) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSectionCustomerSearch('');
+                        onCustomerChange?.('ALL');
+                      }}
+                      className="p-1 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                      title="Clear customer filter"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomerDropdownOpen(!isCustomerDropdownOpen)}
+                    className="p-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform ${isCustomerDropdownOpen ? 'rotate-180 text-emerald-400' : ''}`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Customer Dropdown */}
+              {isCustomerDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto z-50 rounded-xl bg-[#0b1329] border border-slate-700 shadow-2xl divide-y divide-slate-800">
+                  <div className="p-2 bg-slate-950/90 text-[11px] font-bold text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-800">
+                    <span className="flex items-center gap-1.5">
+                      <Search className="w-3 h-3 text-emerald-400" />
+                      <span>Matching Customers ({matchingCustomers.length})</span>
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {totalDistinctCustomersCount} Total
+                    </span>
+                  </div>
+
+                  <div className="p-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onCustomerChange?.('ALL');
+                        setSectionCustomerSearch('');
+                        setIsCustomerDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
+                        !selectedCustomer
+                          ? 'bg-emerald-950/60 text-emerald-300 font-bold border border-emerald-500/30'
+                          : 'text-slate-300 hover:bg-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {!selectedCustomer ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                        )}
+                        <span>All Customers</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        {rawShipments.length.toLocaleString()} AWBs
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="p-1 space-y-0.5">
+                    {matchingCustomers.map((cust) => {
+                      const isSelected = selectedCustomer?.toLowerCase() === cust.name.toLowerCase();
+                      return (
+                        <button
+                          key={cust.name}
+                          type="button"
+                          onClick={() => {
+                            onCustomerChange?.(cust.name);
+                            setSectionCustomerSearch('');
+                            setIsCustomerDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-emerald-600 text-white font-bold'
+                              : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 truncate pr-2">
+                            {isSelected ? (
+                              <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60 shrink-0" />
+                            )}
+                            <span className="truncate">{cust.name}</span>
+                          </div>
+                          <span
+                            className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                              isSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+                            }`}
+                          >
+                            {cust.count.toLocaleString()}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {matchingCustomers.length === 0 && (
+                      <div className="p-4 text-center text-xs text-slate-500">
+                        No customer found matching &quot;{sectionCustomerSearch}&quot;
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Destination Search Bar */}
+            <div className="relative" ref={destDropdownRef}>
+              <div className="relative flex items-center">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-400">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={sectionDestSearch !== '' ? sectionDestSearch : (selectedDestination || '')}
+                  onChange={(e) => {
+                    setSectionDestSearch(e.target.value.toUpperCase());
+                    setIsDestDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDestDropdownOpen(true)}
+                  onKeyDown={handleDestKeyDown}
+                  placeholder="Search destination airport (e.g. JFK, DXB, LHR...)"
+                  className={`w-full pl-9 pr-16 py-2 rounded-xl text-xs bg-slate-950 text-slate-100 placeholder-slate-500 border transition-all focus:outline-none ${
+                    selectedDestination
+                      ? 'border-blue-500/60 ring-1 ring-blue-500/30'
+                      : 'border-slate-700 hover:border-slate-600 focus:border-indigo-500'
+                  }`}
+                />
+                <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                  {(sectionDestSearch || selectedDestination) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSectionDestSearch('');
+                        onDestinationChange?.('ALL');
+                      }}
+                      className="p-1 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                      title="Clear destination filter"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
+                    className="p-1 text-slate-400 hover:text-blue-400 transition-colors cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform ${isDestDropdownOpen ? 'rotate-180 text-blue-400' : ''}`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Destination Dropdown */}
+              {isDestDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto z-50 rounded-xl bg-[#0b1329] border border-slate-700 shadow-2xl divide-y divide-slate-800">
+                  <div className="p-2 bg-slate-950/90 text-[11px] font-bold text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-800">
+                    <span className="flex items-center gap-1.5">
+                      <Search className="w-3 h-3 text-blue-400" />
+                      <span>Matching Destinations ({matchingDestinations.length})</span>
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {distinctDestinations.length} Total
+                    </span>
+                  </div>
+
+                  <div className="p-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDestinationChange?.('ALL');
+                        setSectionDestSearch('');
+                        setIsDestDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
+                        !selectedDestination
+                          ? 'bg-blue-950/60 text-blue-300 font-bold border border-blue-500/30'
+                          : 'text-slate-300 hover:bg-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {!selectedDestination ? (
+                          <Check className="w-3.5 h-3.5 text-blue-400" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                        )}
+                        <span>All Destinations</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        {rawShipments.length.toLocaleString()} AWBs
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="p-1 space-y-0.5">
+                    {matchingDestinations.map((code: string) => {
+                      const isSelected = selectedDestination?.toUpperCase() === code.toUpperCase();
+                      const count = destinationCounts.get(code) || 0;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => {
+                            onDestinationChange?.(code);
+                            setSectionDestSearch('');
+                            setIsDestDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-blue-600 text-white font-bold'
+                              : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 truncate pr-2">
+                            {isSelected ? (
+                              <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                            )}
+                            <span className="font-mono font-bold">{code}</span>
+                          </div>
+                          <span
+                            className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                              isSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+                            }`}
+                          >
+                            {count.toLocaleString()}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {matchingDestinations.length === 0 && (
+                      <div className="p-4 text-center text-xs text-slate-500">
+                        No destination found matching &quot;{sectionDestSearch}&quot;
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
