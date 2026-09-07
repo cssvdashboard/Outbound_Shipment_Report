@@ -168,6 +168,17 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
 
   const { months, grandTotalAWBs, overallAvgTT, overallOnTimeRate } = comparison;
 
+  // Default months: Left = July 2026, Right = August 2026
+  const defaultLeftMonthId = useMemo(() => {
+    const july = months.find(m => m.monthId === '2026-07' || m.monthLabel.toLowerCase().includes('july 2026') || m.monthLabel.toLowerCase().startsWith('july'));
+    return july?.monthId || (months.length > 0 ? months[0].monthId : '');
+  }, [months]);
+
+  const defaultRightMonthId = useMemo(() => {
+    const aug = months.find(m => m.monthId === '2026-08' || m.monthLabel.toLowerCase().includes('august 2026') || m.monthLabel.toLowerCase().startsWith('august'));
+    return aug?.monthId || (months.length > 1 ? months[1].monthId : (months[0]?.monthId || ''));
+  }, [months]);
+
   // State for Side-by-Side Weekday & Week Comparison
   const [selectedWeek, setSelectedWeek] = useState<number | 'ALL'>(1);
   const [selectedWeekday, setSelectedWeekday] = useState<number | 'ALL'>(1); // Monday by default
@@ -178,13 +189,13 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
   useEffect(() => {
     if (months.length > 0) {
       if (!leftMonthId || !months.some(m => m.monthId === leftMonthId)) {
-        setLeftMonthId(months[0].monthId);
+        setLeftMonthId(defaultLeftMonthId);
       }
       if (!rightMonthId || !months.some(m => m.monthId === rightMonthId)) {
-        setRightMonthId(months.length > 1 ? months[1].monthId : months[0].monthId);
+        setRightMonthId(defaultRightMonthId);
       }
     }
-  }, [months, leftMonthId, rightMonthId]);
+  }, [months, leftMonthId, rightMonthId, defaultLeftMonthId, defaultRightMonthId]);
 
   // Local search states for Section 3B Customer & Destination inputs
   const [sectionCustomerSearch, setSectionCustomerSearch] = useState('');
@@ -326,9 +337,13 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     return { count, avgTT, minTT, maxTT, onTimeRate, delayedCount };
   };
 
-  const activeLeftMonth = months.find((m) => m.monthId === leftMonthId) || months[0];
+  const activeLeftMonth =
+    months.find((m) => m.monthId === leftMonthId) ||
+    months.find((m) => m.monthId === defaultLeftMonthId) ||
+    months[0];
   const activeRightMonth =
     months.find((m) => m.monthId === rightMonthId) ||
+    months.find((m) => m.monthId === defaultRightMonthId) ||
     (months.length > 1 ? months[1] : months[0]);
 
   const leftStats = activeLeftMonth ? getStats(activeLeftMonth.monthId, selectedWeek, selectedWeekday) : null;
@@ -895,9 +910,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const temp = leftMonthId;
-                    setLeftMonthId(rightMonthId);
-                    setRightMonthId(temp);
+                    const tempLeft = activeLeftMonth?.monthId || leftMonthId;
+                    const tempRight = activeRightMonth?.monthId || rightMonthId;
+                    setLeftMonthId(tempRight);
+                    setRightMonthId(tempLeft);
                   }}
                   className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
                   title="Swap Left and Right Months"

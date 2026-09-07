@@ -187,7 +187,7 @@ export const Header: React.FC<HeaderProps> = ({
               { id: 'overview', label: 'Overview', icon: Package, color: 'text-sky-500' },
               { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
-              { id: 'comparison', label: 'Performance Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
+              { id: 'comparison', label: 'Shipper Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
               { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
               { id: 'calendar', label: 'Weekly TT Comparison', icon: CalendarDays, color: 'text-violet-500' },
               { id: 'monthly', label: 'Monthly Comparison', icon: CalendarRange, color: 'text-purple-500' },

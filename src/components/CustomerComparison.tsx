@@ -305,7 +305,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-sm font-black text-white light:text-slate-900">
-                  <strong>Multi-Customer Performance Comparison &amp; Transit Time Benchmark</strong>
+                  <strong>Multi-Shipper Comparison &amp; Transit Time Benchmark</strong>
                 </h2>
                 
                 {/* Active Category Scope Badge */}
