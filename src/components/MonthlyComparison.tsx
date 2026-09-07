@@ -348,79 +348,169 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
   const volDiff =
     leftStats && rightStats ? rightStats.count - leftStats.count : 0;
 
-  // Chart configuration: Grouped Bar Chart for Weekly TT Comparison (W1–W4/W5)
-  const weeklyChartData = useMemo(() => {
-    const labels = ['Week 1 (Days 1–7)', 'Week 2 (Days 8–14)', 'Week 3 (Days 15–21)', 'Week 4 (Days 22–28)', 'Week 5 (Days 29+)'];
+  // View mode for Side-by-Side Comparison Graph: 'weekdays' (Sun-Sat) or 'weeks' (W1-W5)
+  const [chartViewMode, setChartViewMode] = useState<'weekdays' | 'weeks'>('weekdays');
 
-    const datasets = months.map((m, idx) => {
-      const palette = MONTH_PALETTES[idx % MONTH_PALETTES.length];
+  // Automatically update chart view mode if user chooses 'ALL' weeks vs a specific week
+  useEffect(() => {
+    if (selectedWeek === 'ALL') {
+      setChartViewMode('weeks');
+    } else {
+      setChartViewMode('weekdays');
+    }
+  }, [selectedWeek]);
+
+  // Chart configuration: Dynamic Side-by-Side Bar Chart comparing Left & Right Month
+  // Dynamically reacts to Left Month, Right Month, Customer search, Destination search, Week & Weekday selections
+  const comparisonChartData = useMemo(() => {
+    if (!activeLeftMonth || !activeRightMonth) {
+      return { labels: [], datasets: [] };
+    }
+
+    if (chartViewMode === 'weeks') {
+      const labels = ['Week 1 (Days 1–7)', 'Week 2 (Days 8–14)', 'Week 3 (Days 15–21)', 'Week 4 (Days 22–28)', 'Week 5 (Days 29+)'];
+
+      const leftData = [1, 2, 3, 4, 5].map((w) => {
+        const s = getStats(activeLeftMonth.monthId, w, selectedWeekday);
+        return s.count > 0 ? s.avgTT : 0;
+      });
+
+      const rightData = [1, 2, 3, 4, 5].map((w) => {
+        const s = getStats(activeRightMonth.monthId, w, selectedWeekday);
+        return s.count > 0 ? s.avgTT : 0;
+      });
+
       return {
-        label: m.monthLabel,
-        data: [1, 2, 3, 4, 5].map((w) => m.weeks[w]?.avgTT || 0),
-        backgroundColor: palette.bg,
-        borderColor: palette.border,
-        borderWidth: 1.5,
-        borderRadius: 8,
-        hoverBackgroundColor: palette.border
+        labels,
+        datasets: [
+          {
+            label: activeLeftMonth.monthLabel,
+            data: leftData,
+            backgroundColor: 'rgba(56, 189, 248, 0.85)',
+            borderColor: '#0284c7',
+            borderWidth: 1.5,
+            borderRadius: 8,
+            hoverBackgroundColor: '#38bdf8'
+          },
+          {
+            label: activeRightMonth.monthLabel,
+            data: rightData,
+            backgroundColor: 'rgba(52, 211, 153, 0.85)',
+            borderColor: '#059669',
+            borderWidth: 1.5,
+            borderRadius: 8,
+            hoverBackgroundColor: '#34d399'
+          }
+        ]
       };
-    });
+    } else {
+      const labels = WEEKDAYS.map((d) => d.name);
 
-    return { labels, datasets };
-  }, [months]);
+      const leftData = WEEKDAYS.map((d) => {
+        const s = getStats(activeLeftMonth.monthId, selectedWeek, d.index);
+        return s.count > 0 ? s.avgTT : 0;
+      });
 
-  const weeklyChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-        labels: {
-          color: '#94a3b8',
-          font: { weight: 'bold' as const, size: 12 },
-          padding: 16,
-          usePointStyle: true,
-          boxWidth: 10
-        }
-      },
-      tooltip: {
-        backgroundColor: '#0f172a',
-        borderColor: '#334155',
-        borderWidth: 1,
-        titleColor: '#f8fafc',
-        bodyColor: '#e2e8f0',
-        padding: 12,
-        cornerRadius: 10,
-        callbacks: {
-          label: (context: any) => {
-            const val = context.parsed.y;
-            const monthIdx = context.datasetIndex;
-            const weekNum = context.dataIndex + 1;
-            const monthObj = months[monthIdx];
-            const weekStats = monthObj?.weeks[weekNum];
-            const countStr = weekStats?.count ? ` (${weekStats.count.toLocaleString()} pkgs)` : '';
-            return ` ${context.dataset.label}: ${val.toFixed(2)} days${countStr}`;
+      const rightData = WEEKDAYS.map((d) => {
+        const s = getStats(activeRightMonth.monthId, selectedWeek, d.index);
+        return s.count > 0 ? s.avgTT : 0;
+      });
+
+      return {
+        labels,
+        datasets: [
+          {
+            label: activeLeftMonth.monthLabel,
+            data: leftData,
+            backgroundColor: 'rgba(56, 189, 248, 0.85)',
+            borderColor: '#0284c7',
+            borderWidth: 1.5,
+            borderRadius: 8,
+            hoverBackgroundColor: '#38bdf8'
+          },
+          {
+            label: activeRightMonth.monthLabel,
+            data: rightData,
+            backgroundColor: 'rgba(52, 211, 153, 0.85)',
+            borderColor: '#059669',
+            borderWidth: 1.5,
+            borderRadius: 8,
+            hoverBackgroundColor: '#34d399'
+          }
+        ]
+      };
+    }
+  }, [activeLeftMonth, activeRightMonth, chartViewMode, selectedWeek, selectedWeekday, weekdayShipmentsIndex]);
+
+  const comparisonChartOptions = useMemo(() => {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top' as const,
+          labels: {
+            color: '#cbd5e1',
+            font: { weight: 'bold' as const, size: 12 },
+            padding: 16,
+            usePointStyle: true,
+            boxWidth: 10
+          }
+        },
+        tooltip: {
+          backgroundColor: '#0b1329',
+          borderColor: '#334155',
+          borderWidth: 1,
+          titleColor: '#f8fafc',
+          bodyColor: '#e2e8f0',
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: {
+            label: (context: any) => {
+              const val = context.parsed.y;
+              if (val === 0) return ` ${context.dataset.label}: No shipments recorded`;
+              const isLeft = context.datasetIndex === 0;
+              const targetMonth = isLeft ? activeLeftMonth : activeRightMonth;
+              if (!targetMonth) return ` ${context.dataset.label}: ${val.toFixed(2)} days`;
+
+              if (chartViewMode === 'weeks') {
+                const weekNum = context.dataIndex + 1;
+                const stats = getStats(targetMonth.monthId, weekNum, selectedWeekday);
+                return [
+                  ` ${context.dataset.label}: ${val.toFixed(2)} days (${stats.count.toLocaleString()} pkgs)`,
+                  `   Min TT: ${stats.minTT}d | Max TT: ${stats.maxTT}d | On-Time: ${stats.onTimeRate}%`
+                ];
+              } else {
+                const dayIndex = context.dataIndex;
+                const stats = getStats(targetMonth.monthId, selectedWeek, dayIndex);
+                return [
+                  ` ${context.dataset.label}: ${val.toFixed(2)} days (${stats.count.toLocaleString()} pkgs)`,
+                  `   Min TT: ${stats.minTT}d | Max TT: ${stats.maxTT}d | On-Time: ${stats.onTimeRate}%`
+                ];
+              }
+            }
           }
         }
-      }
-    },
-    scales: {
-      x: {
-        grid: { color: 'rgba(51, 65, 85, 0.25)' },
-        ticks: { color: '#94a3b8', font: { weight: 'bold' as const, size: 11 } }
       },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Average Transit Time (Days)',
-          color: '#94a3b8',
-          font: { weight: 'bold' as const, size: 11 }
+      scales: {
+        x: {
+          grid: { color: 'rgba(51, 65, 85, 0.25)' },
+          ticks: { color: '#94a3b8', font: { weight: 'bold' as const, size: 11 } }
         },
-        grid: { color: 'rgba(51, 65, 85, 0.25)' },
-        ticks: { color: '#94a3b8', font: { weight: 'bold' as const, size: 11 } }
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Average Transit Time (Days)',
+            color: '#94a3b8',
+            font: { weight: 'bold' as const, size: 11 }
+          },
+          grid: { color: 'rgba(51, 65, 85, 0.25)' },
+          ticks: { color: '#94a3b8', font: { weight: 'bold' as const, size: 11 } }
+        }
       }
-    }
-  };
+    };
+  }, [activeLeftMonth, activeRightMonth, chartViewMode, selectedWeek, selectedWeekday, weekdayShipmentsIndex]);
 
   // Export Complete Monthly Comparison to Excel
   const handleExportExcel = () => {
@@ -766,123 +856,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         })}
       </div>
 
-      {/* 3. WEEKLY TT COMPARISON (W1, W2, W3, W4, W5) WITH GRAPH */}
-      <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-slate-700 bg-slate-950/60 shadow-2xl space-y-6">
-        
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
-          <div>
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-indigo-400" />
-              <h3 className="text-lg font-black text-white tracking-tight">
-                Weekly TT Comparison: W1, W2, W3, W4 (with Graph)
-              </h3>
-            </div>
-            <p className="text-xs text-slate-400 mt-1 font-medium">
-              Compare weekly transit velocity across calendar weeks (Days 1–7, 8–14, 15–21, 22–28, 29+) side-by-side.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Fast (&le; 4.0d)
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Moderate (4.1–5.0d)
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Slow (&gt; 5.0d)
-            </span>
-          </div>
-        </div>
-
-        {/* The Graph */}
-        <div className="h-72 sm:h-80 w-full pt-2">
-          <Bar data={weeklyChartData} options={weeklyChartOptions} />
-        </div>
-
-        {/* Weekly Comparison Data Matrix Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
-          <table className="w-full text-center text-xs border-collapse">
-            <thead className="bg-[#0f172a] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-slate-700">
-              <tr>
-                <th className="py-3 px-4 text-left font-black">Month</th>
-                <th className="py-3 px-4 font-black">Total AWBs</th>
-                <th className="py-3 px-4 font-black">Overall Avg TT</th>
-                <th className="py-3 px-4 font-black border-l border-slate-800">
-                  <div>Week 1 Avg TT</div>
-                  <span className="text-[9px] text-slate-400 font-normal">Days 1–7</span>
-                </th>
-                <th className="py-3 px-4 font-black border-l border-slate-800">
-                  <div>Week 2 Avg TT</div>
-                  <span className="text-[9px] text-slate-400 font-normal">Days 8–14</span>
-                </th>
-                <th className="py-3 px-4 font-black border-l border-slate-800">
-                  <div>Week 3 Avg TT</div>
-                  <span className="text-[9px] text-slate-400 font-normal">Days 15–21</span>
-                </th>
-                <th className="py-3 px-4 font-black border-l border-slate-800">
-                  <div>Week 4 Avg TT</div>
-                  <span className="text-[9px] text-slate-400 font-normal">Days 22–28</span>
-                </th>
-                <th className="py-3 px-4 font-black border-l border-slate-800">
-                  <div>Week 5 Avg TT</div>
-                  <span className="text-[9px] text-slate-400 font-normal">Days 29+</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 font-mono font-bold text-slate-200">
-              {months.map((m, idx) => {
-                const palette = MONTH_PALETTES[idx % MONTH_PALETTES.length];
-                return (
-                  <tr key={m.monthId} className="hover:bg-slate-900/50 transition-colors">
-                    <td className="py-3.5 px-4 text-left font-sans font-black flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${palette.badge}`}></span>
-                      <span className="text-white">{m.monthLabel}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-300">
-                      {m.totalAWBs.toLocaleString()}
-                    </td>
-                    <td className="py-3.5 px-4 text-amber-400 text-sm font-black">
-                      {m.avgTT.toFixed(2)}d
-                    </td>
-                    {[1, 2, 3, 4, 5].map((w) => {
-                      const wData = m.weeks[w];
-                      const count = wData?.count || 0;
-                      const avg = wData?.avgTT || 0;
-                      if (!count) {
-                        return (
-                          <td key={w} className="py-3.5 px-4 text-slate-600 border-l border-slate-800">
-                            -
-                          </td>
-                        );
-                      }
-                      const colorClass =
-                        avg <= 4.0
-                          ? 'text-emerald-400 bg-emerald-950/20'
-                          : avg <= 5.0
-                          ? 'text-amber-400 bg-amber-950/20'
-                          : 'text-rose-400 bg-rose-950/20';
-
-                      return (
-                        <td key={w} className={`py-3.5 px-4 border-l border-slate-800 ${colorClass}`}>
-                          <div className="font-black text-sm">{avg.toFixed(2)}d</div>
-                          <div className="text-[10px] text-slate-400 font-sans font-medium">
-                            {count.toLocaleString()} pkgs
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-
-      {/* 3B. SIDE-BY-SIDE MONTH TT COMPARISON BY WEEK & CALENDAR WEEKDAY */}
+      {/* 3. SIDE-BY-SIDE MONTH TT COMPARISON BY WEEK & CALENDAR WEEKDAY */}
       <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-indigo-500/40 bg-slate-950/70 shadow-2xl space-y-6">
         
         {/* Section Header & Subtitle */}
@@ -1444,7 +1418,62 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
 
         </div>
 
-        {/* 4. SIDE-BY-SIDE ALL WEEKDAYS COMPARISON TABLE FOR SELECTED WEEK */}
+        {/* 4. DYNAMIC SIDE-BY-SIDE TT VELOCITY GRAPH */}
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-indigo-400" />
+                <h4 className="text-sm font-black text-white tracking-tight">
+                  Side-by-Side TT Velocity Graph: {activeLeftMonth?.monthLabel} vs {activeRightMonth?.monthLabel}
+                </h4>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                {chartViewMode === 'weekdays'
+                  ? `Comparing average transit time velocity across all 7 calendar weekdays for ${selectedWeek === 'ALL' ? 'All Weeks' : `Week ${selectedWeek}`}.`
+                  : `Comparing average transit time velocity progression across weeks (W1–W5) for ${selectedWeekday === 'ALL' ? 'All Days' : WEEKDAYS[selectedWeekday].name}.`}
+                {(selectedCustomer || selectedDestination) && (
+                  <span className="text-indigo-300 font-semibold ml-1">
+                    (Filtered by {selectedCustomer ? `Customer: ${selectedCustomer}` : ''}{selectedCustomer && selectedDestination ? ' • ' : ''}{selectedDestination ? `Dest: ${selectedDestination}` : ''})
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* View Mode Toggle: By Weekdays vs By Weeks */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 self-start sm:self-center shrink-0">
+              <button
+                type="button"
+                onClick={() => setChartViewMode('weekdays')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  chartViewMode === 'weekdays'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                By Weekdays (Sun–Sat)
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartViewMode('weeks')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  chartViewMode === 'weeks'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                By Weeks (W1–W5)
+              </button>
+            </div>
+          </div>
+
+          {/* The Graph */}
+          <div className="h-72 sm:h-80 w-full pt-1">
+            <Bar data={comparisonChartData} options={comparisonChartOptions} />
+          </div>
+        </div>
+
+        {/* 5. SIDE-BY-SIDE ALL WEEKDAYS COMPARISON TABLE FOR SELECTED WEEK */}
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-black text-white flex items-center gap-2">
