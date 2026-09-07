@@ -204,6 +204,8 @@ export const App: React.FC = () => {
                 <CountryMatrix
                   countryData={countryPerformance}
                   totalAWBs={filteredShipments.length}
+                  shipments={filteredShipments}
+                  rawShipments={rawShipments}
                 />
               )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Globe,
   Search,
@@ -8,14 +8,34 @@ import {
   Plane,
   MapPin,
   Calendar,
-  AlertTriangle
+  AlertTriangle,
+  X,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  FileSpreadsheet,
+  Layers,
+  Clock,
+  Eye,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
-import { CountryPerformance } from '../types/logistics';
+import { CountryPerformance, Shipment } from '../types/logistics';
 import * as XLSX from 'xlsx';
 
 interface CountryMatrixProps {
   countryData: CountryPerformance[];
   totalAWBs: number;
+  shipments?: Shipment[];
+  rawShipments?: Shipment[];
+}
+
+export interface CountryModalTarget {
+  countryCode?: string; // If undefined, applies to all destinations
+  category: 'all' | 'clearance' | 'transit' | 'destination' | 'weekend' | 'totalDelays';
+  title: string;
 }
 
 type SortField =
@@ -35,11 +55,41 @@ type SortOrder = 'asc' | 'desc';
 
 export const CountryMatrix: React.FC<CountryMatrixProps> = ({
   countryData,
-  totalAWBs
+  totalAWBs,
+  shipments = [],
+  rawShipments = []
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('awbCount');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+
+  // Modal State for Country & Delay AWB List Popup Window
+  const [modalTarget, setModalTarget] = useState<CountryModalTarget | null>(null);
+  const [modalSearch, setModalSearch] = useState<string>('');
+  const [modalPageSize, setModalPageSize] = useState<number>(25);
+  const [modalCurrentPage, setModalCurrentPage] = useState<number>(1);
+  const [inspectedShipment, setInspectedShipment] = useState<Shipment | null>(null);
+  const [copiedAwb, setCopiedAwb] = useState<string | null>(null);
+  const [copiedAll, setCopiedAll] = useState<boolean>(false);
+
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (inspectedShipment) {
+          setInspectedShipment(null);
+        } else if (modalTarget) {
+          setModalTarget(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalTarget, inspectedShipment]);
+
+  const effectiveShipments = useMemo(() => {
+    return shipments && shipments.length > 0 ? shipments : (rawShipments || []);
+  }, [shipments, rawShipments]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -98,55 +148,252 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
   const handleExport = () => {
     if (filteredAndSortedData.length === 0) return;
-    const worksheet = XLSX.utils.json_to_sheet(
-      filteredAndSortedData.map((c) => ({
+
+    const exportRows = filteredAndSortedData.map((c) => {
+      const share = totalAWBs > 0 ? ((c.awbCount / totalAWBs) * 100).toFixed(2) : '0';
+      const delayRate = c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : '0';
+
+      return {
         'Country Code': c.countryCode,
-        'Count of AWB': c.awbCount,
-        'Average TT (Days)': c.avgTT,
+        'Volume (AWB)': c.awbCount,
+        'Volume Share (%)': `${share}%`,
+        'Avg TT (Days)': c.avgTT,
         'Min TT (Days)': c.minTT,
         'Max TT (Days)': c.maxTT,
-        'On-Time Rate (%)': `${c.onTimePercentage}%`,
+        'On-Time (%)': `${c.onTimePercentage}%`,
+        'On-Time Count': c.onTimeCount,
         'Clearance Delays': c.clearanceDelays,
         'Transit Delays': c.transitDelays,
         'Destination Delays': c.destinationDelays,
         'Weekend Delays': c.weekendDelays,
-        'Total Delays': c.totalDelays
-      }))
-    );
+        'Total Delays': c.totalDelays,
+        'Delay Rate (%)': `${delayRate}%`
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Country_Performance');
-    XLSX.writeFile(workbook, `Country_Performance_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(workbook, `Destination_Performance_Matrix_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  // Filter shipments for the active popup modal
+  const modalAllShipments = useMemo(() => {
+    if (!modalTarget || effectiveShipments.length === 0) return [];
+    const { countryCode, category } = modalTarget;
+
+    return effectiveShipments.filter((s) => {
+      // 1. Destination Country check
+      if (countryCode) {
+        const destCode = (s.destination || 'UNKNOWN').toUpperCase().trim();
+        if (destCode !== countryCode.toUpperCase().trim()) return false;
+      }
+
+      // 2. Category check
+      if (category === 'all') {
+        return true;
+      }
+
+      if (category === 'clearance') {
+        return Boolean(s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '');
+      }
+
+      if (category === 'transit') {
+        return Boolean(s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '');
+      }
+
+      if (category === 'destination') {
+        return Boolean(s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '');
+      }
+
+      if (category === 'weekend') {
+        const wd = (s.weekendDelay || '').toString().toLowerCase().trim();
+        return wd === 'yes' || wd === '1' || wd === 'true';
+      }
+
+      if (category === 'totalDelays') {
+        const hasClearance = Boolean(s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '');
+        const hasTransit = Boolean(s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '');
+        const hasDest = Boolean(s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '');
+        const wd = (s.weekendDelay || '').toString().toLowerCase().trim();
+        const hasWeekend = wd === 'yes' || wd === '1' || wd === 'true';
+        const isTtDelayed = typeof s.tt === 'number' && s.tt > 5;
+        return hasClearance || hasTransit || hasDest || hasWeekend || isTtDelayed;
+      }
+
+      return true;
+    });
+  }, [modalTarget, effectiveShipments]);
+
+  // Search filter inside modal
+  const modalFilteredShipments = useMemo(() => {
+    if (!modalSearch.trim()) return modalAllShipments;
+    const q = modalSearch.toLowerCase().trim();
+    return modalAllShipments.filter((s) => {
+      return (
+        (s.awb && s.awb.toLowerCase().includes(q)) ||
+        (s.customer && s.customer.toLowerCase().includes(q)) ||
+        (s.shprName && s.shprName.toLowerCase().includes(q)) ||
+        (s.destination && s.destination.toLowerCase().includes(q)) ||
+        (s.city && s.city.toLowerCase().includes(q)) ||
+        (s.destLocCd && s.destLocCd.toLowerCase().includes(q)) ||
+        (s.finalResolution && s.finalResolution.toLowerCase().includes(q)) ||
+        (s.transitDelay && s.transitDelay.toLowerCase().includes(q)) ||
+        (s.clearanceDelay && s.clearanceDelay.toLowerCase().includes(q)) ||
+        (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q)) ||
+        (s.remarks && s.remarks.toLowerCase().includes(q))
+      );
+    });
+  }, [modalAllShipments, modalSearch]);
+
+  const modalTotalPages = Math.ceil(modalFilteredShipments.length / modalPageSize) || 1;
+  const modalValidCurrentPage = Math.min(modalCurrentPage, modalTotalPages);
+  const modalPaginatedData = useMemo(() => {
+    const start = (modalValidCurrentPage - 1) * modalPageSize;
+    return modalFilteredShipments.slice(start, start + modalPageSize);
+  }, [modalFilteredShipments, modalValidCurrentPage, modalPageSize]);
+
+  // Modal Summary Stats
+  const modalStats = useMemo(() => {
+    if (modalAllShipments.length === 0) return null;
+    const total = modalAllShipments.length;
+    let sumTT = 0;
+    let minTT = Number.MAX_VALUE;
+    let maxTT = 0;
+    let onTimeCount = 0;
+    let totalWeight = 0;
+    let totalPkgs = 0;
+
+    for (const s of modalAllShipments) {
+      const tt = typeof s.tt === 'number' && !isNaN(s.tt) ? s.tt : 0;
+      sumTT += tt;
+      if (tt > 0 && tt < minTT) minTT = tt;
+      if (tt > maxTT) maxTT = tt;
+      if (tt <= 5) onTimeCount++;
+      totalWeight += s.weight || 0;
+      totalPkgs += s.pkgCount || 0;
+    }
+
+    return {
+      total,
+      avgTT: (sumTT / total).toFixed(2),
+      minTT: minTT === Number.MAX_VALUE ? '0.00' : minTT.toFixed(2),
+      maxTT: maxTT.toFixed(2),
+      onTimeRate: ((onTimeCount / total) * 100).toFixed(1),
+      totalWeight: Math.round(totalWeight).toLocaleString(),
+      totalPkgs: totalPkgs.toLocaleString()
+    };
+  }, [modalAllShipments]);
+
+  // Modal Export Handlers
+  const handleExportModalExcel = () => {
+    if (modalFilteredShipments.length === 0) return;
+    const exportData = modalFilteredShipments.map((s, idx) => ({
+      '#': idx + 1,
+      'AWB Number': s.awb,
+      'Customer': s.customer,
+      'Shipper': s.shprName,
+      'Dest Location': s.destLocCd || '',
+      'Destination': s.destination,
+      'City': s.city || '',
+      'Pickup Date': s.pickup || '',
+      'Transit Time (Days)': s.tt,
+      'TT Range': s.ttRange,
+      'Final Resolution': s.finalResolution || 'Delivered',
+      'Clearance Delay': s.clearanceDelay || '',
+      'Transit Delay': s.transitDelay || '',
+      'Destination Delay': s.destinationDelay || '',
+      'Weekend Delay': s.weekendDelay || '',
+      'Remarks': s.remarks || '',
+      'Weight (kg)': s.weight,
+      'Package Count': s.pkgCount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'AWB_List');
+    const cleanTitle = (modalTarget?.title || 'AWB_List').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+    XLSX.writeFile(workbook, `${cleanTitle}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const handleExportModalCSV = () => {
+    if (modalFilteredShipments.length === 0) return;
+    const exportData = modalFilteredShipments.map((s, idx) => ({
+      '#': idx + 1,
+      'AWB Number': s.awb,
+      'Customer': s.customer,
+      'Shipper': s.shprName,
+      'Dest Location': s.destLocCd || '',
+      'Destination': s.destination,
+      'City': s.city || '',
+      'Pickup Date': s.pickup || '',
+      'Transit Time (Days)': s.tt,
+      'TT Range': s.ttRange,
+      'Final Resolution': s.finalResolution || 'Delivered',
+      'Clearance Delay': s.clearanceDelay || '',
+      'Transit Delay': s.transitDelay || '',
+      'Destination Delay': s.destinationDelay || '',
+      'Weekend Delay': s.weekendDelay || '',
+      'Remarks': s.remarks || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    const cleanTitle = (modalTarget?.title || 'AWB_List').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+    link.setAttribute('download', `${cleanTitle}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCopyAllAWBs = () => {
+    if (modalFilteredShipments.length === 0) return;
+    const awbText = modalFilteredShipments.map(s => s.awb).join('\n');
+    navigator.clipboard.writeText(awbText);
+    setCopiedAll(true);
+    setTimeout(() => setCopiedAll(false), 2000);
+  };
+
+  const handleCopySingleAWB = (awb: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(awb);
+    setCopiedAwb(awb);
+    setTimeout(() => setCopiedAwb(null), 2000);
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      
-      {/* Header & Search/Export Bar */}
-      <div className="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border border-slate-300 dark:border-slate-700 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
-            <Globe className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-white light:text-slate-900">
-              <strong>Destination Details &amp; Country Delays Matrix</strong>
+    <div className="space-y-4">
+      {/* Header with Title and Search/Export Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm shadow-lg">
+        <div>
+          <div className="flex items-center gap-2">
+            <Globe className="w-5 h-5 text-sky-400" />
+            <h2 className="text-base sm:text-lg font-black text-white">
+              <strong>Destination Performance Matrix</strong>
             </h2>
-            <p className="text-xs text-slate-400 light:text-slate-500 font-medium">
-              Detailed delay breakdowns (Clearance, Transit, Destination, Weekend) across {summaryTotals.countriesCount} active destinations
-            </p>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-bold border border-sky-500/30">
+              {filteredAndSortedData.length} Countries
+            </span>
           </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Comprehensive country-by-country delivery speeds, on-time rates, volume distribution, and delay breakdowns.
+            <span className="text-sky-400 font-semibold ml-1">Click on any number or row to view the underlying AWB list.</span>
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Search Box */}
-          <div className="relative w-full sm:w-56">
+        <div className="flex items-center gap-2 self-end sm:self-center">
+          {/* Country Search */}
+          <div className="relative">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
+              placeholder="Filter country code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Filter country code (e.g. US, DE)..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-950/80 border border-slate-600 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              className="pl-8 pr-3 py-1.5 text-xs bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 w-44"
             />
           </div>
 
@@ -163,60 +410,100 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
       </div>
 
-      {/* Delay Summary KPI Cards */}
+      {/* Delay Summary KPI Cards (Clickable -> Opens Modal) */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {/* Total Delays */}
-        <div className="glass-card p-3 rounded-xl border-2 border-yellow-500/40 bg-yellow-500/10 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center shrink-0">
+        <div
+          onClick={() => {
+            setModalTarget({ category: 'totalDelays', title: 'All Destinations — Total Delays' });
+            setModalSearch('');
+            setModalCurrentPage(1);
+          }}
+          className="glass-card p-3 rounded-xl border-2 border-yellow-500/40 bg-yellow-500/10 flex items-center gap-3 cursor-pointer hover:bg-yellow-500/20 hover:border-yellow-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-md"
+          title="Click to view all delayed shipments across all destinations"
+        >
+          <div className="w-9 h-9 rounded-lg bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <AlertTriangle className="w-4 h-4 text-yellow-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-300 dark:text-slate-300 uppercase tracking-wider">Total Delays</div>
-            <div className="text-base font-black text-yellow-400 font-mono">{summaryTotals.totalAllDelays.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider group-hover:text-yellow-200 transition-colors">Total Delays</div>
+            <div className="text-base font-black text-yellow-400 font-mono group-hover:underline">{summaryTotals.totalAllDelays.toLocaleString()}</div>
           </div>
         </div>
 
         {/* Clearance Delays */}
-        <div className="glass-card p-3 rounded-xl border-2 border-purple-500/40 bg-purple-500/10 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0">
+        <div
+          onClick={() => {
+            setModalTarget({ category: 'clearance', title: 'All Destinations — Clearance Delays' });
+            setModalSearch('');
+            setModalCurrentPage(1);
+          }}
+          className="glass-card p-3 rounded-xl border-2 border-purple-500/40 bg-purple-500/10 flex items-center gap-3 cursor-pointer hover:bg-purple-500/20 hover:border-purple-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-md"
+          title="Click to view all clearance delay shipments"
+        >
+          <div className="w-9 h-9 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <ShieldAlert className="w-4 h-4 text-purple-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-300 dark:text-slate-300 uppercase tracking-wider">Clearance Delays</div>
-            <div className="text-base font-black text-purple-400 font-mono">{summaryTotals.totalClearance.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider group-hover:text-purple-200 transition-colors">Clearance Delays</div>
+            <div className="text-base font-black text-purple-400 font-mono group-hover:underline">{summaryTotals.totalClearance.toLocaleString()}</div>
           </div>
         </div>
 
         {/* Transit Delays */}
-        <div className="glass-card p-3 rounded-xl border-2 border-sky-500/40 bg-sky-500/10 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-sky-500/20 border border-sky-500/40 flex items-center justify-center shrink-0">
+        <div
+          onClick={() => {
+            setModalTarget({ category: 'transit', title: 'All Destinations — Transit Delays' });
+            setModalSearch('');
+            setModalCurrentPage(1);
+          }}
+          className="glass-card p-3 rounded-xl border-2 border-sky-500/40 bg-sky-500/10 flex items-center gap-3 cursor-pointer hover:bg-sky-500/20 hover:border-sky-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-md"
+          title="Click to view all transit delay shipments"
+        >
+          <div className="w-9 h-9 rounded-lg bg-sky-500/20 border border-sky-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <Plane className="w-4 h-4 text-sky-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-300 dark:text-slate-300 uppercase tracking-wider">Transit Delays</div>
-            <div className="text-base font-black text-sky-400 font-mono">{summaryTotals.totalTransit.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider group-hover:text-sky-200 transition-colors">Transit Delays</div>
+            <div className="text-base font-black text-sky-400 font-mono group-hover:underline">{summaryTotals.totalTransit.toLocaleString()}</div>
           </div>
         </div>
 
         {/* Destination Delays */}
-        <div className="glass-card p-3 rounded-xl border-2 border-amber-500/40 bg-amber-500/10 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
+        <div
+          onClick={() => {
+            setModalTarget({ category: 'destination', title: 'All Destinations — Destination Delays' });
+            setModalSearch('');
+            setModalCurrentPage(1);
+          }}
+          className="glass-card p-3 rounded-xl border-2 border-amber-500/40 bg-amber-500/10 flex items-center gap-3 cursor-pointer hover:bg-amber-500/20 hover:border-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-md"
+          title="Click to view all destination delay shipments"
+        >
+          <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <MapPin className="w-4 h-4 text-amber-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-300 dark:text-slate-300 uppercase tracking-wider">Dest. Delays</div>
-            <div className="text-base font-black text-amber-400 font-mono">{summaryTotals.totalDestination.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider group-hover:text-amber-200 transition-colors">Dest. Delays</div>
+            <div className="text-base font-black text-amber-400 font-mono group-hover:underline">{summaryTotals.totalDestination.toLocaleString()}</div>
           </div>
         </div>
 
         {/* Weekend Delays */}
-        <div className="glass-card p-3 rounded-xl border-2 border-rose-500/40 bg-rose-500/10 flex items-center gap-3 col-span-2 sm:col-span-1">
-          <div className="w-9 h-9 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0">
+        <div
+          onClick={() => {
+            setModalTarget({ category: 'weekend', title: 'All Destinations — Weekend Delays' });
+            setModalSearch('');
+            setModalCurrentPage(1);
+          }}
+          className="glass-card p-3 rounded-xl border-2 border-rose-500/40 bg-rose-500/10 flex items-center gap-3 col-span-2 sm:col-span-1 cursor-pointer hover:bg-rose-500/20 hover:border-rose-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-md"
+          title="Click to view all weekend delay shipments"
+        >
+          <div className="w-9 h-9 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <Calendar className="w-4 h-4 text-rose-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-300 dark:text-slate-300 uppercase tracking-wider">Weekend Delays</div>
-            <div className="text-base font-black text-rose-400 font-mono">{summaryTotals.totalWeekend.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider group-hover:text-rose-200 transition-colors">Weekend Delays</div>
+            <div className="text-base font-black text-rose-400 font-mono group-hover:underline">{summaryTotals.totalWeekend.toLocaleString()}</div>
           </div>
         </div>
       </div>
@@ -281,11 +568,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
-
-                {/* Delay Breakdowns */}
                 <th
                   onClick={() => handleSort('clearanceDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-purple-950/40 hover:text-purple-200 transition-colors font-black bg-purple-950/20 border-r border-slate-600 text-purple-300"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-purple-950/40 hover:text-purple-200 transition-colors font-black bg-purple-950/20 text-purple-300 border-r border-slate-600"
                 >
                   <div className="flex items-center justify-center gap-1">
                     <ShieldAlert className="w-3.5 h-3.5 text-purple-400" />
@@ -293,10 +578,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-purple-400/80" />
                   </div>
                 </th>
-
                 <th
                   onClick={() => handleSort('transitDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-sky-950/40 hover:text-sky-200 transition-colors font-black bg-sky-950/20 border-r border-slate-600 text-sky-300"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-sky-950/40 hover:text-sky-200 transition-colors font-black bg-sky-950/20 text-sky-300 border-r border-slate-600"
                 >
                   <div className="flex items-center justify-center gap-1">
                     <Plane className="w-3.5 h-3.5 text-sky-400" />
@@ -304,10 +588,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-sky-400/80" />
                   </div>
                 </th>
-
                 <th
                   onClick={() => handleSort('destinationDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-amber-950/40 hover:text-amber-200 transition-colors font-black bg-amber-950/20 border-r border-slate-600 text-amber-300"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-amber-950/40 hover:text-amber-200 transition-colors font-black bg-amber-950/20 text-amber-300 border-r border-slate-600"
                 >
                   <div className="flex items-center justify-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-amber-400" />
@@ -315,10 +598,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-amber-400/80" />
                   </div>
                 </th>
-
                 <th
                   onClick={() => handleSort('weekendDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-rose-950/40 hover:text-rose-200 transition-colors font-black bg-rose-950/20 border-r border-slate-600 text-rose-300"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-rose-950/40 hover:text-rose-200 transition-colors font-black bg-rose-950/20 text-rose-300 border-r border-slate-600"
                 >
                   <div className="flex items-center justify-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-rose-400" />
@@ -326,7 +608,6 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-rose-400/80" />
                   </div>
                 </th>
-
                 <th
                   onClick={() => handleSort('totalDelays')}
                   className="py-3 px-3 text-center cursor-pointer hover:bg-yellow-950/40 hover:text-yellow-200 transition-colors font-black bg-yellow-950/20 text-yellow-300"
@@ -348,24 +629,44 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     key={c.countryCode}
                     className="hover:bg-slate-800/60 transition-colors border-b border-slate-600 bg-slate-900/40 even:bg-slate-900/80"
                   >
-                    {/* Country Code */}
+                    {/* Country Code (Clickable) */}
                     <td className="py-2.5 px-3 font-bold text-white text-center align-middle border-r border-slate-600">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="w-7 h-7 rounded-lg bg-slate-800 border-2 border-slate-600 flex items-center justify-center font-mono text-xs text-sky-400 font-black shadow-inner shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalTarget({ countryCode: c.countryCode, category: 'all', title: `${c.countryCode} — All Outbound Shipments` });
+                          setModalSearch('');
+                          setModalCurrentPage(1);
+                        }}
+                        className="flex items-center justify-center gap-2 mx-auto cursor-pointer group hover:opacity-90"
+                        title={`Click to view all ${c.awbCount.toLocaleString()} shipments to ${c.countryCode}`}
+                      >
+                        <span className="w-7 h-7 rounded-lg bg-slate-800 border-2 border-slate-600 flex items-center justify-center font-mono text-xs text-sky-400 font-black shadow-inner shrink-0 group-hover:border-sky-400 group-hover:bg-sky-950/60 transition-colors">
                           {c.countryCode}
                         </span>
-                        <span><strong>{c.countryCode}</strong></span>
-                      </div>
+                        <span className="group-hover:text-sky-300 group-hover:underline transition-colors"><strong>{c.countryCode}</strong></span>
+                      </button>
                     </td>
 
-                    {/* Volume */}
+                    {/* Volume (AWB) (Clickable) */}
                     <td className="py-2.5 px-3 text-center align-middle font-extrabold text-white font-mono border-r border-slate-600">
-                      <div className="flex flex-col items-center justify-center">
-                        <div><strong>{c.awbCount.toLocaleString()}</strong></div>
-                        <div className="text-[10px] text-slate-400 font-semibold font-sans">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalTarget({ countryCode: c.countryCode, category: 'all', title: `${c.countryCode} — All Outbound Shipments` });
+                          setModalSearch('');
+                          setModalCurrentPage(1);
+                        }}
+                        className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:bg-slate-800/70 p-1 rounded-xl transition-all w-full"
+                        title={`Click to view all ${c.awbCount.toLocaleString()} AWBs for ${c.countryCode}`}
+                      >
+                        <div className="text-white group-hover:text-sky-300 group-hover:underline transition-colors">
+                          <strong>{c.awbCount.toLocaleString()}</strong>
+                        </div>
+                        <div className="text-[10px] text-slate-400 group-hover:text-slate-200 font-semibold font-sans">
                           {sharePct}% of total
                         </div>
-                      </div>
+                      </button>
                     </td>
 
                     {/* Avg TT */}
@@ -408,61 +709,106 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                       </div>
                     </td>
 
-                    {/* Clearance Delays */}
+                    {/* Clearance Delays (Clickable) */}
                     <td className="py-2.5 px-2 text-center align-middle bg-purple-950/20 border-r border-slate-600">
                       {c.clearanceDelays > 0 ? (
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTarget({ countryCode: c.countryCode, category: 'clearance', title: `${c.countryCode} — Clearance Delays` });
+                            setModalSearch('');
+                            setModalCurrentPage(1);
+                          }}
+                          className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-sm hover:bg-purple-500/50 hover:border-purple-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          title={`Click to view ${c.clearanceDelays} clearance delay AWBs for ${c.countryCode}`}
+                        >
                           {c.clearanceDelays}
-                        </span>
+                        </button>
                       ) : (
                         <span className="text-slate-500 font-mono text-xs font-bold">-</span>
                       )}
                     </td>
 
-                    {/* Transit Delays */}
+                    {/* Transit Delays (Clickable) */}
                     <td className="py-2.5 px-2 text-center align-middle bg-sky-950/20 border-r border-slate-600">
                       {c.transitDelays > 0 ? (
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-sky-500/25 text-sky-200 border border-sky-400/40 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTarget({ countryCode: c.countryCode, category: 'transit', title: `${c.countryCode} — Transit Delays` });
+                            setModalSearch('');
+                            setModalCurrentPage(1);
+                          }}
+                          className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-sky-500/25 text-sky-200 border border-sky-400/40 shadow-sm hover:bg-sky-500/50 hover:border-sky-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          title={`Click to view ${c.transitDelays} transit delay AWBs for ${c.countryCode}`}
+                        >
                           {c.transitDelays}
-                        </span>
+                        </button>
                       ) : (
                         <span className="text-slate-500 font-mono text-xs font-bold">-</span>
                       )}
                     </td>
 
-                    {/* Destination Delays */}
+                    {/* Destination Delays (Clickable) */}
                     <td className="py-2.5 px-2 text-center align-middle bg-amber-950/20 border-r border-slate-600">
                       {c.destinationDelays > 0 ? (
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-amber-500/25 text-amber-200 border border-amber-400/40 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTarget({ countryCode: c.countryCode, category: 'destination', title: `${c.countryCode} — Destination Delays` });
+                            setModalSearch('');
+                            setModalCurrentPage(1);
+                          }}
+                          className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-amber-500/25 text-amber-200 border border-amber-400/40 shadow-sm hover:bg-amber-500/50 hover:border-amber-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          title={`Click to view ${c.destinationDelays} destination delay AWBs for ${c.countryCode}`}
+                        >
                           {c.destinationDelays}
-                        </span>
+                        </button>
                       ) : (
                         <span className="text-slate-500 font-mono text-xs font-bold">-</span>
                       )}
                     </td>
 
-                    {/* Weekend Delays */}
+                    {/* Weekend Delays (Clickable) */}
                     <td className="py-2.5 px-2 text-center align-middle bg-rose-950/20 border-r border-slate-600">
                       {c.weekendDelays > 0 ? (
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-rose-500/25 text-rose-200 border border-rose-400/40 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTarget({ countryCode: c.countryCode, category: 'weekend', title: `${c.countryCode} — Weekend Delays` });
+                            setModalSearch('');
+                            setModalCurrentPage(1);
+                          }}
+                          className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-rose-500/25 text-rose-200 border border-rose-400/40 shadow-sm hover:bg-rose-500/50 hover:border-rose-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          title={`Click to view ${c.weekendDelays} weekend delay AWBs for ${c.countryCode}`}
+                        >
                           {c.weekendDelays}
-                        </span>
+                        </button>
                       ) : (
                         <span className="text-slate-500 font-mono text-xs font-bold">-</span>
                       )}
                     </td>
 
-                    {/* Total Delays */}
+                    {/* Total Delays (Clickable) */}
                     <td className="py-2.5 px-3 text-center align-middle bg-yellow-950/20">
                       {c.totalDelays > 0 ? (
-                        <div className="flex flex-col items-center justify-center">
-                          <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/30 text-yellow-200 border border-yellow-400/60 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTarget({ countryCode: c.countryCode, category: 'totalDelays', title: `${c.countryCode} — Total Delays` });
+                            setModalSearch('');
+                            setModalCurrentPage(1);
+                          }}
+                          className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all w-full"
+                          title={`Click to view all ${c.totalDelays} delayed AWBs for ${c.countryCode}`}
+                        >
+                          <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-yellow-500/30 text-yellow-200 border border-yellow-400/60 shadow-sm group-hover:bg-yellow-500/50 group-hover:border-yellow-300">
                             {c.totalDelays}
                           </span>
-                          <span className="text-[10px] text-yellow-400 font-mono font-black mt-0.5">
+                          <span className="text-[10px] text-yellow-400 font-mono font-black mt-0.5 group-hover:underline">
                             {c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : 0}%
                           </span>
-                        </div>
+                        </button>
                       ) : (
                         <span className="text-slate-500 font-mono text-xs font-bold">-</span>
                       )}
@@ -474,6 +820,474 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
           </table>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* AWB LIST POPUP WINDOW MODAL                                              */}
+      {/* ========================================================================= */}
+      {modalTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setModalTarget(null);
+            }
+          }}
+        >
+          <div className="glass-panel w-full max-w-6xl max-h-[92vh] flex flex-col rounded-3xl shadow-2xl relative bg-slate-950 border border-slate-700 p-4 sm:p-6 overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-800 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-sky-500/15 text-sky-400 border border-sky-500/30 shrink-0">
+                  <Package className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-black text-white">
+                      {modalTarget.title}
+                    </h3>
+                    {modalTarget.countryCode && (
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-black bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                        {modalTarget.countryCode}
+                      </span>
+                    )}
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      {modalAllShipments.length.toLocaleString()} Total AWBs
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Viewing individual shipment records. Click any row to inspect complete tracking milestones &amp; notes.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setModalTarget(null)}
+                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer shrink-0"
+                title="Close (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Quick Metrics Strip */}
+            {modalStats && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3 shrink-0">
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Average Transit Time</span>
+                  <span className="text-sm sm:text-base font-extrabold text-indigo-400 font-mono">
+                    {modalStats.avgTT} <span className="text-xs font-normal text-slate-400">days</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 block font-mono">
+                    Min: {modalStats.minTT}d • Max: {modalStats.maxTT}d
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">On-Time Delivery Rate</span>
+                  <span className="text-sm sm:text-base font-extrabold text-emerald-400 font-mono">
+                    {modalStats.onTimeRate}%
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">
+                    Delivered within 5 days SLA
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Volume</span>
+                  <span className="text-sm sm:text-base font-extrabold text-white font-mono">
+                    {modalStats.total.toLocaleString()} <span className="text-xs font-normal text-slate-400">AWBs</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 block font-mono">
+                    {modalStats.totalPkgs} packages
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Weight</span>
+                  <span className="text-sm sm:text-base font-extrabold text-sky-400 font-mono">
+                    {modalStats.totalWeight} <span className="text-xs font-normal text-slate-400">kg</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">
+                    Combined gross cargo weight
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Search & Export Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-3 shrink-0">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={modalSearch}
+                  onChange={(e) => {
+                    setModalSearch(e.target.value);
+                    setModalCurrentPage(1);
+                  }}
+                  placeholder="Search within this list (AWB, Customer, Shipper, Destination, Delay Reason, Remarks...)"
+                  className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                />
+                {modalSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setModalSearch('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleCopyAllAWBs}
+                  disabled={modalFilteredShipments.length === 0}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+                  title="Copy all AWBs to clipboard"
+                >
+                  {copiedAll ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-300" />}
+                  <span>{copiedAll ? 'Copied!' : 'Copy AWBs'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportModalExcel}
+                  disabled={modalFilteredShipments.length === 0}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-bold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Export Excel</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportModalCSV}
+                  disabled={modalFilteredShipments.length === 0}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 text-xs font-bold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+                >
+                  <Download className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Table Content */}
+            <div className="flex-1 overflow-y-auto border border-slate-800 rounded-2xl bg-slate-900/60 my-1 min-h-[260px]">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="sticky top-0 bg-slate-950 border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
+                  <tr>
+                    <th className="py-2.5 px-3 w-12 text-center">#</th>
+                    <th className="py-2.5 px-3">AWB Number</th>
+                    <th className="py-2.5 px-3">Customer</th>
+                    <th className="py-2.5 px-3">Shipper</th>
+                    <th className="py-2.5 px-3 text-center">Dest</th>
+                    <th className="py-2.5 px-3 text-right">TT (Days)</th>
+                    <th className="py-2.5 px-3 text-center">Resolution</th>
+                    <th className="py-2.5 px-3">Delay Reason / Remarks</th>
+                    <th className="py-2.5 px-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {modalPaginatedData.length > 0 ? (
+                    modalPaginatedData.map((s, idx) => {
+                      const globalIndex = (modalValidCurrentPage - 1) * modalPageSize + idx + 1;
+                      const isDelivered = s.finalResolution?.toLowerCase() === 'delivered';
+                      const isNegativeRes = ['rts', 'lost', 'destroyed', 'seized', 'undelivered'].includes(s.finalResolution?.toLowerCase().trim() || '');
+
+                      const delayBadge = s.clearanceDelay && s.clearanceDelay !== '-' ? (
+                        <span className="inline-flex items-center gap-1 text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/30 text-[10px] font-semibold">
+                          <ShieldAlert className="w-3 h-3 text-purple-400" />
+                          {s.clearanceDelay}
+                        </span>
+                      ) : s.transitDelay && s.transitDelay !== '-' ? (
+                        <span className="inline-flex items-center gap-1 text-sky-300 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/30 text-[10px] font-semibold">
+                          <Plane className="w-3 h-3 text-sky-400" />
+                          {s.transitDelay}
+                        </span>
+                      ) : s.destinationDelay && s.destinationDelay !== '-' ? (
+                        <span className="inline-flex items-center gap-1 text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 text-[10px] font-semibold">
+                          <MapPin className="w-3 h-3 text-amber-400" />
+                          {s.destinationDelay}
+                        </span>
+                      ) : (s.weekendDelay || '').toString().toLowerCase().includes('yes') ? (
+                        <span className="inline-flex items-center gap-1 text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/30 text-[10px] font-semibold">
+                          <Calendar className="w-3 h-3 text-rose-400" />
+                          Weekend Hold
+                        </span>
+                      ) : s.remarks ? (
+                        <span className="text-slate-400 truncate max-w-[200px] block" title={s.remarks}>
+                          {s.remarks}
+                        </span>
+                      ) : (
+                        <span className="text-slate-600 font-mono text-[11px]">-</span>
+                      );
+
+                      return (
+                        <tr
+                          key={s.awb}
+                          onClick={() => setInspectedShipment(s)}
+                          className="hover:bg-slate-800/60 transition-colors cursor-pointer group"
+                          title="Click to view full dossier"
+                        >
+                          <td className="py-2.5 px-3 text-center text-slate-500 font-mono text-[11px]">
+                            {globalIndex}
+                          </td>
+                          <td className="py-2.5 px-3 font-mono font-bold text-white group-hover:text-sky-400">
+                            <div className="flex items-center gap-1.5">
+                              <span>{s.awb}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => handleCopySingleAWB(s.awb, e)}
+                                className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                                title="Copy AWB"
+                              >
+                                {copiedAwb === s.awb ? (
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 font-semibold text-slate-200 max-w-[160px] truncate" title={s.customer}>
+                            {s.customer}
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-300 max-w-[140px] truncate" title={s.shprName}>
+                            {s.shprName}
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="px-2 py-0.5 rounded bg-slate-800 font-mono font-bold text-sky-400 text-[11px] border border-slate-700">
+                              {s.destination}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono font-bold">
+                            <span className={typeof s.tt === 'number' && s.tt <= 5 ? 'text-emerald-400' : 'text-rose-400'}>
+                              {s.tt} d
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                isDelivered
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : isNegativeRes
+                                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-black'
+                                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                              }`}
+                            >
+                              {s.finalResolution || 'Delivered'}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            {delayBadge}
+                          </td>
+                          <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => setInspectedShipment(s)}
+                              className="px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/30 text-sky-300 hover:text-white border border-sky-500/30 text-[11px] font-semibold transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Inspect dossier"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span>View</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                        <Package className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                        <p className="font-semibold text-sm">No shipment records found</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Try refining your search filter</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Modal Footer with Pagination */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800 shrink-0 text-slate-400 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span>Show</span>
+                  <select
+                    value={modalPageSize}
+                    onChange={(e) => {
+                      setModalPageSize(Number(e.target.value));
+                      setModalCurrentPage(1);
+                    }}
+                    className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-sky-500 cursor-pointer"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <span>per page</span>
+                </div>
+
+                <span className="text-slate-500">|</span>
+
+                <span>
+                  Showing{' '}
+                  <strong className="text-white">
+                    {modalFilteredShipments.length > 0 ? (modalValidCurrentPage - 1) * modalPageSize + 1 : 0}
+                  </strong>{' '}
+                  -{' '}
+                  <strong className="text-white">
+                    {Math.min(modalValidCurrentPage * modalPageSize, modalFilteredShipments.length)}
+                  </strong>{' '}
+                  of <strong className="text-white">{modalFilteredShipments.length.toLocaleString()}</strong> records
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={modalValidCurrentPage <= 1}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white cursor-pointer transition-colors"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="font-mono text-xs text-slate-300 px-1">
+                  Page {modalValidCurrentPage} of {modalTotalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setModalCurrentPage((p) => Math.min(p + 1, modalTotalPages))}
+                  disabled={modalValidCurrentPage >= modalTotalPages}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white cursor-pointer transition-colors"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setModalTarget(null)}
+                  className="ml-3 px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SINGLE SHIPMENT DOSSIER SUB-MODAL                                        */}
+      {/* ========================================================================= */}
+      {inspectedShipment && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="glass-panel w-full max-w-lg p-6 rounded-3xl space-y-4 shadow-2xl relative bg-slate-950 border border-slate-700">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <Package className="w-5 h-5 text-sky-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-white">AWB #{inspectedShipment.awb}</h3>
+                  <p className="text-xs text-slate-400">MAWB: {inspectedShipment.mawb || 'N/A'}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInspectedShipment(null)}
+                className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Customer</span>
+                <span className="font-bold text-white block mt-0.5">{inspectedShipment.customer}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Shipper</span>
+                <span className="font-bold text-white block mt-0.5">{inspectedShipment.shprName}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Destination / Recipient</span>
+                <span className="font-bold text-white block mt-0.5">
+                  {inspectedShipment.destination} ({inspectedShipment.city || 'N/A'})
+                </span>
+                <span className="text-slate-400 text-[11px] block">{inspectedShipment.recipient}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Transit Time (TT)</span>
+                <span className="font-bold text-indigo-400 text-base font-mono block mt-0.5">
+                  {inspectedShipment.tt} days
+                </span>
+                <span className="text-slate-400 text-[11px]">{inspectedShipment.ttRange}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Transit Delay</span>
+                <span className="font-bold text-indigo-300 block mt-0.5">
+                  {inspectedShipment.transitDelay || 'None'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Clearance Delay</span>
+                <span className="font-bold text-amber-300 block mt-0.5">
+                  {inspectedShipment.clearanceDelay || 'None'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Destination Delay</span>
+                <span className="font-bold text-rose-300 block mt-0.5">
+                  {inspectedShipment.destinationDelay || 'None'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-500 block text-[10px]">Final Resolution</span>
+                <span className={`font-bold block mt-0.5 ${
+                  inspectedShipment.finalResolution === 'Delivered'
+                    ? 'text-emerald-400'
+                    : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(inspectedShipment.finalResolution)
+                    ? 'text-rose-400 font-extrabold'
+                    : 'text-amber-400'
+                }`}>
+                  {inspectedShipment.finalResolution || 'Delivered'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 col-span-2">
+                <span className="text-slate-500 block text-[10px]">Pkg &amp; Weight</span>
+                <span className="font-bold text-white block mt-0.5">
+                  {inspectedShipment.weight} kg • {inspectedShipment.pkgCount} pcs
+                </span>
+              </div>
+            </div>
+
+            {inspectedShipment.remarks && (
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                <span className="text-slate-500 block text-[10px]">Remarks</span>
+                <p className="text-slate-300 mt-0.5">{inspectedShipment.remarks}</p>
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setInspectedShipment(null)}
+                className="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
