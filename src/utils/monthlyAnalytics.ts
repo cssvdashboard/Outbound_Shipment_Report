@@ -14,6 +14,8 @@ export interface MonthlyMetric {
   monthId: string; // e.g. "2026-07"
   monthLabel: string; // e.g. "July 2026"
   totalAWBs: number;
+  totalWeight: number;
+  totalPkgs: number;
   momChangeAWB: number | null; // % change in AWBs compared to prior month
   avgTT: number;
   momChangeTT: number | null; // % change in Avg TT compared to prior month
@@ -93,21 +95,23 @@ export function computeMonthlyComparison(
   const monthlyMetrics: MonthlyMetric[] = sortedMonthIds.map((ym, index) => {
     const monthShipments = monthGroups[ym];
     const totalAWBs = monthShipments.length;
+    const totalWeight = Math.round(monthShipments.reduce((acc, s) => acc + (s.weight || 0), 0) * 100) / 100;
+    const totalPkgs = monthShipments.reduce((acc, s) => acc + (s.pkgCount || 0), 0);
 
     // Month Label
     const [yearStr, monthStr] = ym.split('-');
     const dateObj = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1);
     const monthLabel = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-    // Transit Times
-    const ttList = monthShipments
+    // Transit Times (only consider valid positive transit times > 0 for minTT)
+    const validTTList = monthShipments
       .map((s) => (typeof s.tt === 'number' && !isNaN(s.tt) ? s.tt : 0))
-      .filter((tt) => tt >= 0);
+      .filter((tt) => tt > 0);
 
-    const sumTT = ttList.reduce((acc, v) => acc + v, 0);
+    const sumTT = monthShipments.reduce((acc, s) => acc + (typeof s.tt === 'number' && !isNaN(s.tt) ? s.tt : 0), 0);
     const avgTT = totalAWBs > 0 ? parseFloat((sumTT / totalAWBs).toFixed(2)) : 0;
-    const minTT = ttList.length > 0 ? parseFloat(Math.min(...ttList).toFixed(2)) : 0;
-    const maxTT = ttList.length > 0 ? parseFloat(Math.max(...ttList).toFixed(2)) : 0;
+    const minTT = validTTList.length > 0 ? parseFloat(Math.min(...validTTList).toFixed(2)) : 0;
+    const maxTT = validTTList.length > 0 ? parseFloat(Math.max(...validTTList).toFixed(2)) : 0;
 
     // On-Time Delivery (<= 5.0 days)
     const onTimeCount = monthShipments.filter((s) => (s.tt || 0) <= 5).length;
@@ -220,11 +224,12 @@ export function computeMonthlyComparison(
     const weeks: Record<number, WeeklyTTMetric> = {};
     for (let w = 1; w <= 5; w++) {
       const wList = weekGroups[w] || [];
+      const validWList = wList.filter((tt) => tt > 0);
       const wCount = wList.length;
       const wSum = wList.reduce((a, b) => a + b, 0);
       const wAvg = wCount > 0 ? parseFloat((wSum / wCount).toFixed(2)) : 0;
-      const wMin = wCount > 0 ? parseFloat(Math.min(...wList).toFixed(2)) : 0;
-      const wMax = wCount > 0 ? parseFloat(Math.max(...wList).toFixed(2)) : 0;
+      const wMin = validWList.length > 0 ? parseFloat(Math.min(...validWList).toFixed(2)) : 0;
+      const wMax = validWList.length > 0 ? parseFloat(Math.max(...validWList).toFixed(2)) : 0;
 
       weeks[w] = {
         weekNum: w,
@@ -262,6 +267,8 @@ export function computeMonthlyComparison(
       monthId: ym,
       monthLabel,
       totalAWBs,
+      totalWeight,
+      totalPkgs,
       momChangeAWB,
       avgTT,
       momChangeTT,

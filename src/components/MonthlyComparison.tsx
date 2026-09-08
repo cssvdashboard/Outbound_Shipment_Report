@@ -535,6 +535,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     const summaryData = months.map((m) => ({
       Month: m.monthLabel,
       'Total AWBs': m.totalAWBs,
+      'Total Weight (kg)': m.totalWeight || 0,
       'MoM Volume Change (%)': m.momChangeAWB !== null ? `${m.momChangeAWB}%` : 'Baseline',
       'Average TT (Days)': m.avgTT,
       'MoM TT Change (%)': m.momChangeTT !== null ? `${m.momChangeTT}%` : 'Baseline',
@@ -767,12 +768,17 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <Package className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                    Total AWBs
+                    Total Volume (AWBs)
                   </span>
-                  <div className="mt-1 flex items-baseline gap-1.5">
+                  <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
                       {m.totalAWBs.toLocaleString()}
                     </span>
+                    {m.totalWeight > 0 && (
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-bold" title="Total Weight in kg">
+                        / {Math.round(m.totalWeight).toLocaleString()} kg
+                      </span>
+                    )}
                   </div>
                   {m.momChangeAWB !== null && (
                     <div className="mt-1 flex items-center gap-1 text-[11px] font-bold">
@@ -817,21 +823,37 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 </div>
               </div>
 
-              {/* Transit Time Range: Min TT & Max TT */}
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
-                <div className="flex items-center gap-1.5">
+              {/* Transit Time Range & Volume: Min TT, Max TT, Spread & Volume */}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold gap-1.5">
+                <div className="flex items-center gap-1">
                   <span className="text-slate-500 dark:text-slate-400">Min TT:</span>
-                  <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black">{m.minTT.toFixed(2)}d</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black">
+                    {m.minTT > 0 ? `${m.minTT.toFixed(2)}d` : '0.00d'}
+                  </span>
                 </div>
-                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
-                <div className="flex items-center gap-1.5">
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
+                <div className="flex items-center gap-1">
                   <span className="text-slate-500 dark:text-slate-400">Max TT:</span>
-                  <span className="text-rose-700 dark:text-rose-400 font-mono font-black">{m.maxTT.toFixed(2)}d</span>
+                  <span className="text-rose-700 dark:text-rose-400 font-mono font-black">
+                    {m.maxTT > 0 ? `${m.maxTT.toFixed(2)}d` : '0.00d'}
+                  </span>
                 </div>
-                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
-                <div className="flex items-center gap-1.5">
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
+                <div className="flex items-center gap-1">
                   <span className="text-slate-500 dark:text-slate-400">Spread:</span>
-                  <span className="text-slate-700 dark:text-slate-300 font-mono font-black">{(m.maxTT - m.minTT).toFixed(2)}d</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-mono font-black">
+                    {m.maxTT > 0 && m.minTT > 0 ? (m.maxTT - m.minTT).toFixed(2) : '0.00'}d
+                  </span>
+                </div>
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-slate-500 dark:text-slate-400">Volume:</span>
+                  <span
+                    className="text-indigo-700 dark:text-indigo-400 font-mono font-black"
+                    title={`${m.totalAWBs.toLocaleString()} AWBs${m.totalWeight > 0 ? ` • ${Math.round(m.totalWeight).toLocaleString()} kg` : ''}`}
+                  >
+                    {m.totalAWBs.toLocaleString()}
+                  </span>
                 </div>
               </div>
 
