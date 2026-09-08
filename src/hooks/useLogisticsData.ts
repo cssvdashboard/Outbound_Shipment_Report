@@ -281,13 +281,29 @@ export function useLogisticsData() {
     const start = filters.dateRange?.start?.trim();
     const end = filters.dateRange?.end?.trim();
 
-    // If both dates are picked, filter by pickup date within [start, end]
+    // 1. If both dates are picked, filter by pickup date within [start, end]
     if (start && end) {
       const [minRange, maxRange] = start <= end ? [start, end] : [end, start];
       return rawShipments.filter((s) => {
         const pickupIso = getPickupISODate(s.pickup);
         if (!pickupIso) return false;
         return pickupIso >= minRange && pickupIso <= maxRange;
+      });
+    }
+
+    // 2. If only Start Date is picked, filter all data for that specific pickup day
+    if (start && !end) {
+      return rawShipments.filter((s) => {
+        const pickupIso = getPickupISODate(s.pickup);
+        return pickupIso === start;
+      });
+    }
+
+    // 3. If only End Date is picked, filter all data for that specific pickup day
+    if (!start && end) {
+      return rawShipments.filter((s) => {
+        const pickupIso = getPickupISODate(s.pickup);
+        return pickupIso === end;
       });
     }
 

@@ -140,10 +140,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   };
 
-  const isFilterActive = Boolean(dateRange.start && dateRange.end);
-  const isPendingSecondDate = Boolean(
-    (startInput && !endInput) || (!startInput && endInput)
-  );
+  const isFilterActive = Boolean(dateRange.start || dateRange.end);
 
   // Calendar Calculation for the current viewMonth & viewYear
   // 1. Day of week the month starts on (0=Sun, 1=Mon, ..., 6=Sat)
@@ -163,8 +160,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-2xl border-2 transition-all duration-200 shadow-sm ${
           isFilterActive
             ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-500 dark:border-blue-500 ring-2 ring-blue-500/20'
-            : isPendingSecondDate
-            ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-400 dark:border-amber-500 ring-1 ring-amber-400/20'
             : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
         }`}
       >
@@ -212,13 +207,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <div className="hidden xl:flex items-center gap-1 pl-1 pr-1.5 py-0.5 rounded-md bg-blue-100/90 dark:bg-blue-900/50 text-[10px] font-extrabold text-blue-700 dark:text-blue-300">
             <span>{totalFilteredCount.toLocaleString()} AWBs</span>
           </div>
-        )}
-
-        {/* Warning Badge when only one date picked */}
-        {isPendingSecondDate && (
-          <span className="hidden lg:inline text-[10px] font-bold text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/60 animate-pulse">
-            Pick both dates
-          </span>
         )}
 
         {/* Instant Clear Button */}
