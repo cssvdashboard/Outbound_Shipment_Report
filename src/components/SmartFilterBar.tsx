@@ -444,13 +444,17 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
               <div className="absolute left-0 right-0 top-full mt-2 max-h-80 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-blue-900/25 divide-y divide-slate-100 dark:divide-slate-800">
                 
                 {/* Header summary in dropdown */}
-                <div className="p-2.5 bg-slate-50 dark:bg-slate-950/80 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md">
+                <div 
+                  onClick={() => handleSelectDestination('ALL')}
+                  className="p-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/80 dark:hover:bg-slate-900 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md cursor-pointer transition-colors"
+                  title="Click to select All Destination"
+                >
                   <span className="flex items-center gap-1.5 font-bold">
                     <Search className="w-3.5 h-3.5 text-blue-500" />
                     <span>
                       {destSearch.trim()
                         ? `Matching Destinations for "${destSearch.toUpperCase()}"`
-                        : `All Destinations (${totalDestinationsCount} Total)`}
+                        : 'All Destination'}
                     </span>
                   </span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
