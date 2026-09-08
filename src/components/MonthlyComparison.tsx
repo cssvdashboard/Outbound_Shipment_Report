@@ -1052,14 +1052,20 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                             setIsCustomerDropdownOpen(false);
                           }}
                           title={cust.name}
-                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded text-xs text-left transition-colors cursor-pointer gap-2 ${
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded text-xs text-left transition-colors cursor-pointer gap-2 group ${
                             selectedCustomer?.toLowerCase() === cust.name.toLowerCase()
                               ? 'bg-emerald-600 text-white font-bold'
                               : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
                           }`}
                         >
                           <span className="break-words leading-tight flex-1 pr-2">{cust.name}</span>
-                          <span className="text-[10px] font-mono opacity-80 shrink-0 self-start">{cust.count}</span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded shrink-0 self-start transition-colors ${
+                            selectedCustomer?.toLowerCase() === cust.name.toLowerCase()
+                              ? 'bg-white/20 text-white'
+                              : 'bg-emerald-100 text-emerald-900 group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-950/80 dark:text-emerald-300 dark:group-hover:bg-emerald-600 dark:group-hover:text-white'
+                          }`}>
+                            {cust.count.toLocaleString()} AWBs
+                          </span>
                         </button>
                       ))}
                     </div>

@@ -351,10 +351,10 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                             {highlightMatch(item.name, customerSearch, 'text-emerald-600 dark:text-emerald-400 font-bold')}
                           </span>
                         </div>
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shrink-0 self-start mt-0.5 ${
+                        <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md shrink-0 self-start mt-0.5 transition-colors ${
                           isSelected
                             ? 'bg-white/20 text-white'
-                            : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 group-hover:bg-emerald-200'
+                            : 'bg-emerald-100 text-emerald-900 group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-950/80 dark:text-emerald-300 dark:group-hover:bg-emerald-600 dark:group-hover:text-white'
                         }`}>
                           {item.count.toLocaleString()} AWBs
                         </span>
@@ -489,7 +489,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                         <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
                           isSelected
                             ? 'bg-white/20 text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white transition-colors'
                         }`}>
                           {count.toLocaleString()} AWBs
                         </span>
