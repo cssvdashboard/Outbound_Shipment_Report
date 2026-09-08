@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { useLogisticsData } from './hooks/useLogisticsData';
 import { Header } from './components/Header';
 import { SmartFilterBar } from './components/SmartFilterBar';
@@ -130,15 +130,14 @@ export const App: React.FC = () => {
 
   const handleThemeToggle = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
+    // 1. Apply to <html> immediately — CSS repaints instantly, no stutter
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(newTheme);
     setStoredTheme(newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    }
+    // 2. Defer the React state update so it doesn't block the paint
+    startTransition(() => {
+      setTheme(newTheme);
+    });
   };
 
   return (
