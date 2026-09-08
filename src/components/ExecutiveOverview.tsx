@@ -580,58 +580,58 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         const isModalSuccess = modalResolution.toLowerCase().trim() === 'delivered';
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-            <div className={`glass-panel w-full max-w-[96vw] 2xl:max-w-[1600px] max-h-[92vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-slate-950/95 border ${
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className={`w-full max-w-[96vw] 2xl:max-w-[1600px] max-h-[92vh] p-5 sm:p-6 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden bg-white dark:bg-slate-950/95 border ${
               isModalNegative 
-                ? 'border-rose-500/50 shadow-[0_0_40px_rgba(239,68,68,0.25)]' 
+                ? 'border-rose-300 dark:border-rose-500/50 shadow-xl dark:shadow-[0_0_40px_rgba(239,68,68,0.25)]' 
                 : isModalSuccess 
-                ? 'border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)]' 
-                : 'border-blue-500/40'
+                ? 'border-emerald-300 dark:border-emerald-500/40 shadow-xl dark:shadow-[0_0_30px_rgba(16,185,129,0.15)]' 
+                : 'border-blue-300 dark:border-blue-500/40 shadow-xl'
             }`}>
               
               {/* Modal Header */}
               <div>
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-3">
                     <div className={`p-2.5 rounded-xl border ${
                       isModalNegative
-                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
+                        ? 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/40 dark:shadow-[0_0_12px_rgba(239,68,68,0.3)]'
                         : isModalSuccess
-                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                        : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                        ? 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/40'
+                        : 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30'
                     }`}>
                       {isModalNegative ? (
-                        <AlertTriangle className="w-5 h-5 text-rose-400" />
+                        <AlertTriangle className="w-5 h-5" />
                       ) : (
                         <ShieldAlert className="w-5 h-5" />
                       )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2.5">
-                        <h3 className="text-base sm:text-lg font-bold text-white">
+                        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
                           Final Resolution:{' '}
                           <span className={`font-black ${
-                            isModalNegative ? 'text-rose-400' : isModalSuccess ? 'text-emerald-400' : 'text-blue-400'
+                            isModalNegative ? 'text-rose-600 dark:text-rose-400' : isModalSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'
                           }`}>
                             {modalResolution}
                           </span>
                         </h3>
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${
                           isModalNegative
-                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            ? 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
                             : isModalSuccess
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                            : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
+                            : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
                         }`}>
                           {modalAllShipments.length.toLocaleString()} Total AWBs
                         </span>
                         {isModalNegative && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-rose-950 text-rose-400 border border-rose-700">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-600 text-white shadow-xs dark:bg-rose-950 dark:text-rose-400 dark:border dark:border-rose-700">
                             Negative Exception
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
                         {isModalNegative 
                           ? `Detailed negative exception logs & outlier shipment records for status: "${modalResolution}"`
                           : `Filtered shipment records from Shipment Explorer for status: "${modalResolution}"`
@@ -642,7 +642,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
                   <button
                     onClick={() => setModalResolution(null)}
-                    className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors"
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:border-slate-700 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -651,32 +651,32 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               {/* Quick Metrics Strip */}
               {modalStats && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5">
-                  <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Average Transit Time</span>
-                    <span className="text-sm sm:text-base font-extrabold text-indigo-400 font-mono">
-                      {modalStats.avgTT} <span className="text-xs font-normal text-slate-400">days</span>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Average Transit Time</span>
+                    <span className="text-sm sm:text-base font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                      {modalStats.avgTT} <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">days</span>
                     </span>
-                    <span className="text-[10px] text-slate-500 block font-mono">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-500 block font-mono font-medium">
                       Min: {modalStats.minTT}d • Max: {modalStats.maxTT}d
                     </span>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Volume &amp; Wt</span>
-                    <span className="text-sm sm:text-base font-extrabold text-white font-mono">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Total Volume &amp; Wt</span>
+                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono">
                       {modalAllShipments.length.toLocaleString()} AWBs
                     </span>
-                    <span className="text-[10px] text-slate-500 block font-mono">
+                    <span className="text-[10px] text-slate-600 dark:text-slate-500 block font-mono font-medium">
                       {modalStats.totalWeight.toLocaleString()} kg • {modalStats.totalPkgs.toLocaleString()} pkgs
                     </span>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 col-span-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Top Impacted Countries</span>
-                    <span className="text-xs sm:text-sm font-semibold text-emerald-400 mt-0.5 block truncate">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800 col-span-2">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Top Impacted Countries</span>
+                    <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block truncate">
                       {modalStats.topCountries}
                     </span>
-                    <span className="text-[10px] text-slate-500 block">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-500 block font-medium">
                       Sorted by shipment concentration
                     </span>
                   </div>
@@ -685,23 +685,23 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
               {/* Categorized Root-Cause / Delay Reason Breakdown (Specifically for RTS, Undelivered & All Statuses) */}
               {modalCategoryBreakdown.length > 0 && (
-                <div className="mb-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-2.5 transition-all">
+                <div className="mb-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800/80 space-y-2.5 transition-all">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                      <span className="text-xs font-black uppercase text-slate-200 tracking-wider">
+                      <span className="text-xs font-black uppercase text-slate-800 dark:text-slate-200 tracking-wider">
                         <strong>Root Cause &amp; Delay Reason Breakdown ({modalCategoryBreakdown.length} Distinct Causes)</strong>
                       </span>
                       {modalSelectedCategory && !showCauseBreakdown && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30">
                           Active Cause: {modalSelectedCategory}
                         </span>
                       )}
                     </div>
 
                     {/* On / Off Switch for Cause Breakdown */}
-                    <div className="flex items-center gap-2.5 bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800">
-                      <span className="text-[11px] font-bold text-slate-300 select-none">
+                    <div className="flex items-center gap-2.5 bg-white border border-slate-200 shadow-2xs dark:bg-slate-950/80 dark:border-slate-800 px-2.5 py-1 rounded-xl">
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 select-none">
                         {showCauseBreakdown ? 'Hide Breakdown' : 'Show Breakdown'}
                       </span>
                       <button
@@ -711,8 +711,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                         onClick={() => setShowCauseBreakdown(!showCauseBreakdown)}
                         className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer border ${
                           showCauseBreakdown
-                            ? 'bg-blue-600 border-blue-400 justify-end'
-                            : 'bg-slate-800 border-slate-600 justify-start'
+                            ? 'bg-blue-600 border-blue-500 justify-end'
+                            : 'bg-slate-300 dark:bg-slate-800 border-slate-400 dark:border-slate-600 justify-start'
                         }`}
                         title={showCauseBreakdown ? 'Click to hide causes and expand AWB table' : 'Click to show all cause breakdown pills'}
                       >
@@ -732,12 +732,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                         }}
                         className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                           modalSelectedCategory === null
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/35 border border-blue-400/50 scale-[1.02]'
-                            : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/35 border border-blue-500 scale-[1.02]'
+                            : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-300 shadow-2xs dark:bg-slate-800/90 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white dark:border-slate-700'
                         }`}
                       >
                         <span><strong>All Causes</strong></span>
-                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/30 font-bold">
+                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 dark:bg-black/30 dark:text-white font-bold">
                           {modalAllShipments.length}
                         </span>
                       </button>
@@ -758,14 +758,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                                 ? isModalNegative
                                   ? 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-600/35 border border-rose-400/60 scale-[1.02] ring-2 ring-rose-500/30'
                                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/35 border border-blue-400/60 scale-[1.02] ring-2 ring-blue-500/30'
-                                : 'bg-slate-800/90 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/80 hover:border-slate-500'
+                                : 'bg-white text-slate-800 hover:bg-rose-50 hover:text-rose-900 border border-slate-300 shadow-2xs dark:bg-slate-800/90 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:border-slate-700/80 dark:hover:border-slate-500'
                             }`}
                           >
                             <span><strong>{cat.reason}</strong></span>
                             <span className={`font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
                               isSelected
                                 ? 'bg-white/25 text-white font-black'
-                                : 'bg-slate-900 text-rose-300 border border-rose-900/40 group-hover:border-rose-500/40'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-slate-900 dark:text-rose-300 dark:border-rose-900/40 dark:group-hover:border-rose-500/40'
                             }`}>
                               <strong>{cat.count} AWBs ({cat.percentage}%)</strong>
                             </span>
@@ -789,14 +789,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       setModalCurrentPage(1);
                     }}
                     placeholder={`Search within ${modalResolution} (AWB, Shipper, Customer, Destination, Remarks)...`}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-900 border border-slate-700/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white shadow-xs dark:bg-slate-900 dark:border-slate-700/80 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleExportModalExcel}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold border border-emerald-500/30 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold border border-emerald-300 hover:border-emerald-600 shadow-xs transition-all dark:bg-emerald-600/20 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white dark:border-emerald-500/30"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Export Excel</span>
@@ -804,7 +804,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
                   <button
                     onClick={handleExportModalCSV}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white text-xs font-semibold border border-blue-500/30 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white text-xs font-bold border border-blue-300 hover:border-blue-600 shadow-xs transition-all dark:bg-blue-600/20 dark:hover:bg-blue-600 dark:text-blue-300 dark:hover:text-white dark:border-blue-500/30"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>CSV</span>
@@ -814,11 +814,11 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
 
             {/* Modal Table Container */}
-            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-800 bg-slate-900/60 my-1 transition-all ${
+            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs my-1 transition-all ${
               showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
             }`}>
               <table className="w-full text-left text-xs min-w-[850px]">
-                <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px] tracking-wider z-10">
+                <thead className="sticky top-0 bg-slate-100 border-b border-slate-200 dark:bg-slate-900 dark:border-slate-800 text-slate-700 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10">
                   <tr>
                     <th className="py-2.5 px-3">AWB Tracking #</th>
                     <th className="py-2.5 px-2.5">Dest</th>
@@ -831,34 +831,34 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     <th className="py-2.5 px-2 text-center">Inspect</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 font-sans">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
                   {modalPaginatedData.map((s, idx) => (
-                    <tr key={`${s.awb}-${idx}`} className="hover:bg-slate-800/40 text-slate-200 transition-colors">
-                      <td className="py-2 px-3 font-mono font-bold text-blue-400">{s.awb}</td>
-                      <td className="py-2 px-2.5 font-bold text-white font-mono">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px]">
+                    <tr key={`${s.awb}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-200 transition-colors">
+                      <td className="py-2 px-3 font-mono font-bold text-blue-600 dark:text-blue-400 hover:underline">{s.awb}</td>
+                      <td className="py-2 px-2.5 font-bold text-slate-800 dark:text-white font-mono">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-bold">
                           {s.destination}
                         </span>
                       </td>
-                      <td className="py-2 px-3 font-medium text-slate-300 max-w-[150px] truncate" title={s.customer}>
+                      <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-300 max-w-[150px] truncate" title={s.customer}>
                         {s.customer}
                       </td>
-                      <td className="py-2 px-3 text-slate-300 max-w-[150px] truncate" title={s.shprName}>
+                      <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[150px] truncate font-medium" title={s.shprName}>
                         {s.shprName}
                       </td>
-                      <td className="py-2 px-3 text-slate-400 max-w-[130px] truncate">
-                        <div>{s.recipient || '-'}</div>
-                        <div className="text-[10px] text-slate-500">{s.city}</div>
+                      <td className="py-2 px-3 text-slate-700 dark:text-slate-400 max-w-[130px] truncate">
+                        <div className="font-semibold text-slate-800 dark:text-slate-300">{s.recipient || '-'}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-500 font-medium">{s.city}</div>
                       </td>
-                      <td className="py-2 px-2.5 text-right font-mono font-bold text-indigo-400">
+                      <td className="py-2 px-2.5 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
                         {s.tt} d
                       </td>
                       <td className="py-2 px-2.5">
                         <span
-                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
                             s.tt <= 5
-                              ? 'bg-emerald-500/15 text-emerald-400'
-                              : 'bg-amber-500/15 text-amber-400'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
+                              : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
                           }`}
                         >
                           {s.tt <= 5 ? '≤5d' : '>5d'}
@@ -866,29 +866,29 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       </td>
                       <td className="py-2 px-3 text-[11px] max-w-[160px] truncate">
                         {s.remarks && s.remarks !== '-' ? (
-                          <span className="text-amber-300 font-semibold" title={s.remarks}>
+                          <span className="text-amber-700 dark:text-amber-300 font-bold" title={s.remarks}>
                             {s.remarks}
                           </span>
                         ) : s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                          <span className="text-amber-400" title={s.clearanceDelay}>
+                          <span className="text-amber-700 dark:text-amber-400 font-bold" title={s.clearanceDelay}>
                             📋 {s.clearanceDelay}
                           </span>
                         ) : s.transitDelay && s.transitDelay !== '-' ? (
-                          <span className="text-indigo-400" title={s.transitDelay}>
+                          <span className="text-indigo-700 dark:text-indigo-400 font-bold" title={s.transitDelay}>
                             ✈️ {s.transitDelay}
                           </span>
                         ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                          <span className="text-rose-400" title={s.destinationDelay}>
+                          <span className="text-rose-700 dark:text-rose-400 font-bold" title={s.destinationDelay}>
                             🚚 {s.destinationDelay}
                           </span>
                         ) : (
-                          <span className="text-slate-600">-</span>
+                          <span className="text-slate-400 dark:text-slate-600">-</span>
                         )}
                       </td>
                       <td className="py-2 px-2 text-center">
                         <button
                           onClick={() => setInspectedShipment(s)}
-                          className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-white"
+                          className="p-1 rounded bg-slate-100 hover:bg-blue-50 text-blue-600 hover:text-blue-800 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-blue-400 dark:hover:text-white dark:border-transparent cursor-pointer"
                           title="Inspect full details"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -898,7 +898,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   ))}
                   {modalPaginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-10 text-center text-slate-400">
+                      <td colSpan={9} className="py-10 text-center text-slate-500 dark:text-slate-400 font-semibold">
                         No shipment records match &quot;{modalSearch}&quot; for status {modalResolution}.
                       </td>
                     </tr>
@@ -908,16 +908,16 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
 
             {/* Modal Pagination Footer */}
-            <div className="pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-slate-400">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-slate-600 dark:text-slate-400">
               <div className="flex items-center gap-2">
-                <span>Rows:</span>
+                <span className="font-semibold">Rows:</span>
                 <select
                   value={modalPageSize}
                   onChange={(e) => {
                     setModalPageSize(Number(e.target.value));
                     setModalCurrentPage(1);
                   }}
-                  className="bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-xs text-white"
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-0.5 text-xs text-slate-800 dark:text-white font-medium shadow-2xs"
                 >
                   <option value={15}>15</option>
                   <option value={25}>25</option>
@@ -926,14 +926,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 </select>
                 <span>
                   Showing{' '}
-                  <strong className="text-white">
+                  <strong className="text-slate-900 dark:text-white">
                     {modalFilteredShipments.length > 0 ? (modalValidCurrentPage - 1) * modalPageSize + 1 : 0}
                   </strong>{' '}
                   -{' '}
-                  <strong className="text-white">
+                  <strong className="text-slate-900 dark:text-white">
                     {Math.min(modalValidCurrentPage * modalPageSize, modalFilteredShipments.length)}
                   </strong>{' '}
-                  of <strong className="text-white">{modalFilteredShipments.length}</strong> records
+                  of <strong className="text-slate-900 dark:text-white">{modalFilteredShipments.length}</strong> records
                 </span>
               </div>
 
@@ -941,24 +941,24 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 <button
                   onClick={() => setModalCurrentPage((p) => Math.max(p - 1, 1))}
                   disabled={modalValidCurrentPage <= 1}
-                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white"
+                  className="p-1 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 disabled:opacity-30 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-transparent dark:text-white cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="font-mono text-xs">
+                <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
                   Page {modalValidCurrentPage} of {modalTotalPages}
                 </span>
                 <button
                   onClick={() => setModalCurrentPage((p) => Math.min(p + 1, modalTotalPages))}
                   disabled={modalValidCurrentPage >= modalTotalPages}
-                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white"
+                  className="p-1 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 disabled:opacity-30 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-transparent dark:text-white cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setModalResolution(null)}
-                  className="ml-3 px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold"
+                  className="ml-3 px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-semibold dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-transparent dark:text-white text-xs cursor-pointer shadow-2xs"
                 >
                   Close
                 </button>
@@ -971,78 +971,78 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
       {/* Single Shipment Detail Sub-Modal */}
       {inspectedShipment && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel w-full max-w-lg p-6 rounded-3xl space-y-4 shadow-2xl relative bg-slate-950 border border-slate-700">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 dark:bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-lg p-6 rounded-3xl space-y-4 shadow-2xl relative bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
-                <Package className="w-5 h-5 text-blue-400" />
+                <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <h3 className="text-sm font-bold text-white">AWB #{inspectedShipment.awb}</h3>
-                  <p className="text-xs text-slate-400">MAWB: {inspectedShipment.mawb || 'N/A'}</p>
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">AWB #{inspectedShipment.awb}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">MAWB: {inspectedShipment.mawb || 'N/A'}</p>
                 </div>
               </div>
               <button
                 onClick={() => setInspectedShipment(null)}
-                className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white"
+                className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Customer</span>
-                <span className="font-bold text-white block mt-0.5">{inspectedShipment.customer}</span>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Customer</span>
+                <span className="font-bold text-slate-900 dark:text-white block mt-0.5">{inspectedShipment.customer}</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Shipper</span>
-                <span className="font-bold text-white block mt-0.5">{inspectedShipment.shprName}</span>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Shipper</span>
+                <span className="font-bold text-slate-900 dark:text-white block mt-0.5">{inspectedShipment.shprName}</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Destination / Recipient</span>
-                <span className="font-bold text-white block mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Destination / Recipient</span>
+                <span className="font-bold text-slate-900 dark:text-white block mt-0.5">
                   {inspectedShipment.destination} ({inspectedShipment.city || 'N/A'})
                 </span>
-                <span className="text-slate-400 text-[11px] block">{inspectedShipment.recipient}</span>
+                <span className="text-slate-600 dark:text-slate-400 text-[11px] block">{inspectedShipment.recipient}</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Transit Time (TT)</span>
-                <span className="font-bold text-indigo-400 text-base font-mono block mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Transit Time (TT)</span>
+                <span className="font-black text-indigo-600 dark:text-indigo-400 text-base font-mono block mt-0.5">
                   {inspectedShipment.tt} days
                 </span>
-                <span className="text-slate-400 text-[11px]">{inspectedShipment.ttRange}</span>
+                <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">{inspectedShipment.ttRange}</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Final Resolution</span>
-                <span className={`font-bold block mt-0.5 ${
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Final Resolution</span>
+                <span className={`font-black block mt-0.5 ${
                   inspectedShipment.finalResolution === 'Delivered'
-                    ? 'text-emerald-400'
+                    ? 'text-emerald-600 dark:text-emerald-400'
                     : ['RTS', 'Lost', 'Destroyed', 'Seized', 'Undelivered'].includes(inspectedShipment.finalResolution)
-                    ? 'text-rose-400 font-extrabold'
-                    : 'text-amber-400'
+                    ? 'text-rose-600 dark:text-rose-400 font-extrabold'
+                    : 'text-amber-600 dark:text-amber-400'
                 }`}>
                   {inspectedShipment.finalResolution}
                 </span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Pkg &amp; Weight</span>
-                <span className="font-bold text-white block mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Pkg &amp; Weight</span>
+                <span className="font-bold text-slate-900 dark:text-white block mt-0.5">
                   {inspectedShipment.weight} kg • {inspectedShipment.pkgCount} pcs
                 </span>
               </div>
             </div>
 
             {inspectedShipment.description && (
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
-                <span className="text-slate-500 block text-[10px]">Description</span>
-                <p className="text-slate-300 mt-0.5">{inspectedShipment.description}</p>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900 dark:border-slate-800 text-xs">
+                <span className="text-slate-500 dark:text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Description</span>
+                <p className="text-slate-700 dark:text-slate-300 mt-0.5 font-medium">{inspectedShipment.description}</p>
               </div>
             )}
 
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setInspectedShipment(null)}
-                className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold"
+                className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs cursor-pointer"
               >
                 Close
               </button>
