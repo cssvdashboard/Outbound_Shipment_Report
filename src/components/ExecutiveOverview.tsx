@@ -249,87 +249,87 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total AWB Volume */}
-        <div className="glass-card p-4 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-sky-100 dark:border-white/10 hover:border-sky-400 dark:hover:border-sky-500/50 shadow-sm hover:shadow-md transition-all">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-sky-500/10 blur-xl group-hover:bg-sky-500/20 transition-all pointer-events-none" />
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-sky-500 text-white shadow-md shadow-sky-500/30 dark:bg-sky-500/15 dark:text-sky-400 dark:border dark:border-sky-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Package className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>Total Shipments</strong>
           </span>
-          <div className="mt-2 text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight">
             <strong>{summary.totalCount.toLocaleString()}</strong>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            <span><strong>{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
-            <span className="text-slate-600">•</span>
-            <span><strong>{summary.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</strong> Kg</span>
+          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2 text-xs font-bold text-slate-600 dark:text-slate-400">
+            <span><strong className="text-slate-900 dark:text-slate-200">{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span><strong className="text-slate-900 dark:text-slate-200">{summary.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</strong> Kg</span>
           </div>
         </div>
 
         {/* Transit Time Performance */}
-        <div className="glass-card p-4 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-indigo-100 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/50 shadow-sm hover:shadow-md transition-all">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-indigo-500/10 blur-xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border dark:border-indigo-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Clock className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>Average Transit Time</strong>
           </span>
-          <div className="mt-2 text-2xl sm:text-3xl font-black text-indigo-400 tracking-tight flex items-baseline justify-center gap-1">
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight flex items-baseline justify-center gap-1.5">
             <span><strong>{summary.avgTT}</strong></span>
-            <span className="text-sm font-bold text-slate-400">days</span>
+            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">days</span>
           </div>
         </div>
 
         {/* Delivery Timeline (Within 4-5 Days) */}
         <div
           onClick={() => onSelectTTRange('Within 4-5 Days')}
-          className={`glass-card p-4 rounded-2xl relative overflow-hidden group cursor-pointer transition-all flex flex-col items-center justify-center text-center ${
+          className={`glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 ${
             selectedTTRange === 'Within 4-5 Days'
-              ? 'ring-2 ring-emerald-500 bg-emerald-950/40 shadow-glow-emerald'
-              : 'hover:border-emerald-500/50'
+              ? 'ring-2 ring-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 shadow-glow-emerald'
+              : 'border-emerald-100 dark:border-white/10 hover:border-emerald-400 dark:hover:border-emerald-500/50 shadow-sm hover:shadow-md'
           }`}
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-emerald-500/10 blur-xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border dark:border-emerald-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <CheckCircle2 className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>On-Time Rate (≤ 5 Days)</strong>
           </span>
-          <div className="mt-2 text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight flex items-baseline justify-center gap-1">
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight flex items-baseline justify-center gap-1">
             <span><strong>{summary.onTimePercentage}%</strong></span>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            <span><strong>{summary.onTimeCount.toLocaleString()}</strong> AWBs</span>
+          <div className="flex items-center justify-center gap-2 mt-2 text-xs font-bold text-slate-600 dark:text-slate-400">
+            <span><strong className="text-emerald-700 dark:text-emerald-400 font-mono font-black">{summary.onTimeCount.toLocaleString()}</strong> AWBs</span>
           </div>
         </div>
 
         {/* Delay Bottlenecks */}
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl relative overflow-hidden group cursor-pointer hover:border-amber-500/50 transition-all flex flex-col items-center justify-center text-center"
+          className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 dark:hover:border-amber-500/50 transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-amber-200 dark:border-white/10 shadow-sm hover:shadow-md"
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-amber-500/10 blur-xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
+          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400 dark:border dark:border-amber-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <AlertTriangle className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>Recorded Delay Cases</strong>
           </span>
-          <div className="mt-2 text-2xl sm:text-3xl font-black text-amber-400 tracking-tight flex items-baseline justify-center gap-1">
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight flex items-baseline justify-center gap-2">
             <span><strong>{totalDelays.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-400 font-mono">({delayRate}%)</span>
+            <span className="text-xs font-black text-amber-700 dark:text-slate-400 font-mono bg-amber-100/70 dark:bg-transparent px-2 py-0.5 rounded-md border border-amber-300 dark:border-none">({delayRate}%)</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            <span><strong>Transit:</strong> {summary.transitDelayCount}</span>
-            <span>•</span>
-            <span><strong>Clear:</strong> {summary.clearanceDelayCount}</span>
-            <span>•</span>
-            <span><strong>Dest:</strong> {summary.destinationDelayCount}</span>
-            <span>•</span>
-            <span><strong>Wknd:</strong> {summary.weekendDelayCount}</span>
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-2 text-xs font-bold text-slate-700 dark:text-slate-400">
+            <span>Transit: <strong className="text-sky-600 dark:text-sky-400 font-mono font-black">{summary.transitDelayCount}</strong></span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span>Clear: <strong className="text-purple-600 dark:text-purple-400 font-mono font-black">{summary.clearanceDelayCount}</strong></span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span>Dest: <strong className="text-amber-600 dark:text-amber-400 font-mono font-black">{summary.destinationDelayCount}</strong></span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span>Wknd: <strong className="text-rose-600 dark:text-rose-400 font-mono font-black">{summary.weekendDelayCount}</strong></span>
           </div>
         </div>
 
