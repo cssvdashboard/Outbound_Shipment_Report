@@ -483,7 +483,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     }}
                     className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border ${
                       isNegative
-                        ? 'bg-rose-50/70 border-rose-200 hover:border-rose-400 hover:bg-rose-100/60 shadow-xs hover:shadow-md dark:bg-gradient-to-br dark:from-rose-950/40 dark:via-red-950/20 dark:to-slate-900/90 dark:border-rose-900/60 dark:hover:border-rose-500 dark:hover:shadow-[0_0_20px_rgba(239,68,68,0.25)] hover:scale-[1.02] active:scale-[0.98]'
+                        ? 'bg-rose-50/70 border-rose-200 hover:border-rose-400 hover:bg-rose-100/60 shadow-xs hover:shadow-md dark:bg-slate-900/90 dark:border-rose-500/50 dark:hover:border-rose-400 dark:shadow-[0_0_15px_rgba(244,63,94,0.15)] dark:hover:shadow-[0_0_25px_rgba(244,63,94,0.35)] hover:scale-[1.02] active:scale-[0.98]'
                         : isSuccess
                         ? 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-100/60 shadow-xs hover:shadow-md dark:bg-gradient-to-br dark:from-emerald-950/30 dark:via-slate-900/90 dark:to-slate-900 dark:border-emerald-900/50 dark:hover:border-emerald-500 dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
                         : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100/80 shadow-xs hover:shadow-md dark:bg-slate-900/80 dark:border-slate-800 dark:hover:border-blue-500/60 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
@@ -492,7 +492,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     <div className="flex items-center justify-between gap-1">
                       <div className="flex items-center gap-1.5 min-w-0">
                         {isNegative ? (
-                          <span className="w-2 h-2 rounded-full bg-rose-500 shadow-xs dark:shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse flex-shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-rose-500 shadow-xs dark:shadow-[0_0_10px_rgba(244,63,94,0.9)] animate-pulse flex-shrink-0" />
                         ) : isSuccess ? (
                           <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs dark:shadow-[0_0_8px_rgba(16,185,129,0.8)] flex-shrink-0" />
                         ) : (
@@ -503,7 +503,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                         )}
                         <span className={`text-xs font-bold truncate ${
                           isNegative 
-                            ? 'text-slate-800 dark:text-rose-200 dark:group-hover:text-rose-100 font-extrabold' 
+                            ? 'text-slate-800 dark:text-white dark:group-hover:text-rose-200 font-extrabold' 
                             : isSuccess 
                             ? 'text-slate-800 dark:text-emerald-200 dark:group-hover:text-emerald-100 font-extrabold' 
                             : 'text-slate-800 dark:text-slate-200 dark:group-hover:text-blue-300 font-bold'
@@ -512,7 +512,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                         </span>
                       </div>
                       {isNegative && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30">
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 dark:shadow-[0_0_8px_rgba(244,63,94,0.2)]">
                           Negative
                         </span>
                       )}
@@ -535,7 +535,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       </span>
                       <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
                         isNegative 
-                          ? 'bg-white text-rose-700 border border-rose-200 shadow-2xs dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-900/50' 
+                          ? 'bg-white text-rose-700 border border-rose-200 shadow-2xs dark:bg-slate-800 dark:text-rose-300 dark:border-rose-900/50' 
                           : isSuccess 
                           ? 'bg-white text-emerald-800 border border-emerald-200 shadow-2xs dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-900/50' 
                           : 'bg-white text-slate-700 border border-slate-200 shadow-2xs dark:text-slate-400 dark:bg-slate-800/80 dark:border-slate-700/50'
