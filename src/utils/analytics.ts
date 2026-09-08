@@ -7,8 +7,73 @@ import {
   CustomerComparisonMetric
 } from '../types/logistics';
 
+/**
+ * Converts a shipment pickup value (Excel serial number, ISO string, or Date)
+ * into a standardized 'YYYY-MM-DD' string for reliable lexicographical date comparisons.
+ */
+export function getPickupISODate(val: any): string | null {
+  if (val === null || val === undefined || val === '') return null;
+
+  // Handle Excel serial date numbers (e.g. 46208.9729)
+  const num = typeof val === 'number' ? val : parseFloat(String(val));
+  if (!isNaN(num) && num > 30000 && num < 70000) {
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+    const d = new Date(excelEpoch.getTime() + num * 86400000);
+    if (!isNaN(d.getTime())) {
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+  }
+
+  // Handle date string (e.g. '2026-07-01' or '2026-07-01T...')
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    const match = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (match) {
+      const y = match[1];
+      const m = match[2].padStart(2, '0');
+      const d = match[3].padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+  }
+
+  // Fallback to Date parser
+  try {
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 export function filterShipments(shipments: Shipment[], filters: FilterState): Shipment[] {
+  const dateStart = filters.dateRange?.start?.trim();
+  const dateEnd = filters.dateRange?.end?.trim();
+  const hasDateRange = Boolean(dateStart && dateEnd);
+  let minRange = '';
+  let maxRange = '';
+  if (hasDateRange) {
+    [minRange, maxRange] = dateStart! <= dateEnd! ? [dateStart!, dateEnd!] : [dateEnd!, dateStart!];
+  }
+
   return shipments.filter((item) => {
+    // Pickup Date Range Filter (active when both from and to dates are selected)
+    if (hasDateRange) {
+      const pickupIso = getPickupISODate(item.pickup);
+      if (!pickupIso || pickupIso < minRange || pickupIso > maxRange) {
+        return false;
+      }
+    }
+
     // 0. Quick Category Type Filter (Agent, PP, CC, IPD)
     if (filters.selectedCategoryType && filters.selectedCategoryType !== 'ALL') {
       if (filters.selectedCategoryType === 'AGENT') {

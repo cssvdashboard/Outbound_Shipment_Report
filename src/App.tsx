@@ -47,7 +47,10 @@ export const App: React.FC = () => {
     countryPerformance,
     allDestinations,
     allCustomers,
-    allMonths
+    allMonths,
+    dateRange,
+    setDateRangeFilter,
+    availableDateRange
   } = useLogisticsData();
 
   // 1. Initialize theme from storage
@@ -82,6 +85,11 @@ export const App: React.FC = () => {
     if (catParam && ['ALL', 'AGENT', 'PP', 'CC'].includes(catParam)) {
       setCategoryTypeFilter(catParam as any);
     }
+    const fromParam = params.get('from');
+    const toParam = params.get('to');
+    if (fromParam && toParam) {
+      setDateRangeFilter(fromParam, toParam);
+    }
   }, []);
 
   // 3. Keep URL query parameters in sync with active tab and filters
@@ -107,9 +115,17 @@ export const App: React.FC = () => {
       params.delete('cat');
     }
 
+    if (filters.dateRange?.start && filters.dateRange?.end) {
+      params.set('from', filters.dateRange.start);
+      params.set('to', filters.dateRange.end);
+    } else {
+      params.delete('from');
+      params.delete('to');
+    }
+
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState({}, '', newUrl);
-  }, [activeTab, filters.selectedCustomers, filters.selectedDestinations, filters.selectedCategoryType]);
+  }, [activeTab, filters.selectedCustomers, filters.selectedDestinations, filters.selectedCategoryType, filters.dateRange?.start, filters.dateRange?.end]);
 
   const handleThemeToggle = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -135,6 +151,9 @@ export const App: React.FC = () => {
           filteredShipments={filteredShipments}
           theme={theme}
           isServerConnected={isServerConnected}
+          dateRange={dateRange || { start: '', end: '' }}
+          onDateRangeChange={setDateRangeFilter}
+          availableDateRange={availableDateRange}
           allMonths={allMonths}
           selectedMonth={filters.selectedMonth || 'ALL'}
           onMonthChange={setMonthFilter}

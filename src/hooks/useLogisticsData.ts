@@ -9,6 +9,7 @@ import {
 } from '../types/logistics';
 import {
   filterShipments,
+  getPickupISODate,
   computeSummaryMetrics,
   computeDeliveryTimeline,
   computeFinalResolutions,
@@ -43,7 +44,11 @@ export const initialFilterState: FilterState = {
   selectedClearanceDelays: [],
   selectedDestinationDelays: [],
   selectedCategoryType: 'ALL',
-  selectedMonth: 'ALL'
+  selectedMonth: 'ALL',
+  dateRange: {
+    start: '',
+    end: ''
+  }
 };
 
 export function useLogisticsData() {
@@ -271,16 +276,33 @@ export function useLogisticsData() {
     setFilters(initialFilterState);
   }, []);
 
-  // Month filter — applied before all other filters
-  const monthFilteredShipments = useMemo(() => {
-    if (!filters.selectedMonth || filters.selectedMonth === 'ALL') return rawShipments;
-    return rawShipments.filter(s => serialToYearMonth(s.pickup as number) === filters.selectedMonth);
-  }, [rawShipments, filters.selectedMonth]);
+  // Date Range filter (or fallback Month filter) — applied before other dimensional filters
+  const dateFilteredShipments = useMemo(() => {
+    const start = filters.dateRange?.start?.trim();
+    const end = filters.dateRange?.end?.trim();
 
-  // Filtered dataset memo (month-aware)
+    // If both dates are picked, filter by pickup date within [start, end]
+    if (start && end) {
+      const [minRange, maxRange] = start <= end ? [start, end] : [end, start];
+      return rawShipments.filter((s) => {
+        const pickupIso = getPickupISODate(s.pickup);
+        if (!pickupIso) return false;
+        return pickupIso >= minRange && pickupIso <= maxRange;
+      });
+    }
+
+    // Fallback: If legacy month filter is set and not ALL
+    if (filters.selectedMonth && filters.selectedMonth !== 'ALL') {
+      return rawShipments.filter(s => serialToYearMonth(s.pickup as number) === filters.selectedMonth);
+    }
+
+    return rawShipments;
+  }, [rawShipments, filters.dateRange?.start, filters.dateRange?.end, filters.selectedMonth]);
+
+  // Filtered dataset memo
   const filteredShipments = useMemo(() => {
-    return filterShipments(monthFilteredShipments, filters);
-  }, [monthFilteredShipments, filters]);
+    return filterShipments(dateFilteredShipments, filters);
+  }, [dateFilteredShipments, filters]);
 
   // Analytical outputs memoized for sub-second reactive performance
   const summaryMetrics: MetricSummary = useMemo(() => {
@@ -310,6 +332,30 @@ export function useLogisticsData() {
   const countryPerformance: CountryPerformance[] = useMemo(() => {
     return computeCountryPerformance(filteredShipments);
   }, [filteredShipments]);
+
+  // Derive dataset min and max pickup dates
+  const availableDateRange = useMemo(() => {
+    let min = '';
+    let max = '';
+    for (const s of rawShipments) {
+      const d = getPickupISODate(s.pickup);
+      if (d) {
+        if (!min || d < min) min = d;
+        if (!max || d > max) max = d;
+      }
+    }
+    return { min, max };
+  }, [rawShipments]);
+
+  const setDateRangeFilter = useCallback((start: string, end: string) => {
+    setFilters(prev => ({
+      ...prev,
+      dateRange: {
+        start: start || '',
+        end: end || ''
+      }
+    }));
+  }, []);
 
   // All available months derived from raw data
   const allMonths = useMemo(() => {
@@ -349,6 +395,8 @@ export function useLogisticsData() {
     isLoading,
     isServerConnected,
     filters,
+    dateRange: filters.dateRange,
+    availableDateRange,
     setFilters,
     setFilterMode,
     addShipperFilter,
@@ -362,6 +410,7 @@ export function useLogisticsData() {
     setTTRangeFilter,
     setDelayFilter,
     setMonthFilter,
+    setDateRangeFilter,
     resetAllFilters,
     handleDatasetUpdate,
     handleResetToDefault,
