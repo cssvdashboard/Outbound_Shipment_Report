@@ -167,83 +167,89 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   return (
     <div className="relative flex items-center" ref={containerRef}>
-      {/* Date Range Bar - Elevated Command Capsule with Ambient Glow */}
+      {/* Date Range Bar */}
       <div
-        className={`group/bar flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 pl-2 sm:pl-2.5 rounded-2xl border transition-all duration-300 ${
+        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-2xl border transition-all duration-200 shadow-sm ${
           isFilterActive
-            ? 'bg-gradient-to-r from-blue-50/95 via-indigo-50/90 to-sky-50/95 dark:from-blue-950/50 dark:via-indigo-950/40 dark:to-slate-900/80 border-blue-400 dark:border-blue-500/70 shadow-lg shadow-blue-500/15 ring-2 ring-blue-500/25'
+            ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-400/60 dark:border-blue-500/50 ring-2 ring-blue-500/20'
             : isPendingSecondDate
-            ? 'bg-amber-50/95 dark:bg-amber-950/40 border-amber-400 dark:border-amber-500/70 shadow-md shadow-amber-500/15 ring-2 ring-amber-400/30'
-            : 'bg-white/95 dark:bg-[#0c1324]/95 border-slate-300 dark:border-slate-700/90 shadow-md shadow-slate-900/5 hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-lg hover:shadow-sky-500/10 ring-1 ring-slate-200/80 dark:ring-slate-800'
+            ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-400/60 dark:border-amber-500/50 ring-1 ring-amber-400/20'
+            : 'bg-slate-100/90 dark:bg-slate-900/80 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
         {/* FROM DATE TAB BUTTON */}
         <button
           type="button"
           onClick={() => openPicker(activePicker === 'from' ? null as any : 'from')}
-          className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             activePicker === 'from'
-              ? 'bg-gradient-to-r from-blue-600 to-sky-600 text-white border-blue-500 shadow-md shadow-blue-500/30 ring-2 ring-blue-400/40 scale-[1.02]'
+              ? 'bg-blue-600 text-white border-blue-500 shadow-sm ring-2 ring-blue-400/30'
               : startInput
-              ? 'bg-sky-50/90 dark:bg-sky-950/50 border-sky-300 dark:border-sky-500/50 text-sky-800 dark:text-sky-300 hover:border-sky-400 hover:bg-sky-100/90'
-              : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/90 text-slate-800 dark:text-slate-200 hover:border-sky-400 hover:bg-sky-50/60 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-slate-950 border-blue-400/50 dark:border-blue-500/40 text-blue-600 dark:text-blue-400'
+              : 'bg-white/80 dark:bg-slate-950/70 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400'
           }`}
           title="Click to choose From Date"
         >
-          <span className={`text-[9px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded ${
-            activePicker === 'from'
-              ? 'bg-white/20 text-white'
-              : 'bg-sky-100 text-sky-800 dark:bg-sky-500/25 dark:text-sky-300 border border-sky-200 dark:border-sky-500/40'
+          <span className={`text-[10px] uppercase font-black tracking-wider ${
+            activePicker === 'from' ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
           }`}>
             From
           </span>
-          <span className="font-extrabold tracking-tight text-xs sm:text-[13px]">
+          <span className="font-semibold tracking-tight">
             {formatDateDisplay(startInput) || 'Select Date'}
           </span>
         </button>
 
-        {/* Stylish Flow Connector */}
-        <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center shrink-0 shadow-xs">
-          <ArrowRight className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-        </div>
+        {/* Separator Arrow */}
+        <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
 
         {/* TO DATE TAB BUTTON */}
         <button
           type="button"
           onClick={() => openPicker(activePicker === 'to' ? null as any : 'to')}
-          className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             activePicker === 'to'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-500 shadow-md shadow-blue-500/30 ring-2 ring-blue-400/40 scale-[1.02]'
+              ? 'bg-blue-600 text-white border-blue-500 shadow-sm ring-2 ring-blue-400/30'
               : endInput
-              ? 'bg-indigo-50/90 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-500/50 text-indigo-800 dark:text-indigo-300 hover:border-indigo-400 hover:bg-indigo-100/90'
-              : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/90 text-slate-800 dark:text-slate-200 hover:border-indigo-400 hover:bg-indigo-50/60 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-slate-950 border-blue-400/50 dark:border-blue-500/40 text-blue-600 dark:text-blue-400'
+              : 'bg-white/80 dark:bg-slate-950/70 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400'
           }`}
           title="Click to choose To Date"
         >
-          <span className={`text-[9px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded ${
-            activePicker === 'to'
-              ? 'bg-white/20 text-white'
-              : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/25 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40'
+          <span className={`text-[10px] uppercase font-black tracking-wider ${
+            activePicker === 'to' ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
           }`}>
             To
           </span>
-          <span className="font-extrabold tracking-tight text-xs sm:text-[13px]">
+          <span className="font-semibold tracking-tight">
             {formatDateDisplay(endInput) || 'Select Date'}
           </span>
         </button>
 
         {/* Status Badge when filter is active */}
         {isFilterActive && totalFilteredCount !== undefined && (
-          <div className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-[11px] font-black text-white shadow-sm shadow-blue-500/30">
+          <div className="hidden xl:flex items-center gap-1 pl-1 pr-1.5 py-0.5 rounded-md bg-blue-100/90 dark:bg-blue-900/50 text-[10px] font-extrabold text-blue-700 dark:text-blue-300">
             <span>{totalFilteredCount.toLocaleString()} AWBs</span>
           </div>
         )}
 
         {/* Warning Badge when only one date picked */}
         {isPendingSecondDate && (
-          <span className="hidden lg:inline text-[10px] font-black text-amber-900 dark:text-amber-200 px-2 py-1 rounded-xl bg-amber-200/90 dark:bg-amber-500/25 border border-amber-300 dark:border-amber-500/40 animate-pulse">
+          <span className="hidden lg:inline text-[10px] font-bold text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/60 animate-pulse">
             Pick both dates
           </span>
+        )}
+
+        {/* Instant Clear Button */}
+        {(startInput || endInput) && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+            title="Reset date range filter"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         )}
 
         {/* Presets Quick Dropdown Trigger */}
@@ -253,29 +259,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             setActivePicker(null);
             setIsPresetsOpen(!isPresetsOpen);
           }}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
-            isPresetsOpen
-              ? 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white border-blue-500 shadow-md shadow-blue-500/30'
-              : 'bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50 dark:hover:bg-slate-700 shadow-xs'
+          className={`p-1 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer ${
+            isPresetsOpen ? 'rotate-180 text-blue-500' : ''
           }`}
-          title="Quick Month Presets (July / August 2026)"
+          title="Quick date range presets"
         >
-          <Sparkles className={`w-3.5 h-3.5 ${isPresetsOpen ? 'text-white' : 'text-sky-500 dark:text-sky-400'}`} />
-          <span className="hidden md:inline tracking-tight">Month</span>
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isPresetsOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200" />
         </button>
-
-        {/* Instant Clear Button */}
-        {(startInput || endInput) && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60 transition-all cursor-pointer shadow-xs"
-            title="Reset date range filter"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
       </div>
 
       {/* CUSTOM CALENDAR POPUP */}
@@ -430,13 +420,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
       {/* Quick Presets Dropdown Menu */}
       {isPresetsOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 p-2 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl border border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
-          <div className="px-3 py-2 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800">
-            <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+        <div className="absolute left-0 top-full mt-2 w-56 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          <div className="px-3 py-1.5 text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-blue-500" />
             Quick Range Presets
           </div>
 
-          <div className="py-1.5 space-y-1">
+          <div className="py-1">
             {presets.map((p, idx) => {
               const isSelected =
                 (!p.start && !p.end && !startInput && !endInput) ||
@@ -452,18 +442,15 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     setIsPresetsOpen(false);
                     setActivePicker(null);
                   }}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-black flex items-center justify-between transition-all cursor-pointer ${
+                  className={`w-full text-left px-3 py-1.5 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 scale-[1.01]'
-                      : 'text-slate-800 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-slate-800/90 hover:text-sky-600 dark:hover:text-sky-300'
+                      ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-white' : 'bg-sky-500'}`} />
-                    <span>{p.label}</span>
-                  </div>
+                  <span>{p.label}</span>
                   {isSelected && (
-                    <Check className="w-4 h-4 text-white" />
+                    <Check className="w-3.5 h-3.5 text-blue-500" />
                   )}
                 </button>
               );
