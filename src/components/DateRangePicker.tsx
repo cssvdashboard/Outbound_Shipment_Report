@@ -177,52 +177,42 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             : 'bg-slate-100/90 dark:bg-slate-900/80 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
-        {/* FROM DATE TAB BUTTON */}
+        {/* START DATE BUTTON */}
         <button
           type="button"
           onClick={() => openPicker(activePicker === 'from' ? null as any : 'from')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+          className={`flex items-center px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             activePicker === 'from'
               ? 'bg-blue-600 text-white border-blue-500 shadow-sm ring-2 ring-blue-400/30'
               : startInput
               ? 'bg-white dark:bg-slate-950 border-blue-400/50 dark:border-blue-500/40 text-blue-600 dark:text-blue-400'
               : 'bg-white/80 dark:bg-slate-950/70 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400'
           }`}
-          title="Click to choose From Date"
+          title="Click to choose Start Date"
         >
-          <span className={`text-[10px] uppercase font-black tracking-wider ${
-            activePicker === 'from' ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
-          }`}>
-            From
-          </span>
           <span className="font-semibold tracking-tight">
-            {formatDateDisplay(startInput) || 'Select Date'}
+            {formatDateDisplay(startInput) || 'Start Date'}
           </span>
         </button>
 
         {/* Separator Arrow */}
         <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
 
-        {/* TO DATE TAB BUTTON */}
+        {/* END DATE BUTTON */}
         <button
           type="button"
           onClick={() => openPicker(activePicker === 'to' ? null as any : 'to')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+          className={`flex items-center px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             activePicker === 'to'
               ? 'bg-blue-600 text-white border-blue-500 shadow-sm ring-2 ring-blue-400/30'
               : endInput
               ? 'bg-white dark:bg-slate-950 border-blue-400/50 dark:border-blue-500/40 text-blue-600 dark:text-blue-400'
               : 'bg-white/80 dark:bg-slate-950/70 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400'
           }`}
-          title="Click to choose To Date"
+          title="Click to choose End Date"
         >
-          <span className={`text-[10px] uppercase font-black tracking-wider ${
-            activePicker === 'to' ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
-          }`}>
-            To
-          </span>
           <span className="font-semibold tracking-tight">
-            {formatDateDisplay(endInput) || 'Select Date'}
+            {formatDateDisplay(endInput) || 'End Date'}
           </span>
         </button>
 
@@ -275,7 +265,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
             <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
-              Pick {activePicker === 'from' ? 'From' : 'To'} Date
+              Pick {activePicker === 'from' ? 'Start' : 'End'} Date
             </span>
 
             <button
@@ -403,7 +393,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 }}
                 className="text-[11px] font-bold text-slate-500 hover:text-rose-500 transition-colors cursor-pointer"
               >
-                Clear {activePicker === 'from' ? 'From' : 'To'}
+                Clear {activePicker === 'from' ? 'Start' : 'End'}
               </button>
 
               <button
