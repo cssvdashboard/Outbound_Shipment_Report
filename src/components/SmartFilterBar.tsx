@@ -230,12 +230,12 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 onKeyDown={handleCustomerKeyDown}
                 title={
                   selectedCustomer
-                    ? `Customer: ${selectedCustomer} (${selectedCustomerCount.toLocaleString()} AWBs)`
+                    ? selectedCustomer
                     : (customerSearch || 'Search Customer by name')
                 }
                 placeholder={
                   selectedCustomer
-                    ? `Customer: ${selectedCustomer} (${selectedCustomerCount.toLocaleString()} AWBs)`
+                    ? selectedCustomer
                     : 'Search Customer by name...'
                 }
                 className={`w-full pl-10 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
@@ -394,11 +394,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 }}
                 onFocus={() => setIsDestDropdownOpen(true)}
                 onKeyDown={handleDestKeyDown}
-                placeholder={
-                  selectedDestination
-                    ? `Destination: ${selectedDestination} (${(destinationCounts.get(selectedDestination) || 0).toLocaleString()} AWBs)`
-                    : 'Search Destination'
-                }
+                placeholder={selectedDestination || 'Search Destination'}
+                title={selectedDestination || (destSearch || 'Search Destination')}
                 className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                   selectedDestination
                     ? 'bg-blue-50/70 border-blue-400 text-blue-900 dark:bg-blue-950/40 dark:border-blue-500/60 dark:text-blue-200 placeholder:text-blue-800 dark:placeholder:text-blue-300'
@@ -459,31 +456,6 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
                     {filteredDestinations.length} available
                   </span>
-                </div>
-
-                {/* All Destinations Option */}
-                <div className="p-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectDestination('ALL')}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                      !selectedDestination
-                        ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 font-bold border border-blue-500/40 shadow-sm'
-                        : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {!selectedDestination ? (
-                        <Check className="w-4 h-4 text-blue-500 font-bold" />
-                      ) : (
-                        <span className="w-2 h-2 rounded-full bg-slate-400" />
-                      )}
-                      <span className="font-bold">All Destinations ({totalDestinationsCount} Countries)</span>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold text-slate-400">
-                      {rawShipments.length.toLocaleString()} AWBs
-                    </span>
-                  </button>
                 </div>
 
                 {/* Country List Options */}
