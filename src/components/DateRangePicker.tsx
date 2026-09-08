@@ -182,18 +182,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             : 'bg-slate-100/90 dark:bg-slate-900/80 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
-        {/* Calendar Icon Badge */}
-        <div
-          className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-            isFilterActive
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-              : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-          }`}
-          title="Pickup Date Range Filter"
-        >
-          <Calendar className="w-3.5 h-3.5" />
-        </div>
-
         {/* FROM DATE TAB BUTTON */}
         <button
           type="button"
