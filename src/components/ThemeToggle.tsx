@@ -12,19 +12,33 @@ export const ThemeToggle: React.FC = () => {
 
   const handleToggle = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
-    // 1. Instantly update <html> class — CSS repaints with no React involvement
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(newTheme);
-    // 2. Persist
+    const root = document.documentElement;
+
+    // 1. Freeze transitions so browser paints new colors in 0ms without running transitions
+    root.classList.add('no-transitions');
+
+    // 2. Instantly swap theme class
+    root.classList.remove('dark', 'light');
+    root.classList.add(newTheme);
+
+    // 3. Persist
     setStoredTheme(newTheme);
-    // 3. Update local state (only re-renders THIS tiny component, not the whole app)
+
+    // 4. Update local icon state
     setTheme(newTheme);
+
+    // 5. Restore transitions on the next frame after DOM has repainted
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        root.classList.remove('no-transitions');
+      });
+    });
   };
 
   return (
     <button
       onClick={handleToggle}
-      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 cursor-pointer"
       title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
     >
       {theme === 'dark' ? (

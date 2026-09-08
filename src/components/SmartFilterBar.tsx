@@ -202,7 +202,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   const totalDestinationsCount = allDestinations.length > 0 ? allDestinations.length : 127;
 
   return (
-    <div className="sticky top-16 z-30 w-full bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-xl border-y border-slate-200/90 dark:border-slate-800/80 py-3 px-3 sm:px-6 lg:px-8 shadow-sm transition-colors duration-200">
+    <div className="sticky top-16 z-30 w-full bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-xl border-y border-slate-200/90 dark:border-slate-800/80 py-3 px-3 sm:px-6 lg:px-8 shadow-sm">
       <div className="max-w-[1700px] mx-auto">
         
         {/* Main Controls: Customer Search, Destination Search & Reset Button */}

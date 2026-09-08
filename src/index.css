@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Zero-lag theme switch: disable all transitions while switching themes */
+.no-transitions,
+.no-transitions *,
+.no-transitions *::before,
+.no-transitions *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
 @layer base {
   :root {
     /* Eye-Soothing Warm Alabaster & Slate (Light Mode) */
