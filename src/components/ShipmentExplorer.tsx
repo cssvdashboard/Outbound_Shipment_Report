@@ -239,21 +239,21 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
         {/* Dynamic Metric Badges Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold"><strong>Average TT:</strong></span>
-            <span className="text-sm font-black text-indigo-700 dark:text-indigo-400 font-mono"><strong>{tableSummary.avgTT} days</strong></span>
+          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>Average TT:</strong></span>
+            <span className="text-sm font-black text-indigo-800 dark:text-indigo-400 font-mono"><strong>{tableSummary.avgTT} days</strong></span>
           </div>
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold"><strong>On-Time Rate:</strong></span>
-            <span className="text-sm font-black text-emerald-700 dark:text-emerald-400 font-mono"><strong>{tableSummary.onTimePct}%</strong></span>
+          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>On-Time Rate:</strong></span>
+            <span className="text-sm font-black text-emerald-800 dark:text-emerald-400 font-mono"><strong>{tableSummary.onTimePct}%</strong></span>
           </div>
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold"><strong>Gross Weight:</strong></span>
+          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>Gross Weight:</strong></span>
             <span className="text-sm font-black text-slate-900 dark:text-white font-mono"><strong>{tableSummary.totalWt} kg</strong></span>
           </div>
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold"><strong>Active Delays:</strong></span>
-            <span className="text-sm font-black text-amber-700 dark:text-amber-400 font-mono"><strong>{tableSummary.delaysCount} AWBs</strong></span>
+          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>Active Delays:</strong></span>
+            <span className="text-sm font-black text-amber-800 dark:text-amber-400 font-mono"><strong>{tableSummary.delaysCount} AWBs</strong></span>
           </div>
         </div>
 
@@ -271,7 +271,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 setCurrentPage(1);
               }}
               placeholder="Search across all fields: AWB Tracking #, Shipper Name, Customer, Destination, Recipient, Remarks..."
-              className="w-full pl-10 pr-9 py-2 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-700/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              className="w-full pl-10 pr-9 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-950/90 border border-slate-300 dark:border-slate-700/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 shadow-sm"
             />
             {searchTerm && (
               <button
@@ -302,12 +302,12 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   setQuickFilter(pill.id as any);
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   quickFilter === pill.id
                     ? pill.id === 'rts'
-                      ? 'bg-rose-600 text-white shadow-md shadow-rose-500/40 font-black'
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-500/30 font-black'
                       : 'bg-blue-600 text-white shadow-md shadow-blue-500/30 font-black'
-                    : 'bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 shadow-sm dark:bg-slate-900/80 dark:text-slate-400 dark:hover:text-slate-200 dark:border-slate-800 dark:hover:border-slate-700'
                 }`}
               >
                 <span><strong>{pill.label}</strong></span>
@@ -319,14 +319,14 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       </div>
 
       {/* 2. MAIN WIDESCREEN TABLE CONTAINER */}
-      <div className="glass-card rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/40">
+      <div className="rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/40">
         <div className="max-h-[640px] overflow-x-auto overflow-y-auto">
           <table className="w-full text-center text-xs border-collapse border-spacing-0">
-            <thead className="sticky top-0 bg-slate-100 dark:bg-[#0f172a] border-b border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
+            <thead className="sticky top-0 bg-slate-100 dark:bg-[#0f172a] border-b-2 border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
               <tr className="border-b border-slate-200 dark:border-slate-600">
                 <th
                   onClick={() => handleSort('awb')}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[170px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
+                  className="py-3 px-4 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[170px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>AWB Tracking #</strong></span>
@@ -336,7 +336,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('destination')}
-                  className="py-3.5 px-3 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[90px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
+                  className="py-3 px-3 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[90px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Dest</strong></span>
@@ -346,7 +346,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('customer')}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
+                  className="py-3 px-4 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Customer Account</strong></span>
@@ -356,7 +356,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('shprName')}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
+                  className="py-3 px-4 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[220px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Shipper Name</strong></span>
@@ -364,13 +364,13 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[200px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle">
+                <th className="py-3 px-4 min-w-[200px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle">
                   <strong>Recipient &amp; Destination City</strong>
                 </th>
 
                 <th
                   onClick={() => handleSort('tt')}
-                  className="py-3.5 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>TT (Days)</strong></span>
@@ -380,7 +380,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('ttRange')}
-                  className="py-3.5 px-3 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Timeline</strong></span>
@@ -390,7 +390,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                 <th
                   onClick={() => handleSort('finalResolution')}
-                  className="py-3.5 px-3 cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <span><strong>Resolution</strong></span>
@@ -398,11 +398,11 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   </div>
                 </th>
 
-                <th className="py-3.5 px-4 min-w-[220px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle">
-                  <strong>Logged Exceptions &amp; Remarks</strong>
+                <th className="py-3 px-4 min-w-[220px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle">
+                  <strong>Logged Delays &amp; Remarks</strong>
                 </th>
 
-                <th className="py-3.5 px-3 text-center min-w-[80px] font-black align-middle">
+                <th className="py-3 px-3 text-center min-w-[80px] font-black align-middle">
                   <strong>Inspect</strong>
                 </th>
               </tr>
@@ -416,11 +416,11 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 return (
                   <tr
                     key={`${s.awb}-${idx}`}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200 transition-colors border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 even:bg-slate-50/50 dark:even:bg-slate-900/80 group"
+                    className="hover:bg-blue-50/50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200 transition-colors border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 even:bg-slate-50/60 dark:even:bg-slate-900/80 group"
                   >
                     {/* AWB with Copy Button */}
-                    <td className="py-3 px-4 font-mono font-bold text-blue-600 dark:text-sky-400 border-r border-slate-200 dark:border-slate-600 text-center align-middle">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="py-2.5 px-4 font-mono font-bold text-blue-700 hover:text-blue-900 dark:text-sky-400 border-r border-slate-200 dark:border-slate-600 text-center align-middle">
+                      <div className="flex items-center justify-center gap-1.5">
                         <span><strong>{s.awb}</strong></span>
                         <button
                           type="button"
@@ -438,58 +438,58 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Destination Country Badge */}
-                    <td className="py-3 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
-                      <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-300 text-slate-800 dark:bg-slate-800 dark:border-slate-700 font-mono font-bold text-xs dark:text-white shadow-sm">
+                    <td className="py-2.5 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
+                      <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-300 text-slate-900 dark:bg-slate-800 dark:border-slate-700 font-mono font-bold text-xs dark:text-white shadow-xs">
                         <strong>{s.destination}</strong>
                       </span>
                     </td>
 
                     {/* Customer Account Name */}
-                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.customer}>
-                      <div className="line-clamp-2 leading-relaxed text-center">
-                        <strong>{s.customer}</strong>
+                    <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.customer}>
+                      <div className="line-clamp-2 leading-relaxed text-center font-bold">
+                        {s.customer}
                       </div>
                     </td>
 
                     {/* Shipper Name */}
-                    <td className="py-3 px-4 text-slate-700 dark:text-slate-300 font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.shprName}>
-                      <div className="line-clamp-2 leading-relaxed font-normal text-center">
+                    <td className="py-2.5 px-4 text-slate-700 dark:text-slate-300 font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.shprName}>
+                      <div className="line-clamp-2 leading-relaxed text-center">
                         {s.shprName}
                       </div>
                     </td>
 
                     {/* Recipient & City */}
-                    <td className="py-3 px-4 border-r border-slate-200 dark:border-slate-600 text-center align-middle">
-                      <div className="font-semibold text-slate-800 dark:text-slate-300 line-clamp-1 text-center" title={s.recipient || 'N/A'}>
+                    <td className="py-2.5 px-4 border-r border-slate-200 dark:border-slate-600 text-center align-middle">
+                      <div className="font-semibold text-slate-900 dark:text-slate-300 line-clamp-1 text-center" title={s.recipient || 'N/A'}>
                         {s.recipient || '-'}
                       </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 text-center">
+                      <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1 text-center font-medium">
                         {s.city ? `${s.city}, ${s.destination}` : s.destination}
                       </div>
                     </td>
 
                     {/* Transit Time */}
-                    <td className="py-3 px-3 text-center font-mono font-extrabold text-sm border-r border-slate-200 dark:border-slate-600 align-middle">
+                    <td className="py-2.5 px-3 text-center font-mono font-extrabold text-sm border-r border-slate-200 dark:border-slate-600 align-middle">
                       <span
                         className={
                           s.tt <= 4.5
-                            ? 'text-emerald-700 dark:text-emerald-400 font-black'
+                            ? 'text-emerald-800 dark:text-emerald-400 font-black'
                             : s.tt <= 5.5
-                            ? 'text-amber-700 dark:text-amber-400 font-black'
-                            : 'text-rose-700 dark:text-rose-400 font-black'
+                            ? 'text-amber-800 dark:text-amber-400 font-black'
+                            : 'text-rose-800 dark:text-rose-400 font-black'
                         }
                       >
-                        <strong>{formattedDays}</strong> <span className="text-xs font-normal text-slate-500 dark:text-slate-400">d</span>
+                        <strong>{formattedDays}</strong> <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">d</span>
                       </span>
                     </td>
 
                     {/* Delivery Timeline Pill */}
-                    <td className="py-3 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
+                    <td className="py-2.5 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold border shadow-xs ${
                           s.ttRange === 'Within 4-5 Days' || s.tt <= 5
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
-                            : 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
+                            ? 'bg-emerald-100/70 text-emerald-900 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
+                            : 'bg-amber-100/70 text-amber-900 border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
                         }`}
                       >
                         <strong>{s.tt <= 5 ? 'Within 4-5d' : '> 5 Days'}</strong>
@@ -497,47 +497,47 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Final Resolution Pill */}
-                    <td className="py-3 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
+                    <td className="py-2.5 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold border shadow-xs ${
                           s.finalResolution === 'Delivered'
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
+                            ? 'bg-emerald-100/80 text-emerald-900 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
                             : s.finalResolution === 'RTS'
-                            ? 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 font-black shadow-sm'
+                            ? 'bg-rose-100 text-rose-950 border-rose-400 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 font-black'
                             : s.finalResolution === 'Lost'
-                            ? 'bg-red-50 text-red-800 border-red-300 dark:bg-red-600/30 dark:text-red-200 dark:border-red-500/60 font-black shadow-sm'
+                            ? 'bg-red-100 text-red-950 border-red-400 dark:bg-red-600/30 dark:text-red-200 dark:border-red-500/60 font-black'
                             : s.finalResolution === 'Destroyed'
-                            ? 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800/80 font-black shadow-sm'
+                            ? 'bg-rose-100 text-rose-950 border-rose-400 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800/80 font-black'
                             : s.finalResolution === 'Seized'
-                            ? 'bg-red-100 text-red-900 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700/80 font-black shadow-sm'
+                            ? 'bg-red-100 text-red-950 border-red-400 dark:bg-red-950 dark:text-red-300 dark:border-red-700/80 font-black'
                             : s.finalResolution === 'Undelivered'
-                            ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 font-bold'
-                            : 'bg-indigo-50 text-indigo-800 border-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30'
+                            ? 'bg-amber-100 text-amber-950 border-amber-400 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 font-bold'
+                            : 'bg-indigo-100 text-indigo-950 border-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30'
                         }`}
                       >
                         {['RTS', 'Lost', 'Destroyed', 'Seized'].includes(s.finalResolution) && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-600 mr-1 animate-pulse" />
                         )}
                         <strong>{s.finalResolution || 'Delivered'}</strong>
                       </span>
                     </td>
 
                     {/* Logged Delays & Remarks */}
-                    <td className="py-3 px-4 text-xs font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle">
+                    <td className="py-2.5 px-4 text-xs font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle">
                       {s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                        <div className="text-amber-700 dark:text-amber-300 font-bold line-clamp-1 text-center" title={`Clearance Delay: ${s.clearanceDelay}`}>
-                          📋 <strong>{s.clearanceDelay}</strong>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-amber-300 text-center" title={`Clearance Delay: ${s.clearanceDelay}`}>
+                          <span>📋</span> <span className="truncate"><strong>{s.clearanceDelay}</strong></span>
                         </div>
                       ) : s.transitDelay && s.transitDelay !== '-' ? (
-                        <div className="text-indigo-700 dark:text-indigo-300 font-bold line-clamp-1 text-center" title={`Transit Delay: ${s.transitDelay}`}>
-                          ✈️ <strong>{s.transitDelay}</strong>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 text-indigo-900 border border-indigo-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-indigo-300 text-center" title={`Transit Delay: ${s.transitDelay}`}>
+                          <span>✈️</span> <span className="truncate"><strong>{s.transitDelay}</strong></span>
                         </div>
                       ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                        <div className="text-rose-700 dark:text-rose-300 font-bold line-clamp-1 text-center" title={`Destination Delay: ${s.destinationDelay}`}>
-                          🚚 <strong>{s.destinationDelay}</strong>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-900 border border-rose-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-rose-300 text-center" title={`Destination Delay: ${s.destinationDelay}`}>
+                          <span>🚚</span> <span className="truncate"><strong>{s.destinationDelay}</strong></span>
                         </div>
                       ) : s.remarks && s.remarks !== '-' ? (
-                        <div className="text-slate-600 dark:text-slate-400 line-clamp-1 font-normal text-center" title={s.remarks}>
+                        <div className="text-slate-700 dark:text-slate-400 line-clamp-1 font-medium text-center text-[11px]" title={s.remarks}>
                           💬 {s.remarks}
                         </div>
                       ) : (
@@ -546,14 +546,14 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     </td>
 
                     {/* Inspect Button */}
-                    <td className="py-3 px-3 text-center align-middle">
+                    <td className="py-2.5 px-3 text-center align-middle">
                       <button
                         type="button"
                         onClick={() => setSelectedShipment(s)}
-                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-sky-600 text-slate-600 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-sky-600 dark:hover:text-white transition-colors cursor-pointer border border-slate-200 dark:border-transparent"
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-sky-600 dark:hover:text-white transition-colors cursor-pointer border border-slate-300 dark:border-transparent shadow-xs"
                         title="View Full Shipment Dossier"
                       >
-                        <Eye className="w-3.5 h-3.5 text-sky-600 group-hover:text-white dark:text-sky-400" />
+                        <Eye className="w-3.5 h-3.5 text-blue-600 group-hover:text-white dark:text-sky-400" />
                       </button>
                     </td>
                   </tr>
