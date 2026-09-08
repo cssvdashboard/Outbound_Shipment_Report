@@ -182,9 +182,9 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     return aug?.monthId || (months.length > 1 ? months[1].monthId : (months[0]?.monthId || ''));
   }, [months]);
 
-  // State for Side-by-Side Weekday & Week Comparison
-  const [selectedWeek, setSelectedWeek] = useState<number | 'ALL'>(1);
-  const [selectedWeekday, setSelectedWeekday] = useState<number | 'ALL'>(1); // Monday by default
+  // State for Side-by-Side Weekday & Week Comparison (Defaults to All Weeks and All Weekdays)
+  const [selectedWeek, setSelectedWeek] = useState<number | 'ALL'>('ALL');
+  const [selectedWeekday, setSelectedWeekday] = useState<number | 'ALL'>('ALL');
   const [leftMonthId, setLeftMonthId] = useState<string>('');
   const [rightMonthId, setRightMonthId] = useState<string>('');
 
@@ -980,7 +980,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               {/* Short Customer Search */}
               <div className="relative w-56 sm:w-72" ref={customerDropdownRef}>
                 <div className="relative flex items-center">
-                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-emerald-400">
+                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-emerald-600 dark:text-emerald-400">
                     <Users className="w-3.5 h-3.5" />
                   </div>
                   <input
@@ -994,10 +994,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     onKeyDown={handleCustomerKeyDown}
                     title={selectedCustomer ? `Customer: ${selectedCustomer}` : (sectionCustomerSearch || 'Search customer...')}
                     placeholder="Search customer..."
-                    className={`w-full pl-7 pr-7 py-1 rounded-lg text-xs bg-slate-950 text-slate-100 placeholder-slate-500 border transition-all focus:outline-none ${
+                    className={`w-full pl-7 pr-7 py-1.5 rounded-lg text-xs transition-all focus:outline-none shadow-sm ${
                       selectedCustomer
-                        ? 'border-emerald-500/70 ring-1 ring-emerald-500/40 text-emerald-300 font-bold'
-                        : 'border-slate-700 hover:border-slate-600 focus:border-indigo-500'
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-950 ring-1 ring-emerald-400/40 dark:bg-slate-950 dark:border-emerald-500/70 dark:ring-emerald-500/40 dark:text-emerald-300 font-bold border'
+                        : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-indigo-500 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500 dark:hover:border-slate-600 border'
                     }`}
                   />
                   {(sectionCustomerSearch || selectedCustomer) ? (
@@ -1007,7 +1007,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                         setSectionCustomerSearch('');
                         onCustomerChange?.('ALL');
                       }}
-                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-rose-400 cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer"
                       title="Clear customer"
                     >
                       <X className="w-3 h-3" />
@@ -1016,19 +1016,19 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsCustomerDropdownOpen(!isCustomerDropdownOpen)}
-                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-500 hover:text-emerald-400 cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-emerald-400 cursor-pointer"
                     >
-                      <ChevronDown className={`w-3 h-3 transition-transform ${isCustomerDropdownOpen ? 'rotate-180 text-emerald-400' : ''}`} />
+                      <ChevronDown className={`w-3 h-3 transition-transform ${isCustomerDropdownOpen ? 'rotate-180 text-emerald-600 dark:text-emerald-400' : ''}`} />
                     </button>
                   )}
                 </div>
 
                 {/* Dropdown */}
                 {isCustomerDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-80 sm:w-96 max-h-64 overflow-y-auto z-50 rounded-xl bg-[#0b1329] border border-slate-700 shadow-2xl divide-y divide-slate-800">
-                    <div className="p-2 bg-slate-950/90 text-[10px] font-bold text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-800">
+                  <div className="absolute right-0 top-full mt-1 w-80 sm:w-96 max-h-64 overflow-y-auto z-50 rounded-xl bg-white dark:bg-[#0b1329] border border-slate-200 dark:border-slate-700 shadow-2xl divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="p-2 bg-slate-50 dark:bg-slate-950/90 text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
                       <span>Customers ({matchingCustomers.length})</span>
-                      <span className="text-slate-500">{totalDistinctCustomersCount} Total</span>
+                      <span className="text-slate-400 dark:text-slate-500">{totalDistinctCustomersCount} Total</span>
                     </div>
                     <div className="p-1 space-y-0.5">
                       <button
@@ -1038,7 +1038,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                           setSectionCustomerSearch('');
                           setIsCustomerDropdownOpen(false);
                         }}
-                        className="w-full text-left px-2.5 py-1.5 rounded text-xs text-slate-300 hover:bg-slate-900 font-semibold cursor-pointer"
+                        className="w-full text-left px-2.5 py-1.5 rounded text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold cursor-pointer"
                       >
                         All Customers
                       </button>
@@ -1055,7 +1055,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                           className={`w-full flex items-center justify-between px-2.5 py-2 rounded text-xs text-left transition-colors cursor-pointer gap-2 ${
                             selectedCustomer?.toLowerCase() === cust.name.toLowerCase()
                               ? 'bg-emerald-600 text-white font-bold'
-                              : 'text-slate-300 hover:bg-slate-900'
+                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
                           }`}
                         >
                           <span className="break-words leading-tight flex-1 pr-2">{cust.name}</span>
@@ -1070,7 +1070,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               {/* Short Destination Search */}
               <div className="relative w-32 sm:w-36" ref={destDropdownRef}>
                 <div className="relative flex items-center">
-                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-blue-400">
+                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-blue-600 dark:text-blue-400">
                     <Globe className="w-3.5 h-3.5" />
                   </div>
                   <input
@@ -1083,10 +1083,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     onFocus={() => setIsDestDropdownOpen(true)}
                     onKeyDown={handleDestKeyDown}
                     placeholder="Destination..."
-                    className={`w-full pl-7 pr-7 py-1 rounded-lg text-xs bg-slate-950 text-slate-100 placeholder-slate-500 border transition-all focus:outline-none ${
+                    className={`w-full pl-7 pr-7 py-1.5 rounded-lg text-xs transition-all focus:outline-none shadow-sm ${
                       selectedDestination
-                        ? 'border-blue-500/70 ring-1 ring-blue-500/40 text-blue-300 font-bold'
-                        : 'border-slate-700 hover:border-slate-600 focus:border-indigo-500'
+                        ? 'bg-blue-50 border-blue-400 text-blue-950 ring-1 ring-blue-400/40 dark:bg-slate-950 dark:border-blue-500/70 dark:ring-blue-500/40 dark:text-blue-300 font-bold border'
+                        : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-indigo-500 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500 dark:hover:border-slate-600 border'
                     }`}
                   />
                   {(sectionDestSearch || selectedDestination) ? (
@@ -1096,7 +1096,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                         setSectionDestSearch('');
                         onDestinationChange?.('ALL');
                       }}
-                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-rose-400 cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer"
                       title="Clear destination"
                     >
                       <X className="w-3 h-3" />
@@ -1105,19 +1105,19 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsDestDropdownOpen(!isDestDropdownOpen)}
-                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-500 hover:text-blue-400 cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-blue-400 cursor-pointer"
                     >
-                      <ChevronDown className={`w-3 h-3 transition-transform ${isDestDropdownOpen ? 'rotate-180 text-blue-400' : ''}`} />
+                      <ChevronDown className={`w-3 h-3 transition-transform ${isDestDropdownOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''}`} />
                     </button>
                   )}
                 </div>
 
                 {/* Dropdown */}
                 {isDestDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-48 max-h-56 overflow-y-auto z-50 rounded-xl bg-[#0b1329] border border-slate-700 shadow-2xl divide-y divide-slate-800">
-                    <div className="p-2 bg-slate-950/90 text-[10px] font-bold text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-800">
+                  <div className="absolute right-0 top-full mt-1 w-48 max-h-56 overflow-y-auto z-50 rounded-xl bg-white dark:bg-[#0b1329] border border-slate-200 dark:border-slate-700 shadow-2xl divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="p-2 bg-slate-50 dark:bg-slate-950/90 text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
                       <span>Destinations ({matchingDestinations.length})</span>
-                      <span className="text-slate-500">{distinctDestinations.length} Total</span>
+                      <span className="text-slate-400 dark:text-slate-500">{distinctDestinations.length} Total</span>
                     </div>
                     <div className="p-1">
                       <button
@@ -1127,7 +1127,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                           setSectionDestSearch('');
                           setIsDestDropdownOpen(false);
                         }}
-                        className="w-full text-left px-2.5 py-1.5 rounded text-xs text-slate-300 hover:bg-slate-900 font-semibold cursor-pointer"
+                        className="w-full text-left px-2.5 py-1.5 rounded text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold cursor-pointer"
                       >
                         All Destinations
                       </button>
@@ -1143,7 +1143,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                           className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs text-left transition-colors cursor-pointer ${
                             selectedDestination?.toUpperCase() === code.toUpperCase()
                               ? 'bg-blue-600 text-white font-bold'
-                              : 'text-slate-300 hover:bg-slate-900'
+                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
                           }`}
                         >
                           <span className="font-mono font-bold">{code}</span>
