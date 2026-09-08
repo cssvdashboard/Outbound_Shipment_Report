@@ -347,6 +347,16 @@ export function useLogisticsData() {
     return { min, max };
   }, [rawShipments]);
 
+  // Set of dates (YYYY-MM-DD) that have pickup records for bolding in calendar
+  const availablePickupDates = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of rawShipments) {
+      const d = getPickupISODate(s.pickup);
+      if (d) set.add(d);
+    }
+    return set;
+  }, [rawShipments]);
+
   const setDateRangeFilter = useCallback((start: string, end: string) => {
     setFilters(prev => ({
       ...prev,
@@ -397,6 +407,7 @@ export function useLogisticsData() {
     filters,
     dateRange: filters.dateRange,
     availableDateRange,
+    availablePickupDates,
     setFilters,
     setFilterMode,
     addShipperFilter,

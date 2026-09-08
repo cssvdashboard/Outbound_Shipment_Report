@@ -14,6 +14,7 @@ interface DateRangePickerProps {
   dateRange: { start?: string; end?: string };
   onChange: (start: string, end: string) => void;
   availableDateRange?: { min: string; max: string };
+  availablePickupDates?: Set<string>;
   totalFilteredCount?: number;
   totalRawCount?: number;
 }
@@ -44,6 +45,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   dateRange,
   onChange,
   availableDateRange,
+  availablePickupDates,
   totalFilteredCount
 }) => {
   const [startInput, setStartInput] = useState<string>(dateRange.start || '');
@@ -355,6 +357,15 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               const formattedDay = String(day).padStart(2, '0');
               const cellIso = `${viewYear}-${formattedMonth}-${formattedDay}`;
 
+              const hasPickupData = availablePickupDates
+                ? availablePickupDates.has(cellIso)
+                : Boolean(
+                    availableDateRange?.min &&
+                    availableDateRange?.max &&
+                    cellIso >= availableDateRange.min &&
+                    cellIso <= availableDateRange.max
+                  );
+
               const isSelectedFrom = startInput === cellIso;
               const isSelectedTo = endInput === cellIso;
               const isSelected = activePicker === 'from' ? isSelectedFrom : isSelectedTo;
@@ -370,47 +381,60 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   key={day}
                   type="button"
                   onClick={() => handleSelectDate(day)}
-                  className={`w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+                  title={hasPickupData ? `${cellIso} (Pickup records available)` : `${cellIso} (No pickup records)`}
+                  className={`relative w-8 h-8 rounded-lg text-xs flex flex-col items-center justify-center transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105 font-black ring-2 ring-blue-400/40'
                       : isSelectedFrom || isSelectedTo
                       ? 'bg-blue-500 text-white font-black'
                       : isInRange
-                      ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/70'
-                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600'
+                      ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-200 dark:hover:bg-blue-900/70'
+                      : hasPickupData
+                      ? 'font-black text-slate-950 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600'
+                      : 'font-normal text-slate-400/40 dark:text-slate-600/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/40'
                   }`}
                 >
-                  {day}
+                  <span className={hasPickupData ? 'font-black' : 'font-normal'}>{day}</span>
+                  {hasPickupData && !isSelected && !isInRange && (
+                    <span className="w-1 h-1 rounded-full bg-blue-500/70 dark:bg-blue-400/80 -mt-0.5" />
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Footer Controls in Calendar */}
+          {/* Footer Controls & Legend in Calendar */}
           <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                if (activePicker === 'from') {
-                  setStartInput('');
-                  if (!endInput) onChange('', '');
-                } else {
-                  setEndInput('');
-                  if (!startInput) onChange('', '');
-                }
-              }}
-              className="text-[11px] font-bold text-slate-500 hover:text-rose-500 transition-colors cursor-pointer"
-            >
-              Clear {activePicker === 'from' ? 'From' : 'To'}
-            </button>
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
+              <span>Bold = Has pickup data</span>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setActivePicker(null)}
-              className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors cursor-pointer shadow-sm shadow-blue-500/20"
-            >
-              Done
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (activePicker === 'from') {
+                    setStartInput('');
+                    if (!endInput) onChange('', '');
+                  } else {
+                    setEndInput('');
+                    if (!startInput) onChange('', '');
+                  }
+                }}
+                className="text-[11px] font-bold text-slate-500 hover:text-rose-500 transition-colors cursor-pointer"
+              >
+                Clear {activePicker === 'from' ? 'From' : 'To'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActivePicker(null)}
+                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors cursor-pointer shadow-sm shadow-blue-500/20"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}

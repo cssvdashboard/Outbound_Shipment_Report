@@ -29,6 +29,7 @@ interface HeaderProps {
   dateRange: { start?: string; end?: string };
   onDateRangeChange: (start: string, end: string) => void;
   availableDateRange?: { min: string; max: string };
+  availablePickupDates?: Set<string>;
   allMonths?: string[];
   selectedMonth?: string;
   onMonthChange?: (month: string) => void;
@@ -48,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
   dateRange,
   onDateRangeChange,
   availableDateRange,
+  availablePickupDates,
   onThemeToggle,
   onResetToDefault,
   activeTab,
@@ -96,6 +98,7 @@ export const Header: React.FC<HeaderProps> = ({
               dateRange={dateRange}
               onChange={onDateRangeChange}
               availableDateRange={availableDateRange}
+              availablePickupDates={availablePickupDates}
               totalFilteredCount={totalFilteredCount}
               totalRawCount={totalRawCount}
             />
@@ -163,6 +166,7 @@ export const Header: React.FC<HeaderProps> = ({
             dateRange={dateRange}
             onChange={onDateRangeChange}
             availableDateRange={availableDateRange}
+            availablePickupDates={availablePickupDates}
             totalFilteredCount={totalFilteredCount}
             totalRawCount={totalRawCount}
           />

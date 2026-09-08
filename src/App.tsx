@@ -50,7 +50,8 @@ export const App: React.FC = () => {
     allMonths,
     dateRange,
     setDateRangeFilter,
-    availableDateRange
+    availableDateRange,
+    availablePickupDates
   } = useLogisticsData();
 
   // 1. Initialize theme from storage
@@ -154,6 +155,7 @@ export const App: React.FC = () => {
           dateRange={dateRange || { start: '', end: '' }}
           onDateRangeChange={setDateRangeFilter}
           availableDateRange={availableDateRange}
+          availablePickupDates={availablePickupDates}
           allMonths={allMonths}
           selectedMonth={filters.selectedMonth || 'ALL'}
           onMonthChange={setMonthFilter}
