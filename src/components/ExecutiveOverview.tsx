@@ -369,68 +369,68 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <button
               type="button"
               onClick={() => onSelectTTRange('Within 4-5 Days')}
-              className={`p-3 rounded-xl text-left transition-all ${
+              className={`p-3 sm:p-4 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 ${
                 selectedTTRange === 'Within 4-5 Days'
-                  ? 'bg-emerald-500/25 border-2 border-emerald-400 shadow-glow-emerald'
-                  : 'bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15'
+                  ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-400/30 shadow-glow-emerald'
+                  : 'border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/15 shadow-sm hover:shadow-md'
               }`}
             >
-              <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold mb-1">
-                <span>Within 4–5 Days</span>
-                <span>{summary.onTimePercentage}%</span>
+              <div className="flex items-center justify-between text-xs font-black mb-1">
+                <span className="text-emerald-800 dark:text-emerald-400 font-extrabold uppercase text-[11px] tracking-wider">Within 4–5 Days</span>
+                <span className="font-mono font-black text-emerald-700 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md border border-emerald-300 dark:border-none">{summary.onTimePercentage}%</span>
               </div>
-              <div className="text-lg font-bold text-slate-900 dark:text-white">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white mt-1">
                 {summary.onTimeCount.toLocaleString()}
-                <span className="text-xs font-normal text-slate-400 ml-1">AWBs</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
               </div>
-              <div className="w-full bg-emerald-950/60 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div className="w-full bg-slate-200 dark:bg-emerald-950/60 rounded-full h-2 mt-2 overflow-hidden">
                 <div
-                  className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500"
+                  className="bg-emerald-500 dark:bg-emerald-400 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${summary.onTimePercentage}%` }}
                 />
               </div>
-              <div className="text-[10px] text-emerald-400/80 mt-1.5 font-medium">
-                {selectedTTRange === 'Within 4-5 Days' ? '✓ Filter Applied (Click to reset)' : 'Click to filter on-time'}
+              <div className="text-[11px] text-emerald-700 dark:text-emerald-400/80 mt-1.5 font-bold">
+                {selectedTTRange === 'Within 4-5 Days' ? '✓ Filter Applied (Click to reset)' : 'Click to filter on-time →'}
               </div>
             </button>
 
             <button
               type="button"
               onClick={() => onSelectTTRange('More Than 5 Days')}
-              className={`p-3 rounded-xl text-left transition-all ${
+              className={`p-3 sm:p-4 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 ${
                 selectedTTRange === 'More Than 5 Days'
-                  ? 'bg-amber-500/25 border-2 border-amber-400 shadow-glow-amber'
-                  : 'bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15'
+                  ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-400/30 shadow-glow-amber'
+                  : 'border-amber-200 dark:border-amber-500/20 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-500/15 shadow-sm hover:shadow-md'
               }`}
             >
-              <div className="flex items-center justify-between text-xs text-amber-400 font-semibold mb-1">
-                <span>&gt; 5 Working Days</span>
-                <span>{summary.delayedTimelinePercentage}%</span>
+              <div className="flex items-center justify-between text-xs font-black mb-1">
+                <span className="text-amber-800 dark:text-amber-400 font-extrabold uppercase text-[11px] tracking-wider">&gt; 5 Working Days</span>
+                <span className="font-mono font-black text-amber-700 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-950/60 px-1.5 py-0.5 rounded-md border border-amber-300 dark:border-none">{summary.delayedTimelinePercentage}%</span>
               </div>
-              <div className="text-lg font-bold text-slate-900 dark:text-white">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white mt-1">
                 {summary.delayedTimelineCount.toLocaleString()}
-                <span className="text-xs font-normal text-slate-400 ml-1">AWBs</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
               </div>
-              <div className="w-full bg-amber-950/60 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div className="w-full bg-slate-200 dark:bg-amber-950/60 rounded-full h-2 mt-2 overflow-hidden">
                 <div
-                  className="bg-amber-400 h-1.5 rounded-full transition-all duration-500"
+                  className="bg-amber-500 dark:bg-amber-400 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${summary.delayedTimelinePercentage}%` }}
                 />
               </div>
-              <div className="text-[10px] text-amber-400/80 mt-1.5 font-medium">
-                {selectedTTRange === 'More Than 5 Days' ? '✓ Filter Applied (Click to reset)' : 'Click to filter delayed'}
+              <div className="text-[11px] text-amber-700 dark:text-amber-400/80 mt-1.5 font-bold">
+                {selectedTTRange === 'More Than 5 Days' ? '✓ Filter Applied (Click to reset)' : 'Click to filter delayed →'}
               </div>
             </button>
           </div>
         </div>
 
         {/* REQUIREMENT 3: Final Resolution Breakdown (CLICK TO OPEN POPUP MODAL) */}
-        <div className="lg:col-span-7 glass-card p-5 rounded-2xl flex flex-col justify-between">
+        <div className="lg:col-span-7 glass-card p-5 rounded-2xl flex flex-col justify-between bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-blue-400" />
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                <ShieldAlert className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
                   Final Resolution &amp; Outcome Status
                 </h2>
               </div>
@@ -438,13 +438,13 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
             {/* Visual Status Progress Multi-Bar */}
             <div className="my-4">
-              <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
-                <span className="font-semibold text-slate-700 dark:text-slate-300">Delivery Success vs Exceptions</span>
-                <span className="font-mono text-emerald-400 font-bold">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+                <span className="font-extrabold text-slate-700 dark:text-slate-300">Delivery Success vs Exceptions</span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-black">
                   {finalResolutions.find(r => r.name.toLowerCase() === 'delivered')?.percentage || 0}% Delivered
                 </span>
               </div>
-              <div className="h-3 w-full bg-slate-900 rounded-full overflow-hidden flex">
+              <div className="h-3 w-full bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden flex border border-slate-200 dark:border-transparent">
                 {finalResolutions.map((res) => (
                   <div
                     key={res.name}
@@ -481,12 +481,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
-                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border ${
+                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border-2 ${
                       isNegative
-                        ? 'bg-gradient-to-br from-rose-950/40 via-red-950/20 to-slate-900/90 border-rose-900/60 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.25)] hover:scale-[1.02] active:scale-[0.98]'
+                        ? 'bg-white dark:bg-gradient-to-br dark:from-rose-950/40 dark:via-red-950/20 dark:to-slate-900/90 border-rose-200 dark:border-rose-900/60 hover:border-rose-500 hover:bg-rose-50/50 dark:hover:border-rose-500 hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(239,68,68,0.25)] hover:scale-[1.02] active:scale-[0.98]'
                         : isSuccess
-                        ? 'bg-gradient-to-br from-emerald-950/30 via-slate-900/90 to-slate-900 border-emerald-900/50 hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
+                        ? 'bg-white dark:bg-gradient-to-br dark:from-emerald-950/30 dark:via-slate-900/90 dark:to-slate-900 border-emerald-200 dark:border-emerald-900/50 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:border-emerald-500 hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
+                        : 'bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500/60 hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
@@ -501,23 +501,23 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                             style={{ backgroundColor: res.color }}
                           />
                         )}
-                        <span className={`text-xs font-bold truncate ${
+                        <span className={`text-xs font-black truncate ${
                           isNegative 
-                            ? 'text-rose-200 group-hover:text-rose-100 font-extrabold' 
+                            ? 'text-rose-900 dark:text-rose-200 group-hover:text-rose-700 dark:group-hover:text-rose-100' 
                             : isSuccess 
-                            ? 'text-emerald-200 group-hover:text-emerald-100' 
-                            : 'text-slate-200 group-hover:text-blue-300'
+                            ? 'text-emerald-900 dark:text-emerald-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-100' 
+                            : 'text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-300'
                         }`}>
                           {res.name}
                         </span>
                       </div>
                       {isNegative && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30">
                           Negative
                         </span>
                       )}
                       {isSuccess && (
-                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
                           Success
                         </span>
                       )}
@@ -525,28 +525,28 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
                     <div className="mt-2.5 flex items-baseline justify-between">
                       <span className={`text-lg font-black font-mono tracking-tight ${
-                        isNegative ? 'text-rose-400 group-hover:text-rose-300' : isSuccess ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-white'
+                        isNegative ? 'text-rose-600 dark:text-rose-400 group-hover:text-rose-700 dark:group-hover:text-rose-300' : isSuccess ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300' : 'text-slate-900 dark:text-white'
                       }`}>
                         {res.count.toLocaleString()}
                       </span>
                       <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
                         isNegative 
-                          ? 'bg-rose-950/60 text-rose-300 border border-rose-900/50' 
+                          ? 'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-900/50' 
                           : isSuccess 
-                          ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50' 
-                          : 'text-slate-400 bg-slate-800/80 border border-slate-700/50'
+                          ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-900/50' 
+                          : 'text-slate-700 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-slate-800/80 dark:border-slate-700/50'
                       }`}>
                         {res.percentage}%
                       </span>
                     </div>
 
-                    <div className={`mt-1.5 text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ${
-                      isNegative ? 'text-rose-400' : isSuccess ? 'text-emerald-400' : 'text-blue-400'
+                    <div className={`mt-1.5 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ${
+                      isNegative ? 'text-rose-600 dark:text-rose-400' : isSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'
                     }`}>
                       {isNegative ? (
-                        <><AlertTriangle className="w-3 h-3 text-rose-400" /> Negative outlier • View popup →</>
+                        <><AlertTriangle className="w-3 h-3 text-rose-500" /> Negative outlier • View popup →</>
                       ) : isSuccess ? (
-                        <><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Delivered • View popup →</>
+                        <><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Delivered • View popup →</>
                       ) : (
                         <><Eye className="w-3 h-3" /> Click to view details →</>
                       )}
@@ -1051,57 +1051,57 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-indigo-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group"
+          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-indigo-100 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
         >
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 transition-transform">
+          <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border dark:border-indigo-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Plane className="w-4 h-4" />
           </div>
-          <div className="text-xs font-bold text-slate-400">
+          <div className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>Transit Delay Incidents</strong>
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-baseline justify-center gap-1">
+          <div className="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-white mt-1.5 flex items-baseline justify-center gap-1.5">
             <span><strong>{summary.transitDelayCount.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-400">AWBs</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">AWBs</span>
           </div>
-          <span className="text-[11px] text-indigo-400 font-semibold mt-1">
+          <span className="text-xs text-indigo-700 dark:text-indigo-400 font-extrabold mt-1.5 group-hover:underline">
             CDG, US, Gateway bottlenecks →
           </span>
         </div>
 
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-amber-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group"
+          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-amber-200 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
         >
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform">
+          <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400 dark:border dark:border-amber-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <FileText className="w-4 h-4" />
           </div>
-          <div className="text-xs font-bold text-slate-400">
+          <div className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>Customs Clearance Delays</strong>
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-baseline justify-center gap-1">
+          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-white mt-1.5 flex items-baseline justify-center gap-1.5">
             <span><strong>{summary.clearanceDelayCount.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-400">AWBs</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">AWBs</span>
           </div>
-          <span className="text-[11px] text-amber-400 font-semibold mt-1">
+          <span className="text-xs text-amber-700 dark:text-amber-400 font-extrabold mt-1.5 group-hover:underline">
             Invoices, KYC, Inspections →
           </span>
         </div>
 
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 rounded-2xl cursor-pointer hover:border-rose-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group"
+          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-rose-200 dark:border-white/10 hover:border-rose-400 dark:hover:border-rose-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
         >
-          <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20 group-hover:scale-110 transition-transform">
+          <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-rose-500 text-white shadow-md shadow-rose-500/30 dark:bg-rose-500/15 dark:text-rose-400 dark:border dark:border-rose-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Truck className="w-4 h-4" />
           </div>
-          <div className="text-xs font-bold text-slate-400">
+          <div className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
             <strong>Destination Delays</strong>
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-baseline justify-center gap-1">
+          <div className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-white mt-1.5 flex items-baseline justify-center gap-1.5">
             <span><strong>{summary.destinationDelayCount.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-400">AWBs</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">AWBs</span>
           </div>
-          <span className="text-[11px] text-rose-400 font-semibold mt-1">
+          <span className="text-xs text-rose-700 dark:text-rose-400 font-extrabold mt-1.5 group-hover:underline">
             Last-mile &amp; delivery exceptions →
           </span>
         </div>
