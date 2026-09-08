@@ -419,15 +419,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             setModalSearch('');
             setModalCurrentPage(1);
           }}
-          className="glass-card p-3 rounded-xl border-2 border-amber-300 dark:border-yellow-500/40 bg-amber-50/70 dark:bg-yellow-500/10 flex items-center gap-3 cursor-pointer hover:bg-amber-100/70 dark:hover:bg-yellow-500/20 hover:border-amber-400 dark:hover:border-yellow-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm"
+          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-yellow-500/40 bg-white dark:bg-yellow-500/10 flex items-center gap-3 cursor-pointer hover:border-amber-400 dark:hover:border-yellow-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
           title="Click to view all delayed shipments across all destinations"
         >
-          <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-yellow-500/20 border border-amber-300 dark:border-yellow-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <AlertTriangle className="w-4 h-4 text-amber-700 dark:text-yellow-400" />
+          <div className="w-9 h-9 rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-yellow-500/20 dark:border dark:border-yellow-500/40 dark:text-yellow-400">
+            <AlertTriangle className="w-4 h-4 text-white dark:text-yellow-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider group-hover:text-amber-900 dark:group-hover:text-yellow-200 transition-colors">Total Delays</div>
-            <div className="text-base font-black text-amber-800 dark:text-yellow-400 font-mono group-hover:underline">{summaryTotals.totalAllDelays.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-amber-600 dark:group-hover:text-yellow-200 transition-colors">Total Delays</div>
+            <div className="text-base font-black text-amber-600 dark:text-yellow-400 font-mono group-hover:underline">{summaryTotals.totalAllDelays.toLocaleString()}</div>
           </div>
         </div>
 
@@ -438,15 +438,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             setModalSearch('');
             setModalCurrentPage(1);
           }}
-          className="glass-card p-3 rounded-xl border-2 border-purple-300 dark:border-purple-500/40 bg-purple-50/70 dark:bg-purple-500/10 flex items-center gap-3 cursor-pointer hover:bg-purple-100/70 dark:hover:bg-purple-500/20 hover:border-purple-400 dark:hover:border-purple-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm"
+          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-purple-500/40 bg-white dark:bg-purple-500/10 flex items-center gap-3 cursor-pointer hover:border-purple-400 dark:hover:border-purple-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
           title="Click to view all clearance delay shipments"
         >
-          <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-500/20 border border-purple-300 dark:border-purple-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <ShieldAlert className="w-4 h-4 text-purple-700 dark:text-purple-400" />
+          <div className="w-9 h-9 rounded-lg bg-purple-500 text-white shadow-sm shadow-purple-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-purple-500/20 dark:border dark:border-purple-500/40 dark:text-purple-400">
+            <ShieldAlert className="w-4 h-4 text-white dark:text-purple-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider group-hover:text-purple-900 dark:group-hover:text-purple-200 transition-colors">Clearance Delays</div>
-            <div className="text-base font-black text-purple-800 dark:text-purple-400 font-mono group-hover:underline">{summaryTotals.totalClearance.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-purple-600 dark:group-hover:text-purple-200 transition-colors">Clearance Delays</div>
+            <div className="text-base font-black text-purple-600 dark:text-purple-400 font-mono group-hover:underline">{summaryTotals.totalClearance.toLocaleString()}</div>
           </div>
         </div>
 
@@ -457,15 +457,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             setModalSearch('');
             setModalCurrentPage(1);
           }}
-          className="glass-card p-3 rounded-xl border-2 border-sky-300 dark:border-sky-500/40 bg-sky-50/70 dark:bg-sky-500/10 flex items-center gap-3 cursor-pointer hover:bg-sky-100/70 dark:hover:bg-sky-500/20 hover:border-sky-400 dark:hover:border-sky-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm"
+          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-sky-500/40 bg-white dark:bg-sky-500/10 flex items-center gap-3 cursor-pointer hover:border-sky-400 dark:hover:border-sky-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
           title="Click to view all transit delay shipments"
         >
-          <div className="w-9 h-9 rounded-lg bg-sky-100 dark:bg-sky-500/20 border border-sky-300 dark:border-sky-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <Plane className="w-4 h-4 text-sky-700 dark:text-sky-400" />
+          <div className="w-9 h-9 rounded-lg bg-sky-500 text-white shadow-sm shadow-sky-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-sky-500/20 dark:border dark:border-sky-500/40 dark:text-sky-400">
+            <Plane className="w-4 h-4 text-white dark:text-sky-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider group-hover:text-sky-900 dark:group-hover:text-sky-200 transition-colors">Transit Delays</div>
-            <div className="text-base font-black text-sky-800 dark:text-sky-400 font-mono group-hover:underline">{summaryTotals.totalTransit.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-sky-600 dark:group-hover:text-sky-200 transition-colors">Transit Delays</div>
+            <div className="text-base font-black text-sky-600 dark:text-sky-400 font-mono group-hover:underline">{summaryTotals.totalTransit.toLocaleString()}</div>
           </div>
         </div>
 
@@ -476,15 +476,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             setModalSearch('');
             setModalCurrentPage(1);
           }}
-          className="glass-card p-3 rounded-xl border-2 border-amber-300 dark:border-amber-500/40 bg-amber-50/70 dark:bg-amber-500/10 flex items-center gap-3 cursor-pointer hover:bg-amber-100/70 dark:hover:bg-amber-500/20 hover:border-amber-400 dark:hover:border-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm"
+          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-amber-500/40 bg-white dark:bg-amber-500/10 flex items-center gap-3 cursor-pointer hover:border-amber-400 dark:hover:border-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
           title="Click to view all destination delay shipments"
         >
-          <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <MapPin className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+          <div className="w-9 h-9 rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-amber-500/20 dark:border dark:border-amber-500/40 dark:text-amber-400">
+            <MapPin className="w-4 h-4 text-white dark:text-amber-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider group-hover:text-amber-900 dark:group-hover:text-amber-200 transition-colors">Dest. Delays</div>
-            <div className="text-base font-black text-amber-800 dark:text-amber-400 font-mono group-hover:underline">{summaryTotals.totalDestination.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-amber-600 dark:group-hover:text-amber-200 transition-colors">Dest. Delays</div>
+            <div className="text-base font-black text-amber-600 dark:text-amber-400 font-mono group-hover:underline">{summaryTotals.totalDestination.toLocaleString()}</div>
           </div>
         </div>
 
@@ -495,15 +495,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             setModalSearch('');
             setModalCurrentPage(1);
           }}
-          className="glass-card p-3 rounded-xl border-2 border-rose-300 dark:border-rose-500/40 bg-rose-50/70 dark:bg-rose-500/10 flex items-center gap-3 col-span-2 sm:col-span-1 cursor-pointer hover:bg-rose-100/70 dark:hover:bg-rose-500/20 hover:border-rose-400 dark:hover:border-rose-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm"
+          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-rose-500/40 bg-white dark:bg-rose-500/10 flex items-center gap-3 col-span-2 sm:col-span-1 cursor-pointer hover:border-rose-400 dark:hover:border-rose-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
           title="Click to view all weekend delay shipments"
         >
-          <div className="w-9 h-9 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-300 dark:border-rose-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <Calendar className="w-4 h-4 text-rose-700 dark:text-rose-400" />
+          <div className="w-9 h-9 rounded-lg bg-rose-500 text-white shadow-sm shadow-rose-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-rose-500/20 dark:border dark:border-rose-500/40 dark:text-rose-400">
+            <Calendar className="w-4 h-4 text-white dark:text-rose-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider group-hover:text-rose-900 dark:group-hover:text-rose-200 transition-colors">Weekend Delays</div>
-            <div className="text-base font-black text-rose-800 dark:text-rose-400 font-mono group-hover:underline">{summaryTotals.totalWeekend.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-rose-600 dark:group-hover:text-rose-200 transition-colors">Weekend Delays</div>
+            <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono group-hover:underline">{summaryTotals.totalWeekend.toLocaleString()}</div>
           </div>
         </div>
       </div>
@@ -570,52 +570,52 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 </th>
                 <th
                   onClick={() => handleSort('clearanceDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-950/40 hover:text-purple-950 dark:hover:text-purple-200 transition-colors font-black bg-purple-100/80 dark:bg-purple-950/20 text-purple-950 dark:text-purple-300 border-r border-slate-300 dark:border-slate-700"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors font-black bg-slate-100 dark:bg-purple-950/20 border-r border-slate-300 dark:border-slate-700"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    <ShieldAlert className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
-                    <span><strong>Clearance</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-purple-700 dark:text-purple-400/80" />
+                    <ShieldAlert className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span className="text-purple-700 dark:text-purple-300"><strong>Clearance</strong></span>
+                    <ArrowUpDown className="w-3 h-3 text-purple-600 dark:text-purple-400/80" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('transitDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-950/40 hover:text-sky-950 dark:hover:text-sky-200 transition-colors font-black bg-sky-100/80 dark:bg-sky-950/20 text-sky-950 dark:text-sky-300 border-r border-slate-300 dark:border-slate-700"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors font-black bg-slate-100 dark:bg-sky-950/20 border-r border-slate-300 dark:border-slate-700"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    <Plane className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
-                    <span><strong>Transit</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-sky-700 dark:text-sky-400/80" />
+                    <Plane className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                    <span className="text-sky-700 dark:text-sky-300"><strong>Transit</strong></span>
+                    <ArrowUpDown className="w-3 h-3 text-sky-600 dark:text-sky-400/80" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('destinationDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-950/40 hover:text-amber-950 dark:hover:text-amber-200 transition-colors font-black bg-amber-100/80 dark:bg-amber-950/20 text-amber-950 dark:text-amber-300 border-r border-slate-300 dark:border-slate-700"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors font-black bg-slate-100 dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
-                    <span><strong>Dest. Delay</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-amber-700 dark:text-amber-400/80" />
+                    <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span className="text-amber-700 dark:text-amber-300"><strong>Dest. Delay</strong></span>
+                    <ArrowUpDown className="w-3 h-3 text-amber-600 dark:text-amber-400/80" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('weekendDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-rose-200 dark:hover:bg-rose-950/40 hover:text-rose-950 dark:hover:text-rose-200 transition-colors font-black bg-rose-100/80 dark:bg-rose-950/20 text-rose-950 dark:text-rose-300 border-r border-slate-300 dark:border-slate-700"
+                  className="py-3 px-2 text-center cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors font-black bg-slate-100 dark:bg-rose-950/20 border-r border-slate-300 dark:border-slate-700"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-rose-700 dark:text-rose-400" />
-                    <span><strong>Weekend</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-rose-700 dark:text-rose-400/80" />
+                    <Calendar className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                    <span className="text-rose-700 dark:text-rose-300"><strong>Weekend</strong></span>
+                    <ArrowUpDown className="w-3 h-3 text-rose-600 dark:text-rose-400/80" />
                   </div>
                 </th>
                 <th
                   onClick={() => handleSort('totalDelays')}
-                  className="py-3 px-3 text-center cursor-pointer hover:bg-amber-300 dark:hover:bg-yellow-950/40 hover:text-amber-950 dark:hover:text-yellow-200 transition-colors font-black bg-amber-200/70 dark:bg-yellow-950/20 text-amber-950 dark:text-yellow-300"
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-amber-100/60 dark:hover:bg-yellow-950/40 transition-colors font-black bg-slate-100 dark:bg-yellow-950/20"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-800 dark:text-yellow-400" />
-                    <span><strong>Total Delays</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-amber-800 dark:text-yellow-400/80" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-yellow-400" />
+                    <span className="text-amber-700 dark:text-yellow-300"><strong>Total Delays</strong></span>
+                    <ArrowUpDown className="w-3 h-3 text-amber-600 dark:text-yellow-400/80" />
                   </div>
                 </th>
               </tr>
@@ -641,15 +641,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                         className="flex items-center justify-center gap-2 mx-auto cursor-pointer group hover:opacity-90"
                         title={`Click to view all ${c.awbCount.toLocaleString()} shipments to ${c.countryCode}`}
                       >
-                        <span className="w-7 h-7 rounded-lg bg-white border border-slate-400 text-blue-900 dark:bg-slate-800 dark:border-slate-600 dark:text-sky-400 flex items-center justify-center font-mono text-xs font-black shadow-xs shrink-0 group-hover:border-blue-600 group-hover:bg-blue-50 dark:group-hover:bg-sky-950/60 transition-colors">
+                        <span className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 dark:bg-slate-800 dark:border-slate-600 dark:text-sky-400 flex items-center justify-center font-mono text-xs font-black shadow-xs shrink-0 group-hover:border-blue-500 group-hover:bg-blue-100 dark:group-hover:bg-sky-950/60 transition-colors">
                           {c.countryCode}
                         </span>
-                        <span className="text-slate-950 dark:text-white font-extrabold group-hover:text-blue-700 dark:group-hover:text-sky-300 group-hover:underline transition-colors"><strong>{c.countryCode}</strong></span>
+                        <span className="text-slate-900 dark:text-white font-extrabold group-hover:text-blue-600 dark:group-hover:text-sky-300 group-hover:underline transition-colors"><strong>{c.countryCode}</strong></span>
                       </button>
                     </td>
 
                     {/* Volume (AWB) (Clickable) */}
-                    <td className="py-2.5 px-3 text-center align-middle font-black text-slate-950 dark:text-white font-mono border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-3 text-center align-middle font-black text-slate-900 dark:text-white font-mono border-r border-slate-300 dark:border-slate-700">
                       <button
                         type="button"
                         onClick={() => {
@@ -660,10 +660,10 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                         className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:bg-slate-100 dark:hover:bg-slate-800/70 p-1 rounded-xl transition-all w-full"
                         title={`Click to view all ${c.awbCount.toLocaleString()} AWBs for ${c.countryCode}`}
                       >
-                        <div className="text-slate-950 dark:text-white text-sm font-black group-hover:text-blue-700 dark:group-hover:text-sky-300 group-hover:underline transition-colors">
+                        <div className="text-slate-900 dark:text-white text-sm font-black group-hover:text-blue-600 dark:group-hover:text-sky-300 group-hover:underline transition-colors">
                           <strong>{c.awbCount.toLocaleString()}</strong>
                         </div>
-                        <div className="text-[10px] text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 font-bold font-sans">
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 font-bold font-sans">
                           {sharePct}% of total
                         </div>
                       </button>
@@ -674,10 +674,10 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                       <span
                         className={
                           c.avgTT <= 4.5
-                            ? 'text-emerald-800 dark:text-emerald-400 font-black'
+                            ? 'text-emerald-600 dark:text-emerald-400 font-black'
                             : c.avgTT <= 5.5
-                            ? 'text-amber-900 dark:text-amber-400 font-black'
-                            : 'text-rose-900 dark:text-rose-400 font-black'
+                            ? 'text-amber-600 dark:text-amber-400 font-black'
+                            : 'text-rose-600 dark:text-rose-400 font-black'
                         }
                       >
                         <strong>{c.avgTT} d</strong>
@@ -685,24 +685,24 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Min TT */}
-                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-800 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-700 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
                       {c.minTT} d
                     </td>
 
                     {/* Max TT */}
-                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-800 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-700 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
                       {c.maxTT} d
                     </td>
 
                     {/* On-Time Rate */}
                     <td className="py-2.5 px-3 text-center align-middle border-r-2 border-slate-400 dark:border-slate-600">
                       <div className="flex items-center justify-center gap-1.5">
-                        <span className="font-mono font-black text-emerald-800 dark:text-emerald-400 text-xs">
+                        <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs">
                           <strong>{c.onTimePercentage}%</strong>
                         </span>
                         <div className="w-10 bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 hidden sm:block overflow-hidden border border-slate-300 dark:border-slate-700">
                           <div
-                            className="bg-emerald-600 dark:bg-emerald-400 h-1.5 rounded-full"
+                            className="bg-emerald-500 dark:bg-emerald-400 h-1.5 rounded-full"
                             style={{ width: `${Math.min(c.onTimePercentage, 100)}%` }}
                           />
                         </div>
@@ -710,7 +710,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Clearance Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle bg-purple-50/50 dark:bg-purple-950/20 border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-2 text-center align-middle dark:bg-purple-950/20 border-r border-slate-300 dark:border-slate-700">
                       {c.clearanceDelays > 0 ? (
                         <button
                           type="button"
@@ -719,7 +719,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                             setModalSearch('');
                             setModalCurrentPage(1);
                           }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-purple-100 text-purple-950 border border-purple-300 dark:bg-purple-500/25 dark:text-purple-200 dark:border-purple-400/40 shadow-xs hover:bg-purple-200 hover:border-purple-400 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/25 dark:text-purple-200 dark:border-purple-400/40 shadow-xs hover:bg-purple-100 hover:border-purple-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
                           title={`Click to view ${c.clearanceDelays} clearance delay AWBs for ${c.countryCode}`}
                         >
                           <strong>{c.clearanceDelays}</strong>
@@ -730,7 +730,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Transit Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle bg-sky-50/50 dark:bg-sky-950/20 border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-2 text-center align-middle dark:bg-sky-950/20 border-r border-slate-300 dark:border-slate-700">
                       {c.transitDelays > 0 ? (
                         <button
                           type="button"
@@ -739,7 +739,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                             setModalSearch('');
                             setModalCurrentPage(1);
                           }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-sky-100 text-sky-950 border border-sky-300 dark:bg-sky-500/25 dark:text-sky-200 dark:border-sky-400/40 shadow-xs hover:bg-sky-200 hover:border-sky-400 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/25 dark:text-sky-200 dark:border-sky-400/40 shadow-xs hover:bg-sky-100 hover:border-sky-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
                           title={`Click to view ${c.transitDelays} transit delay AWBs for ${c.countryCode}`}
                         >
                           <strong>{c.transitDelays}</strong>
@@ -750,7 +750,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Destination Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle bg-amber-50/50 dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-2 text-center align-middle dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700">
                       {c.destinationDelays > 0 ? (
                         <button
                           type="button"
@@ -759,7 +759,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                             setModalSearch('');
                             setModalCurrentPage(1);
                           }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-amber-100 text-amber-950 border border-amber-300 dark:bg-amber-500/25 dark:text-amber-200 dark:border-amber-400/40 shadow-xs hover:bg-amber-200 hover:border-amber-400 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/25 dark:text-amber-200 dark:border-amber-400/40 shadow-xs hover:bg-amber-100 hover:border-amber-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
                           title={`Click to view ${c.destinationDelays} destination delay AWBs for ${c.countryCode}`}
                         >
                           <strong>{c.destinationDelays}</strong>
@@ -770,7 +770,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Weekend Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle bg-rose-50/50 dark:bg-rose-950/20 border-r border-slate-300 dark:border-slate-700">
+                    <td className="py-2.5 px-2 text-center align-middle dark:bg-rose-950/20 border-r border-slate-300 dark:border-slate-700">
                       {c.weekendDelays > 0 ? (
                         <button
                           type="button"
@@ -779,7 +779,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                             setModalSearch('');
                             setModalCurrentPage(1);
                           }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-rose-100 text-rose-950 border border-rose-300 dark:bg-rose-500/25 dark:text-rose-200 dark:border-rose-400/40 shadow-xs hover:bg-rose-200 hover:border-rose-400 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/25 dark:text-rose-200 dark:border-rose-400/40 shadow-xs hover:bg-rose-100 hover:border-rose-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
                           title={`Click to view ${c.weekendDelays} weekend delay AWBs for ${c.countryCode}`}
                         >
                           <strong>{c.weekendDelays}</strong>
@@ -790,7 +790,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </td>
 
                     {/* Total Delays (Clickable) */}
-                    <td className="py-2.5 px-3 text-center align-middle bg-amber-50/70 dark:bg-yellow-950/20">
+                    <td className="py-2.5 px-3 text-center align-middle dark:bg-yellow-950/20">
                       {c.totalDelays > 0 ? (
                         <button
                           type="button"
@@ -802,10 +802,10 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                           className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all w-full"
                           title={`Click to view all ${c.totalDelays} delayed AWBs for ${c.countryCode}`}
                         >
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-md text-[11px] font-mono font-black bg-amber-100 text-amber-950 border-2 border-amber-400 dark:bg-yellow-500/30 dark:text-yellow-200 dark:border-yellow-400/60 shadow-xs group-hover:bg-amber-200 group-hover:border-amber-500">
+                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-md text-[11px] font-mono font-black bg-amber-50 text-amber-700 border border-amber-300 dark:bg-yellow-500/30 dark:text-yellow-200 dark:border-yellow-400/60 shadow-xs group-hover:bg-amber-100 group-hover:border-amber-400">
                             <strong>{c.totalDelays}</strong>
                           </span>
-                          <span className="text-[10px] text-amber-950 dark:text-yellow-400 font-mono font-black mt-0.5 group-hover:underline">
+                          <span className="text-[10px] text-amber-600 dark:text-yellow-400 font-mono font-black mt-0.5 group-hover:underline">
                             <strong>{c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : 0}%</strong>
                           </span>
                         </button>

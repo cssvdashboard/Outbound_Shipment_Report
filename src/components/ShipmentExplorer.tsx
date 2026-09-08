@@ -501,18 +501,18 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold border shadow-xs ${
                           s.finalResolution === 'Delivered'
-                            ? 'bg-emerald-100/80 text-emerald-900 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
                             : s.finalResolution === 'RTS'
-                            ? 'bg-rose-100 text-rose-950 border-rose-400 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 font-black'
+                            ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 font-black'
                             : s.finalResolution === 'Lost'
-                            ? 'bg-red-100 text-red-950 border-red-400 dark:bg-red-600/30 dark:text-red-200 dark:border-red-500/60 font-black'
+                            ? 'bg-red-50 text-red-700 border-red-300 dark:bg-red-600/30 dark:text-red-200 dark:border-red-500/60 font-black'
                             : s.finalResolution === 'Destroyed'
-                            ? 'bg-rose-100 text-rose-950 border-rose-400 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800/80 font-black'
+                            ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800/80 font-black'
                             : s.finalResolution === 'Seized'
-                            ? 'bg-red-100 text-red-950 border-red-400 dark:bg-red-950 dark:text-red-300 dark:border-red-700/80 font-black'
+                            ? 'bg-red-50 text-red-700 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700/80 font-black'
                             : s.finalResolution === 'Undelivered'
-                            ? 'bg-amber-100 text-amber-950 border-amber-400 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 font-bold'
-                            : 'bg-indigo-100 text-indigo-950 border-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30'
+                            ? 'bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 font-bold'
+                            : 'bg-indigo-50 text-indigo-700 border-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30'
                         }`}
                       >
                         {['RTS', 'Lost', 'Destroyed', 'Seized'].includes(s.finalResolution) && (
@@ -525,15 +525,15 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     {/* Logged Delays & Remarks */}
                     <td className="py-2.5 px-4 text-xs font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle">
                       {s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-amber-300 text-center" title={`Clearance Delay: ${s.clearanceDelay}`}>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-amber-300 text-center" title={`Clearance Delay: ${s.clearanceDelay}`}>
                           <span>📋</span> <span className="truncate"><strong>{s.clearanceDelay}</strong></span>
                         </div>
                       ) : s.transitDelay && s.transitDelay !== '-' ? (
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 text-indigo-900 border border-indigo-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-indigo-300 text-center" title={`Transit Delay: ${s.transitDelay}`}>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-indigo-300 text-center" title={`Transit Delay: ${s.transitDelay}`}>
                           <span>✈️</span> <span className="truncate"><strong>{s.transitDelay}</strong></span>
                         </div>
                       ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-900 border border-rose-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-rose-300 text-center" title={`Destination Delay: ${s.destinationDelay}`}>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold text-[11px] line-clamp-1 max-w-[210px] dark:bg-transparent dark:border-none dark:p-0 dark:text-rose-300 text-center" title={`Destination Delay: ${s.destinationDelay}`}>
                           <span>🚚</span> <span className="truncate"><strong>{s.destinationDelay}</strong></span>
                         </div>
                       ) : s.remarks && s.remarks !== '-' ? (
@@ -565,7 +565,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   <td colSpan={10} className="py-16 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Package className="w-8 h-8 text-slate-600" />
-                      <p className="text-sm font-bold text-white"><strong>No shipment records found</strong></p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-white"><strong>No shipment records found</strong></p>
                       <p className="text-xs text-slate-400">
                         Try modifying your search keywords or resetting active quick filters.
                       </p>
