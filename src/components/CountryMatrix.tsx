@@ -41,6 +41,7 @@ export interface CountryModalTarget {
 type SortField =
   | 'countryCode'
   | 'awbCount'
+  | 'totalWeight'
   | 'avgTT'
   | 'minTT'
   | 'maxTT'
@@ -91,6 +92,16 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     return shipments && shipments.length > 0 ? shipments : (rawShipments || []);
   }, [shipments, rawShipments]);
 
+  // Weight lookup map per country as an extra safeguard
+  const countryWeightMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of effectiveShipments) {
+      const code = (s.destination || 'UNKNOWN').toUpperCase();
+      map.set(code, (map.get(code) || 0) + (s.weight || 0));
+    }
+    return map;
+  }, [effectiveShipments]);
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -108,8 +119,13 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     }
 
     list.sort((a, b) => {
-      const valA: any = a[sortField] ?? 0;
-      const valB: any = b[sortField] ?? 0;
+      let valA: any = a[sortField] ?? 0;
+      let valB: any = b[sortField] ?? 0;
+
+      if (sortField === 'totalWeight') {
+        valA = a.totalWeight ?? (countryWeightMap.get(a.countryCode.toUpperCase()) || 0);
+        valB = b.totalWeight ?? (countryWeightMap.get(b.countryCode.toUpperCase()) || 0);
+      }
 
       if (typeof valA === 'string') {
         return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -118,7 +134,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     });
 
     return list;
-  }, [countryData, searchTerm, sortField, sortOrder]);
+  }, [countryData, countryWeightMap, searchTerm, sortField, sortOrder]);
 
   // Aggregate totals across all countries
   const summaryTotals = useMemo(() => {
@@ -127,6 +143,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     let totalDestination = 0;
     let totalWeekend = 0;
     let totalAllDelays = 0;
+    let totalWeight = 0;
 
     for (const c of countryData) {
       totalClearance += c.clearanceDelays || 0;
@@ -134,6 +151,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
       totalDestination += c.destinationDelays || 0;
       totalWeekend += c.weekendDelays || 0;
       totalAllDelays += c.totalDelays || 0;
+      totalWeight += c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
     }
 
     return {
@@ -142,9 +160,10 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
       totalDestination,
       totalWeekend,
       totalAllDelays,
+      totalWeight,
       countriesCount: countryData.length
     };
-  }, [countryData]);
+  }, [countryData, countryWeightMap]);
 
   const handleExport = () => {
     if (filteredAndSortedData.length === 0) return;
@@ -152,11 +171,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     const exportRows = filteredAndSortedData.map((c) => {
       const share = totalAWBs > 0 ? ((c.awbCount / totalAWBs) * 100).toFixed(2) : '0';
       const delayRate = c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : '0';
+      const weightInKg = c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
+      const weightInTons = weightInKg / 1000;
 
       return {
         'Country Code': c.countryCode,
         'Volume (AWB)': c.awbCount,
         'Volume Share (%)': `${share}%`,
+        'Weight (Tons)': Number(weightInTons.toFixed(2)),
+        'Weight (Kg)': Number(weightInKg.toFixed(1)),
         'Avg TT (Days)': c.avgTT,
         'Min TT (Days)': c.minTT,
         'Max TT (Days)': c.maxTT,
@@ -533,6 +556,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                   </div>
                 </th>
                 <th
+                  onClick={() => handleSort('totalWeight')}
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span><strong>Weight (Tons / Kg)</strong></span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                  </div>
+                </th>
+                <th
                   onClick={() => handleSort('avgTT')}
                   className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
                 >
@@ -667,6 +699,24 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                           {sharePct}% of total
                         </div>
                       </button>
+                    </td>
+
+                    {/* Weight (Tons / Kg) */}
+                    <td className="py-2.5 px-3 text-center align-middle font-mono border-r border-slate-300 dark:border-slate-700">
+                      {(() => {
+                        const weightInKg = c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
+                        const weightInTons = weightInKg / 1000;
+                        return (
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="text-slate-900 dark:text-white text-xs font-black">
+                              <strong>{weightInTons.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Tons</strong>
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-sans">
+                              {weightInKg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </td>
 
                     {/* Avg TT */}

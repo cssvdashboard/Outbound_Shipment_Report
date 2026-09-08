@@ -86,6 +86,7 @@ export interface CountryPerformance {
   destinationDelays: number;
   weekendDelays: number;
   totalDelays: number;
+  totalWeight?: number;
 }
 
 export interface CustomerComparisonMetric {

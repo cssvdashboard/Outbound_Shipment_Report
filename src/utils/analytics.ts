@@ -326,6 +326,7 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
       clearanceDelays: number;
       destinationDelays: number;
       weekendDelays: number;
+      totalWeight: number;
     }
   > = {};
 
@@ -341,12 +342,14 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
         transitDelays: 0,
         clearanceDelays: 0,
         destinationDelays: 0,
-        weekendDelays: 0
+        weekendDelays: 0,
+        totalWeight: 0
       };
     }
 
     const c = map[code];
     c.count++;
+    c.totalWeight += (s.weight || 0);
     const tt = s.tt;
     c.sumTT += tt;
     if (tt > 0 && tt < c.minTT) c.minTT = tt;
@@ -376,6 +379,7 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
       return {
         countryCode,
         awbCount: d.count,
+        totalWeight: Math.round(d.totalWeight * 100) / 100,
         avgTT: Math.round((d.sumTT / d.count) * 100) / 100,
         minTT: d.minTT === Number.MAX_VALUE ? 0 : Math.round(d.minTT * 100) / 100,
         maxTT: Math.round(d.maxTT * 100) / 100,
