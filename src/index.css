@@ -60,14 +60,23 @@
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: 1.125rem;
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+html.dark .glass-card {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25);
+}
+
 .glass-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 18px -3px rgba(37, 99, 235, 0.1);
+  transform: translateY(-1.5px);
+}
+
+html.dark .glass-card:hover {
   border-color: rgba(56, 189, 248, 0.35);
   box-shadow: 0 8px 24px -4px rgba(56, 189, 248, 0.15);
-  transform: translateY(-1.5px);
 }
 
 /* ========================================================================= */

@@ -254,13 +254,13 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/20">
             <Package className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             <strong>Total Shipments</strong>
           </span>
-          <div className="mt-2 text-2xl sm:text-3xl font-black text-white light:text-slate-900 tracking-tight">
+          <div className="mt-2 text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             <strong>{summary.totalCount.toLocaleString()}</strong>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
             <span><strong>{(summary.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> Tons</span>
             <span className="text-slate-600">•</span>
             <span><strong>{summary.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</strong> Kg</span>
@@ -273,7 +273,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
             <Clock className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             <strong>Average Transit Time</strong>
           </span>
           <div className="mt-2 text-2xl sm:text-3xl font-black text-indigo-400 tracking-tight flex items-baseline justify-center gap-1">
@@ -295,13 +295,13 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
             <CheckCircle2 className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             <strong>On-Time Rate (≤ 5 Days)</strong>
           </span>
           <div className="mt-2 text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight flex items-baseline justify-center gap-1">
             <span><strong>{summary.onTimePercentage}%</strong></span>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+          <div className="flex items-center justify-center gap-2 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
             <span><strong>{summary.onTimeCount.toLocaleString()}</strong> AWBs</span>
           </div>
         </div>
@@ -315,14 +315,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
             <AlertTriangle className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             <strong>Recorded Delay Cases</strong>
           </span>
           <div className="mt-2 text-2xl sm:text-3xl font-black text-amber-400 tracking-tight flex items-baseline justify-center gap-1">
             <span><strong>{totalDelays.toLocaleString()}</strong></span>
             <span className="text-xs font-bold text-slate-400 font-mono">({delayRate}%)</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-1.5 text-xs text-slate-400 light:text-slate-500 font-semibold">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
             <span><strong>Transit:</strong> {summary.transitDelayCount}</span>
             <span>•</span>
             <span><strong>Clear:</strong> {summary.clearanceDelayCount}</span>
@@ -341,10 +341,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         {/* REQUIREMENT 2: Delivery Timeline Breakdown */}
         <div className="lg:col-span-5 glass-card p-5 rounded-2xl flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 light:border-slate-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <h2 className="text-sm font-bold text-white light:text-slate-900">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                   Delivery Timeline Distribution
                 </h2>
               </div>
@@ -354,7 +354,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <div className="h-56 my-3 relative flex items-center justify-center">
               <Doughnut data={timelineChartData} options={timelineChartOptions} />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none select-none text-center">
-                <span className="text-xs text-slate-400 light:text-slate-500 font-bold uppercase tracking-wider">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                   <strong>On-Time</strong>
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono tracking-tight leading-tight">
@@ -365,7 +365,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           </div>
 
           {/* Interactive Timeline Metric Detail Cards */}
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800 light:border-slate-200">
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={() => onSelectTTRange('Within 4-5 Days')}
@@ -379,7 +379,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 <span>Within 4–5 Days</span>
                 <span>{summary.onTimePercentage}%</span>
               </div>
-              <div className="text-lg font-bold text-white light:text-slate-900">
+              <div className="text-lg font-bold text-slate-900 dark:text-white">
                 {summary.onTimeCount.toLocaleString()}
                 <span className="text-xs font-normal text-slate-400 ml-1">AWBs</span>
               </div>
@@ -407,7 +407,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 <span>&gt; 5 Working Days</span>
                 <span>{summary.delayedTimelinePercentage}%</span>
               </div>
-              <div className="text-lg font-bold text-white light:text-slate-900">
+              <div className="text-lg font-bold text-slate-900 dark:text-white">
                 {summary.delayedTimelineCount.toLocaleString()}
                 <span className="text-xs font-normal text-slate-400 ml-1">AWBs</span>
               </div>
@@ -427,10 +427,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         {/* REQUIREMENT 3: Final Resolution Breakdown (CLICK TO OPEN POPUP MODAL) */}
         <div className="lg:col-span-7 glass-card p-5 rounded-2xl flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 light:border-slate-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-blue-400" />
-                <h2 className="text-sm font-bold text-white light:text-slate-900">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                   Final Resolution &amp; Outcome Status
                 </h2>
               </div>
@@ -439,7 +439,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             {/* Visual Status Progress Multi-Bar */}
             <div className="my-4">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
-                <span className="font-semibold text-slate-300 light:text-slate-700">Delivery Success vs Exceptions</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Delivery Success vs Exceptions</span>
                 <span className="font-mono text-emerald-400 font-bold">
                   {finalResolutions.find(r => r.name.toLowerCase() === 'delivered')?.percentage || 0}% Delivered
                 </span>
@@ -558,7 +558,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           </div>
 
           {/* Quick Hub Navigation Link */}
-          <div className="mt-4 pt-3 border-t border-slate-800 light:border-slate-200 flex items-center justify-end text-xs">
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end text-xs">
             <button
               onClick={() => onNavigateTab('delays')}
               className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
@@ -1059,7 +1059,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="text-xs font-bold text-slate-400">
             <strong>Transit Delay Incidents</strong>
           </div>
-          <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-baseline justify-center gap-1">
             <span><strong>{summary.transitDelayCount.toLocaleString()}</strong></span>
             <span className="text-xs font-bold text-slate-400">AWBs</span>
           </div>
@@ -1078,7 +1078,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="text-xs font-bold text-slate-400">
             <strong>Customs Clearance Delays</strong>
           </div>
-          <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-baseline justify-center gap-1">
             <span><strong>{summary.clearanceDelayCount.toLocaleString()}</strong></span>
             <span className="text-xs font-bold text-slate-400">AWBs</span>
           </div>
@@ -1097,7 +1097,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           <div className="text-xs font-bold text-slate-400">
             <strong>Destination Delays</strong>
           </div>
-          <div className="text-2xl font-black text-white light:text-slate-900 mt-1 flex items-baseline justify-center gap-1">
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-baseline justify-center gap-1">
             <span><strong>{summary.destinationDelayCount.toLocaleString()}</strong></span>
             <span className="text-xs font-bold text-slate-400">AWBs</span>
           </div>

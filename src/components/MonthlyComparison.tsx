@@ -67,41 +67,41 @@ const MONTH_PALETTES = [
     name: 'Sky / Blue',
     bg: 'rgba(56, 189, 248, 0.85)',
     border: '#0284c7',
-    gradient: 'from-sky-500/20 to-blue-600/10',
-    borderClass: 'border-sky-500/40',
-    badge: 'bg-sky-500/10 text-sky-400 border-sky-500/30'
+    gradient: 'from-sky-500/10 to-blue-600/5 dark:from-sky-500/20 dark:to-blue-600/10',
+    borderClass: 'border-sky-300 dark:border-sky-500/40',
+    badge: 'bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-400 dark:border-sky-500/30'
   },
   {
     name: 'Emerald / Green',
     bg: 'rgba(52, 211, 153, 0.85)',
     border: '#059669',
-    gradient: 'from-emerald-500/20 to-teal-600/10',
-    borderClass: 'border-emerald-500/40',
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+    gradient: 'from-emerald-500/10 to-teal-600/5 dark:from-emerald-500/20 dark:to-teal-600/10',
+    borderClass: 'border-emerald-300 dark:border-emerald-500/40',
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
   },
   {
     name: 'Violet / Purple',
     bg: 'rgba(167, 139, 250, 0.85)',
     border: '#7c3aed',
-    gradient: 'from-violet-500/20 to-purple-600/10',
-    borderClass: 'border-violet-500/40',
-    badge: 'bg-violet-500/10 text-violet-400 border-violet-500/30'
+    gradient: 'from-violet-500/10 to-purple-600/5 dark:from-violet-500/20 dark:to-purple-600/10',
+    borderClass: 'border-violet-300 dark:border-violet-500/40',
+    badge: 'bg-violet-50 text-violet-800 border-violet-300 dark:bg-violet-500/15 dark:text-violet-400 dark:border-violet-500/30'
   },
   {
     name: 'Amber / Orange',
     bg: 'rgba(251, 191, 36, 0.85)',
     border: '#d97706',
-    gradient: 'from-amber-500/20 to-orange-600/10',
-    borderClass: 'border-amber-500/40',
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+    gradient: 'from-amber-500/10 to-orange-600/5 dark:from-amber-500/20 dark:to-orange-600/10',
+    borderClass: 'border-amber-300 dark:border-amber-500/40',
+    badge: 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
   },
   {
     name: 'Rose / Pink',
     bg: 'rgba(251, 113, 133, 0.85)',
     border: '#e11d48',
-    gradient: 'from-rose-500/20 to-pink-600/10',
-    borderClass: 'border-rose-500/40',
-    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+    gradient: 'from-rose-500/10 to-pink-600/5 dark:from-rose-500/20 dark:to-pink-600/10',
+    borderClass: 'border-rose-300 dark:border-rose-500/40',
+    badge: 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30'
   }
 ];
 
@@ -465,7 +465,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         legend: {
           position: 'top' as const,
           labels: {
-            color: '#cbd5e1',
+            color: '#64748b',
             font: { weight: 'bold' as const, size: 12 },
             padding: 16,
             usePointStyle: true,
@@ -473,7 +473,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
           }
         },
         tooltip: {
-          backgroundColor: '#0b1329',
+          backgroundColor: '#0f172a',
           borderColor: '#334155',
           borderWidth: 1,
           titleColor: '#f8fafc',
@@ -509,19 +509,19 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       },
       scales: {
         x: {
-          grid: { color: 'rgba(51, 65, 85, 0.25)' },
-          ticks: { color: '#94a3b8', font: { weight: 'bold' as const, size: 11 } }
+          grid: { color: 'rgba(148, 163, 184, 0.15)' },
+          ticks: { color: '#64748b', font: { weight: 'bold' as const, size: 11 } }
         },
         y: {
           beginAtZero: true,
           title: {
             display: true,
             text: 'Average Transit Time (Days)',
-            color: '#94a3b8',
+            color: '#64748b',
             font: { weight: 'bold' as const, size: 11 }
           },
-          grid: { color: 'rgba(51, 65, 85, 0.25)' },
-          ticks: { color: '#94a3b8', font: { weight: 'bold' as const, size: 11 } }
+          grid: { color: 'rgba(148, 163, 184, 0.15)' },
+          ticks: { color: '#64748b', font: { weight: 'bold' as const, size: 11 } }
         }
       }
     };
@@ -631,21 +631,21 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     <div className="space-y-7 animate-fade-in">
       
       {/* 1. HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0d1527] to-slate-900 border border-slate-700/80 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-gradient-to-r dark:from-slate-900 dark:via-[#0d1527] dark:to-slate-900 border border-slate-200 dark:border-slate-700/80 shadow-lg dark:shadow-2xl">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/25 shrink-0">
             <CalendarRange className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-extrabold text-white tracking-tight">
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Monthly Comparison Analytics
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/40">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-50 text-purple-700 border border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/40">
                 {months.length} Months Tracked
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5 font-medium">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
               Side-by-side performance benchmarks for volume, transit times, on-time delivery, delay categories, and weekly velocities.
             </p>
           </div>
@@ -654,21 +654,21 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
 
       {/* 1.1 ACTIVE SEARCH / FILTER STATUS BAR */}
       {hasActiveFilters && (
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 shadow-sm dark:shadow-lg">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 mr-1">
-              <Filter className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mr-1">
+              <Filter className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
               Active Filters:
             </span>
 
             {selectedCustomer && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 shadow-sm">
-                <Users className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Customer: <strong className="text-white">{selectedCustomer}</strong></span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/40 shadow-sm">
+                <Users className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Customer: <strong className="text-emerald-900 dark:text-white">{selectedCustomer}</strong></span>
                 {onCustomerChange && (
                   <button
                     onClick={() => onCustomerChange('ALL')}
-                    className="ml-1 p-0.5 rounded-full hover:bg-emerald-500/30 text-emerald-300 hover:text-white transition-colors cursor-pointer"
+                    className="ml-1 p-0.5 rounded-full hover:bg-emerald-500/30 text-emerald-600 dark:text-emerald-300 hover:text-white transition-colors cursor-pointer"
                     title="Clear customer filter"
                   >
                     <X className="w-3 h-3" />
@@ -678,13 +678,13 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             )}
 
             {selectedDestination && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-300 border border-blue-500/40 shadow-sm">
-                <Globe className="w-3.5 h-3.5 text-blue-400" />
-                <span>Destination: <strong className="text-white">{selectedDestination}</strong></span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/40 shadow-sm">
+                <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>Destination: <strong className="text-blue-900 dark:text-white">{selectedDestination}</strong></span>
                 {onDestinationChange && (
                   <button
                     onClick={() => onDestinationChange('ALL')}
-                    className="ml-1 p-0.5 rounded-full hover:bg-blue-500/30 text-blue-300 hover:text-white transition-colors cursor-pointer"
+                    className="ml-1 p-0.5 rounded-full hover:bg-blue-500/30 text-blue-600 dark:text-blue-300 hover:text-white transition-colors cursor-pointer"
                     title="Clear destination filter"
                   >
                     <X className="w-3 h-3" />
@@ -694,21 +694,21 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             )}
 
             {selectedCategoryType && selectedCategoryType !== 'ALL' && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/40 shadow-sm">
-                <Package className="w-3.5 h-3.5 text-purple-400" />
-                <span>Category: <strong className="text-white">{selectedCategoryType}</strong></span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-purple-50 text-purple-800 border border-purple-300 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/40 shadow-sm">
+                <Package className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                <span>Category: <strong className="text-purple-900 dark:text-white">{selectedCategoryType}</strong></span>
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-300 font-bold">
-              <span className="font-mono text-white text-sm font-extrabold">{grandTotalAWBs.toLocaleString()}</span> AWBs matched
+            <span className="text-xs text-slate-600 dark:text-slate-300 font-bold">
+              <span className="font-mono text-slate-900 dark:text-white text-sm font-extrabold">{grandTotalAWBs.toLocaleString()}</span> AWBs matched
             </span>
             {onResetFilters && (
               <button
                 onClick={onResetFilters}
-                className="flex items-center gap-1 text-xs font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-rose-500/10"
+                className="flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-rose-500/10"
                 title="Reset all filters"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -720,14 +720,14 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       )}
 
       {grandTotalAWBs === 0 ? (
-        <div className="p-12 rounded-2xl bg-slate-900/60 border border-slate-800 text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
-            <Filter className="w-6 h-6 text-indigo-400" />
+        <div className="p-12 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-500 dark:text-slate-400">
+            <Filter className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
           </div>
-          <h3 className="text-base font-extrabold text-white">
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
             No Shipments Found
           </h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
             No shipments match the selected filters {selectedCustomer ? `for customer "${selectedCustomer}"` : ''} {selectedDestination ? `to destination "${selectedDestination}"` : ''} across tracked months.
           </p>
           {onResetFilters && (
@@ -751,10 +751,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               className={`glass-card p-5 rounded-2xl border-2 ${palette.borderClass} bg-gradient-to-br ${palette.gradient} backdrop-blur-xl shadow-2xl flex flex-col justify-between space-y-4`}
             >
               {/* Card Header: Month Title & Volume */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700/60">
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4 text-purple-400" />
-                  <h3 className="text-base font-black text-white">{m.monthLabel}</h3>
+                  <CalendarDays className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">{m.monthLabel}</h3>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black border ${palette.badge}`}>
                   {m.totalAWBs.toLocaleString()} AWBs
@@ -764,24 +764,24 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               {/* Primary KPIs: Total AWBs & Average TT */}
               <div className="grid grid-cols-2 gap-3">
                 {/* Volume & MoM */}
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                    <Package className="w-3 h-3 text-sky-400" />
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <Package className="w-3 h-3 text-sky-600 dark:text-sky-400" />
                     Total AWBs
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-white font-mono">
+                    <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
                       {m.totalAWBs.toLocaleString()}
                     </span>
                   </div>
                   {m.momChangeAWB !== null && (
                     <div className="mt-1 flex items-center gap-1 text-[11px] font-bold">
                       {m.momChangeAWB >= 0 ? (
-                        <span className="text-emerald-400 flex items-center">
+                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center">
                           <ArrowUpRight className="w-3.5 h-3.5" /> +{m.momChangeAWB}% MoM
                         </span>
                       ) : (
-                        <span className="text-rose-400 flex items-center">
+                        <span className="text-rose-600 dark:text-rose-400 flex items-center">
                           <ArrowDownRight className="w-3.5 h-3.5" /> {m.momChangeAWB}% MoM
                         </span>
                       )}
@@ -790,25 +790,25 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 </div>
 
                 {/* Average TT & MoM */}
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-amber-400" />
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                     Average TT
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-white font-mono">
+                    <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
                       {m.avgTT.toFixed(2)}
                     </span>
-                    <span className="text-xs text-slate-400 font-bold">Days</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">Days</span>
                   </div>
                   {m.momChangeTT !== null && (
                     <div className="mt-1 flex items-center gap-1 text-[11px] font-bold">
                       {m.momChangeTT <= 0 ? (
-                        <span className="text-emerald-400 flex items-center" title="Lower TT is faster">
+                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center" title="Lower TT is faster">
                           <TrendingDown className="w-3.5 h-3.5" /> {m.momChangeTT}% faster
                         </span>
                       ) : (
-                        <span className="text-rose-400 flex items-center" title="Higher TT is slower">
+                        <span className="text-rose-600 dark:text-rose-400 flex items-center" title="Higher TT is slower">
                           <TrendingUp className="w-3.5 h-3.5" /> +{m.momChangeTT}% slower
                         </span>
                       )}
@@ -818,41 +818,41 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               </div>
 
               {/* Transit Time Range: Min TT & Max TT */}
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs font-bold">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400">Min TT:</span>
-                  <span className="text-emerald-400 font-mono font-black">{m.minTT.toFixed(2)}d</span>
+                  <span className="text-slate-500 dark:text-slate-400">Min TT:</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black">{m.minTT.toFixed(2)}d</span>
                 </div>
-                <div className="h-3 w-px bg-slate-700"></div>
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400">Max TT:</span>
-                  <span className="text-rose-400 font-mono font-black">{m.maxTT.toFixed(2)}d</span>
+                  <span className="text-slate-500 dark:text-slate-400">Max TT:</span>
+                  <span className="text-rose-700 dark:text-rose-400 font-mono font-black">{m.maxTT.toFixed(2)}d</span>
                 </div>
-                <div className="h-3 w-px bg-slate-700"></div>
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400">Spread:</span>
-                  <span className="text-slate-300 font-mono font-black">{(m.maxTT - m.minTT).toFixed(2)}d</span>
+                  <span className="text-slate-500 dark:text-slate-400">Spread:</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-mono font-black">{(m.maxTT - m.minTT).toFixed(2)}d</span>
                 </div>
               </div>
 
               {/* On-Time Delivery Progress */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-300 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     On-Time Delivery (&le; 5d)
                   </span>
-                  <span className="text-emerald-400 font-mono font-black">
+                  <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black">
                     {m.onTimePercentage}%
                   </span>
                 </div>
-                <div className="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
+                <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
                     style={{ width: `${Math.min(m.onTimePercentage, 100)}%` }}
                   ></div>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                   <span>{m.onTimeCount.toLocaleString()} on-time</span>
                   <span>{m.delayedCount.toLocaleString()} delayed</span>
                 </div>
@@ -864,21 +864,21 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       </div>
 
       {/* 3. SIDE-BY-SIDE MONTH TT COMPARISON BY WEEK & CALENDAR WEEKDAY */}
-      <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-indigo-500/40 bg-slate-950/70 shadow-2xl space-y-6">
+      <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-indigo-300 dark:border-indigo-500/40 bg-white dark:bg-slate-950/70 shadow-lg dark:shadow-2xl space-y-6">
         
         {/* Section Header & Subtitle */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
                 <ArrowRightLeft className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                 Side-by-Side Month TT Comparison: By Week & Calendar Weekday
               </h3>
             </div>
-            <p className="text-xs text-slate-400 font-medium pl-11">
-              Select any week (<span className="text-indigo-400 font-bold">W1–W5</span>) and individual calendar weekday (<span className="text-purple-400 font-bold">Sunday–Saturday</span>) to compare <span className="text-amber-400 font-bold">Avg TT</span>, <span className="text-emerald-400 font-bold">Min TT</span>, and <span className="text-rose-400 font-bold">Max TT</span> side-by-side simultaneously.
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium pl-11">
+              Select any week (<span className="text-indigo-600 dark:text-indigo-400 font-bold">W1–W5</span>) and individual calendar weekday (<span className="text-purple-600 dark:text-purple-400 font-bold">Sunday–Saturday</span>) to compare <span className="text-amber-600 dark:text-amber-400 font-bold">Avg TT</span>, <span className="text-emerald-600 dark:text-emerald-400 font-bold">Min TT</span>, and <span className="text-rose-600 dark:text-rose-400 font-bold">Max TT</span> side-by-side simultaneously.
             </p>
           </div>
 
@@ -886,11 +886,11 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
           <div className="flex flex-col items-start lg:items-end gap-2 self-start lg:self-center shrink-0">
             {/* Month Switcher Controls: [Left: Month v] ⇄ [Right: Month v] */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700 shadow-sm">
+              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900/90 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <select
                   value={activeLeftMonth?.monthId}
                   onChange={(e) => setLeftMonthId(e.target.value)}
-                  className="bg-slate-950 text-xs font-bold text-sky-400 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500 cursor-pointer"
+                  className="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-sky-700 dark:text-sky-400 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500 cursor-pointer"
                 >
                   {months.map((m) => (
                     <option key={m.monthId} value={m.monthId} disabled={m.monthId === rightMonthId}>
@@ -907,16 +907,16 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     setLeftMonthId(tempRight);
                     setRightMonthId(tempLeft);
                   }}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                   title="Swap Left and Right Months"
                 >
-                  <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
+                  <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 </button>
 
                 <select
                   value={activeRightMonth?.monthId}
                   onChange={(e) => setRightMonthId(e.target.value)}
-                  className="bg-slate-950 text-xs font-bold text-emerald-400 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                  className="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-emerald-700 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer"
                 >
                   {months.map((m) => (
                     <option key={m.monthId} value={m.monthId} disabled={m.monthId === leftMonthId}>
@@ -927,8 +927,8 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               </div>
 
               {hasActiveFilters && (
-                <span className="text-[11px] px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold hidden sm:flex items-center gap-1">
-                  <Filter className="w-3 h-3 text-indigo-400" />
+                <span className="text-[11px] px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-300 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-bold hidden sm:flex items-center gap-1">
+                  <Filter className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
                   Filtered
                 </span>
               )}
@@ -1135,12 +1135,12 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         </div>
 
         {/* INTERACTIVE CONTROLS */}
-        <div className="space-y-3.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800/80">
+        <div className="space-y-3.5 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80">
           
           {/* 1. Week Selector (W1, W2, W3, W4, W5, All Weeks) */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
-            <div className="flex items-center gap-1.5 min-w-[130px] text-xs font-black uppercase tracking-wider text-indigo-300">
-              <CalendarDays className="w-4 h-4 text-indigo-400" />
+            <div className="flex items-center gap-1.5 min-w-[130px] text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+              <CalendarDays className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <span>1. Choose Week:</span>
             </div>
             <div className="flex flex-wrap gap-1.5 flex-1">
@@ -1153,11 +1153,11 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                       isActive
                         ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400 scale-[1.02]'
-                        : 'bg-slate-950/80 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800'
+                        : 'bg-white dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800'
                     }`}
                   >
                     <span>{opt.label}</span>
-                    <span className={`text-[10px] font-normal ${isActive ? 'text-indigo-200' : 'text-slate-500'}`}>
+                    <span className={`text-[10px] font-normal ${isActive ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'}`}>
                       ({opt.sub})
                     </span>
                   </button>
@@ -1167,9 +1167,9 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
           </div>
 
           {/* 2. Calendar Weekday Selector (Sunday - Saturday, All Days) */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2 border-t border-slate-800/60">
-            <div className="flex items-center gap-1.5 min-w-[130px] text-xs font-black uppercase tracking-wider text-purple-300">
-              <CalendarCheck className="w-4 h-4 text-purple-400" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/60">
+            <div className="flex items-center gap-1.5 min-w-[130px] text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-300">
+              <CalendarCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>2. Choose Day:</span>
             </div>
             <div className="flex flex-wrap gap-1.5 flex-1">
@@ -1178,7 +1178,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedWeekday === 'ALL'
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400 scale-[1.02]'
-                    : 'bg-slate-950/80 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800'
+                    : 'bg-white dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800'
                 }`}
               >
                 All Weekdays
@@ -1192,11 +1192,11 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                       isActive
                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400 scale-[1.02]'
-                        : 'bg-slate-950/80 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800'
+                        : 'bg-white dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800'
                     }`}
                   >
                     <span>{day.name}</span>
-                    <span className={`text-[10px] font-mono font-medium ${isActive ? 'text-purple-200' : 'text-slate-500'}`}>
+                    <span className={`text-[10px] font-mono font-medium ${isActive ? 'text-purple-200' : 'text-slate-400 dark:text-slate-500'}`}>
                       {day.short}
                     </span>
                   </button>
@@ -1211,80 +1211,80 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-11 gap-4 items-stretch">
           
           {/* LEFT MONTH HERO CARD */}
-          <div className="lg:col-span-5 rounded-2xl border-2 border-sky-500/30 bg-gradient-to-br from-sky-950/20 via-slate-950 to-slate-950 p-5 shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 rounded-2xl border-2 border-sky-300 dark:border-sky-500/30 bg-gradient-to-br from-sky-50 via-white to-white dark:from-sky-950/20 dark:via-slate-950 dark:to-slate-950 p-5 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4">
             <div className="absolute top-0 right-0 w-36 h-36 bg-sky-500/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
 
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 relative z-10">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800/80 relative z-10">
               <div className="flex items-center gap-2.5">
                 <span className="w-3 h-3 rounded-full bg-sky-400 ring-4 ring-sky-400/20"></span>
                 <div>
-                  <h4 className="text-base font-black text-white flex items-center gap-2">
+                  <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                     {activeLeftMonth?.monthLabel || 'Left Month'}
                   </h4>
-                  <div className="text-[11px] text-sky-400 font-mono font-semibold">
+                  <div className="text-[11px] text-sky-600 dark:text-sky-400 font-mono font-semibold">
                     {selectedWeek === 'ALL' ? 'All Weeks (W1–W5)' : `Week ${selectedWeek} (${WEEK_OPTIONS.find(w => w.id === selectedWeek)?.sub})`} • {selectedWeekday === 'ALL' ? 'All Weekdays' : WEEKDAYS[selectedWeekday].name}
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-mono font-black text-white">
+                <div className="text-xs font-mono font-black text-slate-900 dark:text-white">
                   {(leftStats?.count || 0).toLocaleString()} pkgs
                 </div>
-                <div className="text-[10px] text-slate-400">Total Volume</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">Total Volume</div>
               </div>
             </div>
 
             {/* Triad Metric Tiles: Avg TT, Min TT, Max TT */}
             <div className="grid grid-cols-3 gap-2.5 relative z-10">
               {/* Avg TT */}
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                   <span>Avg TT</span>
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <Clock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-black text-amber-400">
+                <div className="text-xl sm:text-2xl font-mono font-black text-amber-700 dark:text-amber-400">
                   {leftStats && leftStats.count > 0 ? `${leftStats.avgTT.toFixed(2)}d` : 'N/A'}
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-medium">Mean velocity</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Mean velocity</div>
               </div>
 
               {/* Min TT */}
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                   <span>Min TT</span>
-                  <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
+                  <TrendingDown className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-black text-emerald-400">
+                <div className="text-xl sm:text-2xl font-mono font-black text-emerald-700 dark:text-emerald-400">
                   {leftStats && leftStats.count > 0 ? `${leftStats.minTT.toFixed(2)}d` : 'N/A'}
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-medium">Fastest parcel</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Fastest parcel</div>
               </div>
 
               {/* Max TT */}
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                   <span>Max TT</span>
-                  <TrendingUp className="w-3.5 h-3.5 text-rose-400" />
+                  <TrendingUp className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-black text-rose-400">
+                <div className="text-xl sm:text-2xl font-mono font-black text-rose-700 dark:text-rose-400">
                   {leftStats && leftStats.count > 0 ? `${leftStats.maxTT.toFixed(2)}d` : 'N/A'}
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-medium">Slowest parcel</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Slowest parcel</div>
               </div>
             </div>
 
             {/* Performance Footer */}
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs font-mono relative z-10">
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400 text-[11px]">On-Time (≤5d):</span>
-                <span className="font-bold text-emerald-400">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/80 text-xs font-mono relative z-10">
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">On-Time (≤5d):</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">
                   {leftStats && leftStats.count > 0 ? `${leftStats.onTimeRate}%` : 'N/A'}
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400 text-[11px]">Delayed (&gt;5d):</span>
-                <span className="font-bold text-rose-400">
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">Delayed (&gt;5d):</span>
+                <span className="font-bold text-rose-700 dark:text-rose-400">
                   {leftStats && leftStats.count > 0 ? `${leftStats.delayedCount} pkgs` : '0'}
                 </span>
               </div>
@@ -1292,13 +1292,13 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
           </div>
 
           {/* CENTER DELTA / VELOCITY BRIDGE */}
-          <div className="lg:col-span-1 flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-inner">
-              <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
+          <div className="lg:col-span-1 flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-md dark:shadow-xl space-y-3">
+            <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-inner">
+              <ArrowRightLeft className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
 
             <div className="text-center space-y-1">
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 MoM Delta
               </div>
               {ttDiff !== null ? (
@@ -1306,10 +1306,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                   <div
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-mono font-black text-xs ${
                       ttDiff < 0
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30'
                         : ttDiff > 0
-                        ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                        : 'bg-slate-800 text-slate-300'
+                        ? 'bg-rose-50 text-rose-800 border border-rose-300 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {ttDiff < 0 ? (
@@ -1319,105 +1319,105 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     ) : null}
                     <span>{ttDiff > 0 ? `+${ttDiff.toFixed(2)}d` : `${ttDiff.toFixed(2)}d`}</span>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-bold">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
                     {ttDiff < 0 ? (
-                      <span className="text-emerald-400 font-semibold">{Math.abs(ttPercentDiff || 0)}% Faster</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{Math.abs(ttPercentDiff || 0)}% Faster</span>
                     ) : ttDiff > 0 ? (
-                      <span className="text-rose-400 font-semibold">{Math.abs(ttPercentDiff || 0)}% Slower</span>
+                      <span className="text-rose-700 dark:text-rose-400 font-semibold">{Math.abs(ttPercentDiff || 0)}% Slower</span>
                     ) : (
                       'Identical'
                     )}
                   </div>
                 </div>
               ) : (
-                <span className="text-xs text-slate-500 font-mono">-</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">-</span>
               )}
             </div>
 
             {/* Volume Delta */}
-            <div className="text-center pt-2 border-t border-slate-800 w-full">
-              <div className="text-[9px] text-slate-500 font-mono">Vol Delta</div>
-              <div className={`text-xs font-mono font-bold ${volDiff >= 0 ? 'text-sky-400' : 'text-slate-400'}`}>
+            <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-800 w-full">
+              <div className="text-[9px] text-slate-400 dark:text-slate-500 font-mono">Vol Delta</div>
+              <div className={`text-xs font-mono font-bold ${volDiff >= 0 ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'}`}>
                 {volDiff > 0 ? `+${volDiff.toLocaleString()}` : volDiff.toLocaleString()}
               </div>
             </div>
           </div>
 
           {/* RIGHT MONTH HERO CARD */}
-          <div className="lg:col-span-5 rounded-2xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-slate-950 to-slate-950 p-5 shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 rounded-2xl border-2 border-emerald-300 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-50 via-white to-white dark:from-emerald-950/20 dark:via-slate-950 dark:to-slate-950 p-5 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4">
             <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
 
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 relative z-10">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800/80 relative z-10">
               <div className="flex items-center gap-2.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20"></span>
                 <div>
-                  <h4 className="text-base font-black text-white flex items-center gap-2">
+                  <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                     {activeRightMonth?.monthLabel || 'Right Month'}
                   </h4>
-                  <div className="text-[11px] text-emerald-400 font-mono font-semibold">
+                  <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
                     {selectedWeek === 'ALL' ? 'All Weeks (W1–W5)' : `Week ${selectedWeek} (${WEEK_OPTIONS.find(w => w.id === selectedWeek)?.sub})`} • {selectedWeekday === 'ALL' ? 'All Weekdays' : WEEKDAYS[selectedWeekday].name}
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-mono font-black text-white">
+                <div className="text-xs font-mono font-black text-slate-900 dark:text-white">
                   {(rightStats?.count || 0).toLocaleString()} pkgs
                 </div>
-                <div className="text-[10px] text-slate-400">Total Volume</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">Total Volume</div>
               </div>
             </div>
 
             {/* Triad Metric Tiles: Avg TT, Min TT, Max TT */}
             <div className="grid grid-cols-3 gap-2.5 relative z-10">
               {/* Avg TT */}
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                   <span>Avg TT</span>
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <Clock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-black text-amber-400">
+                <div className="text-xl sm:text-2xl font-mono font-black text-amber-700 dark:text-amber-400">
                   {rightStats && rightStats.count > 0 ? `${rightStats.avgTT.toFixed(2)}d` : 'N/A'}
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-medium">Mean velocity</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Mean velocity</div>
               </div>
 
               {/* Min TT */}
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                   <span>Min TT</span>
-                  <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
+                  <TrendingDown className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-black text-emerald-400">
+                <div className="text-xl sm:text-2xl font-mono font-black text-emerald-700 dark:text-emerald-400">
                   {rightStats && rightStats.count > 0 ? `${rightStats.minTT.toFixed(2)}d` : 'N/A'}
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-medium">Fastest parcel</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Fastest parcel</div>
               </div>
 
               {/* Max TT */}
-              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
                   <span>Max TT</span>
-                  <TrendingUp className="w-3.5 h-3.5 text-rose-400" />
+                  <TrendingUp className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-black text-rose-400">
+                <div className="text-xl sm:text-2xl font-mono font-black text-rose-700 dark:text-rose-400">
                   {rightStats && rightStats.count > 0 ? `${rightStats.maxTT.toFixed(2)}d` : 'N/A'}
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-medium">Slowest parcel</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Slowest parcel</div>
               </div>
             </div>
 
             {/* Performance Footer */}
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs font-mono relative z-10">
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400 text-[11px]">On-Time (≤5d):</span>
-                <span className="font-bold text-emerald-400">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/80 text-xs font-mono relative z-10">
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">On-Time (≤5d):</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">
                   {rightStats && rightStats.count > 0 ? `${rightStats.onTimeRate}%` : 'N/A'}
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-                <span className="text-slate-400 text-[11px]">Delayed (&gt;5d):</span>
-                <span className="font-bold text-rose-400">
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">Delayed (&gt;5d):</span>
+                <span className="font-bold text-rose-700 dark:text-rose-400">
                   {rightStats && rightStats.count > 0 ? `${rightStats.delayedCount} pkgs` : '0'}
                 </span>
               </div>
@@ -1427,21 +1427,21 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         </div>
 
         {/* 4. DYNAMIC SIDE-BY-SIDE TT VELOCITY GRAPH */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm dark:shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
             <div>
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-indigo-400" />
-                <h4 className="text-sm font-black text-white tracking-tight">
+                <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <h4 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
                   Side-by-Side TT Velocity Graph: {activeLeftMonth?.monthLabel} vs {activeRightMonth?.monthLabel}
                 </h4>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
                 {chartViewMode === 'weekdays'
                   ? `Comparing average transit time velocity across all 7 calendar weekdays for ${selectedWeek === 'ALL' ? 'All Weeks' : `Week ${selectedWeek}`}.`
                   : `Comparing average transit time velocity progression across weeks (W1–W5) for ${selectedWeekday === 'ALL' ? 'All Days' : WEEKDAYS[selectedWeekday].name}.`}
                 {(selectedCustomer || selectedDestination) && (
-                  <span className="text-indigo-300 font-semibold ml-1">
+                  <span className="text-indigo-600 dark:text-indigo-300 font-semibold ml-1">
                     (Filtered by {selectedCustomer ? `Customer: ${selectedCustomer}` : ''}{selectedCustomer && selectedDestination ? ' • ' : ''}{selectedDestination ? `Dest: ${selectedDestination}` : ''})
                   </span>
                 )}
@@ -1449,14 +1449,14 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             </div>
 
             {/* View Mode Toggle: By Weekdays vs By Weeks */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 self-start sm:self-center shrink-0">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 self-start sm:self-center shrink-0">
               <button
                 type="button"
                 onClick={() => setChartViewMode('weekdays')}
                 className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   chartViewMode === 'weekdays'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 By Weekdays (Sun–Sat)
@@ -1467,7 +1467,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   chartViewMode === 'weeks'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 By Weeks (W1–W5)
@@ -1484,46 +1484,46 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         {/* 5. SIDE-BY-SIDE ALL WEEKDAYS COMPARISON TABLE FOR SELECTED WEEK */}
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-black text-white flex items-center gap-2">
+            <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
               <span>Detailed Calendar Weekdays for {selectedWeek === 'ALL' ? 'All Weeks' : `Week ${selectedWeek}`}</span>
-              <span className="text-xs text-slate-400 font-normal">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
                 (Click any row to select that weekday above)
               </span>
             </h4>
-            <span className="text-xs text-indigo-400 font-bold">
+            <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
               {activeLeftMonth?.monthLabel} vs {activeRightMonth?.monthLabel}
             </span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/80">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/80">
             <table className="w-full text-center text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-900/90 text-[11px] font-black uppercase text-slate-400 border-b border-slate-800">
+                <tr className="bg-slate-100 dark:bg-slate-900/90 text-[11px] font-black uppercase text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                   <th className="py-3 px-4 text-left">Calendar Weekday</th>
-                  <th className="py-3 px-3 text-sky-400 bg-sky-950/20 border-l border-slate-800" colSpan={4}>
+                  <th className="py-3 px-3 text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 border-l border-slate-200 dark:border-slate-800" colSpan={4}>
                     {activeLeftMonth?.monthLabel || 'Month A'}
                   </th>
-                  <th className="py-3 px-3 text-emerald-400 bg-emerald-950/20 border-l border-slate-800" colSpan={4}>
+                  <th className="py-3 px-3 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border-l border-slate-200 dark:border-slate-800" colSpan={4}>
                     {activeRightMonth?.monthLabel || 'Month B'}
                   </th>
-                  <th className="py-3 px-3 text-indigo-300 border-l border-slate-800">
+                  <th className="py-3 px-3 text-indigo-700 dark:text-indigo-300 border-l border-slate-200 dark:border-slate-800">
                     MoM Velocity Delta
                   </th>
                 </tr>
-                <tr className="bg-slate-900/60 text-[10px] font-bold text-slate-400 border-b border-slate-800">
+                <tr className="bg-slate-50 dark:bg-slate-900/60 text-[10px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                   <th className="py-2 px-4 text-left">Day</th>
-                  <th className="py-2 px-2 text-slate-300 border-l border-slate-800">Avg TT</th>
-                  <th className="py-2 px-2 text-emerald-400">Min TT</th>
-                  <th className="py-2 px-2 text-rose-400">Max TT</th>
-                  <th className="py-2 px-2 text-slate-400">AWBs</th>
-                  <th className="py-2 px-2 text-slate-300 border-l border-slate-800">Avg TT</th>
-                  <th className="py-2 px-2 text-emerald-400">Min TT</th>
-                  <th className="py-2 px-2 text-rose-400">Max TT</th>
-                  <th className="py-2 px-2 text-slate-400">AWBs</th>
-                  <th className="py-2 px-3 text-indigo-300 border-l border-slate-800">Δ Avg TT (Speed)</th>
+                  <th className="py-2 px-2 text-slate-700 dark:text-slate-300 border-l border-slate-200 dark:border-slate-800">Avg TT</th>
+                  <th className="py-2 px-2 text-emerald-700 dark:text-emerald-400">Min TT</th>
+                  <th className="py-2 px-2 text-rose-700 dark:text-rose-400">Max TT</th>
+                  <th className="py-2 px-2 text-slate-500 dark:text-slate-400">AWBs</th>
+                  <th className="py-2 px-2 text-slate-700 dark:text-slate-300 border-l border-slate-200 dark:border-slate-800">Avg TT</th>
+                  <th className="py-2 px-2 text-emerald-700 dark:text-emerald-400">Min TT</th>
+                  <th className="py-2 px-2 text-rose-700 dark:text-rose-400">Max TT</th>
+                  <th className="py-2 px-2 text-slate-500 dark:text-slate-400">AWBs</th>
+                  <th className="py-2 px-3 text-indigo-700 dark:text-indigo-300 border-l border-slate-200 dark:border-slate-800">Δ Avg TT (Speed)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono text-slate-200">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-slate-800 dark:text-slate-200">
                 {WEEKDAYS.map((day) => {
                   const isSelected = selectedWeekday === day.index;
                   const leftS = activeLeftMonth ? getStats(activeLeftMonth.monthId, selectedWeek, day.index) : null;
@@ -1533,70 +1533,70 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                       ? Number((rightS.avgTT - leftS.avgTT).toFixed(2))
                       : null;
 
-                  return (
+                   return (
                     <tr
                       key={day.index}
                       onClick={() => setSelectedWeekday(day.index)}
                       className={`cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-indigo-950/40 text-white font-bold ring-1 ring-inset ring-indigo-500/50'
-                          : 'hover:bg-slate-900/60'
+                          ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-white font-bold ring-1 ring-inset ring-indigo-400 dark:ring-indigo-500/50'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-900/60'
                       }`}
                     >
                       <td className="py-2.5 px-4 text-left font-sans font-bold flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span
                             className={`w-2 h-2 rounded-full ${
-                              isSelected ? 'bg-indigo-400 ring-2 ring-indigo-400/40' : 'bg-slate-600'
+                              isSelected ? 'bg-indigo-500 ring-2 ring-indigo-400/40' : 'bg-slate-300 dark:bg-slate-600'
                             }`}
                           ></span>
-                          <span className={isSelected ? 'text-indigo-300' : 'text-slate-200'}>{day.name}</span>
+                          <span className={isSelected ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'}>{day.name}</span>
                         </div>
                         {isSelected && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-mono">
                             ACTIVE
                           </span>
                         )}
                       </td>
 
                       {/* Left Month: Avg, Min, Max, AWBs */}
-                      <td className="py-2.5 px-2 font-bold text-amber-400 border-l border-slate-800">
+                      <td className="py-2.5 px-2 font-bold text-amber-700 dark:text-amber-400 border-l border-slate-200 dark:border-slate-800">
                         {leftS && leftS.count > 0 ? `${leftS.avgTT.toFixed(2)}d` : '-'}
                       </td>
-                      <td className="py-2.5 px-2 text-emerald-400 font-medium">
+                      <td className="py-2.5 px-2 text-emerald-700 dark:text-emerald-400 font-medium">
                         {leftS && leftS.count > 0 ? `${leftS.minTT.toFixed(2)}d` : '-'}
                       </td>
-                      <td className="py-2.5 px-2 text-rose-400 font-medium">
+                      <td className="py-2.5 px-2 text-rose-700 dark:text-rose-400 font-medium">
                         {leftS && leftS.count > 0 ? `${leftS.maxTT.toFixed(2)}d` : '-'}
                       </td>
-                      <td className="py-2.5 px-2 text-slate-400 text-[11px]">
+                      <td className="py-2.5 px-2 text-slate-500 dark:text-slate-400 text-[11px]">
                         {leftS ? leftS.count.toLocaleString() : '0'}
                       </td>
 
                       {/* Right Month: Avg, Min, Max, AWBs */}
-                      <td className="py-2.5 px-2 font-bold text-amber-400 border-l border-slate-800">
+                      <td className="py-2.5 px-2 font-bold text-amber-700 dark:text-amber-400 border-l border-slate-200 dark:border-slate-800">
                         {rightS && rightS.count > 0 ? `${rightS.avgTT.toFixed(2)}d` : '-'}
                       </td>
-                      <td className="py-2.5 px-2 text-emerald-400 font-medium">
+                      <td className="py-2.5 px-2 text-emerald-700 dark:text-emerald-400 font-medium">
                         {rightS && rightS.count > 0 ? `${rightS.minTT.toFixed(2)}d` : '-'}
                       </td>
-                      <td className="py-2.5 px-2 text-rose-400 font-medium">
+                      <td className="py-2.5 px-2 text-rose-700 dark:text-rose-400 font-medium">
                         {rightS && rightS.count > 0 ? `${rightS.maxTT.toFixed(2)}d` : '-'}
                       </td>
-                      <td className="py-2.5 px-2 text-slate-400 text-[11px]">
+                      <td className="py-2.5 px-2 text-slate-500 dark:text-slate-400 text-[11px]">
                         {rightS ? rightS.count.toLocaleString() : '0'}
                       </td>
 
                       {/* Delta */}
-                      <td className="py-2.5 px-3 border-l border-slate-800">
+                      <td className="py-2.5 px-3 border-l border-slate-200 dark:border-slate-800">
                         {dDiff !== null ? (
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${
                               dDiff < 0
-                                ? 'bg-emerald-500/10 text-emerald-400'
+                                ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400'
                                 : dDiff > 0
-                                ? 'bg-rose-500/10 text-rose-400'
-                                : 'bg-slate-800 text-slate-400'
+                                ? 'bg-rose-50 text-rose-800 dark:bg-rose-500/10 dark:text-rose-400'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                             }`}
                           >
                             {dDiff < 0 ? '▼' : dDiff > 0 ? '▲' : '•'}{' '}
@@ -1606,7 +1606,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                             </span>
                           </span>
                         ) : (
-                          <span className="text-slate-600">-</span>
+                          <span className="text-slate-400 dark:text-slate-600">-</span>
                         )}
                       </td>
                     </tr>
@@ -1623,15 +1623,15 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* A. Recorded Delays Comparison */}
-        <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-slate-700 bg-slate-950/60 shadow-2xl space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/60 shadow-lg dark:shadow-2xl space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-amber-400" />
-              <h3 className="text-base font-black text-white">
+              <ShieldAlert className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
                 Recorded Delays Comparison
               </h3>
             </div>
-            <span className="text-xs text-slate-400 font-bold">Transit, Clearance & Dest</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">Transit, Clearance &amp; Dest</span>
           </div>
 
           <div className="space-y-4">
@@ -1640,45 +1640,45 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               const { transit, clearance, destination, totalDelayed, delayedPercentage } = m.delays;
 
               return (
-                <div key={m.monthId} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                <div key={m.monthId} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-sm text-white flex items-center gap-2">
+                    <span className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full ${palette.badge}`}></span>
                       {m.monthLabel}
                     </span>
-                    <span className="text-xs font-mono font-bold text-amber-400">
+                    <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400">
                       {totalDelayed.toLocaleString()} Delayed ({delayedPercentage}%)
                     </span>
                   </div>
 
                   {/* Delay Categories Breakdown Grid */}
                   <div className="grid grid-cols-3 gap-2.5 text-xs">
-                    <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Transit Delays</div>
-                      <div className="mt-1 font-mono font-black text-sm text-sky-400">
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
+                      <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Transit Delays</div>
+                      <div className="mt-1 font-mono font-black text-sm text-sky-700 dark:text-sky-400">
                         {transit.count.toLocaleString()}
                       </div>
-                      <div className="text-[10px] text-slate-500 font-medium">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                         {transit.percentage}% of month
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Clearance Delays</div>
-                      <div className="mt-1 font-mono font-black text-sm text-purple-400">
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
+                      <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Clearance Delays</div>
+                      <div className="mt-1 font-mono font-black text-sm text-purple-700 dark:text-purple-400">
                         {clearance.count.toLocaleString()}
                       </div>
-                      <div className="text-[10px] text-slate-500 font-medium">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                         {clearance.percentage}% of month
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Dest Delays</div>
-                      <div className="mt-1 font-mono font-black text-sm text-amber-400">
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
+                      <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Dest Delays</div>
+                      <div className="mt-1 font-mono font-black text-sm text-amber-700 dark:text-amber-400">
                         {destination.count.toLocaleString()}
                       </div>
-                      <div className="text-[10px] text-slate-500 font-medium">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                         {destination.percentage}% of month
                       </div>
                     </div>
@@ -1686,9 +1686,9 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
 
                   {/* Top Delay Reasons snippet */}
                   {clearance.count > 0 && m.delays.topClearanceReasons[0] && (
-                    <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1">
-                      <span className="text-slate-500">Top Clearance Reason:</span>
-                      <span className="font-bold text-slate-300 truncate max-w-[220px]">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1">
+                      <span className="text-slate-500 dark:text-slate-500">Top Clearance Reason:</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[220px]">
                         {m.delays.topClearanceReasons[0].reason} ({m.delays.topClearanceReasons[0].count})
                       </span>
                     </div>
@@ -1700,15 +1700,15 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
         </div>
 
         {/* B. Final Resolution Comparison */}
-        <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-slate-700 bg-slate-950/60 shadow-2xl space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="glass-card p-5 sm:p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/60 shadow-lg dark:shadow-2xl space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-black text-white">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
                 Final Resolution Comparison
               </h3>
             </div>
-            <span className="text-xs text-slate-400 font-bold">Delivery Success & RTS</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">Delivery Success &amp; RTS</span>
           </div>
 
           <div className="space-y-4">
@@ -1717,19 +1717,19 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
               const { delivered, rts, other } = m.resolutions;
 
               return (
-                <div key={m.monthId} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                <div key={m.monthId} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-sm text-white flex items-center gap-2">
+                    <span className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full ${palette.badge}`}></span>
                       {m.monthLabel}
                     </span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">
+                    <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
                       {delivered.percentage}% Delivered
                     </span>
                   </div>
 
                   {/* Multi-segment stacked progress bar */}
-                  <div className="w-full h-3 rounded-full bg-slate-950 flex overflow-hidden border border-slate-800">
+                  <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-950 flex overflow-hidden border border-slate-300 dark:border-slate-800">
                     <div
                       className="h-full bg-emerald-500"
                       style={{ width: `${delivered.percentage}%` }}
@@ -1741,7 +1741,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                       title={`RTS: ${rts.percentage}% (${rts.count.toLocaleString()})`}
                     ></div>
                     <div
-                      className="h-full bg-slate-600"
+                      className="h-full bg-slate-400 dark:bg-slate-600"
                       style={{ width: `${other.percentage}%` }}
                       title={`Other: ${other.percentage}% (${other.count.toLocaleString()})`}
                     ></div>
@@ -1752,8 +1752,8 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">Delivered</span>
-                        <span className="font-mono font-black text-emerald-400">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Delivered</span>
+                        <span className="font-mono font-black text-emerald-700 dark:text-emerald-400">
                           {delivered.count.toLocaleString()} ({delivered.percentage}%)
                         </span>
                       </div>
@@ -1762,18 +1762,18 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">RTS / Return</span>
-                        <span className="font-mono font-black text-rose-400">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block">RTS / Return</span>
+                        <span className="font-mono font-black text-rose-700 dark:text-rose-400">
                           {rts.count.toLocaleString()} ({rts.percentage}%)
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-400 dark:bg-slate-500"></span>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">Other Resolutions</span>
-                        <span className="font-mono font-black text-slate-300">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Other Resolutions</span>
+                        <span className="font-mono font-black text-slate-700 dark:text-slate-300">
                           {other.count.toLocaleString()} ({other.percentage}%)
                         </span>
                       </div>
@@ -1788,22 +1788,22 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       </div>
 
       {/* 5. MASTER MONTHLY SUMMARY MATRIX TABLE */}
-      <div className="glass-card rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-950/60 shadow-2xl">
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
+      <div className="glass-card rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/60 shadow-lg dark:shadow-2xl">
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-sky-400" />
-            <h3 className="text-base font-black text-white">
+            <Layers className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white">
               Complete Cross-Month Performance Matrix
             </h3>
           </div>
-          <span className="text-xs text-slate-400 font-bold font-mono">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">
             {grandTotalAWBs.toLocaleString()} Total Combined AWBs
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-center text-xs border-collapse">
-            <thead className="bg-[#0f172a] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-slate-700">
+            <thead className="bg-slate-100 dark:bg-[#0f172a] text-slate-600 dark:text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="py-3 px-4 text-left font-black">Month</th>
                 <th className="py-3 px-4 font-black">Volume (AWB)</th>
@@ -1817,52 +1817,52 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 <th className="py-3 px-4 font-black">Delivered %</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 font-mono font-bold text-slate-200">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono font-bold text-slate-700 dark:text-slate-200">
               {months.map((m, idx) => {
                 const palette = MONTH_PALETTES[idx % MONTH_PALETTES.length];
                 const shareOfTotal = grandTotalAWBs > 0 ? ((m.totalAWBs / grandTotalAWBs) * 100).toFixed(1) : '0.0';
 
                 return (
-                  <tr key={m.monthId} className="hover:bg-slate-900/50 transition-colors">
+                  <tr key={m.monthId} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                     <td className="py-3.5 px-4 text-left font-sans font-black flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full ${palette.badge}`}></span>
-                      <span className="text-white">{m.monthLabel}</span>
+                      <span className="text-slate-900 dark:text-white">{m.monthLabel}</span>
                     </td>
-                    <td className="py-3.5 px-4 text-white text-sm font-black">
+                    <td className="py-3.5 px-4 text-slate-900 dark:text-white text-sm font-black">
                       {m.totalAWBs.toLocaleString()}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-400">
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">
                       {shareOfTotal}%
                     </td>
                     <td className="py-3.5 px-4">
                       {m.momChangeAWB !== null ? (
                         m.momChangeAWB >= 0 ? (
-                          <span className="text-emerald-400 font-bold">+{m.momChangeAWB}%</span>
+                          <span className="text-emerald-700 dark:text-emerald-400 font-bold">+{m.momChangeAWB}%</span>
                         ) : (
-                          <span className="text-rose-400 font-bold">{m.momChangeAWB}%</span>
+                          <span className="text-rose-700 dark:text-rose-400 font-bold">{m.momChangeAWB}%</span>
                         )
                       ) : (
-                        <span className="text-slate-500">-</span>
+                        <span className="text-slate-400 dark:text-slate-500">-</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-amber-400 font-black text-sm">
+                    <td className="py-3.5 px-4 text-amber-700 dark:text-amber-400 font-black text-sm">
                       {m.avgTT.toFixed(2)}d
                     </td>
-                    <td className="py-3.5 px-4 text-emerald-400">
+                    <td className="py-3.5 px-4 text-emerald-700 dark:text-emerald-400">
                       {m.minTT.toFixed(2)}d
                     </td>
-                    <td className="py-3.5 px-4 text-rose-400">
+                    <td className="py-3.5 px-4 text-rose-700 dark:text-rose-400">
                       {m.maxTT.toFixed(2)}d
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-950/40 text-emerald-400 border border-emerald-800/60 font-black">
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800/60 font-black">
                         {m.onTimePercentage}%
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-amber-300">
+                    <td className="py-3.5 px-4 text-amber-700 dark:text-amber-300">
                       {m.delays.totalDelayed.toLocaleString()} ({m.delays.delayedPercentage}%)
                     </td>
-                    <td className="py-3.5 px-4 text-emerald-400 font-black">
+                    <td className="py-3.5 px-4 text-emerald-700 dark:text-emerald-400 font-black">
                       {m.resolutions.delivered.percentage}%
                     </td>
                   </tr>

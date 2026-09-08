@@ -238,7 +238,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: { size: 11, weight: 'bold' as const },
           padding: 12
         }
@@ -258,7 +258,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       x: {
         grid: { display: false },
         ticks: {
-          color: '#94a3b8',
+          color: '#64748b',
           font: { size: 10, weight: 'bold' as const }
         }
       },
@@ -266,19 +266,19 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         type: 'linear' as const,
         display: true,
         position: 'left' as const,
-        title: { display: true, text: 'Avg Days', color: '#38bdf8', font: { size: 10, weight: 'bold' as const } },
-        grid: { color: 'rgba(51, 65, 85, 0.3)' },
-        ticks: { color: '#94a3b8', font: { weight: 'bold' as const } }
+        title: { display: true, text: 'Avg Days', color: '#0284c7', font: { size: 10, weight: 'bold' as const } },
+        grid: { color: 'rgba(148, 163, 184, 0.15)' },
+        ticks: { color: '#64748b', font: { weight: 'bold' as const } }
       },
       y1: {
         type: 'linear' as const,
         display: true,
         position: 'right' as const,
-        title: { display: true, text: 'On-Time Rate (%)', color: '#34d399', font: { size: 10, weight: 'bold' as const } },
+        title: { display: true, text: 'On-Time Rate (%)', color: '#059669', font: { size: 10, weight: 'bold' as const } },
         grid: { display: false },
         min: 0,
         max: 100,
-        ticks: { color: '#94a3b8', font: { weight: 'bold' as const } }
+        ticks: { color: '#64748b', font: { weight: 'bold' as const } }
       }
     }
   };
@@ -296,45 +296,45 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     <div className="space-y-6 animate-fade-in">
       
       {/* 1. SELECTION & CONFIGURATION PANEL */}
-      <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-800/80">
-        <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-800/80 light:border-slate-200 relative ${isAutoLoadDropdownOpen ? 'z-50' : 'z-20'}`}>
+      <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 shadow-sm">
+        <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800/80 relative ${isAutoLoadDropdownOpen ? 'z-50' : 'z-20'}`}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 shrink-0">
+            <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-sm font-black text-white light:text-slate-900">
+                <h2 className="text-sm font-black text-slate-900 dark:text-white">
                   <strong>Multi-Shipper Comparison &amp; Transit Time Benchmark</strong>
                 </h2>
                 
                 {/* Active Category Scope Badge */}
                 {selectedCategoryType === 'PP' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/40">
-                    <PackageCheck className="w-3 h-3 text-blue-400" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40">
+                    <PackageCheck className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                     <span>PP Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
                   </span>
                 )}
                 {selectedCategoryType === 'CC' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    <CreditCard className="w-3 h-3 text-amber-400" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40">
+                    <CreditCard className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                     <span>CC Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
                   </span>
                 )}
                 {selectedCategoryType === 'IPD' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                    <Plane className="w-3 h-3 text-emerald-400" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40">
+                    <Plane className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                     <span>IPD Shipments Only ({shipments.length.toLocaleString()} AWBs)</span>
                   </span>
                 )}
                 {selectedCategoryType === 'AGENT' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                    <ShieldCheck className="w-3 h-3 text-purple-400" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-500/40">
+                    <ShieldCheck className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                     <span>Agent Customers Only ({shipments.length.toLocaleString()} AWBs)</span>
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400 light:text-slate-500 font-medium mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
                 Compare delivery speeds, volumes, and delay rates for any destination across {selectedCategoryType === 'ALL' ? 'all' : selectedCategoryType} shipments
               </p>
             </div>
@@ -361,9 +361,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   }
                 }}
                 placeholder="Select Top Customer for.."
-                className="w-full pl-9 pr-14 py-2 text-xs font-bold rounded-xl bg-indigo-950/40 border border-indigo-500/40 text-indigo-100 placeholder:text-indigo-300/70 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-inner"
+                className="w-full pl-9 pr-14 py-2 text-xs font-bold rounded-xl bg-slate-100 dark:bg-indigo-950/40 border border-slate-300 dark:border-indigo-500/40 text-slate-900 dark:text-indigo-100 placeholder:text-slate-400 dark:placeholder:text-indigo-300/70 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-inner"
               />
-              <Sparkles className="w-4 h-4 text-indigo-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Sparkles className="w-4 h-4 text-indigo-500 dark:text-indigo-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
               <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
                 {autoLoadSearch && (
@@ -373,7 +373,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       setAutoLoadSearch('');
                       autoLoadInputRef.current?.focus();
                     }}
-                    className="p-1 text-indigo-300 hover:text-white transition-colors cursor-pointer"
+                    className="p-1 text-slate-400 hover:text-slate-700 dark:text-indigo-300 dark:hover:text-white transition-colors cursor-pointer"
                     title="Clear search"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -382,16 +382,16 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAutoLoadDropdownOpen(!isAutoLoadDropdownOpen)}
-                  className="p-1 text-indigo-300 hover:text-white transition-colors cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-slate-700 dark:text-indigo-300 dark:hover:text-white transition-colors cursor-pointer"
                   title="Toggle country list"
                 >
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAutoLoadDropdownOpen ? 'rotate-180 text-indigo-300' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAutoLoadDropdownOpen ? 'rotate-180 text-indigo-500 dark:text-indigo-300' : ''}`} />
                 </button>
               </div>
 
               {/* Dropdown Popup */}
               {isAutoLoadDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[99999] rounded-2xl bg-[#0f172a] border border-indigo-500/40 shadow-2xl shadow-black/90 p-1.5 divide-y divide-slate-800">
+                <div className="absolute left-0 right-0 top-full mt-1.5 max-h-72 overflow-y-auto z-[99999] rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-indigo-500/40 shadow-2xl shadow-black/40 dark:shadow-black/90 p-1.5 divide-y divide-slate-100 dark:divide-slate-800">
                   <div className="p-1.5">
                     <button
                       type="button"
@@ -399,18 +399,18 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
                         selectedDestination === 'ALL'
                           ? 'bg-indigo-600 text-white font-black shadow-md shadow-indigo-500/30'
-                          : 'text-slate-200 hover:bg-indigo-950/60'
+                          : 'text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-indigo-950/60'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         {selectedDestination === 'ALL' ? (
                           <Check className="w-4 h-4 text-white font-bold" />
                         ) : (
-                          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                          <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                         )}
                         <span className="font-bold"><strong>Global (All Destinations)</strong></span>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-indigo-300">
+                      <span className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-300">
                         <strong>{shipments.length.toLocaleString()} AWBs</strong>
                       </span>
                     </button>
@@ -428,21 +428,21 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
                             isSelected
                               ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/25'
-                              : 'text-slate-200 hover:bg-indigo-950/60 hover:text-white'
+                              : 'text-slate-800 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-900 dark:hover:text-white'
                           }`}
                         >
                           <div className="flex items-center gap-2">
                             {isSelected ? (
                               <Check className="w-3.5 h-3.5 text-white font-bold" />
                             ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0 group-hover:scale-125 transition-transform" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0 group-hover:scale-125 transition-transform" />
                             )}
                             <span className="font-mono font-extrabold">{code}</span>
                           </div>
                           <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
                             isSelected
                               ? 'bg-white/20 text-white font-black'
-                              : 'bg-slate-800 text-slate-300 group-hover:bg-indigo-900/60 group-hover:text-indigo-200'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/60 group-hover:text-indigo-800 dark:group-hover:text-indigo-200'
                           }`}>
                             <strong>{count.toLocaleString()} AWBs</strong>
                           </span>
@@ -679,17 +679,17 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         {/* Selected Customer Chips */}
         {selectedCustomers.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <span className="text-xs text-slate-400 font-bold"><strong>Comparing:</strong></span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold"><strong>Comparing:</strong></span>
             {selectedCustomers.map((cust) => (
               <span
                 key={cust}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 border border-slate-700"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm"
               >
                 <span><strong>{cust}</strong></span>
                 <button
                   type="button"
                   onClick={() => handleRemoveCustomer(cust)}
-                  className="p-0.5 rounded-full hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -709,23 +709,23 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             return (
               <div
                 key={c.customer}
-                className={`glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden ${
-                  isFastest ? 'border-emerald-500/50 bg-emerald-950/20' : ''
+                className={`glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all ${
+                  isFastest ? 'border-emerald-400/60 dark:border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20' : ''
                 }`}
               >
                 {/* Highlight badges */}
                 <div className="flex items-start justify-between gap-2">
-                  <div className="font-extrabold text-white text-sm line-clamp-2" title={c.customer}>
+                  <div className="font-extrabold text-slate-900 dark:text-white text-sm line-clamp-2" title={c.customer}>
                     <strong>{c.customer}</strong>
                   </div>
                   {isFastest && (
-                    <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
                       <Trophy className="w-3 h-3" />
                       <strong>Fastest</strong>
                     </span>
                   )}
                   {isHighestVol && !isFastest && (
-                    <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
                       <strong>Top Vol</strong>
                     </span>
                   )}
@@ -733,16 +733,16 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
                 <div className="mt-4 space-y-3">
                   {/* Transit Time Metric */}
-                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <div className="text-[11px] text-slate-400 font-bold flex items-center justify-between">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-bold flex items-center justify-between">
                       <span><strong>Avg Transit Time</strong></span>
-                      <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                      <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <div className="text-2xl font-black text-indigo-400 mt-1 flex items-baseline gap-1 font-mono">
+                    <div className="text-2xl font-black text-indigo-700 dark:text-indigo-400 mt-1 flex items-baseline gap-1 font-mono">
                       <span><strong>{c.avgTT > 0 ? c.avgTT : '-'}</strong></span>
-                      <span className="text-xs font-bold text-slate-400">days</span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">days</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono font-bold">
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 flex items-center justify-between font-mono font-bold">
                       <span><strong>Min: {c.minTT}d</strong></span>
                       <span><strong>Max: {c.maxTT}d</strong></span>
                     </div>
@@ -750,28 +750,28 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
                   {/* Volume & On-time Stats */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                      <span className="text-slate-400 text-[11px] block font-bold"><strong>AWB Volume</strong></span>
-                      <span className="text-base font-black text-white font-mono">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] block font-bold"><strong>AWB Volume</strong></span>
+                      <span className="text-base font-black text-slate-900 dark:text-white font-mono">
                         <strong>{c.awbCount.toLocaleString()}</strong>
                       </span>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                      <span className="text-slate-400 text-[11px] block font-bold"><strong>On-Time (≤5d)</strong></span>
-                      <span className="text-base font-black text-emerald-400 font-mono">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] block font-bold"><strong>On-Time (≤5d)</strong></span>
+                      <span className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
                         <strong>{c.onTimePercentage}%</strong>
                       </span>
                     </div>
                   </div>
 
                   {/* Delay Breakdown Summary */}
-                  <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-bold">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1 font-bold">
                       <span><strong>Recorded Delays</strong></span>
-                      <span className="font-mono text-amber-400 font-black"><strong>{c.delayCount} AWBs</strong></span>
+                      <span className="font-mono text-amber-700 dark:text-amber-400 font-black"><strong>{c.delayCount} AWBs</strong></span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono font-semibold">
+                    <div className="flex items-center justify-between text-[10px] text-slate-600 dark:text-slate-400 font-mono font-semibold">
                       <span><strong>Transit:</strong> {c.transitDelays}</span>
                       <span><strong>Clear:</strong> {c.clearanceDelays}</span>
                       <span><strong>Dest:</strong> {c.destinationDelays}</span>
@@ -779,12 +779,12 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2 text-[10px] text-slate-400 flex items-center justify-between border-t border-slate-800 font-semibold">
+                <div className="mt-3 pt-2 text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 font-semibold">
                   <span><strong>Destination: {selectedDestination}</strong></span>
                   <button
                     type="button"
                     onClick={() => handleRemoveCustomer(c.customer)}
-                    className="text-rose-400 hover:underline cursor-pointer font-bold"
+                    className="text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-bold"
                   >
                     <strong>Remove</strong>
                   </button>
@@ -794,17 +794,17 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           })}
         </div>
       ) : (
-        <div className="glass-card p-12 text-center rounded-2xl text-slate-400 font-semibold">
+        <div className="glass-card p-12 text-center rounded-2xl text-slate-500 dark:text-slate-400 font-semibold">
           Please add at least 1 customer above to view comparative benchmarks.
         </div>
       )}
 
       {/* 3. VISUAL BENCHMARK CHART */}
       {comparisonData.length > 0 && (
-        <div className="glass-panel p-5 rounded-2xl relative z-10 border border-slate-800/80">
+        <div className="glass-panel p-5 rounded-2xl relative z-10 border border-slate-200 dark:border-slate-800/80">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="w-4 h-4 text-sky-400" />
-            <h3 className="text-xs font-extrabold uppercase text-slate-300 tracking-wider">
+            <BarChart2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+            <h3 className="text-xs font-extrabold uppercase text-slate-700 dark:text-slate-300 tracking-wider">
               <strong>Comparative Transit Time &amp; On-Time Performance Benchmark</strong>
             </h3>
           </div>
