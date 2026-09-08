@@ -286,38 +286,21 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       {/* CUSTOM CALENDAR POPUP */}
       {activePicker && (
         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-3 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700/90 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
-          {/* Header: Currently editing label & Month navigation */}
+          {/* Header: Currently editing label & Close */}
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
             <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               Pick {activePicker === 'from' ? 'From' : 'To'} Date
             </span>
 
-            {/* Quick Month Jump Buttons */}
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => { setViewMonth(6); setViewYear(2026); }}
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
-                  viewMonth === 6 && viewYear === 2026
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                }`}
-              >
-                Jul
-              </button>
-              <button
-                type="button"
-                onClick={() => { setViewMonth(7); setViewYear(2026); }}
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
-                  viewMonth === 7 && viewYear === 2026
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                }`}
-              >
-                Aug
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setActivePicker(null)}
+              className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Close calendar"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           {/* Month / Year Navigator */}
