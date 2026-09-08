@@ -391,10 +391,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-200 dark:hover:bg-blue-900/70'
                       : hasPickupData
                       ? 'font-black text-slate-950 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600'
-                      : 'font-normal text-slate-400/30 dark:text-slate-600/40 hover:bg-slate-100/40 dark:hover:bg-slate-800/30'
+                      : 'font-normal text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span className={hasPickupData ? 'font-black' : 'font-normal opacity-40'}>{day}</span>
+                  <span className={hasPickupData ? 'font-black' : 'font-normal'}>{day}</span>
                 </button>
               );
             })}
