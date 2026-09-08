@@ -104,21 +104,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
     if (activePicker === 'from') {
       setStartInput(selectedIso);
-      if (endInput) {
-        onChange(selectedIso, endInput);
-        setActivePicker(null);
-      } else {
-        // If end date is not chosen yet, automatically guide to selecting TO date
-        setActivePicker('to');
-      }
+      onChange(selectedIso, endInput);
+      setActivePicker(null);
     } else if (activePicker === 'to') {
       setEndInput(selectedIso);
-      if (startInput) {
-        onChange(startInput, selectedIso);
-        setActivePicker(null);
-      } else {
-        setActivePicker('from');
-      }
+      onChange(startInput, selectedIso);
+      setActivePicker(null);
     }
   };
 
@@ -167,26 +158,26 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   return (
     <div className="relative flex items-center" ref={containerRef}>
-      {/* Date Range Bar */}
+      {/* Date Range Bar with visible border */}
       <div
-        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-2xl border transition-all duration-200 shadow-sm ${
+        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-2xl border-2 transition-all duration-200 shadow-sm ${
           isFilterActive
-            ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-400/60 dark:border-blue-500/50 ring-2 ring-blue-500/20'
+            ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-500 dark:border-blue-500 ring-2 ring-blue-500/20'
             : isPendingSecondDate
-            ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-400/60 dark:border-amber-500/50 ring-1 ring-amber-400/20'
-            : 'bg-slate-100/90 dark:bg-slate-900/80 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+            ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-400 dark:border-amber-500 ring-1 ring-amber-400/20'
+            : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
         }`}
       >
         {/* START DATE BUTTON */}
         <button
           type="button"
           onClick={() => openPicker(activePicker === 'from' ? null as any : 'from')}
-          className={`flex items-center px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+          className={`flex items-center px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             activePicker === 'from'
-              ? 'bg-blue-600 text-white border-blue-500 shadow-sm ring-2 ring-blue-400/30'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-400/30'
               : startInput
-              ? 'bg-white dark:bg-slate-950 border-blue-400/50 dark:border-blue-500/40 text-blue-600 dark:text-blue-400'
-              : 'bg-white/80 dark:bg-slate-950/70 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400'
+              ? 'bg-blue-50 dark:bg-slate-950 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-300 font-extrabold'
+              : 'bg-slate-50 dark:bg-slate-950/70 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:bg-white'
           }`}
           title="Click to choose Start Date"
         >
@@ -196,18 +187,18 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         </button>
 
         {/* Separator Arrow */}
-        <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
+        <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
 
         {/* END DATE BUTTON */}
         <button
           type="button"
           onClick={() => openPicker(activePicker === 'to' ? null as any : 'to')}
-          className={`flex items-center px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+          className={`flex items-center px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             activePicker === 'to'
-              ? 'bg-blue-600 text-white border-blue-500 shadow-sm ring-2 ring-blue-400/30'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-400/30'
               : endInput
-              ? 'bg-white dark:bg-slate-950 border-blue-400/50 dark:border-blue-500/40 text-blue-600 dark:text-blue-400'
-              : 'bg-white/80 dark:bg-slate-950/70 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-blue-400'
+              ? 'bg-blue-50 dark:bg-slate-950 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-300 font-extrabold'
+              : 'bg-slate-50 dark:bg-slate-950/70 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:bg-white'
           }`}
           title="Click to choose End Date"
         >
@@ -260,7 +251,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
       {/* CUSTOM CALENDAR POPUP */}
       {activePicker && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-3 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700/90 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-3.5 bg-white dark:bg-[#0f172a] border-2 border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
           {/* Header: Currently editing label & Close */}
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
             <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -355,16 +346,16 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   type="button"
                   onClick={() => handleSelectDate(day)}
                   title={hasPickupData ? `${cellIso} (Pickup records available)` : `${cellIso} (No pickup records)`}
-                  className={`w-8 h-8 rounded-lg text-xs flex items-center justify-center transition-all cursor-pointer ${
+                  className={`w-8 h-8 rounded-lg text-xs flex items-center justify-center transition-all cursor-pointer border ${
                     isSelected
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105 font-black ring-2 ring-blue-400/40'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105 font-black ring-2 ring-blue-400/40'
                       : isSelectedFrom || isSelectedTo
-                      ? 'bg-blue-500 text-white font-black'
+                      ? 'bg-blue-500 text-white border-blue-500 font-black'
                       : isInRange
-                      ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-200 dark:hover:bg-blue-900/70'
+                      ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-200 dark:hover:bg-blue-900/70 border-blue-200 dark:border-blue-800'
                       : hasPickupData
-                      ? 'font-black text-slate-950 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600'
-                      : 'font-normal text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-700 dark:hover:text-slate-200'
+                      ? 'font-black text-slate-950 dark:text-white border-transparent hover:border-blue-300 dark:hover:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600'
+                      : 'font-normal text-slate-500 dark:text-slate-400 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
                   <span className={hasPickupData ? 'font-black' : 'font-normal'}>{day}</span>
@@ -373,37 +364,31 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             })}
           </div>
 
-          {/* Footer Controls & Legend in Calendar */}
-          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-              Bold = Has pickup data
-            </span>
+          {/* Footer Controls in Calendar */}
+          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                if (activePicker === 'from') {
+                  setStartInput('');
+                  onChange('', endInput);
+                } else {
+                  setEndInput('');
+                  onChange(startInput, '');
+                }
+              }}
+              className="text-[11px] font-bold text-slate-500 hover:text-rose-500 transition-colors cursor-pointer px-2 py-1"
+            >
+              Clear {activePicker === 'from' ? 'Start' : 'End'}
+            </button>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (activePicker === 'from') {
-                    setStartInput('');
-                    if (!endInput) onChange('', '');
-                  } else {
-                    setEndInput('');
-                    if (!startInput) onChange('', '');
-                  }
-                }}
-                className="text-[11px] font-bold text-slate-500 hover:text-rose-500 transition-colors cursor-pointer"
-              >
-                Clear {activePicker === 'from' ? 'Start' : 'End'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActivePicker(null)}
-                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors cursor-pointer shadow-sm shadow-blue-500/20"
-              >
-                Done
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setActivePicker(null)}
+              className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors cursor-pointer shadow-sm shadow-blue-500/20"
+            >
+              Done
+            </button>
           </div>
         </div>
       )}
