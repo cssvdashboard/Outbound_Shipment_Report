@@ -978,7 +978,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             {/* Compact Customer & Destination Search Bars (Just Below It) */}
             <div className="flex items-center gap-2">
               {/* Short Customer Search */}
-              <div className="relative w-44 sm:w-48" ref={customerDropdownRef}>
+              <div className="relative w-56 sm:w-72" ref={customerDropdownRef}>
                 <div className="relative flex items-center">
                   <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-emerald-400">
                     <Users className="w-3.5 h-3.5" />
@@ -992,6 +992,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     }}
                     onFocus={() => setIsCustomerDropdownOpen(true)}
                     onKeyDown={handleCustomerKeyDown}
+                    title={selectedCustomer ? `Customer: ${selectedCustomer}` : (sectionCustomerSearch || 'Search customer...')}
                     placeholder="Search customer..."
                     className={`w-full pl-7 pr-7 py-1 rounded-lg text-xs bg-slate-950 text-slate-100 placeholder-slate-500 border transition-all focus:outline-none ${
                       selectedCustomer
@@ -1024,12 +1025,12 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
 
                 {/* Dropdown */}
                 {isCustomerDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-64 max-h-56 overflow-y-auto z-50 rounded-xl bg-[#0b1329] border border-slate-700 shadow-2xl divide-y divide-slate-800">
+                  <div className="absolute right-0 top-full mt-1 w-80 sm:w-96 max-h-64 overflow-y-auto z-50 rounded-xl bg-[#0b1329] border border-slate-700 shadow-2xl divide-y divide-slate-800">
                     <div className="p-2 bg-slate-950/90 text-[10px] font-bold text-slate-400 flex items-center justify-between sticky top-0 z-10 border-b border-slate-800">
                       <span>Customers ({matchingCustomers.length})</span>
                       <span className="text-slate-500">{totalDistinctCustomersCount} Total</span>
                     </div>
-                    <div className="p-1">
+                    <div className="p-1 space-y-0.5">
                       <button
                         type="button"
                         onClick={() => {
@@ -1050,14 +1051,15 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                             setSectionCustomerSearch('');
                             setIsCustomerDropdownOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs text-left transition-colors cursor-pointer ${
+                          title={cust.name}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded text-xs text-left transition-colors cursor-pointer gap-2 ${
                             selectedCustomer?.toLowerCase() === cust.name.toLowerCase()
                               ? 'bg-emerald-600 text-white font-bold'
                               : 'text-slate-300 hover:bg-slate-900'
                           }`}
                         >
-                          <span className="truncate pr-2">{cust.name}</span>
-                          <span className="text-[10px] font-mono opacity-80">{cust.count}</span>
+                          <span className="break-words leading-tight flex-1 pr-2">{cust.name}</span>
+                          <span className="text-[10px] font-mono opacity-80 shrink-0 self-start">{cust.count}</span>
                         </button>
                       ))}
                     </div>

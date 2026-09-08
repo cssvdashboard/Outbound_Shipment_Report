@@ -208,8 +208,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
         {/* Main Controls: Customer Search, Destination Search & Reset Button */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           
-          {/* 1. CUSTOMER SEARCH BAR */}
-          <div className="relative flex-1" ref={customerDropdownRef}>
+          {/* 1. CUSTOMER SEARCH BAR (Expanded width for full name visibility) */}
+          <div className="relative flex-1 min-w-[280px] lg:min-w-[420px]" ref={customerDropdownRef}>
             <div className="relative flex items-center">
               
               {/* Customer Users Icon */}
@@ -228,12 +228,17 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 }}
                 onFocus={() => setIsCustomerDropdownOpen(true)}
                 onKeyDown={handleCustomerKeyDown}
+                title={
+                  selectedCustomer
+                    ? `Customer: ${selectedCustomer} (${selectedCustomerCount.toLocaleString()} AWBs)`
+                    : (customerSearch || 'Search Customer by name')
+                }
                 placeholder={
                   selectedCustomer
                     ? `Customer: ${selectedCustomer} (${selectedCustomerCount.toLocaleString()} AWBs)`
-                    : 'Search Customer'
+                    : 'Search Customer by name...'
                 }
-                className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+                className={`w-full pl-10 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
                   selectedCustomer
                     ? 'bg-emerald-50/70 border-emerald-400 text-emerald-950 dark:bg-emerald-950/40 dark:border-emerald-500/60 dark:text-emerald-200 placeholder:text-emerald-800 dark:placeholder:text-emerald-300'
                     : 'bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
@@ -241,7 +246,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
               />
 
               {/* Right side controls: Clear X and Chevron */}
-              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1.5">
+              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
                 {customerSearch ? (
                   <button
                     type="button"
@@ -276,9 +281,9 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
               </div>
             </div>
 
-            {/* Customer Autocomplete Dropdown List */}
+            {/* Customer Autocomplete Dropdown List (Expanded width to show complete customer names) */}
             {isCustomerDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 max-h-80 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-emerald-900/20 divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="absolute left-0 top-full mt-2 w-full min-w-[340px] sm:min-w-[540px] lg:min-w-[680px] max-w-[95vw] max-h-96 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-emerald-900/20 divide-y divide-slate-100 dark:divide-slate-800">
                 
                 {/* Header summary in dropdown */}
                 <div className="p-2.5 bg-slate-50 dark:bg-slate-950/80 text-[11px] text-slate-600 dark:text-slate-300 font-semibold flex items-center justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md">
@@ -329,23 +334,24 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                         key={item.name}
                         type="button"
                         onClick={() => handleSelectCustomer(item.name)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all cursor-pointer group ${
+                        title={item.name}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-left transition-all cursor-pointer group gap-3 ${
                           isSelected
                             ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-500/25'
                             : 'text-slate-800 hover:bg-emerald-50/70 dark:text-slate-200 dark:hover:bg-slate-800/90'
                         }`}
                       >
-                        <div className="flex items-center gap-2 truncate pr-2">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           {isSelected ? (
                             <Check className="w-3.5 h-3.5 text-white font-bold shrink-0" />
                           ) : (
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 group-hover:scale-125 transition-transform" />
                           )}
-                          <span className={`truncate ${isSelected ? 'text-white' : 'group-hover:text-emerald-600 dark:group-hover:text-emerald-300'}`}>
-                            {highlightMatch(item.name, customerSearch, 'text-emerald-600 dark:text-emerald-400')}
+                          <span className={`break-words leading-relaxed font-medium ${isSelected ? 'text-white' : 'group-hover:text-emerald-600 dark:group-hover:text-emerald-300'}`}>
+                            {highlightMatch(item.name, customerSearch, 'text-emerald-600 dark:text-emerald-400 font-bold')}
                           </span>
                         </div>
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shrink-0 ${
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shrink-0 self-start mt-0.5 ${
                           isSelected
                             ? 'bg-white/20 text-white'
                             : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 group-hover:bg-emerald-200'
@@ -368,8 +374,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             )}
           </div>
 
-          {/* 2. DESTINATION SEARCH BAR */}
-          <div className="relative flex-1" ref={destDropdownRef}>
+          {/* 2. DESTINATION SEARCH BAR (Compact width so customer search bar has maximum space) */}
+          <div className="relative w-full sm:w-56 lg:w-64 shrink-0" ref={destDropdownRef}>
             <div className="relative flex items-center">
               
               {/* Destination Globe Icon */}
