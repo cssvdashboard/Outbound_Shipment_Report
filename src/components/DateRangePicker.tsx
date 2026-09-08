@@ -161,13 +161,8 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
   const presets = [
-    { label: 'All Dates (Full Dataset)', start: '', end: '' },
     { label: 'July 2026 (Full Month)', start: '2026-07-01', end: '2026-07-31' },
-    { label: 'August 2026 (Full Month)', start: '2026-08-01', end: '2026-08-31' },
-    { label: 'July 1 – 15, 2026', start: '2026-07-01', end: '2026-07-15' },
-    { label: 'July 16 – 31, 2026', start: '2026-07-16', end: '2026-07-31' },
-    { label: 'August 1 – 15, 2026', start: '2026-08-01', end: '2026-08-15' },
-    { label: 'August 16 – 31, 2026', start: '2026-08-16', end: '2026-08-31' }
+    { label: 'August 2026 (Full Month)', start: '2026-08-01', end: '2026-08-31' }
   ];
 
   return (
