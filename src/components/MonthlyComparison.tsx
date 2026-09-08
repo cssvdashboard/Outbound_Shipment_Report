@@ -147,20 +147,23 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
   );
 
   // Compute filtered dataset across all months for the comparative analysis
+  // Date filter should NEVER change anything in the Monthly comparison page
   const effectiveShipments = useMemo(() => {
     if (!filters) {
-      return filteredShipments && filteredShipments.length > 0 ? filteredShipments : rawShipments;
+      return rawShipments;
     }
 
     // Apply customer, destination, category, shipper, and delay filters
-    // Keep selectedMonth: 'ALL' so all tracked months (e.g. July & August) are compared side-by-side!
+    // Keep selectedMonth: 'ALL' so all tracked months (e.g. July & August) are compared side-by-side
+    // AND explicitly reset dateRange so the header date picker never filters out months or dates in Monthly Comparison
     const comparisonFilters: FilterState = {
       ...filters,
-      selectedMonth: 'ALL'
+      selectedMonth: 'ALL',
+      dateRange: { start: '', end: '' }
     };
 
     return filterShipments(rawShipments, comparisonFilters);
-  }, [rawShipments, filteredShipments, filters]);
+  }, [rawShipments, filters]);
 
   const comparison = useMemo(() => {
     return computeMonthlyComparison(effectiveShipments, allMonths);
@@ -536,6 +539,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       Month: m.monthLabel,
       'Total AWBs': m.totalAWBs,
       'Total Weight (kg)': m.totalWeight || 0,
+      'Agent AWBs': m.categories.agent,
+      'PP AWBs': m.categories.pp,
+      'CC AWBs': m.categories.cc,
+      'IPD AWBs': m.categories.ipd,
       'MoM Volume Change (%)': m.momChangeAWB !== null ? `${m.momChangeAWB}%` : 'Baseline',
       'Average TT (Days)': m.avgTT,
       'MoM TT Change (%)': m.momChangeTT !== null ? `${m.momChangeTT}%` : 'Baseline',
@@ -768,7 +775,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <Package className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                    Total Volume (AWBs)
+                    Total AWBs
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
@@ -823,36 +830,45 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                 </div>
               </div>
 
-              {/* Transit Time Range & Volume: Min TT, Max TT, Spread & Volume */}
+              {/* Shipment Categories Breakdown: Agent, PP, CC & IPD */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold gap-1.5">
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-500 dark:text-slate-400">Min TT:</span>
+                <div
+                  className="flex items-center gap-1.5"
+                  title={`Agent: ${m.categories.agent.toLocaleString()} AWBs (${m.totalAWBs > 0 ? ((m.categories.agent / m.totalAWBs) * 100).toFixed(1) : 0}%)`}
+                >
+                  <span className="text-slate-500 dark:text-slate-400 font-bold">Agent:</span>
+                  <span className="text-amber-700 dark:text-amber-400 font-mono font-black">
+                    {m.categories.agent.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
+                <div
+                  className="flex items-center gap-1.5"
+                  title={`PP: ${m.categories.pp.toLocaleString()} AWBs (${m.totalAWBs > 0 ? ((m.categories.pp / m.totalAWBs) * 100).toFixed(1) : 0}%)`}
+                >
+                  <span className="text-slate-500 dark:text-slate-400 font-bold">PP:</span>
+                  <span className="text-sky-700 dark:text-sky-400 font-mono font-black">
+                    {m.categories.pp.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
+                <div
+                  className="flex items-center gap-1.5"
+                  title={`CC: ${m.categories.cc.toLocaleString()} AWBs (${m.totalAWBs > 0 ? ((m.categories.cc / m.totalAWBs) * 100).toFixed(1) : 0}%)`}
+                >
+                  <span className="text-slate-500 dark:text-slate-400 font-bold">CC:</span>
                   <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black">
-                    {m.minTT > 0 ? `${m.minTT.toFixed(2)}d` : '0.00d'}
+                    {m.categories.cc.toLocaleString()}
                   </span>
                 </div>
                 <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-500 dark:text-slate-400">Max TT:</span>
-                  <span className="text-rose-700 dark:text-rose-400 font-mono font-black">
-                    {m.maxTT > 0 ? `${m.maxTT.toFixed(2)}d` : '0.00d'}
-                  </span>
-                </div>
-                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-500 dark:text-slate-400">Spread:</span>
-                  <span className="text-slate-700 dark:text-slate-300 font-mono font-black">
-                    {m.maxTT > 0 && m.minTT > 0 ? (m.maxTT - m.minTT).toFixed(2) : '0.00'}d
-                  </span>
-                </div>
-                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 shrink-0"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-500 dark:text-slate-400">Volume:</span>
-                  <span
-                    className="text-indigo-700 dark:text-indigo-400 font-mono font-black"
-                    title={`${m.totalAWBs.toLocaleString()} AWBs${m.totalWeight > 0 ? ` • ${Math.round(m.totalWeight).toLocaleString()} kg` : ''}`}
-                  >
-                    {m.totalAWBs.toLocaleString()}
+                <div
+                  className="flex items-center gap-1.5"
+                  title={`IPD: ${m.categories.ipd.toLocaleString()} AWBs (${m.totalAWBs > 0 ? ((m.categories.ipd / m.totalAWBs) * 100).toFixed(1) : 0}%)`}
+                >
+                  <span className="text-slate-500 dark:text-slate-400 font-bold">IPD:</span>
+                  <span className="text-purple-700 dark:text-purple-400 font-mono font-black">
+                    {m.categories.ipd.toLocaleString()}
                   </span>
                 </div>
               </div>

@@ -16,6 +16,12 @@ export interface MonthlyMetric {
   totalAWBs: number;
   totalWeight: number;
   totalPkgs: number;
+  categories: {
+    agent: number;
+    pp: number;
+    cc: number;
+    ipd: number;
+  };
   momChangeAWB: number | null; // % change in AWBs compared to prior month
   avgTT: number;
   momChangeTT: number | null; // % change in Avg TT compared to prior month
@@ -97,6 +103,15 @@ export function computeMonthlyComparison(
     const totalAWBs = monthShipments.length;
     const totalWeight = Math.round(monthShipments.reduce((acc, s) => acc + (s.weight || 0), 0) * 100) / 100;
     const totalPkgs = monthShipments.reduce((acc, s) => acc + (s.pkgCount || 0), 0);
+
+    // Categories Breakdown: Agent, PP, CC, IPD
+    const agentCount = monthShipments.filter((s) => s.isAgent ?? /agent/i.test(s.customer || '')).length;
+    const ppCount = monthShipments.filter((s) => {
+      const t = (s.shipmentType || '').toUpperCase();
+      return t === 'PP' || !t;
+    }).length;
+    const ccCount = monthShipments.filter((s) => (s.shipmentType || '').toUpperCase() === 'CC').length;
+    const ipdCount = monthShipments.filter((s) => (s.shipmentType || '').toUpperCase() === 'IPD').length;
 
     // Month Label
     const [yearStr, monthStr] = ym.split('-');
@@ -269,6 +284,12 @@ export function computeMonthlyComparison(
       totalAWBs,
       totalWeight,
       totalPkgs,
+      categories: {
+        agent: agentCount,
+        pp: ppCount,
+        cc: ccCount,
+        ipd: ipdCount
+      },
       momChangeAWB,
       avgTT,
       momChangeTT,
