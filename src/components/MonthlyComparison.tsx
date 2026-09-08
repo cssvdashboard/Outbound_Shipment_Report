@@ -782,8 +782,11 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                       {m.totalAWBs.toLocaleString()}
                     </span>
                     {m.totalWeight > 0 && (
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-bold" title="Total Weight in kg">
-                        / {Math.round(m.totalWeight).toLocaleString()} kg
+                      <span
+                        className="text-xs text-slate-500 dark:text-slate-400 font-bold"
+                        title={`Total Weight: ${(m.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })} tons (${Math.round(m.totalWeight).toLocaleString()} kg)`}
+                      >
+                        / {(m.totalWeight / 1000).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} tons
                       </span>
                     )}
                   </div>
@@ -791,11 +794,11 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     <div className="mt-1 flex items-center gap-1 text-[11px] font-bold">
                       {m.momChangeAWB >= 0 ? (
                         <span className="text-emerald-600 dark:text-emerald-400 flex items-center">
-                          <ArrowUpRight className="w-3.5 h-3.5" /> +{m.momChangeAWB}% MoM
+                          <ArrowUpRight className="w-3.5 h-3.5" /> +{m.momChangeAWB}% increase
                         </span>
                       ) : (
                         <span className="text-rose-600 dark:text-rose-400 flex items-center">
-                          <ArrowDownRight className="w-3.5 h-3.5" /> {m.momChangeAWB}% MoM
+                          <ArrowDownRight className="w-3.5 h-3.5" /> {m.momChangeAWB}% decrease
                         </span>
                       )}
                     </div>
@@ -1336,9 +1339,6 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
             </div>
 
             <div className="text-center space-y-1">
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                MoM Delta
-              </div>
               {ttDiff !== null ? (
                 <div className="space-y-1">
                   <div
@@ -1545,7 +1545,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
                     {activeRightMonth?.monthLabel || 'Month B'}
                   </th>
                   <th className="py-3 px-3 text-indigo-700 dark:text-indigo-300 border-l border-slate-200 dark:border-slate-800">
-                    MoM Velocity Delta
+                    Velocity Difference
                   </th>
                 </tr>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 text-[10px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
