@@ -382,7 +382,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   type="button"
                   onClick={() => handleSelectDate(day)}
                   title={hasPickupData ? `${cellIso} (Pickup records available)` : `${cellIso} (No pickup records)`}
-                  className={`relative w-8 h-8 rounded-lg text-xs flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  className={`w-8 h-8 rounded-lg text-xs flex items-center justify-center transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105 font-black ring-2 ring-blue-400/40'
                       : isSelectedFrom || isSelectedTo
@@ -391,13 +391,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-200 dark:hover:bg-blue-900/70'
                       : hasPickupData
                       ? 'font-black text-slate-950 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600'
-                      : 'font-normal text-slate-400/40 dark:text-slate-600/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/40'
+                      : 'font-normal text-slate-400/30 dark:text-slate-600/40 hover:bg-slate-100/40 dark:hover:bg-slate-800/30'
                   }`}
                 >
-                  <span className={hasPickupData ? 'font-black' : 'font-normal'}>{day}</span>
-                  {hasPickupData && !isSelected && !isInRange && (
-                    <span className="w-1 h-1 rounded-full bg-blue-500/70 dark:bg-blue-400/80 -mt-0.5" />
-                  )}
+                  <span className={hasPickupData ? 'font-black' : 'font-normal opacity-40'}>{day}</span>
                 </button>
               );
             })}
@@ -405,10 +402,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
           {/* Footer Controls & Legend in Calendar */}
           <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
-              <span>Bold = Has pickup data</span>
-            </div>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+              Bold = Has pickup data
+            </span>
 
             <div className="flex items-center gap-2">
               <button
