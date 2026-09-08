@@ -717,35 +717,35 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                   </button>
                 </div>
 
-                {/* Quick Metrics Strip */}
+                {/* Quick Metrics Strip - Option C: Dark Command-Center Cards */}
                 {modalStats && (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5">
-                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-xs">
-                      <span className="text-[10px] uppercase font-black tracking-wider text-slate-500 dark:text-slate-400 block">Average Transit Time</span>
-                      <span className="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 font-mono">
-                        {modalStats.avgTT} <span className="text-xs font-bold text-slate-600 dark:text-slate-400">days</span>
+                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Average Transit Time</span>
+                      <span className="text-base sm:text-lg font-black text-indigo-400 font-mono">
+                        {modalStats.avgTT} <span className="text-xs font-medium text-slate-400">days</span>
                       </span>
-                      <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-mono font-semibold">
+                      <span className="text-[10px] text-slate-400 block font-mono font-medium mt-0.5">
                         Min: {modalStats.minTT}d • Max: {modalStats.maxTT}d
                       </span>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-xs">
-                      <span className="text-[10px] uppercase font-black tracking-wider text-slate-500 dark:text-slate-400 block">Total Volume &amp; Wt</span>
-                      <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
-                        {modalAllShipments.length.toLocaleString()} <span className="text-xs font-bold text-slate-600 dark:text-slate-400">AWBs</span>
+                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Total Volume &amp; Wt</span>
+                      <span className="text-base sm:text-lg font-black text-white font-mono">
+                        {modalAllShipments.length.toLocaleString()} <span className="text-xs font-medium text-slate-400">AWBs</span>
                       </span>
-                      <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-mono font-semibold">
+                      <span className="text-[10px] text-slate-400 block font-mono font-medium mt-0.5">
                         {modalStats.totalWeight} kg • {modalStats.totalPkgs} pcs
                       </span>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 sm:col-span-2 shadow-xs">
-                      <span className="text-[10px] uppercase font-black tracking-wider text-slate-500 dark:text-slate-400 block">Top Impacted Destinations</span>
-                      <span className="text-xs sm:text-sm font-black text-emerald-700 dark:text-emerald-400 truncate block mt-0.5">
+                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 sm:col-span-2 shadow-md">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Top Impacted Destinations</span>
+                      <span className="text-xs sm:text-sm font-black text-emerald-400 truncate block mt-0.5">
                         {modalStats.topCountries}
                       </span>
-                      <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-semibold">
+                      <span className="text-[10px] text-slate-400 block font-medium mt-0.5">
                         Countries with highest concentration of this delay
                       </span>
                     </div>
@@ -797,12 +797,12 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                 </div>
               </div>
 
-              {/* Modal Table Content */}
-              <div className="flex-1 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/60 shadow-xs my-2">
+              {/* Modal Table Content - Option C: Dark Command-Center Grid */}
+              <div className="flex-1 overflow-y-auto border border-slate-800 rounded-2xl bg-slate-950 shadow-lg my-2">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-slate-100 dark:bg-slate-950 border-b-2 border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-400 font-black uppercase text-[10px] tracking-wider z-10">
+                  <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-black uppercase text-[10px] tracking-wider z-10">
                     <tr>
-                      <th className="py-2.5 px-3 w-12 text-center">#</th>
+                      <th className="py-2.5 px-3 w-12 text-center text-slate-400">#</th>
                       <th className="py-2.5 px-3">AWB Number</th>
                       <th className="py-2.5 px-3">Customer</th>
                       <th className="py-2.5 px-3">Shipper</th>
@@ -813,7 +813,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       <th className="py-2.5 px-3 text-center">Dossier</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-800/80 bg-slate-950">
                     {modalPaginatedData.length > 0 ? (
                       modalPaginatedData.map((s, idx) => {
                         const globalIndex = (modalValidCurrentPage - 1) * modalPageSize + idx + 1;
@@ -833,50 +833,50 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                           <tr
                             key={s.awb}
                             onClick={() => setInspectedShipment(s)}
-                            className="hover:bg-blue-50/40 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
+                            className="hover:bg-slate-900/90 transition-colors cursor-pointer group"
                             title="Click to view full dossier"
                           >
                             <td className="py-2.5 px-3 text-center text-slate-500 font-mono font-bold text-[11px]">
                               {globalIndex}
                             </td>
-                            <td className="py-2.5 px-3 font-mono font-black text-blue-600 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 hover:underline">
+                            <td className="py-2.5 px-3 font-mono font-black text-sky-400 group-hover:text-sky-300 hover:underline">
                               {s.awb}
                             </td>
-                            <td className="py-2.5 px-3 font-extrabold text-slate-900 dark:text-slate-200 max-w-[160px] truncate" title={s.customer}>
+                            <td className="py-2.5 px-3 font-extrabold text-white max-w-[160px] truncate" title={s.customer}>
                               {s.customer}
                             </td>
-                            <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-300 max-w-[140px] truncate" title={s.shprName}>
+                            <td className="py-2.5 px-3 font-semibold text-slate-300 max-w-[140px] truncate" title={s.shprName}>
                               {s.shprName}
                             </td>
                             <td className="py-2.5 px-3">
-                              <span className="font-black text-slate-900 dark:text-white">{s.destination}</span>
-                              {s.city && <span className="text-slate-600 dark:text-slate-400 text-[11px] font-semibold block">{s.city}</span>}
+                              <span className="font-black text-white">{s.destination}</span>
+                              {s.city && <span className="text-slate-400 text-[11px] font-medium block">{s.city}</span>}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-black text-indigo-700 dark:text-indigo-400 text-xs">
+                            <td className="py-2.5 px-3 text-right font-mono font-black text-indigo-400 text-xs">
                               {Number(s.tt || 0).toFixed(1)}d
                             </td>
                             <td className="py-2.5 px-3 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-2xs ${
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs ${
                                 isNegativeRes
-                                  ? 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
+                                  ? 'bg-rose-950/80 text-rose-300 border-rose-500/50'
                                   : isDelivered
-                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
-                                  : 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40'
+                                  ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50'
+                                  : 'bg-amber-950/80 text-amber-300 border-amber-500/50'
                               }`}>
                                 {s.finalResolution || 'Delivered'}
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={s.remarks || delayText}>
-                              <span className="text-slate-900 dark:text-slate-200 font-extrabold block truncate">{delayText}</span>
+                            <td className="py-2.5 px-3 text-slate-300 max-w-[200px] truncate" title={s.remarks || delayText}>
+                              <span className="text-slate-100 font-extrabold block truncate">{delayText}</span>
                               {s.remarks && s.remarks !== delayText && (
-                                <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium block truncate">{s.remarks}</span>
+                                <span className="text-slate-400 text-[11px] font-medium block truncate">{s.remarks}</span>
                               )}
                             </td>
                             <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
                               <button
                                 type="button"
                                 onClick={() => setInspectedShipment(s)}
-                                className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 dark:bg-slate-800 dark:border-transparent dark:text-sky-400 transition-all shadow-xs cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-sky-400 hover:text-white border border-slate-700 transition-all shadow-xs cursor-pointer"
                                 title="View full AWB dossier"
                               >
                                 <Eye className="w-4 h-4" />
@@ -887,7 +887,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       })
                     ) : (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center text-slate-500 font-semibold">
+                        <td colSpan={9} className="py-8 text-center text-slate-400 font-semibold">
                           No shipments matching current query.
                         </td>
                       </tr>

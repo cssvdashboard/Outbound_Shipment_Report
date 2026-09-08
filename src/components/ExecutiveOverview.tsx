@@ -648,35 +648,35 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   </button>
                 </div>
 
-              {/* Quick Metrics Strip */}
+              {/* Quick Metrics Strip - Option C: Dark Command-Center Block */}
               {modalStats && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5">
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Average Transit Time</span>
-                    <span className="text-sm sm:text-base font-black text-indigo-600 dark:text-indigo-400 font-mono">
-                      {modalStats.avgTT} <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">days</span>
+                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Average Transit Time</span>
+                    <span className="text-base sm:text-lg font-black text-indigo-400 font-mono">
+                      {modalStats.avgTT} <span className="text-xs font-medium text-slate-400">days</span>
                     </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-500 block font-mono font-medium">
+                    <span className="text-[10px] text-slate-400 block font-mono font-medium mt-0.5">
                       Min: {modalStats.minTT}d • Max: {modalStats.maxTT}d
                     </span>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Total Volume &amp; Wt</span>
-                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono">
+                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Volume &amp; Wt</span>
+                    <span className="text-base sm:text-lg font-black text-white font-mono">
                       {modalAllShipments.length.toLocaleString()} AWBs
                     </span>
-                    <span className="text-[10px] text-slate-600 dark:text-slate-500 block font-mono font-medium">
+                    <span className="text-[10px] text-slate-400 block font-mono font-medium mt-0.5">
                       {modalStats.totalWeight.toLocaleString()} kg • {modalStats.totalPkgs.toLocaleString()} pkgs
                     </span>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800 col-span-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Top Impacted Countries</span>
-                    <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block truncate">
+                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 col-span-2 shadow-md">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Top Impacted Countries</span>
+                    <span className="text-xs sm:text-sm font-black text-emerald-400 mt-0.5 block truncate">
                       {modalStats.topCountries}
                     </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-500 block font-medium">
+                    <span className="text-[10px] text-slate-400 block font-medium mt-0.5">
                       Sorted by shipment concentration
                     </span>
                   </div>
@@ -813,12 +813,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               </div>
             </div>
 
-            {/* Modal Table Container */}
-            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs my-1 transition-all ${
+            {/* Modal Table Container - Option C: Dark Command-Center Grid */}
+            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 shadow-lg my-1 transition-all ${
               showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
             }`}>
               <table className="w-full text-left text-xs min-w-[850px]">
-                <thead className="sticky top-0 bg-slate-100 border-b border-slate-200 dark:bg-slate-900 dark:border-slate-800 text-slate-700 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10">
+                <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10">
                   <tr>
                     <th className="py-2.5 px-3">AWB Tracking #</th>
                     <th className="py-2.5 px-2.5">Dest</th>
@@ -831,34 +831,34 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     <th className="py-2.5 px-2 text-center">Inspect</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
+                <tbody className="divide-y divide-slate-800/80 bg-slate-950 font-sans">
                   {modalPaginatedData.map((s, idx) => (
-                    <tr key={`${s.awb}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-200 transition-colors">
-                      <td className="py-2 px-3 font-mono font-bold text-blue-600 dark:text-blue-400 hover:underline">{s.awb}</td>
-                      <td className="py-2 px-2.5 font-bold text-slate-800 dark:text-white font-mono">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-bold">
+                    <tr key={`${s.awb}-${idx}`} className="hover:bg-slate-900/90 text-slate-200 transition-colors">
+                      <td className="py-2 px-3 font-mono font-bold text-sky-400 group-hover:text-sky-300 hover:underline">{s.awb}</td>
+                      <td className="py-2 px-2.5 font-bold text-white font-mono">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-200">
                           {s.destination}
                         </span>
                       </td>
-                      <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-300 max-w-[150px] truncate" title={s.customer}>
+                      <td className="py-2 px-3 font-semibold text-white max-w-[150px] truncate" title={s.customer}>
                         {s.customer}
                       </td>
-                      <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[150px] truncate font-medium" title={s.shprName}>
+                      <td className="py-2 px-3 text-slate-300 max-w-[150px] truncate font-medium" title={s.shprName}>
                         {s.shprName}
                       </td>
-                      <td className="py-2 px-3 text-slate-700 dark:text-slate-400 max-w-[130px] truncate">
-                        <div className="font-semibold text-slate-800 dark:text-slate-300">{s.recipient || '-'}</div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-500 font-medium">{s.city}</div>
+                      <td className="py-2 px-3 text-slate-300 max-w-[130px] truncate">
+                        <div className="font-semibold text-white">{s.recipient || '-'}</div>
+                        <div className="text-[10px] text-slate-400 font-medium">{s.city}</div>
                       </td>
-                      <td className="py-2 px-2.5 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                        {s.tt} d
+                      <td className="py-2 px-2.5 text-right font-mono font-bold text-indigo-400">
+                        {Number(s.tt || 0).toFixed(1)} d
                       </td>
                       <td className="py-2 px-2.5">
                         <span
                           className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
                             s.tt <= 5
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
-                              : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
+                              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                              : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
                           }`}
                         >
                           {s.tt <= 5 ? '≤5d' : '>5d'}
@@ -866,29 +866,29 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       </td>
                       <td className="py-2 px-3 text-[11px] max-w-[160px] truncate">
                         {s.remarks && s.remarks !== '-' ? (
-                          <span className="text-amber-700 dark:text-amber-300 font-bold" title={s.remarks}>
+                          <span className="text-amber-300 font-bold" title={s.remarks}>
                             {s.remarks}
                           </span>
                         ) : s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                          <span className="text-amber-700 dark:text-amber-400 font-bold" title={s.clearanceDelay}>
+                          <span className="text-amber-400 font-bold" title={s.clearanceDelay}>
                             📋 {s.clearanceDelay}
                           </span>
                         ) : s.transitDelay && s.transitDelay !== '-' ? (
-                          <span className="text-indigo-700 dark:text-indigo-400 font-bold" title={s.transitDelay}>
+                          <span className="text-indigo-400 font-bold" title={s.transitDelay}>
                             ✈️ {s.transitDelay}
                           </span>
                         ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                          <span className="text-rose-700 dark:text-rose-400 font-bold" title={s.destinationDelay}>
+                          <span className="text-rose-400 font-bold" title={s.destinationDelay}>
                             🚚 {s.destinationDelay}
                           </span>
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-600">-</span>
+                          <span className="text-slate-500">-</span>
                         )}
                       </td>
                       <td className="py-2 px-2 text-center">
                         <button
                           onClick={() => setInspectedShipment(s)}
-                          className="p-1 rounded bg-slate-100 hover:bg-blue-50 text-blue-600 hover:text-blue-800 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-blue-400 dark:hover:text-white dark:border-transparent cursor-pointer"
+                          className="p-1 rounded bg-slate-900 hover:bg-blue-600 text-sky-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
                           title="Inspect full details"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -898,7 +898,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   ))}
                   {modalPaginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-10 text-center text-slate-500 dark:text-slate-400 font-semibold">
+                      <td colSpan={9} className="py-10 text-center text-slate-400 font-semibold">
                         No shipment records match &quot;{modalSearch}&quot; for status {modalResolution}.
                       </td>
                     </tr>
