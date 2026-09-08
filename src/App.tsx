@@ -1,4 +1,4 @@
-import React, { useState, useEffect, startTransition } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLogisticsData } from './hooks/useLogisticsData';
 import { Header } from './components/Header';
 import { SmartFilterBar } from './components/SmartFilterBar';
@@ -14,7 +14,6 @@ import { Loader2 } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('overview');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   const {
     rawShipments,
@@ -53,19 +52,6 @@ export const App: React.FC = () => {
     availableDateRange,
     availablePickupDates
   } = useLogisticsData();
-
-  // 1. Initialize theme from storage
-  useEffect(() => {
-    const saved = getStoredTheme();
-    setTheme(saved);
-    if (saved === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
 
   // 2. Initialize state from URL Search Params (for shareable links)
   useEffect(() => {
@@ -128,18 +114,6 @@ export const App: React.FC = () => {
     window.history.replaceState({}, '', newUrl);
   }, [activeTab, filters.selectedCustomers, filters.selectedDestinations, filters.selectedCategoryType, filters.dateRange?.start, filters.dateRange?.end]);
 
-  const handleThemeToggle = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    // 1. Apply to <html> immediately — CSS repaints instantly, no stutter
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(newTheme);
-    setStoredTheme(newTheme);
-    // 2. Defer the React state update so it doesn't block the paint
-    startTransition(() => {
-      setTheme(newTheme);
-    });
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       <div className="flex-1 flex flex-col">
@@ -149,7 +123,6 @@ export const App: React.FC = () => {
           totalFilteredCount={filteredShipments.length}
           totalRawCount={rawShipments.length}
           filteredShipments={filteredShipments}
-          theme={theme}
           isServerConnected={isServerConnected}
           dateRange={dateRange || { start: '', end: '' }}
           onDateRangeChange={setDateRangeFilter}
@@ -158,7 +131,6 @@ export const App: React.FC = () => {
           allMonths={allMonths}
           selectedMonth={filters.selectedMonth || 'ALL'}
           onMonthChange={setMonthFilter}
-          onThemeToggle={handleThemeToggle}
           onDatasetUpdate={handleDatasetUpdate}
           onResetToDefault={handleResetToDefault}
           activeTab={activeTab}

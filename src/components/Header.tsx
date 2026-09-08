@@ -1,8 +1,6 @@
 import React from 'react';
 import {
   RotateCcw,
-  Sun,
-  Moon,
   Package,
   Layers,
   FileSpreadsheet,
@@ -10,21 +8,20 @@ import {
   CheckCircle2,
   AlertCircle,
   CalendarDays,
-  CalendarRange,
-  ChevronDown
+  CalendarRange
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { Shipment } from '../types/logistics';
 import * as XLSX from 'xlsx';
 
 import { DateRangePicker } from './DateRangePicker';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   datasetMeta: DatasetMeta;
   totalFilteredCount: number;
   totalRawCount: number;
   filteredShipments: Shipment[];
-  theme: 'dark' | 'light';
   isServerConnected?: boolean;
   dateRange: { start?: string; end?: string };
   onDateRangeChange: (start: string, end: string) => void;
@@ -33,7 +30,6 @@ interface HeaderProps {
   allMonths?: string[];
   selectedMonth?: string;
   onMonthChange?: (month: string) => void;
-  onThemeToggle: () => void;
   onDatasetUpdate?: (shipments: Shipment[], filename: string) => void;
   onResetToDefault: () => void;
   activeTab: string;
@@ -45,12 +41,10 @@ export const Header: React.FC<HeaderProps> = ({
   totalFilteredCount,
   totalRawCount,
   filteredShipments,
-  theme,
   dateRange,
   onDateRangeChange,
   availableDateRange,
   availablePickupDates,
-  onThemeToggle,
   onResetToDefault,
   activeTab,
   onTabChange
@@ -145,18 +139,8 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {/* Theme Switcher */}
-            <button
-              onClick={onThemeToggle}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
-              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
-              ) : (
-                <Moon className="w-4 h-4 text-indigo-600 hover:-rotate-12 transition-transform" />
-              )}
-            </button>
+            {/* Theme Switcher — self-contained, does not re-render App */}
+            <ThemeToggle />
           </div>
         </div>
 
