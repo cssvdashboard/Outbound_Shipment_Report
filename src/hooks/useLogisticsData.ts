@@ -213,11 +213,31 @@ export function useLogisticsData() {
     }));
   }, []);
 
-  const setCustomerFilter = useCallback((customer: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      selectedCustomers: customer === 'ALL' || !customer ? [] : [customer]
-    }));
+  const toggleCustomerFilter = useCallback((customer: string) => {
+    setFilters((prev) => {
+      if (customer === 'ALL' || !customer) {
+        return { ...prev, selectedCustomers: [] };
+      }
+      const exists = prev.selectedCustomers.includes(customer);
+      return {
+        ...prev,
+        selectedCustomers: exists
+          ? prev.selectedCustomers.filter((c) => c !== customer)
+          : [...prev.selectedCustomers, customer]
+      };
+    });
+  }, []);
+
+  const setCustomerFilter = useCallback((customer: string | string[]) => {
+    setFilters((prev) => {
+      if (Array.isArray(customer)) {
+        return { ...prev, selectedCustomers: customer };
+      }
+      return {
+        ...prev,
+        selectedCustomers: customer === 'ALL' || !customer ? [] : [customer]
+      };
+    });
   }, []);
 
   const setDestinationFilter = useCallback((dest: string) => {
@@ -430,6 +450,7 @@ export function useLogisticsData() {
     removeShipperFilter,
     addCustomerFilter,
     removeCustomerFilter,
+    toggleCustomerFilter,
     setCustomerFilter,
     setDestinationFilter,
     setCategoryTypeFilter,

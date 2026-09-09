@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   X,
+  Plus,
   Users,
   Globe,
   Check,
@@ -18,8 +19,9 @@ import { searchCustomers } from '../utils/analytics';
 interface SmartFilterBarProps {
   rawShipments: Shipment[];
   filters: FilterState;
-  onCustomerChange: (customer: string) => void;
+  onCustomerChange: (customer: string | string[]) => void;
   onDestinationChange: (dest: string) => void;
+  onCustomerToggle?: (customer: string) => void;
   onCategoryTypeChange?: (categoryType: CategoryTypeFilter) => void;
   onResetFilters?: () => void;
   allCustomers?: string[];
@@ -31,6 +33,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   filters,
   onCustomerChange,
   onDestinationChange,
+  onCustomerToggle,
   onCategoryTypeChange,
   onResetFilters,
   allCustomers = [],
@@ -67,20 +70,26 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     return searchCustomers(rawShipments, customerSearch, 30);
   }, [rawShipments, customerSearch]);
 
-  const selectedCustomer = filters.selectedCustomers[0] || null;
+  const selectedCustomers = filters.selectedCustomers || [];
+  const selectedCustomer = selectedCustomers[0] || null;
 
-  // Compute selected customer count
-  const selectedCustomerCount = useMemo(() => {
-    if (!selectedCustomer) return 0;
-    return rawShipments.filter(
-      (s) => (s.customer || '').trim().toLowerCase() === selectedCustomer.trim().toLowerCase()
-    ).length;
-  }, [rawShipments, selectedCustomer]);
+  const handleToggleCustomer = (name: string) => {
+    if (name === 'ALL') {
+      onCustomerChange('ALL');
+      setCustomerSearch('');
+      return;
+    }
+    if (onCustomerToggle) {
+      onCustomerToggle(name);
+    } else {
+      const exists = selectedCustomers.includes(name);
+      onCustomerChange(exists ? selectedCustomers.filter((c) => c !== name) : [...selectedCustomers, name]);
+    }
+  };
 
-  const handleSelectCustomer = (name: string) => {
-    onCustomerChange(name);
+  const handleClearCustomers = () => {
+    onCustomerChange('ALL');
     setCustomerSearch('');
-    setIsCustomerDropdownOpen(false);
   };
 
   const handleCustomerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -91,7 +100,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       if (matchingCustomers.length > 0) {
-        handleSelectCustomer(matchingCustomers[0].name);
+        handleToggleCustomer(matchingCustomers[0].name);
+        setCustomerSearch('');
       }
     }
   };
@@ -208,7 +218,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
         {/* Main Controls: Customer Search, Destination Search & Reset Button */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           
-          {/* 1. CUSTOMER SEARCH BAR (Expanded width for full name visibility) */}
+          {/* 1. CUSTOMER SEARCH BAR (Multi-customer selection with Plus sign) */}
           <div className="relative flex-1 min-w-[280px] lg:min-w-[420px]" ref={customerDropdownRef}>
             <div className="relative flex items-center">
               
@@ -229,23 +239,25 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 onFocus={() => setIsCustomerDropdownOpen(true)}
                 onKeyDown={handleCustomerKeyDown}
                 title={
-                  selectedCustomer
-                    ? selectedCustomer
-                    : (customerSearch || 'Search Customer by name')
+                  selectedCustomers.length > 0
+                    ? selectedCustomers.join(', ')
+                    : (customerSearch || 'Search Customer by name...')
                 }
                 placeholder={
-                  selectedCustomer
-                    ? selectedCustomer
+                  selectedCustomers.length > 1
+                    ? `${selectedCustomers.length} Customers Selected (Add more...)`
+                    : selectedCustomers.length === 1
+                    ? selectedCustomers[0]
                     : 'Search Customer by name...'
                 }
-                className={`w-full pl-10 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
-                  selectedCustomer
+                className={`w-full pl-10 pr-20 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+                  selectedCustomers.length > 0
                     ? 'bg-emerald-50/70 border-emerald-400 text-emerald-950 dark:bg-emerald-950/40 dark:border-emerald-500/60 dark:text-emerald-200 placeholder:text-emerald-800 dark:placeholder:text-emerald-300'
                     : 'bg-white border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
                 }`}
               />
 
-              {/* Right side controls: Clear X and Chevron */}
+              {/* Right side controls: Clear X, count badge and Chevron */}
               <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
                 {customerSearch ? (
                   <button
@@ -259,14 +271,15 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
-                ) : selectedCustomer ? (
+                ) : selectedCustomers.length > 0 ? (
                   <button
                     type="button"
-                    onClick={() => onCustomerChange('ALL')}
-                    className="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
-                    title="Reset customer to All"
+                    onClick={handleClearCustomers}
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-colors cursor-pointer"
+                    title="Reset customer filter to All"
                   >
                     <X className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-extrabold">{selectedCustomers.length}</span>
                   </button>
                 ) : null}
 
@@ -281,7 +294,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
               </div>
             </div>
 
-            {/* Customer Autocomplete Dropdown List (Expanded width to show complete customer names) */}
+            {/* Customer Autocomplete Dropdown List (Expanded width to show complete customer names with Plus sign) */}
             {isCustomerDropdownOpen && (
               <div className="absolute left-0 top-full mt-2 w-full min-w-[340px] sm:min-w-[540px] lg:min-w-[680px] max-w-[95vw] max-h-96 overflow-y-auto z-[100] rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-emerald-900/20 divide-y divide-slate-100 dark:divide-slate-800">
                 
@@ -295,24 +308,35 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                         : `All Customers (${totalDistinctCustomersCount.toLocaleString()} Total)`}
                     </span>
                   </span>
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300">
-                    {matchingCustomers.length} shown
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {selectedCustomers.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleClearCustomers}
+                        className="text-[10px] font-bold text-rose-500 hover:underline cursor-pointer"
+                      >
+                        Reset to All
+                      </button>
+                    )}
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300">
+                      {matchingCustomers.length} shown
+                    </span>
+                  </div>
                 </div>
 
                 {/* All Customers Option */}
                 <div className="p-1.5">
                   <button
                     type="button"
-                    onClick={() => handleSelectCustomer('ALL')}
+                    onClick={handleClearCustomers}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                      !selectedCustomer
+                      selectedCustomers.length === 0
                         ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
                         : 'text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      {!selectedCustomer ? (
+                      {selectedCustomers.length === 0 ? (
                         <Check className="w-4 h-4 text-emerald-500 font-bold" />
                       ) : (
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
@@ -325,39 +349,46 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                   </button>
                 </div>
 
-                {/* Customer List Options */}
+                {/* Customer List Options (styled matching user reference with Plus icon) */}
                 <div className="p-1.5 space-y-0.5">
                   {matchingCustomers.map((item) => {
-                    const isSelected = selectedCustomer === item.name;
+                    const isSelected = selectedCustomers.includes(item.name);
                     return (
                       <button
                         key={item.name}
                         type="button"
-                        onClick={() => handleSelectCustomer(item.name)}
+                        onClick={() => handleToggleCustomer(item.name)}
                         title={item.name}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-left transition-all cursor-pointer group gap-3 ${
+                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer group gap-3 ${
                           isSelected
-                            ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-500/25'
-                            : 'text-slate-800 hover:bg-emerald-50/70 dark:text-slate-200 dark:hover:bg-slate-800/90'
+                            ? 'bg-emerald-50/90 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-100 border border-emerald-500/40 shadow-xs'
+                            : 'text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/90'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          {isSelected ? (
-                            <Check className="w-3.5 h-3.5 text-white font-bold shrink-0" />
-                          ) : (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 group-hover:scale-125 transition-transform" />
-                          )}
-                          <span className={`break-words leading-relaxed font-medium ${isSelected ? 'text-white' : 'group-hover:text-emerald-600 dark:group-hover:text-emerald-300'}`}>
-                            {highlightMatch(item.name, customerSearch, 'text-emerald-600 dark:text-emerald-400 font-bold')}
+                          <span className={`w-2 h-2 rounded-full shrink-0 transition-transform ${
+                            isSelected
+                              ? 'bg-emerald-400 ring-2 ring-emerald-400/40 scale-110'
+                              : 'bg-emerald-500 dark:bg-emerald-400 group-hover:scale-125'
+                          }`} />
+                          <span className={`break-words leading-relaxed font-extrabold ${isSelected ? 'text-emerald-950 dark:text-emerald-200' : 'group-hover:text-emerald-600 dark:group-hover:text-emerald-300'}`}>
+                            {highlightMatch(item.name, customerSearch, 'text-emerald-600 dark:text-emerald-400 font-extrabold underline')}
                           </span>
                         </div>
-                        <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md shrink-0 self-start mt-0.5 transition-colors ${
-                          isSelected
-                            ? 'bg-white/20 text-white'
-                            : 'bg-emerald-100 text-emerald-900 group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-950/80 dark:text-emerald-300 dark:group-hover:bg-emerald-600 dark:group-hover:text-white'
-                        }`}>
-                          {item.count.toLocaleString()} AWBs
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded transition-colors ${
+                            isSelected
+                              ? 'bg-emerald-200/90 text-emerald-950 dark:bg-emerald-900/90 dark:text-emerald-200'
+                              : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950'
+                          }`}>
+                            <strong>{item.count.toLocaleString()} AWBs</strong>
+                          </span>
+                          {isSelected ? (
+                            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                          ) : (
+                            <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-125 transition-transform" />
+                          )}
+                        </div>
                       </button>
                     );
                   })}
@@ -630,6 +661,41 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
           </button>
 
         </div>
+
+        {/* Selected Customer Chips Bar */}
+        {selectedCustomers.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-2.5 border-t border-slate-200/70 dark:border-slate-800/80 mt-2.5">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1 mr-1">
+              <Users className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Selected Customers ({selectedCustomers.length}):</span>
+            </span>
+            {selectedCustomers.map((cust) => (
+              <span
+                key={cust}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-50 border border-emerald-300/80 text-emerald-950 dark:bg-emerald-950/60 dark:border-emerald-700/80 dark:text-emerald-200 shadow-xs"
+              >
+                <span className="truncate max-w-[260px] sm:max-w-[340px]" title={cust}>
+                  <strong>{cust}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleToggleCustomer(cust)}
+                  className="text-emerald-700 hover:text-rose-500 dark:text-emerald-300 dark:hover:text-rose-400 transition-colors p-0.5 cursor-pointer"
+                  title={`Remove ${cust}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              onClick={handleClearCustomers}
+              className="text-xs text-rose-500 hover:text-rose-400 font-bold ml-1.5 hover:underline cursor-pointer"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
 
       </div>
     </div>
