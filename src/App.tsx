@@ -27,7 +27,6 @@ export const App: React.FC = () => {
     removeShipperFilter,
     addCustomerFilter,
     removeCustomerFilter,
-    toggleCustomerFilter,
     setCustomerFilter,
     setDestinationFilter,
     setCategoryTypeFilter,
@@ -63,8 +62,7 @@ export const App: React.FC = () => {
     }
     const custParam = params.get('cust');
     if (custParam) {
-      const custs = custParam.split('||').map((s) => s.trim()).filter(Boolean);
-      if (custs.length > 0) setCustomerFilter(custs);
+      setCustomerFilter(custParam);
     }
     const destParam = params.get('dest');
     if (destParam) {
@@ -87,7 +85,7 @@ export const App: React.FC = () => {
     params.set('tab', activeTab);
     
     if (filters.selectedCustomers.length > 0) {
-      params.set('cust', filters.selectedCustomers.join('||'));
+      params.set('cust', filters.selectedCustomers[0]);
     } else {
       params.delete('cust');
     }
@@ -144,7 +142,6 @@ export const App: React.FC = () => {
           rawShipments={rawShipments}
           filters={filters}
           onCustomerChange={setCustomerFilter}
-          onCustomerToggle={toggleCustomerFilter}
           onDestinationChange={setDestinationFilter}
           onCategoryTypeChange={setCategoryTypeFilter}
           onResetFilters={resetAllFilters}
