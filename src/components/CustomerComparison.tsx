@@ -188,25 +188,36 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     }
   }, [selectedCategoryType, selectedDestination, shipments]);
 
-  // Customer Ranking is completely INDEPENDENT of the Multi-Shipper search bars / destination selection below
-  const allRankingCustomers = useMemo(() => {
-    const countMap: Record<string, number> = {};
-    for (const s of shipments) {
-      if (s.customer) {
-        countMap[s.customer] = (countMap[s.customer] || 0) + 1;
-      }
+  // Fast single-pass candidate extraction for top customers by AWB count and Total Weight
+  const candidateTopCustomers = useMemo(() => {
+    const awbMap = new Map<string, number>();
+    const wtMap = new Map<string, number>();
+
+    for (let i = 0; i < shipments.length; i++) {
+      const s = shipments[i];
+      if (!s.customer) continue;
+      awbMap.set(s.customer, (awbMap.get(s.customer) || 0) + 1);
+      wtMap.set(s.customer, (wtMap.get(s.customer) || 0) + (s.weight || 0));
     }
 
-    return Object.entries(countMap)
+    const topByAwb = Array.from(awbMap.entries())
       .sort((a, b) => b[1] - a[1])
+      .slice(0, 15)
       .map(([name]) => name);
+
+    const topByWt = Array.from(wtMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15)
+      .map(([name]) => name);
+
+    return Array.from(new Set([...topByAwb, ...topByWt]));
   }, [shipments]);
 
-  // Ranking data evaluates globally across shipments, completely unaffected by the Multi-Shipper search bars below
-  const allRankingData: CustomerComparisonMetric[] = useMemo(() => {
-    if (allRankingCustomers.length === 0) return [];
-    return computeCustomerComparison(shipments, 'ALL', allRankingCustomers);
-  }, [shipments, allRankingCustomers]);
+  // Compute ranking metrics strictly for candidate top customers (~20-25 customers instead of 1,316)
+  const rankingMetrics = useMemo(() => {
+    if (candidateTopCustomers.length === 0) return [];
+    return computeCustomerComparison(shipments, 'ALL', candidateTopCustomers);
+  }, [shipments, candidateTopCustomers]);
 
   // Filter and rank customers for autocomplete by AWB volume in active category
   const availableCustomerSuggestions = useMemo(() => {
@@ -220,23 +231,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     return computeCustomerComparison(shipments, selectedDestination, selectedCustomers);
   }, [shipments, selectedDestination, selectedCustomers]);
 
-  // Find best performer (fastest average TT among customers with > 0 AWBs)
-  const fastestCustomer = useMemo(() => {
-    const valid = allRankingData.filter((c) => c.awbCount > 0);
-    if (valid.length === 0) return null;
-    return [...valid].sort((a, b) => a.avgTT - b.avgTT)[0]?.customer;
-  }, [allRankingData]);
-
-  // Find highest volume customer
-  const highestVolumeCustomer = useMemo(() => {
-    const valid = allRankingData.filter((c) => c.awbCount > 0);
-    if (valid.length === 0) return null;
-    return [...valid].sort((a, b) => b.awbCount - a.awbCount)[0]?.customer;
-  }, [allRankingData]);
-
   // Top 10 customer ranking that dynamically changes based on active AWB count / Total Weight sort
   const top10Rank = useMemo(() => {
-    return [...allRankingData]
+    return [...rankingMetrics]
       .sort((a, b) => {
         if (rankSort.field === 'awb') {
           return rankSort.dir === 'desc' ? b.awbCount - a.awbCount : a.awbCount - b.awbCount;
@@ -244,10 +241,24 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         return rankSort.dir === 'desc' ? b.totalWeight - a.totalWeight : a.totalWeight - b.totalWeight;
       })
       .slice(0, 10);
-  }, [allRankingData, rankSort]);
+  }, [rankingMetrics, rankSort]);
 
   const maxAwb = useMemo(() => Math.max(...top10Rank.map((x) => x.awbCount), 1), [top10Rank]);
   const maxWt = useMemo(() => Math.max(...top10Rank.map((x) => x.totalWeight), 1), [top10Rank]);
+
+  // Find best performer (fastest average TT among top 10 customers with > 0 AWBs)
+  const fastestCustomer = useMemo(() => {
+    const valid = top10Rank.filter((c) => c.awbCount > 0);
+    if (valid.length === 0) return null;
+    return [...valid].sort((a, b) => a.avgTT - b.avgTT)[0]?.customer;
+  }, [top10Rank]);
+
+  // Find highest volume customer
+  const highestVolumeCustomer = useMemo(() => {
+    const valid = top10Rank.filter((c) => c.awbCount > 0);
+    if (valid.length === 0) return null;
+    return [...valid].sort((a, b) => b.awbCount - a.awbCount)[0]?.customer;
+  }, [top10Rank]);
 
   const handleAddCustomer = (customer: string) => {
     if (!selectedCustomers.includes(customer)) {

@@ -400,14 +400,80 @@ export function computeCustomerComparison(
   destination: string, // 'ALL' or specific country code like 'US'
   customerNames: string[]
 ): CustomerComparisonMetric[] {
-  return customerNames.map((cust) => {
-    const custShipments = shipments.filter((s) => {
-      if (s.customer !== cust) return false;
-      if (destination && destination !== 'ALL' && s.destination !== destination) return false;
-      return true;
-    });
+  if (!customerNames || customerNames.length === 0) return [];
+  const targetSet = new Set(customerNames);
 
-    const count = custShipments.length;
+  // Single-pass accumulator: 1 pass through shipments instead of K filter loops!
+  type MetricAccumulator = {
+    count: number;
+    totalWeight: number;
+    sumTT: number;
+    minTT: number;
+    maxTT: number;
+    onTimeCount: number;
+    transitDelays: number;
+    clearanceDelays: number;
+    destinationDelays: number;
+    delayCount: number;
+  };
+
+  const map = new Map<string, MetricAccumulator>();
+  for (const name of customerNames) {
+    map.set(name, {
+      count: 0,
+      totalWeight: 0,
+      sumTT: 0,
+      minTT: Number.MAX_VALUE,
+      maxTT: 0,
+      onTimeCount: 0,
+      transitDelays: 0,
+      clearanceDelays: 0,
+      destinationDelays: 0,
+      delayCount: 0
+    });
+  }
+
+  const isGlobalDest = !destination || destination === 'ALL';
+
+  for (let i = 0; i < shipments.length; i++) {
+    const s = shipments[i];
+    if (!s.customer) continue;
+    const acc = map.get(s.customer);
+    if (!acc) continue;
+    if (!isGlobalDest && s.destination !== destination) continue;
+
+    const tt = s.tt;
+    acc.count++;
+    acc.totalWeight += s.weight || 0;
+    acc.sumTT += tt;
+    if (tt > 0 && tt < acc.minTT) acc.minTT = tt;
+    if (tt > acc.maxTT) acc.maxTT = tt;
+
+    if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+      acc.onTimeCount++;
+    }
+
+    let hasDelay = false;
+    if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') {
+      acc.transitDelays++;
+      hasDelay = true;
+    }
+    if (s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '') {
+      acc.clearanceDelays++;
+      hasDelay = true;
+    }
+    if (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') {
+      acc.destinationDelays++;
+      hasDelay = true;
+    }
+    if (hasDelay || s.ttRange === 'More Than 5 Days' || tt > 5) {
+      acc.delayCount++;
+    }
+  }
+
+  return customerNames.map((cust) => {
+    const acc = map.get(cust)!;
+    const count = acc ? acc.count : 0;
     if (count === 0) {
       return {
         customer: cust,
@@ -426,59 +492,20 @@ export function computeCustomerComparison(
       };
     }
 
-    let sumTT = 0;
-    let minTT = Number.MAX_VALUE;
-    let maxTT = 0;
-    let onTimeCount = 0;
-    let transitDelays = 0;
-    let clearanceDelays = 0;
-    let destinationDelays = 0;
-    let delayCount = 0;
-    let totalWeight = 0;
-
-    for (const s of custShipments) {
-      const tt = s.tt;
-      totalWeight += s.weight || 0;
-      sumTT += tt;
-      if (tt > 0 && tt < minTT) minTT = tt;
-      if (tt > maxTT) maxTT = tt;
-
-      if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
-        onTimeCount++;
-      }
-
-      let hasDelay = false;
-      if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') {
-        transitDelays++;
-        hasDelay = true;
-      }
-      if (s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '') {
-        clearanceDelays++;
-        hasDelay = true;
-      }
-      if (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') {
-        destinationDelays++;
-        hasDelay = true;
-      }
-      if (hasDelay || s.ttRange === 'More Than 5 Days' || tt > 5) {
-        delayCount++;
-      }
-    }
-
     return {
       customer: cust,
       awbCount: count,
-      totalWeight: Math.round(totalWeight * 100) / 100,
-      avgTT: Math.round((sumTT / count) * 100) / 100,
-      minTT: minTT === Number.MAX_VALUE ? 0 : Math.round(minTT * 100) / 100,
-      maxTT: Math.round(maxTT * 100) / 100,
-      onTimeCount,
-      onTimePercentage: Math.round((onTimeCount / count) * 10000) / 100,
-      delayCount,
-      delayPercentage: Math.round((delayCount / count) * 10000) / 100,
-      transitDelays,
-      clearanceDelays,
-      destinationDelays
+      totalWeight: Math.round(acc.totalWeight * 100) / 100,
+      avgTT: Math.round((acc.sumTT / count) * 100) / 100,
+      minTT: acc.minTT === Number.MAX_VALUE ? 0 : Math.round(acc.minTT * 100) / 100,
+      maxTT: Math.round(acc.maxTT * 100) / 100,
+      onTimeCount: acc.onTimeCount,
+      onTimePercentage: Math.round((acc.onTimeCount / count) * 10000) / 100,
+      delayCount: acc.delayCount,
+      delayPercentage: Math.round((acc.delayCount / count) * 10000) / 100,
+      transitDelays: acc.transitDelays,
+      clearanceDelays: acc.clearanceDelays,
+      destinationDelays: acc.destinationDelays
     };
   });
 }
