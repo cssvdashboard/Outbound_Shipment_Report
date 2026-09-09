@@ -27,7 +27,11 @@ export const App: React.FC = () => {
     removeShipperFilter,
     addCustomerFilter,
     removeCustomerFilter,
+    toggleCustomerFilter,
     setCustomerFilter,
+    addDestinationFilter,
+    removeDestinationFilter,
+    toggleDestinationFilter,
     setDestinationFilter,
     setCategoryTypeFilter,
     setFinalResolutionFilter,
@@ -62,11 +66,13 @@ export const App: React.FC = () => {
     }
     const custParam = params.get('cust');
     if (custParam) {
-      setCustomerFilter(custParam);
+      const custs = custParam.split('||').map(s => s.trim()).filter(Boolean);
+      if (custs.length > 0) setCustomerFilter(custs);
     }
     const destParam = params.get('dest');
     if (destParam) {
-      setDestinationFilter(destParam);
+      const dests = destParam.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+      if (dests.length > 0) setDestinationFilter(dests);
     }
     const catParam = params.get('cat');
     if (catParam && ['ALL', 'AGENT', 'PP', 'CC'].includes(catParam)) {
@@ -85,13 +91,14 @@ export const App: React.FC = () => {
     params.set('tab', activeTab);
     
     if (filters.selectedCustomers.length > 0) {
-      params.set('cust', filters.selectedCustomers[0]);
+      // Use || delimiter for customers because customer names might contain commas
+      params.set('cust', filters.selectedCustomers.join('||'));
     } else {
       params.delete('cust');
     }
 
     if (filters.selectedDestinations.length > 0) {
-      params.set('dest', filters.selectedDestinations[0]);
+      params.set('dest', filters.selectedDestinations.join(','));
     } else {
       params.delete('dest');
     }
@@ -143,6 +150,8 @@ export const App: React.FC = () => {
           filters={filters}
           onCustomerChange={setCustomerFilter}
           onDestinationChange={setDestinationFilter}
+          onCustomerToggle={toggleCustomerFilter}
+          onDestinationToggle={toggleDestinationFilter}
           onCategoryTypeChange={setCategoryTypeFilter}
           onResetFilters={resetAllFilters}
           allCustomers={allCustomers}
