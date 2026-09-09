@@ -412,6 +412,7 @@ export function computeCustomerComparison(
       return {
         customer: cust,
         awbCount: 0,
+        totalWeight: 0,
         avgTT: 0,
         minTT: 0,
         maxTT: 0,
@@ -433,9 +434,11 @@ export function computeCustomerComparison(
     let clearanceDelays = 0;
     let destinationDelays = 0;
     let delayCount = 0;
+    let totalWeight = 0;
 
     for (const s of custShipments) {
       const tt = s.tt;
+      totalWeight += s.weight || 0;
       sumTT += tt;
       if (tt > 0 && tt < minTT) minTT = tt;
       if (tt > maxTT) maxTT = tt;
@@ -465,6 +468,7 @@ export function computeCustomerComparison(
     return {
       customer: cust,
       awbCount: count,
+      totalWeight: Math.round(totalWeight * 100) / 100,
       avgTT: Math.round((sumTT / count) * 100) / 100,
       minTT: minTT === Number.MAX_VALUE ? 0 : Math.round(minTT * 100) / 100,
       maxTT: Math.round(maxTT * 100) / 100,

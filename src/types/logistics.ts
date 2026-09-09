@@ -92,6 +92,7 @@ export interface CountryPerformance {
 export interface CustomerComparisonMetric {
   customer: string;
   awbCount: number;
+  totalWeight: number;
   avgTT: number;
   minTT: number;
   maxTT: number;
