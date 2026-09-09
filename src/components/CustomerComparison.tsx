@@ -17,7 +17,8 @@ import {
   Weight,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Search
 } from 'lucide-react';
 import { Shipment, CustomerComparisonMetric, CategoryTypeFilter } from '../types/logistics';
 import { computeCustomerComparison, searchCustomers } from '../utils/analytics';
@@ -121,6 +122,9 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     return allDestinations.filter((code) => code.includes(q));
   }, [allDestinations, autoLoadSearch]);
 
+  // Ranking table search filter state
+  const [rankTableSearch, setRankTableSearch] = useState<string>('');
+
   // Auto-Load Top Customers handler when a country is selected
   const handleAutoLoadForCountry = (countryCode: string) => {
     setSelectedDestination(countryCode);
@@ -139,7 +143,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
     const top = Object.entries(countMap)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
+      .slice(0, 10)
       .map(([name]) => name);
 
     if (top.length > 0) {
@@ -162,11 +166,11 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     // Check how many of current selected customers have > 0 AWBs in this category
     const activeCount = selectedCustomers.filter((c) => (countMap[c] || 0) > 0).length;
 
-    // If no customers selected or none of the current customers have shipments in this category, load top 4
+    // If no customers selected or none of the current customers have shipments in this category, load top 10
     if (selectedCustomers.length === 0 || activeCount === 0) {
       const top = Object.entries(countMap)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 4)
+        .slice(0, 10)
         .map(([name]) => name);
 
       if (top.length > 0) {
@@ -174,6 +178,31 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       }
     }
   }, [selectedCategoryType, selectedDestination, shipments]);
+
+  // All unique customers with shipments in current destination & active category
+  const allDestCustomers = useMemo(() => {
+    const destShipments =
+      selectedDestination === 'ALL'
+        ? shipments
+        : shipments.filter((s) => s.destination === selectedDestination);
+    
+    const countMap: Record<string, number> = {};
+    for (const s of destShipments) {
+      if (s.customer) {
+        countMap[s.customer] = (countMap[s.customer] || 0) + 1;
+      }
+    }
+
+    return Object.entries(countMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name]) => name);
+  }, [shipments, selectedDestination]);
+
+  // Ranking data for ALL customers in current destination
+  const allRankingData: CustomerComparisonMetric[] = useMemo(() => {
+    if (allDestCustomers.length === 0) return [];
+    return computeCustomerComparison(shipments, selectedDestination, allDestCustomers);
+  }, [shipments, selectedDestination, allDestCustomers]);
 
   // Filter and rank customers for autocomplete by AWB volume in active category
   const availableCustomerSuggestions = useMemo(() => {
@@ -189,17 +218,35 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
   // Find best performer (fastest average TT among customers with > 0 AWBs)
   const fastestCustomer = useMemo(() => {
-    const valid = comparisonData.filter((c) => c.awbCount > 0);
+    const valid = allRankingData.filter((c) => c.awbCount > 0);
     if (valid.length === 0) return null;
     return [...valid].sort((a, b) => a.avgTT - b.avgTT)[0]?.customer;
-  }, [comparisonData]);
+  }, [allRankingData]);
 
   // Find highest volume customer
   const highestVolumeCustomer = useMemo(() => {
-    const valid = comparisonData.filter((c) => c.awbCount > 0);
+    const valid = allRankingData.filter((c) => c.awbCount > 0);
     if (valid.length === 0) return null;
     return [...valid].sort((a, b) => b.awbCount - a.awbCount)[0]?.customer;
-  }, [comparisonData]);
+  }, [allRankingData]);
+
+  // Filtered and sorted list for Customer Ranking Table
+  const filteredAndSortedRank = useMemo(() => {
+    let list = allRankingData;
+    if (rankTableSearch.trim()) {
+      const q = rankTableSearch.trim().toLowerCase();
+      list = list.filter((c) => c.customer.toLowerCase().includes(q));
+    }
+    return [...list].sort((a, b) => {
+      if (rankSort.field === 'awb') {
+        return rankSort.dir === 'desc' ? b.awbCount - a.awbCount : a.awbCount - b.awbCount;
+      }
+      return rankSort.dir === 'desc' ? b.totalWeight - a.totalWeight : a.totalWeight - b.totalWeight;
+    });
+  }, [allRankingData, rankTableSearch, rankSort]);
+
+  const maxAwb = useMemo(() => Math.max(...allRankingData.map((x) => x.awbCount), 1), [allRankingData]);
+  const maxWt = useMemo(() => Math.max(...allRankingData.map((x) => x.totalWeight), 1), [allRankingData]);
 
   const handleAddCustomer = (customer: string) => {
     if (!selectedCustomers.includes(customer)) {
@@ -312,8 +359,253 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      
-      {/* 1. SELECTION & CONFIGURATION PANEL */}
+
+      {/* 🏆 1. CUSTOMER RANKING BOX (AT THE VERY TOP) */}
+      {allRankingData.length > 0 && (
+        <div className="glass-panel rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden relative z-10 shadow-sm">
+          {/* Table Header Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 shrink-0">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    Customer Ranking &amp; Volume Benchmark
+                  </h3>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-700/50">
+                    Destination: {selectedDestination === 'ALL' ? 'All Global' : selectedDestination}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    {allRankingData.length} Total Customers
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  Top 10 visible at a glance — scroll the vertical bar on the right to see all {allRankingData.length} customers
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Filter Customer Search Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={rankTableSearch}
+                  onChange={(e) => setRankTableSearch(e.target.value)}
+                  placeholder="Filter customer..."
+                  className="pl-7 pr-7 py-1 text-xs font-bold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/40 w-48 shadow-sm"
+                />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                {rankTableSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setRankTableSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+
+              <span className="hidden lg:inline-block text-[10px] text-slate-400 font-semibold">
+                Click headers to sort ↕
+              </span>
+            </div>
+          </div>
+
+          {/* Scrollable Table with visible vertical scrollbar on the right */}
+          <div className="overflow-y-auto overflow-x-auto max-h-[480px] custom-scrollbar">
+            <table className="w-full text-xs">
+              <thead className="sticky top-0 z-20 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th className="px-4 py-2.5 text-center font-black text-slate-500 dark:text-slate-400 w-14">#</th>
+                  <th className="px-4 py-2.5 text-left font-black text-slate-500 dark:text-slate-400">Customer</th>
+                  <th
+                    className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-sky-600 dark:hover:text-sky-400 transition-colors group"
+                    onClick={() => toggleRankSort('awb')}
+                    title="Click to sort by AWB Count"
+                  >
+                    <span className="inline-flex items-center justify-end gap-1">
+                      AWB Count
+                      {rankSort.field === 'awb' ? (
+                        rankSort.dir === 'desc'
+                          ? <ArrowDown className="w-3.5 h-3.5 text-sky-500" />
+                          : <ArrowUp className="w-3.5 h-3.5 text-sky-500" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-40 group-hover:opacity-80 transition-opacity" />
+                      )}
+                    </span>
+                  </th>
+                  <th
+                    className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-violet-600 dark:hover:text-violet-400 transition-colors group"
+                    onClick={() => toggleRankSort('weight')}
+                    title="Click to sort by Total Weight"
+                  >
+                    <span className="inline-flex items-center justify-end gap-1">
+                      Total Weight (kg)
+                      {rankSort.field === 'weight' ? (
+                        rankSort.dir === 'desc'
+                          ? <ArrowDown className="w-3.5 h-3.5 text-violet-500" />
+                          : <ArrowUp className="w-3.5 h-3.5 text-violet-500" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-40 group-hover:opacity-80 transition-opacity" />
+                      )}
+                    </span>
+                  </th>
+                  <th className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400">Avg TT</th>
+                  <th className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400">On-Time</th>
+                  <th className="px-4 py-2.5 text-center font-black text-slate-500 dark:text-slate-400 w-28">Benchmark</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                {filteredAndSortedRank.map((c, idx) => {
+                  const isFastestRow = c.customer === fastestCustomer && c.awbCount > 0;
+                  const isTopVolRow = c.customer === highestVolumeCustomer && c.awbCount > 0;
+                  const isCompared = selectedCustomers.includes(c.customer);
+                  const awbPct = (c.awbCount / maxAwb) * 100;
+                  const wtPct = (c.totalWeight / maxWt) * 100;
+
+                  return (
+                    <tr
+                      key={c.customer}
+                      className={`transition-colors ${
+                        isCompared
+                          ? 'bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/30'
+                          : isFastestRow
+                          ? 'bg-emerald-50/40 dark:bg-emerald-950/20 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'
+                      }`}
+                    >
+                      {/* Rank badge */}
+                      <td className="px-4 py-3 text-center">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black ${
+                          idx === 0
+                            ? 'bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/40 shadow-sm'
+                            : idx === 1
+                            ? 'bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600'
+                            : idx === 2
+                            ? 'bg-orange-100 text-orange-700 border border-orange-300 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/40'
+                            : 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                        }`}>
+                          {idx + 1}
+                        </span>
+                      </td>
+
+                      {/* Customer Name */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-extrabold text-slate-900 dark:text-white">{c.customer}</span>
+                          {isFastestRow && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
+                              <Trophy className="w-2.5 h-2.5" /> Fastest
+                            </span>
+                          )}
+                          {isTopVolRow && !isFastestRow && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
+                              Top Vol
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* AWB Count with bar */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="font-black text-sky-700 dark:text-sky-400 font-mono tabular-nums">
+                            {c.awbCount.toLocaleString()}
+                          </span>
+                          <div className="w-24 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-sky-400 dark:bg-sky-500 transition-all duration-500"
+                              style={{ width: `${awbPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Total Weight with bar */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="font-black text-violet-700 dark:text-violet-400 font-mono tabular-nums">
+                            {c.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
+                          </span>
+                          <div className="w-24 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-violet-400 dark:bg-violet-500 transition-all duration-500"
+                              style={{ width: `${wtPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Avg TT */}
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-bold text-indigo-700 dark:text-indigo-400 font-mono">
+                          {c.avgTT > 0 ? `${c.avgTT}d` : '-'}
+                        </span>
+                      </td>
+
+                      {/* On-Time % */}
+                      <td className="px-4 py-3 text-right">
+                        <span className={`font-bold font-mono ${
+                          c.onTimePercentage >= 70
+                            ? 'text-emerald-700 dark:text-emerald-400'
+                            : c.onTimePercentage >= 50
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        }`}>
+                          {c.awbCount > 0 ? `${c.onTimePercentage}%` : '-'}
+                        </span>
+                      </td>
+
+                      {/* Benchmark Card Toggle Action */}
+                      <td className="px-4 py-3 text-center">
+                        {isCompared ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomer(c.customer)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200 border border-indigo-300 dark:border-indigo-700 hover:bg-rose-100 hover:text-rose-700 hover:border-rose-300 dark:hover:bg-rose-950/60 dark:hover:text-rose-300 transition-all cursor-pointer shadow-sm"
+                            title="Click to remove from benchmark cards below"
+                          >
+                            <Check className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                            <span>In Benchmark</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleAddCustomer(c.customer)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 dark:hover:bg-sky-950/50 dark:hover:text-sky-300 transition-all cursor-pointer shadow-sm"
+                            title="Click to add to benchmark cards below"
+                          >
+                            <Plus className="w-3 h-3 text-sky-500" />
+                            <span>Add</span>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Table Footer Summary */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-5 py-2.5 bg-slate-50/60 dark:bg-slate-900/60 text-[11px] text-slate-500 dark:text-slate-400 font-semibold border-t border-slate-200 dark:border-slate-800/80">
+            <div className="flex items-center gap-4 flex-wrap">
+              <span>Total: <strong className="text-slate-800 dark:text-slate-200">{allRankingData.length} customers</strong></span>
+              <span>AWBs: <strong className="text-sky-600 dark:text-sky-400">{allRankingData.reduce((acc, curr) => acc + curr.awbCount, 0).toLocaleString()}</strong></span>
+              <span>Weight: <strong className="text-violet-600 dark:text-violet-400">{allRankingData.reduce((acc, curr) => acc + curr.totalWeight, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg</strong></span>
+            </div>
+            <div className="text-[10px] text-slate-400">
+              Comparing <strong>{selectedCustomers.length}</strong> customer accounts in benchmark cards below
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. SELECTION & CONFIGURATION PANEL */}
       <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 shadow-sm">
         <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800/80 relative ${isAutoLoadDropdownOpen ? 'z-50' : 'z-20'}`}>
           <div className="flex items-center gap-3">
@@ -717,177 +1009,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         )}
       </div>
 
-      {/* SORTABLE CUSTOMER RANKING TABLE */}
-      {comparisonData.length > 0 && (() => {
-        const sortedRank = [...comparisonData].sort((a, b) => {
-          if (rankSort.field === 'awb') {
-            return rankSort.dir === 'desc' ? b.awbCount - a.awbCount : a.awbCount - b.awbCount;
-          }
-          return rankSort.dir === 'desc' ? b.totalWeight - a.totalWeight : a.totalWeight - b.totalWeight;
-        });
-        const maxAwb = Math.max(...comparisonData.map((x) => x.awbCount), 1);
-        const maxWt = Math.max(...comparisonData.map((x) => x.totalWeight), 1);
-        return (
-          <div className="glass-panel rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden relative z-10">
-            {/* Table header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/70">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-amber-500" />
-                <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">
-                  <strong>Customer Ranking</strong>
-                </span>
-                <span className="text-[10px] font-mono font-bold text-slate-400 ml-1">
-                  — Destination: <strong className="text-sky-600 dark:text-sky-400">{selectedDestination}</strong>
-                </span>
-              </div>
-              <span className="text-[10px] text-slate-400 font-semibold">Click column headers to sort ↕</span>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800/60 bg-slate-50/40 dark:bg-slate-900/40">
-                    <th className="px-4 py-2.5 text-left font-black text-slate-500 dark:text-slate-400 w-12">#</th>
-                    <th className="px-4 py-2.5 text-left font-black text-slate-500 dark:text-slate-400">Customer</th>
-                    <th
-                      className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-sky-600 dark:hover:text-sky-400 transition-colors group"
-                      onClick={() => toggleRankSort('awb')}
-                    >
-                      <span className="inline-flex items-center justify-end gap-1">
-                        AWB Count
-                        {rankSort.field === 'awb' ? (
-                          rankSort.dir === 'desc'
-                            ? <ArrowDown className="w-3 h-3 text-sky-500" />
-                            : <ArrowUp className="w-3 h-3 text-sky-500" />
-                        ) : (
-                          <ArrowUpDown className="w-3 h-3 opacity-40 group-hover:opacity-80 transition-opacity" />
-                        )}
-                      </span>
-                    </th>
-                    <th
-                      className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-violet-600 dark:hover:text-violet-400 transition-colors group"
-                      onClick={() => toggleRankSort('weight')}
-                    >
-                      <span className="inline-flex items-center justify-end gap-1">
-                        Total Weight (kg)
-                        {rankSort.field === 'weight' ? (
-                          rankSort.dir === 'desc'
-                            ? <ArrowDown className="w-3 h-3 text-violet-500" />
-                            : <ArrowUp className="w-3 h-3 text-violet-500" />
-                        ) : (
-                          <ArrowUpDown className="w-3 h-3 opacity-40 group-hover:opacity-80 transition-opacity" />
-                        )}
-                      </span>
-                    </th>
-                    <th className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400">Avg TT</th>
-                    <th className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400">On-Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                  {sortedRank.map((c, idx) => {
-                    const isFastestRow = c.customer === fastestCustomer && c.awbCount > 0;
-                    const isTopVolRow = c.customer === highestVolumeCustomer && c.awbCount > 0;
-                    const awbPct = (c.awbCount / maxAwb) * 100;
-                    const wtPct = (c.totalWeight / maxWt) * 100;
-                    return (
-                      <tr
-                        key={c.customer}
-                        className={`transition-colors ${
-                          isFastestRow
-                            ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
-                            : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'
-                        }`}
-                      >
-                        {/* Rank badge */}
-                        <td className="px-4 py-3 text-center">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black ${
-                            idx === 0
-                              ? 'bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/40'
-                              : idx === 1
-                              ? 'bg-slate-200 text-slate-600 border border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'
-                              : idx === 2
-                              ? 'bg-orange-100 text-orange-700 border border-orange-300 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/40'
-                              : 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                          }`}>
-                            {idx + 1}
-                          </span>
-                        </td>
-
-                        {/* Customer Name */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-extrabold text-slate-900 dark:text-white">{c.customer}</span>
-                            {isFastestRow && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
-                                <Trophy className="w-2.5 h-2.5" /> Fastest
-                              </span>
-                            )}
-                            {isTopVolRow && !isFastestRow && (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
-                                Top Vol
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* AWB Count with bar */}
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="font-black text-sky-700 dark:text-sky-400 font-mono tabular-nums">
-                              {c.awbCount.toLocaleString()}
-                            </span>
-                            <div className="w-24 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-sky-400 dark:bg-sky-500 transition-all duration-500"
-                                style={{ width: `${awbPct}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Total Weight with bar */}
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="font-black text-violet-700 dark:text-violet-400 font-mono tabular-nums">
-                              {c.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
-                            </span>
-                            <div className="w-24 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-violet-400 dark:bg-violet-500 transition-all duration-500"
-                                style={{ width: `${wtPct}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Avg TT */}
-                        <td className="px-4 py-3 text-right">
-                          <span className="font-bold text-indigo-700 dark:text-indigo-400 font-mono">
-                            {c.avgTT > 0 ? `${c.avgTT}d` : '-'}
-                          </span>
-                        </td>
-
-                        {/* On-Time % */}
-                        <td className="px-4 py-3 text-right">
-                          <span className={`font-bold font-mono ${
-                            c.onTimePercentage >= 70
-                              ? 'text-emerald-700 dark:text-emerald-400'
-                              : c.onTimePercentage >= 50
-                              ? 'text-amber-600 dark:text-amber-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          }`}>
-                            {c.awbCount > 0 ? `${c.onTimePercentage}%` : '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* 2. SIDE-BY-SIDE BENCHMARK CARDS */}
       {comparisonData.length > 0 ? (
