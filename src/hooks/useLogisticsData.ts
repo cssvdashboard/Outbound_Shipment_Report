@@ -213,75 +213,18 @@ export function useLogisticsData() {
     }));
   }, []);
 
-  const toggleCustomerFilter = useCallback((customer: string) => {
-    setFilters((prev) => {
-      if (customer === 'ALL' || !customer) {
-        return { ...prev, selectedCustomers: [] };
-      }
-      const exists = prev.selectedCustomers.includes(customer);
-      return {
-        ...prev,
-        selectedCustomers: exists
-          ? prev.selectedCustomers.filter((c) => c !== customer)
-          : [...prev.selectedCustomers, customer]
-      };
-    });
-  }, []);
-
-  const setCustomerFilter = useCallback((customer: string | string[]) => {
-    setFilters((prev) => {
-      if (Array.isArray(customer)) {
-        return { ...prev, selectedCustomers: customer };
-      }
-      return {
-        ...prev,
-        selectedCustomers: customer === 'ALL' || !customer ? [] : [customer]
-      };
-    });
-  }, []);
-
-  const addDestinationFilter = useCallback((dest: string) => {
-    setFilters((prev) => {
-      const upper = dest.toUpperCase();
-      if (prev.selectedDestinations.includes(upper)) return prev;
-      return { ...prev, selectedDestinations: [...prev.selectedDestinations, upper] };
-    });
-  }, []);
-
-  const removeDestinationFilter = useCallback((dest: string) => {
-    const upper = dest.toUpperCase();
+  const setCustomerFilter = useCallback((customer: string) => {
     setFilters((prev) => ({
       ...prev,
-      selectedDestinations: prev.selectedDestinations.filter((d) => d !== upper)
+      selectedCustomers: customer === 'ALL' || !customer ? [] : [customer]
     }));
   }, []);
 
-  const toggleDestinationFilter = useCallback((dest: string) => {
-    setFilters((prev) => {
-      if (dest === 'ALL' || !dest) {
-        return { ...prev, selectedDestinations: [] };
-      }
-      const upper = dest.toUpperCase();
-      const exists = prev.selectedDestinations.includes(upper);
-      return {
-        ...prev,
-        selectedDestinations: exists
-          ? prev.selectedDestinations.filter((d) => d !== upper)
-          : [...prev.selectedDestinations, upper]
-      };
-    });
-  }, []);
-
-  const setDestinationFilter = useCallback((dest: string | string[]) => {
-    setFilters((prev) => {
-      if (Array.isArray(dest)) {
-        return { ...prev, selectedDestinations: dest.map((d) => d.toUpperCase()) };
-      }
-      return {
-        ...prev,
-        selectedDestinations: dest === 'ALL' || !dest ? [] : [dest.toUpperCase()]
-      };
-    });
+  const setDestinationFilter = useCallback((dest: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      selectedDestinations: dest === 'ALL' || !dest ? [] : [dest]
+    }));
   }, []);
 
   const setFinalResolutionFilter = useCallback((resolution: string | null) => {
@@ -487,11 +430,7 @@ export function useLogisticsData() {
     removeShipperFilter,
     addCustomerFilter,
     removeCustomerFilter,
-    toggleCustomerFilter,
     setCustomerFilter,
-    addDestinationFilter,
-    removeDestinationFilter,
-    toggleDestinationFilter,
     setDestinationFilter,
     setCategoryTypeFilter,
     setFinalResolutionFilter,

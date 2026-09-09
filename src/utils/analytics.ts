@@ -100,23 +100,18 @@ export function filterShipments(shipments: Shipment[], filters: FilterState): Sh
       if (filters.filterMode === 'exclude' && match) return false;
     }
 
-    // 2. Customer Filter (supports Include and Filter Out / Exclude with multiple selections)
+    // 2. Customer Filter (supports Include and Filter Out / Exclude)
     if (filters.selectedCustomers && filters.selectedCustomers.length > 0) {
-      const itemCustomer = (item.customer || '').trim().toLowerCase();
       const match = filters.selectedCustomers.some(
-        (c) => c.trim().toLowerCase() === itemCustomer
+        (c) => c.trim().toLowerCase() === (item.customer || '').trim().toLowerCase()
       );
       if (filters.filterMode === 'include' && !match) return false;
       if (filters.filterMode === 'exclude' && match) return false;
     }
 
-    // 3. Destination Country Filter (supports multiple selections)
+    // 3. Destination Country Filter
     if (filters.selectedDestinations && filters.selectedDestinations.length > 0) {
-      const itemDest = (item.destination || '').trim().toUpperCase();
-      const match = filters.selectedDestinations.some(
-        (d) => d.trim().toUpperCase() === itemDest
-      );
-      if (!match) return false;
+      if (!filters.selectedDestinations.some((d) => d.trim().toUpperCase() === (item.destination || '').trim().toUpperCase())) return false;
     }
 
     // 4. TT Range Filter
