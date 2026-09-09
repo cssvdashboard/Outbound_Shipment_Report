@@ -362,29 +362,16 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
       {/* 🏆 1. CUSTOMER RANKING BOX (AT THE VERY TOP) */}
       {allRankingData.length > 0 && (
-        <div className="glass-panel rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden relative z-10 shadow-sm">
+        <div className="glass-panel rounded-2xl border border-slate-300 dark:border-slate-700 overflow-hidden relative z-10 shadow-sm">
           {/* Table Header Bar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 shrink-0">
-                <Trophy className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 border-b border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 shrink-0">
+                <Trophy className="w-4 h-4" />
               </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                    Customer Ranking &amp; Volume Benchmark
-                  </h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-700/50">
-                    Destination: {selectedDestination === 'ALL' ? 'All Global' : selectedDestination}
-                  </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                    {allRankingData.length} Total Customers
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                  Top 10 visible at a glance — scroll the vertical bar on the right to see all {allRankingData.length} customers
-                </p>
-              </div>
+              <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                Customer Ranking
+              </h3>
             </div>
 
             <div className="flex items-center gap-3">
@@ -409,7 +396,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 )}
               </div>
 
-              <span className="hidden lg:inline-block text-[10px] text-slate-400 font-semibold">
+              <span className="hidden sm:inline-block text-[10px] text-slate-400 font-semibold">
                 Click headers to sort ↕
               </span>
             </div>
@@ -417,13 +404,13 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
           {/* Scrollable Table with visible vertical scrollbar on the right */}
           <div className="overflow-y-auto overflow-x-auto max-h-[480px] custom-scrollbar">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 z-20 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-slate-200 dark:border-slate-800">
+            <table className="w-full text-xs border-collapse border border-slate-300 dark:border-slate-700">
+              <thead className="sticky top-0 z-20 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm">
                 <tr>
-                  <th className="px-4 py-2.5 text-center font-black text-slate-500 dark:text-slate-400 w-14">#</th>
-                  <th className="px-4 py-2.5 text-left font-black text-slate-500 dark:text-slate-400">Customer</th>
+                  <th className="px-4 py-2.5 text-center font-black text-slate-600 dark:text-slate-300 w-14 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">#</th>
+                  <th className="px-4 py-2.5 text-left font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">Customer</th>
                   <th
-                    className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-sky-600 dark:hover:text-sky-400 transition-colors group"
+                    className="px-4 py-2.5 text-right font-black text-slate-600 dark:text-slate-300 cursor-pointer select-none hover:text-sky-600 dark:hover:text-sky-400 transition-colors group border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900"
                     onClick={() => toggleRankSort('awb')}
                     title="Click to sort by AWB Count"
                   >
@@ -439,7 +426,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                     </span>
                   </th>
                   <th
-                    className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-violet-600 dark:hover:text-violet-400 transition-colors group"
+                    className="px-4 py-2.5 text-right font-black text-slate-600 dark:text-slate-300 cursor-pointer select-none hover:text-violet-600 dark:hover:text-violet-400 transition-colors group border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900"
                     onClick={() => toggleRankSort('weight')}
                     title="Click to sort by Total Weight"
                   >
@@ -454,16 +441,14 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       )}
                     </span>
                   </th>
-                  <th className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400">Avg TT</th>
-                  <th className="px-4 py-2.5 text-right font-black text-slate-500 dark:text-slate-400">On-Time</th>
-                  <th className="px-4 py-2.5 text-center font-black text-slate-500 dark:text-slate-400 w-28">Benchmark</th>
+                  <th className="px-4 py-2.5 text-right font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">Avg TT</th>
+                  <th className="px-4 py-2.5 text-right font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">On-Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              <tbody>
                 {filteredAndSortedRank.map((c, idx) => {
                   const isFastestRow = c.customer === fastestCustomer && c.awbCount > 0;
                   const isTopVolRow = c.customer === highestVolumeCustomer && c.awbCount > 0;
-                  const isCompared = selectedCustomers.includes(c.customer);
                   const awbPct = (c.awbCount / maxAwb) * 100;
                   const wtPct = (c.totalWeight / maxWt) * 100;
 
@@ -471,15 +456,13 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                     <tr
                       key={c.customer}
                       className={`transition-colors ${
-                        isCompared
-                          ? 'bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/30'
-                          : isFastestRow
+                        isFastestRow
                           ? 'bg-emerald-50/40 dark:bg-emerald-950/20 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30'
                           : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'
                       }`}
                     >
                       {/* Rank badge */}
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-center border border-slate-300 dark:border-slate-700">
                         <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black ${
                           idx === 0
                             ? 'bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/40 shadow-sm'
@@ -494,7 +477,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       </td>
 
                       {/* Customer Name */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border border-slate-300 dark:border-slate-700">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-extrabold text-slate-900 dark:text-white">{c.customer}</span>
                           {isFastestRow && (
@@ -511,7 +494,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       </td>
 
                       {/* AWB Count with bar */}
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right border border-slate-300 dark:border-slate-700">
                         <div className="flex flex-col items-end gap-1">
                           <span className="font-black text-sky-700 dark:text-sky-400 font-mono tabular-nums">
                             {c.awbCount.toLocaleString()}
@@ -526,7 +509,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       </td>
 
                       {/* Total Weight with bar */}
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right border border-slate-300 dark:border-slate-700">
                         <div className="flex flex-col items-end gap-1">
                           <span className="font-black text-violet-700 dark:text-violet-400 font-mono tabular-nums">
                             {c.totalWeight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
@@ -541,14 +524,14 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                       </td>
 
                       {/* Avg TT */}
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right border border-slate-300 dark:border-slate-700">
                         <span className="font-bold text-indigo-700 dark:text-indigo-400 font-mono">
                           {c.avgTT > 0 ? `${c.avgTT}d` : '-'}
                         </span>
                       </td>
 
                       {/* On-Time % */}
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right border border-slate-300 dark:border-slate-700">
                         <span className={`font-bold font-mono ${
                           c.onTimePercentage >= 70
                             ? 'text-emerald-700 dark:text-emerald-400'
@@ -559,31 +542,6 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                           {c.awbCount > 0 ? `${c.onTimePercentage}%` : '-'}
                         </span>
                       </td>
-
-                      {/* Benchmark Card Toggle Action */}
-                      <td className="px-4 py-3 text-center">
-                        {isCompared ? (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveCustomer(c.customer)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200 border border-indigo-300 dark:border-indigo-700 hover:bg-rose-100 hover:text-rose-700 hover:border-rose-300 dark:hover:bg-rose-950/60 dark:hover:text-rose-300 transition-all cursor-pointer shadow-sm"
-                            title="Click to remove from benchmark cards below"
-                          >
-                            <Check className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
-                            <span>In Benchmark</span>
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleAddCustomer(c.customer)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 dark:hover:bg-sky-950/50 dark:hover:text-sky-300 transition-all cursor-pointer shadow-sm"
-                            title="Click to add to benchmark cards below"
-                          >
-                            <Plus className="w-3 h-3 text-sky-500" />
-                            <span>Add</span>
-                          </button>
-                        )}
-                      </td>
                     </tr>
                   );
                 })}
@@ -592,14 +550,11 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           </div>
 
           {/* Table Footer Summary */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-5 py-2.5 bg-slate-50/60 dark:bg-slate-900/60 text-[11px] text-slate-500 dark:text-slate-400 font-semibold border-t border-slate-200 dark:border-slate-800/80">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-5 py-2.5 bg-slate-50/60 dark:bg-slate-900/60 text-[11px] text-slate-500 dark:text-slate-400 font-semibold border-t border-slate-300 dark:border-slate-700">
             <div className="flex items-center gap-4 flex-wrap">
-              <span>Total: <strong className="text-slate-800 dark:text-slate-200">{allRankingData.length} customers</strong></span>
-              <span>AWBs: <strong className="text-sky-600 dark:text-sky-400">{allRankingData.reduce((acc, curr) => acc + curr.awbCount, 0).toLocaleString()}</strong></span>
-              <span>Weight: <strong className="text-violet-600 dark:text-violet-400">{allRankingData.reduce((acc, curr) => acc + curr.totalWeight, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg</strong></span>
-            </div>
-            <div className="text-[10px] text-slate-400">
-              Comparing <strong>{selectedCustomers.length}</strong> customer accounts in benchmark cards below
+              <span>Total Customers: <strong className="text-slate-800 dark:text-slate-200">{allRankingData.length}</strong></span>
+              <span>Total AWBs: <strong className="text-sky-600 dark:text-sky-400">{allRankingData.reduce((acc, curr) => acc + curr.awbCount, 0).toLocaleString()}</strong></span>
+              <span>Total Weight: <strong className="text-violet-600 dark:text-violet-400">{allRankingData.reduce((acc, curr) => acc + curr.totalWeight, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg</strong></span>
             </div>
           </div>
         </div>
