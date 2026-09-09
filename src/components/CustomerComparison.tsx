@@ -32,14 +32,21 @@ interface CustomerComparisonProps {
   selectedCategoryType?: CategoryTypeFilter;
 }
 
+const DEFAULT_COMPARISON_CUSTOMERS = [
+  'DEPARTMENT OF IMMIGRATION & PASSPORT',
+  'ELITE GARMENTS IND. LTD.',
+  'AMBITION EXPRESS INTL **AGENT**',
+  'MGX.COM LTD. **AGENT**'
+];
+
 export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   shipments,
   rawShipments,
   allDestinations,
   selectedCategoryType = 'ALL'
 }) => {
-  const [selectedDestination, setSelectedDestination] = useState<string>('US');
-  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const [selectedDestination, setSelectedDestination] = useState<string>('ALL');
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>(DEFAULT_COMPARISON_CUSTOMERS);
 
   // Ranking table sort state
   const [rankSort, setRankSort] = useState<{ field: 'awb' | 'weight'; dir: 'desc' | 'asc' }>({
@@ -125,7 +132,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   // Ranking table search filter state
   const [rankTableSearch, setRankTableSearch] = useState<string>('');
 
-  // Auto-Load Top Customers handler when a country is selected
+  // Auto-Load Top Customers handler when a country is selected in Multi-Shipper panel
   const handleAutoLoadForCountry = (countryCode: string) => {
     setSelectedDestination(countryCode);
     setAutoLoadSearch('');
@@ -143,7 +150,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
     const top = Object.entries(countMap)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
+      .slice(0, 4)
       .map(([name]) => name);
 
     if (top.length > 0) {
@@ -151,7 +158,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     }
   };
 
-  // Auto-initialize or refresh top customers when category filter or destination changes
+  // Auto-initialize or refresh top customers for Multi-Shipper panel
   useEffect(() => {
     const destShipments =
       selectedDestination === 'ALL'
@@ -166,28 +173,28 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     // Check how many of current selected customers have > 0 AWBs in this category
     const activeCount = selectedCustomers.filter((c) => (countMap[c] || 0) > 0).length;
 
-    // If no customers selected or none of the current customers have shipments in this category, load top 10
+    // If no customers selected or none of the current customers have shipments in this category, load default 4
     if (selectedCustomers.length === 0 || activeCount === 0) {
-      const top = Object.entries(countMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([name]) => name);
+      const defaultValid = DEFAULT_COMPARISON_CUSTOMERS.filter((c) => (countMap[c] || 0) > 0);
+      if (defaultValid.length > 0) {
+        setSelectedCustomers(defaultValid);
+      } else {
+        const top = Object.entries(countMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4)
+          .map(([name]) => name);
 
-      if (top.length > 0) {
-        setSelectedCustomers(top);
+        if (top.length > 0) {
+          setSelectedCustomers(top);
+        }
       }
     }
   }, [selectedCategoryType, selectedDestination, shipments]);
 
-  // All unique customers with shipments in current destination & active category
-  const allDestCustomers = useMemo(() => {
-    const destShipments =
-      selectedDestination === 'ALL'
-        ? shipments
-        : shipments.filter((s) => s.destination === selectedDestination);
-    
+  // Customer Ranking is completely INDEPENDENT of the Multi-Shipper search bars / destination selection below
+  const allRankingCustomers = useMemo(() => {
     const countMap: Record<string, number> = {};
-    for (const s of destShipments) {
+    for (const s of shipments) {
       if (s.customer) {
         countMap[s.customer] = (countMap[s.customer] || 0) + 1;
       }
@@ -196,13 +203,13 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     return Object.entries(countMap)
       .sort((a, b) => b[1] - a[1])
       .map(([name]) => name);
-  }, [shipments, selectedDestination]);
+  }, [shipments]);
 
-  // Ranking data for ALL customers in current destination
+  // Ranking data evaluates globally across shipments, completely unaffected by the Multi-Shipper search bars below
   const allRankingData: CustomerComparisonMetric[] = useMemo(() => {
-    if (allDestCustomers.length === 0) return [];
-    return computeCustomerComparison(shipments, selectedDestination, allDestCustomers);
-  }, [shipments, selectedDestination, allDestCustomers]);
+    if (allRankingCustomers.length === 0) return [];
+    return computeCustomerComparison(shipments, 'ALL', allRankingCustomers);
+  }, [shipments, allRankingCustomers]);
 
   // Filter and rank customers for autocomplete by AWB volume in active category
   const availableCustomerSuggestions = useMemo(() => {
