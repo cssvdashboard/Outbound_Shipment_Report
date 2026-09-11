@@ -818,53 +818,53 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 shadow-lg my-1 transition-all ${
               showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
             }`}>
-              <table className="w-full text-left text-xs min-w-[950px]">
+              <table className="w-full text-center text-xs min-w-[950px]">
                 <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10">
                   <tr>
-                    <th className="py-2.5 px-3">AWB Tracking #</th>
-                    <th className="py-2.5 px-2.5">Dest</th>
-                    <th className="py-2.5 px-3">Customer Account</th>
-                    <th className="py-2.5 px-3">Shipper Name</th>
-                    <th className="py-2.5 px-3">Recipient / City</th>
-                    <th className="py-2.5 px-3">Pickup Date</th>
-                    <th className="py-2.5 px-2.5 text-right">Weight (kg)</th>
-                    <th className="py-2.5 px-2.5 text-right">TT (Days)</th>
-                    <th className="py-2.5 px-2.5">Timeline</th>
-                    <th className="py-2.5 px-3">Logged Delays &amp; Remarks</th>
-                    <th className="py-2.5 px-2 text-center">Inspect</th>
+                    <th className="py-2.5 px-3 text-center align-middle">AWB Tracking #</th>
+                    <th className="py-2.5 px-2.5 text-center align-middle">Dest</th>
+                    <th className="py-2.5 px-3 text-center align-middle">Customer Account</th>
+                    <th className="py-2.5 px-3 text-center align-middle">Shipper Name</th>
+                    <th className="py-2.5 px-3 text-center align-middle">Recipient / City</th>
+                    <th className="py-2.5 px-3 text-center align-middle">Pickup Date</th>
+                    <th className="py-2.5 px-2.5 text-center align-middle">Weight (kg)</th>
+                    <th className="py-2.5 px-2.5 text-center align-middle">TT (Days)</th>
+                    <th className="py-2.5 px-2.5 text-center align-middle">Timeline</th>
+                    <th className="py-2.5 px-3 text-center align-middle">Logged Delays &amp; Remarks</th>
+                    <th className="py-2.5 px-2 text-center align-middle">Inspect</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80 bg-slate-950 font-sans">
                   {modalPaginatedData.map((s, idx) => (
                     <tr key={`${s.awb}-${idx}`} className="hover:bg-slate-900/90 text-slate-200 transition-colors">
-                      <td className="py-2 px-3 font-mono font-bold text-sky-400 group-hover:text-sky-300 hover:underline">{s.awb}</td>
-                      <td className="py-2 px-2.5 font-bold text-white font-mono">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-200">
+                      <td className="py-2 px-3 font-mono font-bold text-sky-400 group-hover:text-sky-300 hover:underline text-center align-middle">{s.awb}</td>
+                      <td className="py-2 px-2.5 font-bold text-white font-mono text-center align-middle">
+                        <span className="inline-block px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-200">
                           {s.destination}
                         </span>
                       </td>
-                      <td className="py-2 px-3 font-semibold text-white max-w-[150px] truncate" title={s.customer}>
-                        {s.customer}
+                      <td className="py-2 px-3 font-semibold text-white max-w-[150px] truncate text-center align-middle mx-auto" title={s.customer}>
+                        {s.customer || '-'}
                       </td>
-                      <td className="py-2 px-3 text-slate-300 max-w-[150px] truncate font-medium" title={s.shprName}>
-                        {s.shprName}
+                      <td className="py-2 px-3 text-slate-300 max-w-[150px] truncate font-medium text-center align-middle mx-auto" title={s.shprName}>
+                        {s.shprName || '-'}
                       </td>
-                      <td className="py-2 px-3 text-slate-300 max-w-[130px] truncate">
-                        <div className="font-semibold text-white">{s.recipient || '-'}</div>
-                        <div className="text-[10px] text-slate-400 font-medium">{s.city}</div>
+                      <td className="py-2 px-3 text-slate-300 max-w-[140px] truncate text-center align-middle">
+                        <div className="font-semibold text-white truncate text-center">{s.recipient || '-'}</div>
+                        <div className="text-[10px] text-slate-400 font-medium truncate text-center">{s.city || '-'}</div>
                       </td>
-                      <td className="py-2 px-3 font-mono text-slate-300 whitespace-nowrap">
+                      <td className="py-2 px-3 font-mono text-slate-300 whitespace-nowrap text-center align-middle">
                         {formatExcelDate(s.pickup)}
                       </td>
-                      <td className="py-2 px-2.5 text-right font-mono font-bold text-slate-200 whitespace-nowrap">
+                      <td className="py-2 px-2.5 font-mono font-bold text-slate-200 whitespace-nowrap text-center align-middle">
                         {s.weight ? `${formatWeight(s.weight)}` : '-'}
                       </td>
-                      <td className="py-2 px-2.5 text-right font-mono font-bold text-indigo-400">
+                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-400 text-center align-middle">
                         {Number(s.tt || 0).toFixed(1)} d
                       </td>
-                      <td className="py-2 px-2.5">
+                      <td className="py-2 px-2.5 text-center align-middle">
                         <span
-                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
                             s.tt <= 5
                               ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
                               : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
@@ -873,28 +873,30 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                           {s.tt <= 5 ? '≤5d' : '>5d'}
                         </span>
                       </td>
-                      <td className="py-2 px-3 text-[11px] max-w-[160px] truncate">
-                        {s.remarks && s.remarks !== '-' ? (
-                          <span className="text-amber-300 font-bold" title={s.remarks}>
-                            {s.remarks}
-                          </span>
-                        ) : s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                          <span className="text-amber-400 font-bold" title={s.clearanceDelay}>
-                            📋 {s.clearanceDelay}
-                          </span>
-                        ) : s.transitDelay && s.transitDelay !== '-' ? (
-                          <span className="text-indigo-400 font-bold" title={s.transitDelay}>
-                            ✈️ {s.transitDelay}
-                          </span>
-                        ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                          <span className="text-rose-400 font-bold" title={s.destinationDelay}>
-                            🚚 {s.destinationDelay}
-                          </span>
-                        ) : (
-                          <span className="text-slate-500">-</span>
-                        )}
+                      <td className="py-2 px-3 text-[11px] max-w-[180px] truncate text-center align-middle">
+                        <div className="flex items-center justify-center truncate">
+                          {s.remarks && s.remarks !== '-' ? (
+                            <span className="text-amber-300 font-bold truncate" title={s.remarks}>
+                              {s.remarks}
+                            </span>
+                          ) : s.clearanceDelay && s.clearanceDelay !== '-' ? (
+                            <span className="text-amber-400 font-bold truncate" title={s.clearanceDelay}>
+                              📋 {s.clearanceDelay}
+                            </span>
+                          ) : s.transitDelay && s.transitDelay !== '-' ? (
+                            <span className="text-indigo-400 font-bold truncate" title={s.transitDelay}>
+                              ✈️ {s.transitDelay}
+                            </span>
+                          ) : s.destinationDelay && s.destinationDelay !== '-' ? (
+                            <span className="text-rose-400 font-bold truncate" title={s.destinationDelay}>
+                              🚚 {s.destinationDelay}
+                            </span>
+                          ) : (
+                            <span className="text-slate-500">-</span>
+                          )}
+                        </div>
                       </td>
-                      <td className="py-2 px-2 text-center">
+                      <td className="py-2 px-2 text-center align-middle">
                         <button
                           onClick={() => setInspectedShipment(s)}
                           className="p-1 rounded bg-slate-900 hover:bg-blue-600 text-sky-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
@@ -907,7 +909,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   ))}
                   {modalPaginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-10 text-center text-slate-400 font-semibold">
+                      <td colSpan={11} className="py-10 text-center text-slate-400 font-semibold">
                         No shipment records match &quot;{modalSearch}&quot; for status {modalResolution}.
                       </td>
                     </tr>
