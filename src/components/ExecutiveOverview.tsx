@@ -14,6 +14,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Eye,
   Globe,
   Layers,
@@ -68,6 +69,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   const [showCauseBreakdown, setShowCauseBreakdown] = useState<boolean>(true);
   const [showCountryBreakdownModal, setShowCountryBreakdownModal] = useState<boolean>(false);
   const [countryModalSearch, setCountryModalSearch] = useState<string>('');
+  const [modalSelectedCountry, setModalSelectedCountry] = useState<string | null>(null);
 
   // Helper to extract the primary reason/delay for any shipment
   const getShipmentPrimaryReason = (s: Shipment): string => {
@@ -165,6 +167,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       list = list.filter((s) => getShipmentPrimaryReason(s).toLowerCase() === modalSelectedCategory.toLowerCase());
     }
 
+    if (modalSelectedCountry) {
+      list = list.filter((s) => (s.destination || '').trim().toLowerCase() === modalSelectedCountry.trim().toLowerCase());
+    }
+
     if (!modalSearch.trim()) return list;
     const q = modalSearch.toLowerCase().trim();
     return list.filter((s) => {
@@ -181,7 +187,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q))
       );
     });
-  }, [modalAllShipments, modalSelectedCategory, modalSearch]);
+  }, [modalAllShipments, modalSelectedCategory, modalSelectedCountry, modalSearch]);
 
   const modalTotalPages = Math.ceil(modalFilteredShipments.length / modalPageSize) || 1;
   const modalValidCurrentPage = Math.min(modalCurrentPage, modalTotalPages);
@@ -687,31 +693,75 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCountryModalSearch('');
-                      setShowCountryBreakdownModal(true);
-                    }}
-                    className="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 col-span-2 shadow-md text-left transition-all cursor-pointer group relative overflow-hidden focus:outline-none focus:ring-1 focus:ring-emerald-500/40"
-                    title="Click to view full country-wise impacted shipment breakdown"
-                  >
-                    <div className="flex items-center justify-between">
+                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 col-span-2 shadow-md flex flex-col justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-emerald-400" />
-                        Top Impacted Countries
+                        Top Destination
                       </span>
-                      <span className="text-[10px] font-bold text-emerald-400 group-hover:underline flex items-center gap-0.5">
-                        View All ({modalCountryBreakdown.length}) →
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {modalSelectedCountry && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalSelectedCountry(null);
+                              setModalCurrentPage(1);
+                            }}
+                            className="text-[10px] text-rose-400 hover:text-rose-300 font-bold underline cursor-pointer"
+                          >
+                            Reset ({modalSelectedCountry})
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCountryModalSearch('');
+                            setShowCountryBreakdownModal(true);
+                          }}
+                          className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
+                          title="View all in popup window"
+                        >
+                          View Breakdown ({modalCountryBreakdown.length}) →
+                        </button>
+                      </div>
                     </div>
-                    <span className="text-xs sm:text-sm font-black text-emerald-400 mt-1 block truncate">
-                      {modalStats.topCountries}
-                    </span>
-                    <span className="text-[10px] text-slate-400 block font-medium mt-0.5">
-                      Sorted by shipment concentration • Click to open country breakdown popup
-                    </span>
-                  </button>
+
+                    {/* Dropdown list for Top Destination */}
+                    <div className="relative mt-1.5">
+                      <select
+                        value={modalSelectedCountry || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setModalSelectedCountry(val || null);
+                          setModalCurrentPage(1);
+                        }}
+                        className="w-full bg-slate-950 border border-slate-700 hover:border-emerald-500/60 focus:border-emerald-500 rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold text-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-xs"
+                      >
+                        <option value="" className="bg-slate-900 text-slate-300 font-medium">
+                          All Destinations ({modalAllShipments.length.toLocaleString()} AWBs • {modalCountryBreakdown.length} countries)
+                        </option>
+                        {modalCountryBreakdown.map((item, idx) => (
+                          <option
+                            key={item.country}
+                            value={item.country}
+                            className="bg-slate-900 text-white font-mono"
+                          >
+                            #{idx + 1} {item.country} — {item.count.toLocaleString()} AWBs ({item.percentage}%)
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 font-medium">
+                      <span className="truncate">
+                        {modalSelectedCountry
+                          ? `Filtered to ${modalSelectedCountry}: ${modalFilteredShipments.length} matching shipments`
+                          : `Top: ${modalStats.topCountries}`}
+                      </span>
+                      <span className="text-slate-500 shrink-0 ml-2">Sorted by volume</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1125,7 +1175,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setModalSearch(item.country);
+                                  setModalSelectedCountry(item.country);
+                                  setModalCurrentPage(1);
                                   setShowCountryBreakdownModal(false);
                                 }}
                                 className="px-2.5 py-1 rounded bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-700 text-emerald-400 text-[10px] font-bold transition-colors cursor-pointer"
