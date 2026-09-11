@@ -161,12 +161,11 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 dark:bg-[#070c18]/90 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-inner w-fit min-w-full sm:min-w-0">
             {[
               { id: 'overview', label: 'Overview', icon: Package, color: 'text-sky-500' },
-              { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
-              { id: 'comparison', label: 'Shipper Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
-              { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
               { id: 'calendar', label: 'Weekly TT Comparison', icon: CalendarDays, color: 'text-violet-500' },
               { id: 'monthly', label: 'Monthly Comparison', icon: CalendarRange, color: 'text-purple-500' },
+              { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
+              { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
