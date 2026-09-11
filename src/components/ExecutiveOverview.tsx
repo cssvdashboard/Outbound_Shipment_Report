@@ -818,7 +818,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                             value={item.country}
                             className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white font-mono"
                           >
-                            #{idx + 1} {item.country} — {item.count.toLocaleString()} AWBs ({item.percentage}%)
+                            {`${idx + 1}.\u00A0\u00A0${item.country} - ${item.count.toLocaleString()} AWB`}
                           </option>
                         ))}
                       </select>

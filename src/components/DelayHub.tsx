@@ -679,7 +679,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                 </option>
                 {hubCountryList.map((c, idx) => (
                   <option key={c.country} value={c.country} className="bg-slate-900 text-white font-mono">
-                    #{idx + 1} {c.country} ({c.count.toLocaleString()} AWBs)
+                    {`${idx + 1}.\u00A0\u00A0${c.country} - ${c.count.toLocaleString()} AWB`}
                   </option>
                 ))}
               </select>
@@ -971,7 +971,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                               value={item.country}
                               className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white font-mono"
                             >
-                              #{idx + 1} {item.country} — {item.count.toLocaleString()} AWBs ({item.percentage}%)
+                              {`${idx + 1}.\u00A0\u00A0${item.country} - ${item.count.toLocaleString()} AWB`}
                             </option>
                           ))}
                         </select>
