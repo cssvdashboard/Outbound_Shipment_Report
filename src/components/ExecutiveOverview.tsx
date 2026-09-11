@@ -18,7 +18,10 @@ import {
   Eye,
   Globe,
   Layers,
-  Sparkles
+  Sparkles,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { MetricSummary, RatioBreakdown, Shipment } from '../types/logistics';
 import { formatExcelDate, formatWeight } from '../utils/formatters';
@@ -66,10 +69,40 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   const [modalPageSize, setModalPageSize] = useState<number>(25);
   const [modalCurrentPage, setModalCurrentPage] = useState<number>(1);
   const [inspectedShipment, setInspectedShipment] = useState<Shipment | null>(null);
-  const [showCauseBreakdown, setShowCauseBreakdown] = useState<boolean>(true);
+  const [showCauseBreakdown, setShowCauseBreakdown] = useState<boolean>(false);
   const [showCountryBreakdownModal, setShowCountryBreakdownModal] = useState<boolean>(false);
   const [countryModalSearch, setCountryModalSearch] = useState<string>('');
   const [modalSelectedCountry, setModalSelectedCountry] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      if (sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortField(null);
+        setSortOrder('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setModalCurrentPage(1);
+  };
+
+  const renderSortIcon = (field: string) => {
+    if (sortField === field) {
+      return sortOrder === 'asc' ? (
+        <ArrowUp className="w-3.5 h-3.5 text-sky-400 inline-block shrink-0 transition-transform" />
+      ) : (
+        <ArrowDown className="w-3.5 h-3.5 text-sky-400 inline-block shrink-0 transition-transform" />
+      );
+    }
+    return (
+      <ArrowUpDown className="w-3 h-3 text-slate-500 opacity-40 group-hover:opacity-100 group-hover:text-slate-300 inline-block shrink-0 transition-opacity" />
+    );
+  };
 
   // Helper to extract the primary reason/delay for any shipment
   const getShipmentPrimaryReason = (s: Shipment): string => {
@@ -171,23 +204,54 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       list = list.filter((s) => (s.destination || '').trim().toLowerCase() === modalSelectedCountry.trim().toLowerCase());
     }
 
-    if (!modalSearch.trim()) return list;
-    const q = modalSearch.toLowerCase().trim();
-    return list.filter((s) => {
-      return (
-        s.awb.toLowerCase().includes(q) ||
-        s.shprName.toLowerCase().includes(q) ||
-        s.customer.toLowerCase().includes(q) ||
-        s.destination.toLowerCase().includes(q) ||
-        (s.recipient && s.recipient.toLowerCase().includes(q)) ||
-        (s.city && s.city.toLowerCase().includes(q)) ||
-        (s.remarks && s.remarks.toLowerCase().includes(q)) ||
-        (s.clearanceDelay && s.clearanceDelay.toLowerCase().includes(q)) ||
-        (s.transitDelay && s.transitDelay.toLowerCase().includes(q)) ||
-        (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q))
-      );
-    });
-  }, [modalAllShipments, modalSelectedCategory, modalSelectedCountry, modalSearch]);
+    if (modalSearch.trim()) {
+      const q = modalSearch.toLowerCase().trim();
+      list = list.filter((s) => {
+        return (
+          s.awb.toLowerCase().includes(q) ||
+          s.shprName.toLowerCase().includes(q) ||
+          s.customer.toLowerCase().includes(q) ||
+          s.destination.toLowerCase().includes(q) ||
+          (s.recipient && s.recipient.toLowerCase().includes(q)) ||
+          (s.city && s.city.toLowerCase().includes(q)) ||
+          (s.remarks && s.remarks.toLowerCase().includes(q)) ||
+          (s.clearanceDelay && s.clearanceDelay.toLowerCase().includes(q)) ||
+          (s.transitDelay && s.transitDelay.toLowerCase().includes(q)) ||
+          (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q))
+        );
+      });
+    }
+
+    if (sortField) {
+      list = [...list].sort((a, b) => {
+        let cmp = 0;
+        if (sortField === 'awb') {
+          cmp = (a.awb || '').localeCompare(b.awb || '', undefined, { numeric: true, sensitivity: 'base' });
+        } else if (sortField === 'destination') {
+          cmp = (a.destination || '').localeCompare(b.destination || '');
+        } else if (sortField === 'customer') {
+          cmp = (a.customer || '').localeCompare(b.customer || '');
+        } else if (sortField === 'shprName') {
+          cmp = (a.shprName || '').localeCompare(b.shprName || '');
+        } else if (sortField === 'recipient') {
+          const recA = (a.recipient || a.city || '').toLowerCase();
+          const recB = (b.recipient || b.city || '').toLowerCase();
+          cmp = recA.localeCompare(recB);
+        } else if (sortField === 'pickup') {
+          const dateA = a.pickup ? new Date(a.pickup).getTime() : 0;
+          const dateB = b.pickup ? new Date(b.pickup).getTime() : 0;
+          cmp = dateA - dateB;
+        } else if (sortField === 'weight') {
+          cmp = (Number(a.weight) || 0) - (Number(b.weight) || 0);
+        } else if (sortField === 'tt') {
+          cmp = (Number(a.tt) || 0) - (Number(b.tt) || 0);
+        }
+        return sortOrder === 'asc' ? cmp : -cmp;
+      });
+    }
+
+    return list;
+  }, [modalAllShipments, modalSelectedCategory, modalSelectedCountry, modalSearch, sortField, sortOrder]);
 
   const modalTotalPages = Math.ceil(modalFilteredShipments.length / modalPageSize) || 1;
   const modalValidCurrentPage = Math.min(modalCurrentPage, modalTotalPages);
@@ -482,6 +546,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     onClick={() => {
                       setModalResolution(res.name);
                       setModalSelectedCategory(null);
+                      setModalSelectedCountry(null);
+                      setSortField(null);
+                      setSortOrder('asc');
+                      setShowCauseBreakdown(false);
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
@@ -508,6 +576,10 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     onClick={() => {
                       setModalResolution(res.name);
                       setModalSelectedCategory(null);
+                      setModalSelectedCountry(null);
+                      setSortField(null);
+                      setSortOrder('asc');
+                      setShowCauseBreakdown(false);
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
@@ -876,6 +948,18 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {sortField && (
+                    <button
+                      type="button"
+                      onClick={() => setSortField(null)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/40 text-sky-300 text-xs font-semibold transition-all cursor-pointer"
+                      title="Clear active sorting"
+                    >
+                      <span>Sorted: <strong className="text-white capitalize">{sortField === 'destination' ? 'Dest' : sortField === 'shprName' ? 'Shipper' : sortField === 'tt' ? 'TT' : sortField}</strong> ({sortOrder.toUpperCase()})</span>
+                      <X className="w-3 h-3 text-sky-400 hover:text-white ml-0.5" />
+                    </button>
+                  )}
+
                   <button
                     onClick={handleExportModalExcel}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold border border-emerald-300 hover:border-emerald-600 shadow-xs transition-all dark:bg-emerald-600/20 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white dark:border-emerald-500/30"
@@ -900,16 +984,88 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
             }`}>
               <table className="w-full text-center text-xs min-w-[950px]">
-                <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10">
+                <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10 select-none">
                   <tr>
-                    <th className="py-2.5 px-3 text-center align-middle">AWB Tracking #</th>
-                    <th className="py-2.5 px-2.5 text-center align-middle">Dest</th>
-                    <th className="py-2.5 px-3 text-center align-middle">Customer Account</th>
-                    <th className="py-2.5 px-3 text-center align-middle">Shipper Name</th>
-                    <th className="py-2.5 px-3 text-center align-middle">Recipient / City</th>
-                    <th className="py-2.5 px-3 text-center align-middle">Pickup Date</th>
-                    <th className="py-2.5 px-2.5 text-center align-middle">Weight (kg)</th>
-                    <th className="py-2.5 px-2.5 text-center align-middle">TT (Days)</th>
+                    <th
+                      onClick={() => handleSort('awb')}
+                      className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by AWB Tracking #"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'awb' ? 'text-sky-300 font-black' : ''}>AWB Tracking #</span>
+                        {renderSortIcon('awb')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('destination')}
+                      className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Destination"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'destination' ? 'text-sky-300 font-black' : ''}>Dest</span>
+                        {renderSortIcon('destination')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('customer')}
+                      className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Customer Account"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'customer' ? 'text-sky-300 font-black' : ''}>Customer Account</span>
+                        {renderSortIcon('customer')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('shprName')}
+                      className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Shipper Name"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'shprName' ? 'text-sky-300 font-black' : ''}>Shipper Name</span>
+                        {renderSortIcon('shprName')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('recipient')}
+                      className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Recipient / City"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'recipient' ? 'text-sky-300 font-black' : ''}>Recipient / City</span>
+                        {renderSortIcon('recipient')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('pickup')}
+                      className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Pickup Date"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'pickup' ? 'text-sky-300 font-black' : ''}>Pickup Date</span>
+                        {renderSortIcon('pickup')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('weight')}
+                      className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Weight"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'weight' ? 'text-sky-300 font-black' : ''}>Weight (kg)</span>
+                        {renderSortIcon('weight')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('tt')}
+                      className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                      title="Click to sort by Transit Time"
+                    >
+                      <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                        <span className={sortField === 'tt' ? 'text-sky-300 font-black' : ''}>TT (Days)</span>
+                        {renderSortIcon('tt')}
+                      </div>
+                    </th>
                     <th className="py-2.5 px-2.5 text-center align-middle">Timeline</th>
                     <th className="py-2.5 px-3 text-center align-middle">Logged Delays &amp; Remarks</th>
                     <th className="py-2.5 px-2 text-center align-middle">Inspect</th>
