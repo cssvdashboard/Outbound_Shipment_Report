@@ -136,34 +136,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     return list;
   }, [countryData, countryWeightMap, searchTerm, sortField, sortOrder]);
 
-  // Aggregate totals across all countries
-  const summaryTotals = useMemo(() => {
-    let totalClearance = 0;
-    let totalTransit = 0;
-    let totalDestination = 0;
-    let totalWeekend = 0;
-    let totalAllDelays = 0;
-    let totalWeight = 0;
 
-    for (const c of countryData) {
-      totalClearance += c.clearanceDelays || 0;
-      totalTransit += c.transitDelays || 0;
-      totalDestination += c.destinationDelays || 0;
-      totalWeekend += c.weekendDelays || 0;
-      totalAllDelays += c.totalDelays || 0;
-      totalWeight += c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
-    }
-
-    return {
-      totalClearance,
-      totalTransit,
-      totalDestination,
-      totalWeekend,
-      totalAllDelays,
-      totalWeight,
-      countriesCount: countryData.length
-    };
-  }, [countryData, countryWeightMap]);
 
   const handleExport = () => {
     if (filteredAndSortedData.length === 0) return;
@@ -433,103 +406,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         </div>
       </div>
 
-      {/* Delay Summary KPI Cards (Clickable -> Opens Modal) */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        {/* Total Delays */}
-        <div
-          onClick={() => {
-            setModalTarget({ category: 'totalDelays', title: 'All Destinations — Total Delays' });
-            setModalSearch('');
-            setModalCurrentPage(1);
-          }}
-          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-yellow-500/40 bg-white dark:bg-yellow-500/10 flex items-center gap-3 cursor-pointer hover:border-amber-400 dark:hover:border-yellow-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
-          title="Click to view all delayed shipments across all destinations"
-        >
-          <div className="w-9 h-9 rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-yellow-500/20 dark:border dark:border-yellow-500/40 dark:text-yellow-400">
-            <AlertTriangle className="w-4 h-4 text-white dark:text-yellow-400" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-amber-600 dark:group-hover:text-yellow-200 transition-colors">Total Delays</div>
-            <div className="text-base font-black text-amber-600 dark:text-yellow-400 font-mono group-hover:underline">{summaryTotals.totalAllDelays.toLocaleString()}</div>
-          </div>
-        </div>
 
-        {/* Clearance Delays */}
-        <div
-          onClick={() => {
-            setModalTarget({ category: 'clearance', title: 'All Destinations — Clearance Delays' });
-            setModalSearch('');
-            setModalCurrentPage(1);
-          }}
-          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-purple-500/40 bg-white dark:bg-purple-500/10 flex items-center gap-3 cursor-pointer hover:border-purple-400 dark:hover:border-purple-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
-          title="Click to view all clearance delay shipments"
-        >
-          <div className="w-9 h-9 rounded-lg bg-purple-500 text-white shadow-sm shadow-purple-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-purple-500/20 dark:border dark:border-purple-500/40 dark:text-purple-400">
-            <ShieldAlert className="w-4 h-4 text-white dark:text-purple-400" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-purple-600 dark:group-hover:text-purple-200 transition-colors">Clearance Delays</div>
-            <div className="text-base font-black text-purple-600 dark:text-purple-400 font-mono group-hover:underline">{summaryTotals.totalClearance.toLocaleString()}</div>
-          </div>
-        </div>
-
-        {/* Transit Delays */}
-        <div
-          onClick={() => {
-            setModalTarget({ category: 'transit', title: 'All Destinations — Transit Delays' });
-            setModalSearch('');
-            setModalCurrentPage(1);
-          }}
-          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-sky-500/40 bg-white dark:bg-sky-500/10 flex items-center gap-3 cursor-pointer hover:border-sky-400 dark:hover:border-sky-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
-          title="Click to view all transit delay shipments"
-        >
-          <div className="w-9 h-9 rounded-lg bg-sky-500 text-white shadow-sm shadow-sky-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-sky-500/20 dark:border dark:border-sky-500/40 dark:text-sky-400">
-            <Plane className="w-4 h-4 text-white dark:text-sky-400" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-sky-600 dark:group-hover:text-sky-200 transition-colors">Transit Delays</div>
-            <div className="text-base font-black text-sky-600 dark:text-sky-400 font-mono group-hover:underline">{summaryTotals.totalTransit.toLocaleString()}</div>
-          </div>
-        </div>
-
-        {/* Destination Delays */}
-        <div
-          onClick={() => {
-            setModalTarget({ category: 'destination', title: 'All Destinations — Destination Delays' });
-            setModalSearch('');
-            setModalCurrentPage(1);
-          }}
-          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-amber-500/40 bg-white dark:bg-amber-500/10 flex items-center gap-3 cursor-pointer hover:border-amber-400 dark:hover:border-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
-          title="Click to view all destination delay shipments"
-        >
-          <div className="w-9 h-9 rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-amber-500/20 dark:border dark:border-amber-500/40 dark:text-amber-400">
-            <MapPin className="w-4 h-4 text-white dark:text-amber-400" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-amber-600 dark:group-hover:text-amber-200 transition-colors">Dest. Delays</div>
-            <div className="text-base font-black text-amber-600 dark:text-amber-400 font-mono group-hover:underline">{summaryTotals.totalDestination.toLocaleString()}</div>
-          </div>
-        </div>
-
-        {/* Weekend Delays */}
-        <div
-          onClick={() => {
-            setModalTarget({ category: 'weekend', title: 'All Destinations — Weekend Delays' });
-            setModalSearch('');
-            setModalCurrentPage(1);
-          }}
-          className="glass-card p-3 rounded-xl border border-slate-200 dark:border-rose-500/40 bg-white dark:bg-rose-500/10 flex items-center gap-3 col-span-2 sm:col-span-1 cursor-pointer hover:border-rose-400 dark:hover:border-rose-400 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-sm hover:shadow-md"
-          title="Click to view all weekend delay shipments"
-        >
-          <div className="w-9 h-9 rounded-lg bg-rose-500 text-white shadow-sm shadow-rose-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform dark:bg-rose-500/20 dark:border dark:border-rose-500/40 dark:text-rose-400">
-            <Calendar className="w-4 h-4 text-white dark:text-rose-400" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider group-hover:text-rose-600 dark:group-hover:text-rose-200 transition-colors">Weekend Delays</div>
-            <div className="text-base font-black text-rose-600 dark:text-rose-400 font-mono group-hover:underline">{summaryTotals.totalWeekend.toLocaleString()}</div>
-          </div>
-        </div>
-      </div>
 
       {/* Table Container with high-contrast, prominent grid borders and centered content */}
       <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40">
