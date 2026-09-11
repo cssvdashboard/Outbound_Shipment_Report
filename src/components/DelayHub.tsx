@@ -11,6 +11,7 @@ import {
   Package,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Download,
   AlertTriangle,
   Clock,
@@ -19,9 +20,14 @@ import {
   ShieldAlert,
   Building,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  Globe,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { RatioBreakdown, MetricSummary, Shipment } from '../types/logistics';
+import { formatExcelDate, formatWeight } from '../utils/formatters';
 import { Bar } from 'react-chartjs-2';
 import * as XLSX from 'xlsx';
 
@@ -57,6 +63,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
 }) => {
   const [activeCategory, setActiveCategory] = useState<'transit' | 'clearance' | 'destination'>('transit');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [hubSelectedCountry, setHubSelectedCountry] = useState<string | null>(null);
 
   // Modal State for Delay AWB List Popup Window
   const [modalTarget, setModalTarget] = useState<DelayModalTarget | null>(null);
@@ -64,12 +71,56 @@ export const DelayHub: React.FC<DelayHubProps> = ({
   const [modalPageSize, setModalPageSize] = useState<number>(25);
   const [modalCurrentPage, setModalCurrentPage] = useState<number>(1);
   const [inspectedShipment, setInspectedShipment] = useState<Shipment | null>(null);
+  const [modalSelectedCountry, setModalSelectedCountry] = useState<string | null>(null);
+  const [showCountryBreakdownModal, setShowCountryBreakdownModal] = useState<boolean>(false);
+  const [countryModalSearch, setCountryModalSearch] = useState<string>('');
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const openModal = (target: DelayModalTarget) => {
+    setModalTarget(target);
+    setModalSelectedCountry(hubSelectedCountry || null);
+    setSortField(null);
+    setSortOrder('asc');
+    setModalSearch('');
+    setModalCurrentPage(1);
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      if (sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortField(null);
+        setSortOrder('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setModalCurrentPage(1);
+  };
+
+  const renderSortIcon = (field: string) => {
+    if (sortField === field) {
+      return sortOrder === 'asc' ? (
+        <ArrowUp className="w-3.5 h-3.5 text-sky-400 inline-block shrink-0 transition-transform" />
+      ) : (
+        <ArrowDown className="w-3.5 h-3.5 text-sky-400 inline-block shrink-0 transition-transform" />
+      );
+    }
+    return (
+      <ArrowUpDown className="w-3 h-3 text-slate-500 opacity-40 group-hover:opacity-100 group-hover:text-slate-300 inline-block shrink-0 transition-opacity" />
+    );
+  };
 
   // Close modal on Escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (inspectedShipment) {
+        if (showCountryBreakdownModal) {
+          setShowCountryBreakdownModal(false);
+        } else if (inspectedShipment) {
           setInspectedShipment(null);
         } else if (modalTarget) {
           setModalTarget(null);
@@ -78,18 +129,66 @@ export const DelayHub: React.FC<DelayHubProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [modalTarget, inspectedShipment]);
+  }, [modalTarget, inspectedShipment, showCountryBreakdownModal]);
+
+  // Unique destinations across filtered shipments for main tab dropdown
+  const hubCountryList = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const s of filteredShipments) {
+      if (s.destination) {
+        const d = s.destination.trim().toUpperCase();
+        counts[d] = (counts[d] || 0) + 1;
+      }
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([country, count]) => ({
+        country,
+        count
+      }));
+  }, [filteredShipments]);
 
   const currentList = useMemo(() => {
     let list: RatioBreakdown[] = [];
-    if (activeCategory === 'transit') list = transitDelays;
-    else if (activeCategory === 'clearance') list = clearanceDelays;
-    else list = destinationDelays;
+    if (hubSelectedCountry) {
+      const countryShipments = filteredShipments.filter(
+        (s) => (s.destination || '').trim().toUpperCase() === hubSelectedCountry.trim().toUpperCase()
+      );
+      const countMap: Record<string, number> = {};
+      let totalCategoryCount = 0;
+
+      for (const s of countryShipments) {
+        let reason = '';
+        if (activeCategory === 'transit' && s.transitDelay && s.transitDelay !== '-') {
+          reason = s.transitDelay.trim();
+        } else if (activeCategory === 'clearance' && s.clearanceDelay && s.clearanceDelay !== '-') {
+          reason = s.clearanceDelay.trim();
+        } else if (activeCategory === 'destination' && s.destinationDelay && s.destinationDelay !== '-') {
+          reason = s.destinationDelay.trim();
+        }
+        if (reason) {
+          countMap[reason] = (countMap[reason] || 0) + 1;
+          totalCategoryCount++;
+        }
+      }
+
+      list = Object.entries(countMap)
+        .map(([name, count]) => ({
+          name,
+          count,
+          percentage: totalCategoryCount > 0 ? Number(((count / totalCategoryCount) * 100).toFixed(1)) : 0
+        }))
+        .sort((a, b) => b.count - a.count);
+    } else {
+      if (activeCategory === 'transit') list = transitDelays;
+      else if (activeCategory === 'clearance') list = clearanceDelays;
+      else list = destinationDelays;
+    }
 
     if (!searchTerm.trim()) return list;
     const q = searchTerm.toLowerCase();
     return list.filter((item) => item.name.toLowerCase().includes(q));
-  }, [activeCategory, transitDelays, clearanceDelays, destinationDelays, searchTerm]);
+  }, [activeCategory, hubSelectedCountry, filteredShipments, transitDelays, clearanceDelays, destinationDelays, searchTerm]);
 
   // Chart data for top 8 reasons
   const topReasons = currentList.slice(0, 8);
@@ -126,13 +225,11 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         const index = elements[0].index;
         const selectedReason = topReasons[index];
         if (selectedReason) {
-          setModalTarget({
+          openModal({
             category: activeCategory,
             reason: selectedReason.name,
             title: selectedReason.name
           });
-          setModalSearch('');
-          setModalCurrentPage(1);
         }
       }
     },
@@ -195,27 +292,90 @@ export const DelayHub: React.FC<DelayHubProps> = ({
     });
   }, [modalTarget, filteredShipments]);
 
-  // Search filter inside modal
+  // Country breakdown for active delay modal
+  const modalCountryBreakdown = useMemo(() => {
+    if (modalAllShipments.length === 0) return [];
+    const countryCounts: Record<string, number> = {};
+    for (const s of modalAllShipments) {
+      const dest = (s.destination || 'UNKNOWN').trim().toUpperCase();
+      countryCounts[dest] = (countryCounts[dest] || 0) + 1;
+    }
+    const total = modalAllShipments.length;
+    return Object.entries(countryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([country, count]) => ({
+        country,
+        count,
+        percentage: Number(((count / total) * 100).toFixed(1))
+      }));
+  }, [modalAllShipments]);
+
+  const filteredCountryBreakdown = useMemo(() => {
+    if (!countryModalSearch.trim()) return modalCountryBreakdown;
+    const q = countryModalSearch.trim().toLowerCase();
+    return modalCountryBreakdown.filter((c) => c.country.toLowerCase().includes(q));
+  }, [modalCountryBreakdown, countryModalSearch]);
+
+  // Search, country filter, and column sorting inside modal
   const modalFilteredShipments = useMemo(() => {
-    if (!modalSearch.trim()) return modalAllShipments;
-    const q = modalSearch.toLowerCase().trim();
-    return modalAllShipments.filter((s) => {
-      return (
-        s.awb.toLowerCase().includes(q) ||
-        s.shprName.toLowerCase().includes(q) ||
-        s.customer.toLowerCase().includes(q) ||
-        s.destination.toLowerCase().includes(q) ||
-        (s.recipient && s.recipient.toLowerCase().includes(q)) ||
-        (s.city && s.city.toLowerCase().includes(q)) ||
-        (s.remarks && s.remarks.toLowerCase().includes(q)) ||
-        (s.clearanceDelay && s.clearanceDelay.toLowerCase().includes(q)) ||
-        (s.transitDelay && s.transitDelay.toLowerCase().includes(q)) ||
-        (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q)) ||
-        (s.weekendDelay && s.weekendDelay.toLowerCase().includes(q)) ||
-        (s.finalResolution && s.finalResolution.toLowerCase().includes(q))
-      );
-    });
-  }, [modalAllShipments, modalSearch]);
+    let list = modalAllShipments;
+
+    if (modalSelectedCountry) {
+      list = list.filter((s) => (s.destination || '').trim().toLowerCase() === modalSelectedCountry.trim().toLowerCase());
+    }
+
+    if (modalSearch.trim()) {
+      const q = modalSearch.toLowerCase().trim();
+      list = list.filter((s) => {
+        return (
+          s.awb.toLowerCase().includes(q) ||
+          s.shprName.toLowerCase().includes(q) ||
+          s.customer.toLowerCase().includes(q) ||
+          s.destination.toLowerCase().includes(q) ||
+          (s.recipient && s.recipient.toLowerCase().includes(q)) ||
+          (s.city && s.city.toLowerCase().includes(q)) ||
+          (s.remarks && s.remarks.toLowerCase().includes(q)) ||
+          (s.clearanceDelay && s.clearanceDelay.toLowerCase().includes(q)) ||
+          (s.transitDelay && s.transitDelay.toLowerCase().includes(q)) ||
+          (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q)) ||
+          (s.weekendDelay && s.weekendDelay.toLowerCase().includes(q)) ||
+          (s.finalResolution && s.finalResolution.toLowerCase().includes(q))
+        );
+      });
+    }
+
+    if (sortField) {
+      list = [...list].sort((a, b) => {
+        let cmp = 0;
+        if (sortField === 'awb') {
+          cmp = (a.awb || '').localeCompare(b.awb || '', undefined, { numeric: true, sensitivity: 'base' });
+        } else if (sortField === 'destination') {
+          cmp = (a.destination || '').localeCompare(b.destination || '');
+        } else if (sortField === 'customer') {
+          cmp = (a.customer || '').localeCompare(b.customer || '');
+        } else if (sortField === 'shprName') {
+          cmp = (a.shprName || '').localeCompare(b.shprName || '');
+        } else if (sortField === 'recipient') {
+          const recA = (a.recipient || a.city || '').toLowerCase();
+          const recB = (b.recipient || b.city || '').toLowerCase();
+          cmp = recA.localeCompare(recB);
+        } else if (sortField === 'pickup') {
+          const dateA = a.pickup ? new Date(a.pickup).getTime() : 0;
+          const dateB = b.pickup ? new Date(b.pickup).getTime() : 0;
+          cmp = dateA - dateB;
+        } else if (sortField === 'weight') {
+          cmp = (Number(a.weight) || 0) - (Number(b.weight) || 0);
+        } else if (sortField === 'tt') {
+          cmp = (Number(a.tt) || 0) - (Number(b.tt) || 0);
+        } else if (sortField === 'finalResolution') {
+          cmp = (a.finalResolution || '').localeCompare(b.finalResolution || '');
+        }
+        return sortOrder === 'asc' ? cmp : -cmp;
+      });
+    }
+
+    return list;
+  }, [modalAllShipments, modalSelectedCountry, modalSearch, sortField, sortOrder]);
 
   const modalTotalPages = Math.ceil(modalFilteredShipments.length / modalPageSize) || 1;
   const modalValidCurrentPage = Math.min(modalCurrentPage, modalTotalPages);
@@ -233,7 +393,6 @@ export const DelayHub: React.FC<DelayHubProps> = ({
     let maxTT = 0;
     let totalWeight = 0;
     let totalPkgs = 0;
-    const countryCounts: Record<string, number> = {};
 
     for (const s of modalAllShipments) {
       sumTT += s.tt;
@@ -241,24 +400,22 @@ export const DelayHub: React.FC<DelayHubProps> = ({
       if (s.tt > maxTT) maxTT = s.tt;
       totalWeight += s.weight || 0;
       totalPkgs += s.pkgCount || 0;
-      if (s.destination) countryCounts[s.destination] = (countryCounts[s.destination] || 0) + 1;
     }
 
-    const topCountries = Object.entries(countryCounts)
-      .sort((a, b) => b[1] - a[1])
+    const topCountries = modalCountryBreakdown
       .slice(0, 4)
-      .map(([c, count]) => `${c} (${count})`)
+      .map(({ country, count }) => `${country} (${count})`)
       .join(', ');
 
     return {
       avgTT: (sumTT / modalAllShipments.length).toFixed(2),
       minTT: minTT === Number.MAX_VALUE ? 0 : minTT.toFixed(2),
       maxTT: maxTT.toFixed(2),
-      totalWeight: totalWeight.toLocaleString(undefined, { maximumFractionDigits: 1 }),
-      totalPkgs: totalPkgs.toLocaleString(),
-      topCountries: topCountries || 'N/A'
+      totalWeight: Math.round(totalWeight),
+      totalPkgs,
+      topCountries: topCountries || 'None'
     };
-  }, [modalAllShipments]);
+  }, [modalAllShipments, modalCountryBreakdown]);
 
   // Modal Export Handlers
   const handleExportModalExcel = () => {
@@ -328,9 +485,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         <div
           onClick={() => {
             setActiveCategory('transit');
-            setModalTarget({ category: 'transit', title: 'Transit Delays (All Incidents)' });
-            setModalSearch('');
-            setModalCurrentPage(1);
+            openModal({ category: 'transit', title: 'Transit Delays (All Incidents)' });
           }}
           className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
             activeCategory === 'transit'
@@ -365,9 +520,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         <div
           onClick={() => {
             setActiveCategory('clearance');
-            setModalTarget({ category: 'clearance', title: 'Customs Clearance Delays (All Causes)' });
-            setModalSearch('');
-            setModalCurrentPage(1);
+            openModal({ category: 'clearance', title: 'Customs Clearance Delays (All Causes)' });
           }}
           className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
             activeCategory === 'clearance'
@@ -402,9 +555,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         <div
           onClick={() => {
             setActiveCategory('destination');
-            setModalTarget({ category: 'destination', title: 'Destination Delays (All Exceptions)' });
-            setModalSearch('');
-            setModalCurrentPage(1);
+            openModal({ category: 'destination', title: 'Destination Delays (All Exceptions)' });
           }}
           className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
             activeCategory === 'destination'
@@ -438,9 +589,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         {/* Weekend Impact Delays */}
         <div
           onClick={() => {
-            setModalTarget({ category: 'weekend', title: 'Weekend & Non-Working Day Hold Delays' });
-            setModalSearch('');
-            setModalCurrentPage(1);
+            openModal({ category: 'weekend', title: 'Weekend & Non-Working Day Hold Delays' });
           }}
           className="glass-card p-4 rounded-2xl cursor-pointer transition-all hover:border-cyan-400 dark:hover:border-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] group"
           title="Click to view all Weekend Delay AWBs"
@@ -473,8 +622,8 @@ export const DelayHub: React.FC<DelayHubProps> = ({
       <div className="glass-panel p-5 rounded-2xl space-y-5 border border-slate-200 dark:border-slate-800/80">
         
         {/* Header with Category Tabs and Search */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800/80">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800/80">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => { setActiveCategory('transit'); setSearchTerm(''); }}
@@ -515,16 +664,49 @@ export const DelayHub: React.FC<DelayHubProps> = ({
             </button>
           </div>
 
-          {/* Search inside reasons */}
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={`Search ${activeCategory} reasons...`}
-              className="w-full pl-8 pr-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
-            />
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Country Dropdown for Main DelayHub Tabs */}
+            <div className="relative min-w-[200px]">
+              <Globe className="w-3.5 h-3.5 text-emerald-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select
+                value={hubSelectedCountry || ''}
+                onChange={(e) => setHubSelectedCountry(e.target.value || null)}
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-emerald-500/60 focus:border-emerald-500 rounded-xl pl-8 pr-8 py-1.5 text-xs font-bold text-slate-800 dark:text-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-xs"
+                title="Filter delay reasons by destination country"
+              >
+                <option value="" className="bg-slate-900 text-slate-300 font-medium">
+                  All Destinations ({hubCountryList.length} countries)
+                </option>
+                {hubCountryList.map((c, idx) => (
+                  <option key={c.country} value={c.country} className="bg-slate-900 text-white font-mono">
+                    #{idx + 1} {c.country} ({c.count.toLocaleString()} AWBs)
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {hubSelectedCountry && (
+              <button
+                type="button"
+                onClick={() => setHubSelectedCountry(null)}
+                className="text-xs font-bold text-rose-500 hover:text-rose-400 underline cursor-pointer"
+              >
+                Reset
+              </button>
+            )}
+
+            {/* Search inside reasons */}
+            <div className="relative w-full sm:w-56">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={`Search ${activeCategory} reasons...`}
+                className="w-full pl-8 pr-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              />
+            </div>
           </div>
         </div>
 
@@ -583,13 +765,11 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       <tr
                         key={item.name}
                         onClick={() => {
-                          setModalTarget({
+                          openModal({
                             category: activeCategory,
                             reason: item.name,
                             title: item.name
                           });
-                          setModalSearch('');
-                          setModalCurrentPage(1);
                         }}
                         className={`hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-all cursor-pointer group ${
                           isFiltered ? 'bg-blue-50 dark:bg-blue-600/15' : 'even:bg-slate-50/40 dark:even:bg-slate-900/30'
@@ -624,13 +804,11 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                           <button
                             type="button"
                             onClick={() => {
-                              setModalTarget({
+                              openModal({
                                 category: activeCategory,
                                 reason: item.name,
                                 title: item.name
                               });
-                              setModalSearch('');
-                              setModalCurrentPage(1);
                             }}
                             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 dark:bg-blue-600/20 dark:text-blue-300 dark:hover:bg-blue-600 dark:hover:text-white dark:border-blue-500/40 shadow-sm hover:shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer"
                             title="Open AWB List Modal"
@@ -740,14 +918,75 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       </span>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 sm:col-span-2 shadow-md">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Top Impacted Destinations</span>
-                      <span className="text-xs sm:text-sm font-black text-emerald-400 truncate block mt-0.5">
-                        {modalStats.topCountries}
-                      </span>
-                      <span className="text-[10px] text-slate-400 block font-medium mt-0.5">
-                        Countries with highest concentration of this delay
-                      </span>
+                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 sm:col-span-2 shadow-md flex flex-col justify-between">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                          Top Destination
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {modalSelectedCountry && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setModalSelectedCountry(null);
+                                setModalCurrentPage(1);
+                              }}
+                              className="text-[10px] text-rose-400 hover:text-rose-300 font-bold underline cursor-pointer"
+                            >
+                              Reset ({modalSelectedCountry})
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCountryModalSearch('');
+                              setShowCountryBreakdownModal(true);
+                            }}
+                            className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
+                            title="View all in popup window"
+                          >
+                            View Breakdown ({modalCountryBreakdown.length}) →
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Dropdown list for Top Destination */}
+                      <div className="relative mt-1.5">
+                        <select
+                          value={modalSelectedCountry || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setModalSelectedCountry(val || null);
+                            setModalCurrentPage(1);
+                          }}
+                          className="w-full bg-slate-950 border border-slate-700 hover:border-emerald-500/60 focus:border-emerald-500 rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold text-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-xs"
+                        >
+                          <option value="" className="bg-slate-900 text-slate-300 font-medium">
+                            All Destinations ({modalAllShipments.length.toLocaleString()} AWBs • {modalCountryBreakdown.length} countries)
+                          </option>
+                          {modalCountryBreakdown.map((item, idx) => (
+                            <option
+                              key={item.country}
+                              value={item.country}
+                              className="bg-slate-900 text-white font-mono"
+                            >
+                              #{idx + 1} {item.country} — {item.count.toLocaleString()} AWBs ({item.percentage}%)
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+
+                      {/* Top list footer */}
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5">
+                        <span className="truncate font-mono font-medium">
+                          {modalSelectedCountry
+                            ? `Selected: ${modalSelectedCountry} (${modalCountryBreakdown.find(c => c.country === modalSelectedCountry)?.count || 0} AWBs)`
+                            : `Top: ${modalStats.topCountries}`}
+                        </span>
+                        <span className="text-slate-500 shrink-0 ml-2">Sorted by volume</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -777,6 +1016,18 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {sortField && (
+                      <button
+                        type="button"
+                        onClick={() => setSortField(null)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/40 text-sky-300 text-xs font-semibold transition-all cursor-pointer"
+                        title="Clear active sorting"
+                      >
+                        <span>Sorted: <strong className="text-white capitalize">{sortField === 'destination' ? 'Dest' : sortField === 'shprName' ? 'Shipper' : sortField === 'tt' ? 'TT' : sortField}</strong> ({sortOrder.toUpperCase()})</span>
+                        <X className="w-3 h-3 text-sky-400 hover:text-white ml-0.5" />
+                      </button>
+                    )}
+
                     <button
                       onClick={handleExportModalExcel}
                       disabled={modalFilteredShipments.length === 0}
@@ -798,22 +1049,106 @@ export const DelayHub: React.FC<DelayHubProps> = ({
               </div>
 
               {/* Modal Table Content - Option C: Dark Command-Center Grid */}
-              <div className="flex-1 overflow-y-auto border border-slate-800 rounded-2xl bg-slate-950 shadow-lg my-2">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-black uppercase text-[10px] tracking-wider z-10">
+              <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800 rounded-2xl bg-slate-950 shadow-lg my-2 max-h-[58vh]">
+                <table className="w-full text-center text-xs border-collapse min-w-[950px]">
+                  <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10 select-none">
                     <tr>
-                      <th className="py-2.5 px-3 w-12 text-center text-slate-400">#</th>
-                      <th className="py-2.5 px-3">AWB Number</th>
-                      <th className="py-2.5 px-3">Customer</th>
-                      <th className="py-2.5 px-3">Shipper</th>
-                      <th className="py-2.5 px-3">Destination</th>
-                      <th className="py-2.5 px-3 text-right">TT (Days)</th>
-                      <th className="py-2.5 px-3 text-center">Final Resolution</th>
-                      <th className="py-2.5 px-3">Delay Remarks / Details</th>
-                      <th className="py-2.5 px-3 text-center">Dossier</th>
+                      <th className="py-2.5 px-2.5 w-12 text-center text-slate-400 align-middle">#</th>
+                      <th
+                        onClick={() => handleSort('awb')}
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by AWB Tracking #"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'awb' ? 'text-sky-300 font-black' : ''}>AWB Tracking #</span>
+                          {renderSortIcon('awb')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('destination')}
+                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Destination"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'destination' ? 'text-sky-300 font-black' : ''}>Dest</span>
+                          {renderSortIcon('destination')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('customer')}
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Customer Account"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'customer' ? 'text-sky-300 font-black' : ''}>Customer Account</span>
+                          {renderSortIcon('customer')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('shprName')}
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Shipper Name"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'shprName' ? 'text-sky-300 font-black' : ''}>Shipper Name</span>
+                          {renderSortIcon('shprName')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('recipient')}
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Recipient / City"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'recipient' ? 'text-sky-300 font-black' : ''}>Recipient / City</span>
+                          {renderSortIcon('recipient')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('pickup')}
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Pickup Date"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'pickup' ? 'text-sky-300 font-black' : ''}>Pickup Date</span>
+                          {renderSortIcon('pickup')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('weight')}
+                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Weight"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'weight' ? 'text-sky-300 font-black' : ''}>Weight (kg)</span>
+                          {renderSortIcon('weight')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('tt')}
+                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Transit Time"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'tt' ? 'text-sky-300 font-black' : ''}>TT (Days)</span>
+                          {renderSortIcon('tt')}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort('finalResolution')}
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        title="Click to sort by Final Resolution"
+                      >
+                        <div className="inline-flex items-center justify-center gap-1 mx-auto">
+                          <span className={sortField === 'finalResolution' ? 'text-sky-300 font-black' : ''}>Final Resolution</span>
+                          {renderSortIcon('finalResolution')}
+                        </div>
+                      </th>
+                      <th className="py-2.5 px-3 text-center align-middle">Delay Reason &amp; Remarks</th>
+                      <th className="py-2.5 px-2.5 text-center align-middle">Inspect</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/80 bg-slate-950">
+                  <tbody className="divide-y divide-slate-800/80 bg-slate-950 font-sans">
                     {modalPaginatedData.length > 0 ? (
                       modalPaginatedData.map((s, idx) => {
                         const globalIndex = (modalValidCurrentPage - 1) * modalPageSize + idx + 1;
@@ -831,32 +1166,43 @@ export const DelayHub: React.FC<DelayHubProps> = ({
 
                         return (
                           <tr
-                            key={s.awb}
+                            key={`${s.awb}-${idx}`}
                             onClick={() => setInspectedShipment(s)}
-                            className="hover:bg-slate-900/90 transition-colors cursor-pointer group"
+                            className="hover:bg-slate-900/90 text-slate-200 transition-colors cursor-pointer group"
                             title="Click to view full dossier"
                           >
-                            <td className="py-2.5 px-3 text-center text-slate-500 font-mono font-bold text-[11px]">
+                            <td className="py-2 px-2.5 text-center text-slate-500 font-mono font-bold text-[11px] align-middle">
                               {globalIndex}
                             </td>
-                            <td className="py-2.5 px-3 font-mono font-black text-sky-400 group-hover:text-sky-300 hover:underline">
+                            <td className="py-2 px-3 font-mono font-bold text-sky-400 group-hover:text-sky-300 hover:underline text-center align-middle">
                               {s.awb}
                             </td>
-                            <td className="py-2.5 px-3 font-extrabold text-white max-w-[160px] truncate" title={s.customer}>
-                              {s.customer}
+                            <td className="py-2 px-2.5 font-bold text-white font-mono text-center align-middle">
+                              <span className="inline-block px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-200">
+                                {s.destination}
+                              </span>
                             </td>
-                            <td className="py-2.5 px-3 font-semibold text-slate-300 max-w-[140px] truncate" title={s.shprName}>
-                              {s.shprName}
+                            <td className="py-2 px-3 font-semibold text-white max-w-[150px] truncate text-center align-middle mx-auto" title={s.customer}>
+                              {s.customer || '-'}
                             </td>
-                            <td className="py-2.5 px-3">
-                              <span className="font-black text-white">{s.destination}</span>
-                              {s.city && <span className="text-slate-400 text-[11px] font-medium block">{s.city}</span>}
+                            <td className="py-2 px-3 text-slate-300 max-w-[150px] truncate font-medium text-center align-middle mx-auto" title={s.shprName}>
+                              {s.shprName || '-'}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-black text-indigo-400 text-xs">
-                              {Number(s.tt || 0).toFixed(1)}d
+                            <td className="py-2 px-3 text-slate-300 max-w-[140px] truncate text-center align-middle">
+                              <div className="font-semibold text-white truncate text-center">{s.recipient || '-'}</div>
+                              <div className="text-[10px] text-slate-400 font-medium truncate text-center">{s.city || '-'}</div>
                             </td>
-                            <td className="py-2.5 px-3 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs ${
+                            <td className="py-2 px-3 font-mono text-slate-300 whitespace-nowrap text-center align-middle">
+                              {formatExcelDate(s.pickup)}
+                            </td>
+                            <td className="py-2 px-2.5 font-mono font-bold text-slate-200 whitespace-nowrap text-center align-middle">
+                              {s.weight ? `${formatWeight(s.weight)}` : '-'}
+                            </td>
+                            <td className="py-2 px-2.5 text-center align-middle font-mono font-black text-indigo-400">
+                              {Number(s.tt || 0).toFixed(1)} d
+                            </td>
+                            <td className="py-2 px-3 text-center align-middle">
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black border shadow-xs ${
                                 isNegativeRes
                                   ? 'bg-rose-950/80 text-rose-300 border-rose-500/50'
                                   : isDelivered
@@ -866,20 +1212,20 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                                 {s.finalResolution || 'Delivered'}
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 text-slate-300 max-w-[200px] truncate" title={s.remarks || delayText}>
-                              <span className="text-slate-100 font-extrabold block truncate">{delayText}</span>
+                            <td className="py-2 px-3 text-slate-300 max-w-[200px] truncate text-center align-middle" title={s.remarks || delayText}>
+                              <span className="text-slate-100 font-bold block truncate">{delayText}</span>
                               {s.remarks && s.remarks !== delayText && (
-                                <span className="text-slate-400 text-[11px] font-medium block truncate">{s.remarks}</span>
+                                <span className="text-slate-400 text-[10px] font-medium block truncate">{s.remarks}</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                            <td className="py-2 px-2.5 text-center align-middle" onClick={(e) => e.stopPropagation()}>
                               <button
                                 type="button"
                                 onClick={() => setInspectedShipment(s)}
-                                className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-sky-400 hover:text-white border border-slate-700 transition-all shadow-xs cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-sky-400 hover:text-white border border-slate-700 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center"
                                 title="View full AWB dossier"
                               >
-                                <Eye className="w-4 h-4" />
+                                <Eye className="w-3.5 h-3.5" />
                               </button>
                             </td>
                           </tr>
@@ -887,7 +1233,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       })
                     ) : (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center text-slate-400 font-semibold">
+                        <td colSpan={12} className="py-8 text-center text-slate-400 font-semibold">
                           No shipments matching current query.
                         </td>
                       </tr>
@@ -953,6 +1299,143 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                   </button>
                 </div>
               </div>
+
+            {/* 4. COUNTRY-WISE IMPACTED SHIPMENTS POPUP MODAL */}
+            {showCountryBreakdownModal && (
+              <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in">
+                <div className="w-full max-w-2xl max-h-[88vh] p-5 sm:p-6 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden bg-slate-950 border border-emerald-500/40 text-slate-200">
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-lg font-black text-white">
+                            Country-Wise Impacted Shipments
+                          </h3>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            {modalTarget.title}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Total <strong className="text-white font-mono">{modalAllShipments.length.toLocaleString()}</strong> AWBs across <strong className="text-white font-mono">{modalCountryBreakdown.length}</strong> countries
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowCountryBreakdownModal(false)}
+                      className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Summary Bar */}
+                  <div className="grid grid-cols-3 gap-2 my-3 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Countries</span>
+                      <span className="text-lg font-black text-white font-mono">{modalCountryBreakdown.length}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Impacted Shipments</span>
+                      <span className="text-lg font-black text-emerald-400 font-mono">{modalAllShipments.length.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Top Concentration</span>
+                      <span className="text-lg font-black text-sky-400 font-mono">
+                        {modalCountryBreakdown[0] ? `${modalCountryBreakdown[0].country} (${modalCountryBreakdown[0].count.toLocaleString()})` : '-'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Search inside Country List */}
+                  <div className="relative mb-3">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={countryModalSearch}
+                      onChange={(e) => setCountryModalSearch(e.target.value)}
+                      placeholder="Search country code (e.g. US, IN, BR, CA)..."
+                      className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/60"
+                    />
+                  </div>
+
+                  {/* Countries Ranked Table */}
+                  <div className="flex-1 overflow-y-auto border border-slate-800/80 rounded-2xl bg-slate-900/50 divide-y divide-slate-800/60">
+                    <div className="sticky top-0 bg-slate-900 px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider grid grid-cols-12 gap-2 border-b border-slate-800">
+                      <span className="col-span-2 text-center">Rank</span>
+                      <span className="col-span-2 text-center">Country</span>
+                      <span className="col-span-3 text-center">Impacted Shipments</span>
+                      <span className="col-span-3 text-center">Share (%)</span>
+                      <span className="col-span-2 text-center">Action</span>
+                    </div>
+
+                    {filteredCountryBreakdown.length === 0 ? (
+                      <div className="p-8 text-center text-slate-500 text-xs">
+                        No countries found matching "{countryModalSearch}"
+                      </div>
+                    ) : (
+                      filteredCountryBreakdown.map((item, idx) => (
+                        <div
+                          key={item.country}
+                          className="px-4 py-2.5 text-xs grid grid-cols-12 gap-2 items-center hover:bg-slate-800/50 transition-colors"
+                        >
+                          <span className="col-span-2 text-center font-mono font-bold text-slate-400 text-[11px]">
+                            #{idx + 1}
+                          </span>
+                          <span className="col-span-2 text-center">
+                            <span className="inline-block px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 font-mono font-bold text-white text-xs">
+                              {item.country}
+                            </span>
+                          </span>
+                          <span className="col-span-3 text-center font-mono font-bold text-emerald-400">
+                            {item.count.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">AWBs</span>
+                          </span>
+                          <div className="col-span-3 flex items-center justify-center gap-2">
+                            <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-emerald-500 rounded-full"
+                                style={{ width: `${Math.min(item.percentage, 100)}%` }}
+                              />
+                            </div>
+                            <span className="font-mono text-[10px] font-bold text-slate-300 w-9 text-right">
+                              {item.percentage}%
+                            </span>
+                          </div>
+                          <div className="col-span-2 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setModalSelectedCountry(item.country);
+                                setModalCurrentPage(1);
+                                setShowCountryBreakdownModal(false);
+                              }}
+                              className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 text-emerald-300 hover:text-white text-[10px] font-bold border border-emerald-500/30 transition-all cursor-pointer"
+                            >
+                              Filter Table
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="pt-3 mt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span>Click <strong>Filter Table</strong> to isolate records for that destination</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCountryBreakdownModal(false)}
+                      className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             </div>
           </div>
