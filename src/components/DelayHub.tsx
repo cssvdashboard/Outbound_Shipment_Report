@@ -895,33 +895,33 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                   </button>
                 </div>
 
-                {/* Quick Metrics Strip - Option C: Dark Command-Center Cards */}
+                {/* Quick Metrics Strip */}
                 {modalStats && (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5">
-                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Average Transit Time</span>
-                      <span className="text-base sm:text-lg font-black text-indigo-400 font-mono">
-                        {modalStats.avgTT} <span className="text-xs font-medium text-slate-400">days</span>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 block">Average Transit Time</span>
+                      <span className="text-base sm:text-lg font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                        {modalStats.avgTT} <span className="text-xs font-medium text-slate-500 dark:text-slate-400">days</span>
                       </span>
-                      <span className="text-[10px] text-slate-400 block font-mono font-medium mt-0.5">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono font-medium mt-0.5">
                         Min: {modalStats.minTT}d • Max: {modalStats.maxTT}d
                       </span>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Total Volume &amp; Wt</span>
-                      <span className="text-base sm:text-lg font-black text-white font-mono">
-                        {modalAllShipments.length.toLocaleString()} <span className="text-xs font-medium text-slate-400">AWBs</span>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 block">Total Volume &amp; Wt</span>
+                      <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
+                        {modalAllShipments.length.toLocaleString()} <span className="text-xs font-medium text-slate-500 dark:text-slate-400">AWBs</span>
                       </span>
-                      <span className="text-[10px] text-slate-400 block font-mono font-medium mt-0.5">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono font-medium mt-0.5">
                         {modalStats.totalWeight} kg • {modalStats.totalPkgs} pcs
                       </span>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 sm:col-span-2 shadow-md flex flex-col justify-between">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs sm:col-span-2 dark:bg-slate-900/90 dark:border-slate-800 flex flex-col justify-between">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
-                          <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           Top Destination
                         </span>
                         <div className="flex items-center gap-2">
@@ -932,7 +932,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                                 setModalSelectedCountry(null);
                                 setModalCurrentPage(1);
                               }}
-                              className="text-[10px] text-rose-400 hover:text-rose-300 font-bold underline cursor-pointer"
+                              className="text-[10px] text-rose-600 dark:text-rose-400 hover:underline font-bold cursor-pointer"
                             >
                               Reset ({modalSelectedCountry})
                             </button>
@@ -943,7 +943,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                               setCountryModalSearch('');
                               setShowCountryBreakdownModal(true);
                             }}
-                            className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
+                            className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold cursor-pointer flex items-center gap-0.5"
                             title="View all in popup window"
                           >
                             View Breakdown ({modalCountryBreakdown.length}) →
@@ -960,16 +960,16 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                             setModalSelectedCountry(val || null);
                             setModalCurrentPage(1);
                           }}
-                          className="w-full bg-slate-950 border border-slate-700 hover:border-emerald-500/60 focus:border-emerald-500 rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold text-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-xs"
+                          className="w-full bg-white border border-slate-300 text-slate-800 hover:border-emerald-500 focus:border-emerald-500 rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-2xs dark:bg-slate-950 dark:border-slate-700 dark:text-emerald-400 dark:hover:border-emerald-500/60"
                         >
-                          <option value="" className="bg-slate-900 text-slate-300 font-medium">
+                          <option value="" className="bg-white text-slate-700 dark:bg-slate-900 dark:text-slate-300 font-medium">
                             All Destinations ({modalAllShipments.length.toLocaleString()} AWBs • {modalCountryBreakdown.length} countries)
                           </option>
                           {modalCountryBreakdown.map((item, idx) => (
                             <option
                               key={item.country}
                               value={item.country}
-                              className="bg-slate-900 text-white font-mono"
+                              className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white font-mono"
                             >
                               #{idx + 1} {item.country} — {item.count.toLocaleString()} AWBs ({item.percentage}%)
                             </option>
@@ -979,13 +979,13 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       </div>
 
                       {/* Top list footer */}
-                      <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">
                         <span className="truncate font-mono font-medium">
                           {modalSelectedCountry
                             ? `Selected: ${modalSelectedCountry} (${modalCountryBreakdown.find(c => c.country === modalSelectedCountry)?.count || 0} AWBs)`
                             : `Top: ${modalStats.topCountries}`}
                         </span>
-                        <span className="text-slate-500 shrink-0 ml-2">Sorted by volume</span>
+                        <span className="text-slate-400 dark:text-slate-500 shrink-0 ml-2">Sorted by volume</span>
                       </div>
                     </div>
                   </div>
@@ -1048,99 +1048,99 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                 </div>
               </div>
 
-              {/* Modal Table Content - Option C: Dark Command-Center Grid */}
-              <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800 rounded-2xl bg-slate-950 shadow-lg my-2 max-h-[58vh]">
+              {/* Modal Table Content */}
+              <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-200 rounded-2xl bg-white shadow-sm my-2 max-h-[58vh] dark:border-slate-800 dark:bg-slate-950">
                 <table className="w-full text-center text-xs border-collapse min-w-[950px]">
-                  <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10 select-none">
+                  <thead className="sticky top-0 bg-slate-100 border-b border-slate-200 text-slate-700 font-bold uppercase text-[10px] tracking-wider z-10 select-none dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300">
                     <tr>
-                      <th className="py-2.5 px-2.5 w-12 text-center text-slate-400 align-middle">#</th>
+                      <th className="py-2.5 px-2.5 w-12 text-center text-slate-500 dark:text-slate-400 align-middle">#</th>
                       <th
                         onClick={() => handleSort('awb')}
-                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by AWB Tracking #"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'awb' ? 'text-sky-300 font-black' : ''}>AWB Tracking #</span>
+                          <span className={sortField === 'awb' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>AWB Tracking #</span>
                           {renderSortIcon('awb')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('destination')}
-                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Destination"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'destination' ? 'text-sky-300 font-black' : ''}>Dest</span>
+                          <span className={sortField === 'destination' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Dest</span>
                           {renderSortIcon('destination')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('customer')}
-                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Customer Account"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'customer' ? 'text-sky-300 font-black' : ''}>Customer Account</span>
+                          <span className={sortField === 'customer' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Customer Account</span>
                           {renderSortIcon('customer')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('shprName')}
-                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Shipper Name"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'shprName' ? 'text-sky-300 font-black' : ''}>Shipper Name</span>
+                          <span className={sortField === 'shprName' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Shipper Name</span>
                           {renderSortIcon('shprName')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('recipient')}
-                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Recipient / City"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'recipient' ? 'text-sky-300 font-black' : ''}>Recipient / City</span>
+                          <span className={sortField === 'recipient' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Recipient / City</span>
                           {renderSortIcon('recipient')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('pickup')}
-                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Pickup Date"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'pickup' ? 'text-sky-300 font-black' : ''}>Pickup Date</span>
+                          <span className={sortField === 'pickup' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Pickup Date</span>
                           {renderSortIcon('pickup')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('weight')}
-                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Weight"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'weight' ? 'text-sky-300 font-black' : ''}>Weight (kg)</span>
+                          <span className={sortField === 'weight' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Weight (kg)</span>
                           {renderSortIcon('weight')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('tt')}
-                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-2.5 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Transit Time"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'tt' ? 'text-sky-300 font-black' : ''}>TT (Days)</span>
+                          <span className={sortField === 'tt' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>TT (Days)</span>
                           {renderSortIcon('tt')}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort('finalResolution')}
-                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-800/80 transition-colors group"
+                        className="py-2.5 px-3 text-center align-middle cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800/80 transition-colors group"
                         title="Click to sort by Final Resolution"
                       >
                         <div className="inline-flex items-center justify-center gap-1 mx-auto">
-                          <span className={sortField === 'finalResolution' ? 'text-sky-300 font-black' : ''}>Final Resolution</span>
+                          <span className={sortField === 'finalResolution' ? 'text-blue-600 dark:text-sky-300 font-black' : ''}>Final Resolution</span>
                           {renderSortIcon('finalResolution')}
                         </div>
                       </th>
@@ -1148,7 +1148,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                       <th className="py-2.5 px-2.5 text-center align-middle">Inspect</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/80 bg-slate-950 font-sans">
+                  <tbody className="divide-y divide-slate-200 bg-white font-sans dark:divide-slate-800/80 dark:bg-slate-950">
                     {modalPaginatedData.length > 0 ? (
                       modalPaginatedData.map((s, idx) => {
                         const globalIndex = (modalValidCurrentPage - 1) * modalPageSize + idx + 1;
@@ -1168,61 +1168,61 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                           <tr
                             key={`${s.awb}-${idx}`}
                             onClick={() => setInspectedShipment(s)}
-                            className="hover:bg-slate-900/90 text-slate-200 transition-colors cursor-pointer group"
+                            className="hover:bg-slate-50 text-slate-800 transition-colors cursor-pointer group dark:hover:bg-slate-900/90 dark:text-slate-200"
                             title="Click to view full dossier"
                           >
                             <td className="py-2 px-2.5 text-center text-slate-500 font-mono font-bold text-[11px] align-middle">
                               {globalIndex}
                             </td>
-                            <td className="py-2 px-3 font-mono font-bold text-sky-400 group-hover:text-sky-300 hover:underline text-center align-middle">
+                            <td className="py-2 px-3 font-mono font-bold text-blue-600 hover:text-blue-700 dark:text-sky-400 dark:hover:text-sky-300 hover:underline text-center align-middle">
                               {s.awb}
                             </td>
-                            <td className="py-2 px-2.5 font-bold text-white font-mono text-center align-middle">
-                              <span className="inline-block px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-200">
+                            <td className="py-2 px-2.5 font-bold text-slate-900 dark:text-white font-mono text-center align-middle">
+                              <span className="inline-block px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
                                 {s.destination}
                               </span>
                             </td>
-                            <td className="py-2 px-3 font-semibold text-white max-w-[150px] truncate text-center align-middle mx-auto" title={s.customer}>
+                            <td className="py-2 px-3 font-semibold text-slate-900 dark:text-white max-w-[150px] truncate text-center align-middle mx-auto" title={s.customer}>
                               {s.customer || '-'}
                             </td>
-                            <td className="py-2 px-3 text-slate-300 max-w-[150px] truncate font-medium text-center align-middle mx-auto" title={s.shprName}>
+                            <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[150px] truncate font-medium text-center align-middle mx-auto" title={s.shprName}>
                               {s.shprName || '-'}
                             </td>
-                            <td className="py-2 px-3 text-slate-300 max-w-[140px] truncate text-center align-middle">
-                              <div className="font-semibold text-white truncate text-center">{s.recipient || '-'}</div>
-                              <div className="text-[10px] text-slate-400 font-medium truncate text-center">{s.city || '-'}</div>
+                            <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[140px] truncate text-center align-middle">
+                              <div className="font-semibold text-slate-900 dark:text-white truncate text-center">{s.recipient || '-'}</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate text-center">{s.city || '-'}</div>
                             </td>
-                            <td className="py-2 px-3 font-mono text-slate-300 whitespace-nowrap text-center align-middle">
+                            <td className="py-2 px-3 font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap text-center align-middle">
                               {formatExcelDate(s.pickup)}
                             </td>
-                            <td className="py-2 px-2.5 font-mono font-bold text-slate-200 whitespace-nowrap text-center align-middle">
+                            <td className="py-2 px-2.5 font-mono font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap text-center align-middle">
                               {s.weight ? `${formatWeight(s.weight)}` : '-'}
                             </td>
-                            <td className="py-2 px-2.5 text-center align-middle font-mono font-black text-indigo-400">
+                            <td className="py-2 px-2.5 text-center align-middle font-mono font-black text-indigo-600 dark:text-indigo-400">
                               {Number(s.tt || 0).toFixed(1)} d
                             </td>
                             <td className="py-2 px-3 text-center align-middle">
                               <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black border shadow-xs ${
                                 isNegativeRes
-                                  ? 'bg-rose-950/80 text-rose-300 border-rose-500/50'
+                                  ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-500/50'
                                   : isDelivered
-                                  ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50'
-                                  : 'bg-amber-950/80 text-amber-300 border-amber-500/50'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-500/50'
+                                  : 'bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-500/50'
                               }`}>
                                 {s.finalResolution || 'Delivered'}
                               </span>
                             </td>
-                            <td className="py-2 px-3 text-slate-300 max-w-[200px] truncate text-center align-middle" title={s.remarks || delayText}>
-                              <span className="text-slate-100 font-bold block truncate">{delayText}</span>
+                            <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[200px] truncate text-center align-middle" title={s.remarks || delayText}>
+                              <span className="text-slate-900 dark:text-slate-100 font-bold block truncate">{delayText}</span>
                               {s.remarks && s.remarks !== delayText && (
-                                <span className="text-slate-400 text-[10px] font-medium block truncate">{s.remarks}</span>
+                                <span className="text-slate-500 dark:text-slate-400 text-[10px] font-medium block truncate">{s.remarks}</span>
                               )}
                             </td>
                             <td className="py-2 px-2.5 text-center align-middle" onClick={(e) => e.stopPropagation()}>
                               <button
                                 type="button"
                                 onClick={() => setInspectedShipment(s)}
-                                className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-sky-400 hover:text-white border border-slate-700 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white border border-slate-300 dark:bg-slate-900 dark:hover:bg-blue-600 dark:text-sky-400 dark:hover:text-white dark:border-slate-700 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center"
                                 title="View full AWB dossier"
                               >
                                 <Eye className="w-3.5 h-3.5" />
