@@ -24,23 +24,32 @@ export function formatExcelDate(serialOrDate: any): string {
     const date = new Date(excelEpoch.getTime() + num * msPerDay);
     
     if (!isNaN(date.getTime())) {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric'
-      });
+      const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(date.getUTCDate()).padStart(2, '0');
+      const y = date.getUTCFullYear();
+      return `${m}/${d}/${y}`;
     }
   }
 
-  // If it's a date string
+  // If it's a date string matching YYYY-MM-DD or YYYY/MM/DD
+  if (typeof serialOrDate === 'string') {
+    const match = serialOrDate.trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (match) {
+      const y = match[1];
+      const m = match[2].padStart(2, '0');
+      const d = match[3].padStart(2, '0');
+      return `${m}/${d}/${y}`;
+    }
+  }
+
+  // Fallback for other date strings or Date objects
   try {
     const d = new Date(serialOrDate);
     if (!isNaN(d.getTime())) {
-      return d.toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric'
-      });
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const y = d.getFullYear();
+      return `${m}/${day}/${y}`;
     }
   } catch (e) {
     // ignore
