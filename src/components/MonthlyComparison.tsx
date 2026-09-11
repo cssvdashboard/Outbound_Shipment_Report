@@ -222,19 +222,44 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Base shipments filtered by active Category (Agent, PP, CC, IPD)
+  const categoryFilteredShipments = useMemo(() => {
+    if (!selectedCategoryType || selectedCategoryType === 'ALL') {
+      return rawShipments;
+    }
+    return rawShipments.filter((s) => {
+      if (selectedCategoryType === 'AGENT') {
+        return s.isAgent ?? /agent/i.test(s.customer || '');
+      }
+      if (selectedCategoryType === 'PP') {
+        const t = (s.shipmentType || '').toUpperCase();
+        return t === 'PP' || !t;
+      }
+      if (selectedCategoryType === 'CC') {
+        return (s.shipmentType || '').toUpperCase() === 'CC';
+      }
+      if (selectedCategoryType === 'IPD') {
+        return (s.shipmentType || '').toUpperCase() === 'IPD';
+      }
+      return true;
+    });
+  }, [rawShipments, selectedCategoryType]);
+
   // Compute matching customers
   const matchingCustomers = useMemo(() => {
-    return searchCustomers(rawShipments, sectionCustomerSearch, 40);
-  }, [rawShipments, sectionCustomerSearch]);
+    return searchCustomers(categoryFilteredShipments, sectionCustomerSearch, 40);
+  }, [categoryFilteredShipments, sectionCustomerSearch]);
 
   const totalDistinctCustomersCount = useMemo(() => {
-    if (allCustomers && allCustomers.length > 0) return allCustomers.length;
+    if (!selectedCategoryType || selectedCategoryType === 'ALL') {
+      if (allCustomers && allCustomers.length > 0) return allCustomers.length;
+    }
     const set = new Set<string>();
-    rawShipments.forEach((s) => {
+    categoryFilteredShipments.forEach((s) => {
       if (s.customer) set.add(s.customer.trim());
     });
     return set.size;
-  }, [allCustomers, rawShipments]);
+  }, [allCustomers, categoryFilteredShipments, selectedCategoryType]);
 
   // Compute destination counts from raw shipments
   const destinationCounts = useMemo(() => {

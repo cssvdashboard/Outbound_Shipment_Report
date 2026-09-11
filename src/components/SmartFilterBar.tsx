@@ -62,20 +62,45 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Compute matching autocomplete customer items based on query
+  const currentCategory = filters.selectedCategoryType || 'ALL';
+
+  // Base shipments filtered by active Category (Agent, PP, CC, IPD)
+  const categoryFilteredShipments = useMemo(() => {
+    if (!currentCategory || currentCategory === 'ALL') {
+      return rawShipments;
+    }
+    return rawShipments.filter((s) => {
+      if (currentCategory === 'AGENT') {
+        return s.isAgent ?? /agent/i.test(s.customer || '');
+      }
+      if (currentCategory === 'PP') {
+        const t = (s.shipmentType || '').toUpperCase();
+        return t === 'PP' || !t;
+      }
+      if (currentCategory === 'CC') {
+        return (s.shipmentType || '').toUpperCase() === 'CC';
+      }
+      if (currentCategory === 'IPD') {
+        return (s.shipmentType || '').toUpperCase() === 'IPD';
+      }
+      return true;
+    });
+  }, [rawShipments, currentCategory]);
+
+  // Compute matching autocomplete customer items strictly for active category
   const matchingCustomers = useMemo(() => {
-    return searchCustomers(rawShipments, customerSearch, 30);
-  }, [rawShipments, customerSearch]);
+    return searchCustomers(categoryFilteredShipments, customerSearch, 40);
+  }, [categoryFilteredShipments, customerSearch]);
 
   const selectedCustomer = filters.selectedCustomers[0] || null;
 
   // Compute selected customer count
   const selectedCustomerCount = useMemo(() => {
     if (!selectedCustomer) return 0;
-    return rawShipments.filter(
+    return categoryFilteredShipments.filter(
       (s) => (s.customer || '').trim().toLowerCase() === selectedCustomer.trim().toLowerCase()
     ).length;
-  }, [rawShipments, selectedCustomer]);
+  }, [categoryFilteredShipments, selectedCustomer]);
 
   const handleSelectCustomer = (name: string) => {
     onCustomerChange(name);
@@ -136,7 +161,32 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     }
   };
 
-  const currentCategory = filters.selectedCategoryType || 'ALL';
+  const handleCategoryToggle = (cat: CategoryTypeFilter) => {
+    const nextCategory = currentCategory === cat ? 'ALL' : cat;
+    if (onCategoryTypeChange) {
+      onCategoryTypeChange(nextCategory);
+    }
+    // If a customer is currently selected, check if they exist in the new category; if not, reset
+    if (selectedCustomer && nextCategory !== 'ALL') {
+      const existsInNew = rawShipments.some((s) => {
+        if ((s.customer || '').trim().toLowerCase() !== selectedCustomer.trim().toLowerCase()) {
+          return false;
+        }
+        if (nextCategory === 'AGENT') return s.isAgent ?? /agent/i.test(s.customer || '');
+        if (nextCategory === 'PP') {
+          const t = (s.shipmentType || '').toUpperCase();
+          return t === 'PP' || !t;
+        }
+        if (nextCategory === 'CC') return (s.shipmentType || '').toUpperCase() === 'CC';
+        if (nextCategory === 'IPD') return (s.shipmentType || '').toUpperCase() === 'IPD';
+        return true;
+      });
+      if (!existsInNew) {
+        onCustomerChange('ALL');
+        setCustomerSearch('');
+      }
+    }
+  };
 
   const agentCount = useMemo(() => {
     return rawShipments.filter((s) => s.isAgent ?? /agent/i.test(s.customer || '')).length;
@@ -198,7 +248,18 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
     );
   };
 
-  const totalDistinctCustomersCount = allCustomers.length > 0 ? allCustomers.length : 1082;
+  const totalDistinctCustomersCount = useMemo(() => {
+    if (!currentCategory || currentCategory === 'ALL') {
+      return allCustomers.length > 0 ? allCustomers.length : 1082;
+    }
+    const set = new Set<string>();
+    for (const s of categoryFilteredShipments) {
+      if (s.customer && s.customer.trim()) {
+        set.add(s.customer.trim());
+      }
+    }
+    return set.size;
+  }, [allCustomers, categoryFilteredShipments, currentCategory]);
   const totalDestinationsCount = allDestinations.length > 0 ? allDestinations.length : 127;
 
   return (
@@ -236,6 +297,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 placeholder={
                   selectedCustomer
                     ? selectedCustomer
+                    : currentCategory !== 'ALL'
+                    ? `Search ${currentCategory} Customer by name...`
                     : 'Search Customer by name...'
                 }
                 className={`w-full pl-10 pr-16 py-2.5 text-xs font-bold rounded-xl border-2 transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
@@ -291,7 +354,9 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                     <Search className="w-3.5 h-3.5 text-emerald-500" />
                     <span>
                       {customerSearch.trim()
-                        ? `Matching Customers for "${customerSearch}"`
+                        ? `Matching ${currentCategory !== 'ALL' ? currentCategory + ' ' : ''}Customers for "${customerSearch}"`
+                        : currentCategory !== 'ALL'
+                        ? `${currentCategory} Customers (${totalDistinctCustomersCount.toLocaleString()} Total)`
                         : `All Customers (${totalDistinctCustomersCount.toLocaleString()} Total)`}
                     </span>
                   </span>
@@ -317,10 +382,14 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                       ) : (
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
                       )}
-                      <span className="font-bold">All Customers ({totalDistinctCustomersCount.toLocaleString()} Total)</span>
+                      <span className="font-bold">
+                        {currentCategory !== 'ALL'
+                          ? `All ${currentCategory} Customers (${totalDistinctCustomersCount.toLocaleString()} Total)`
+                          : `All Customers (${totalDistinctCustomersCount.toLocaleString()} Total)`}
+                      </span>
                     </div>
                     <span className="text-[10px] font-mono font-bold text-slate-400">
-                      {rawShipments.length.toLocaleString()} AWBs
+                      {categoryFilteredShipments.length.toLocaleString()} AWBs
                     </span>
                   </button>
                 </div>
@@ -364,7 +433,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
 
                   {matchingCustomers.length === 0 && (
                     <div className="p-6 text-center text-xs text-slate-400 space-y-1">
-                      <p className="font-semibold">No customer found matching &quot;{customerSearch}&quot;</p>
+                      <p className="font-semibold">No {currentCategory !== 'ALL' ? currentCategory + ' ' : ''}customer found matching &quot;{customerSearch}&quot;</p>
                       <p className="text-[11px] text-slate-500">Try searching for partial names or check spelling.</p>
                     </div>
                   )}
@@ -514,7 +583,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             {/* All */}
             <button
               type="button"
-              onClick={() => onCategoryTypeChange?.('ALL')}
+              onClick={() => handleCategoryToggle('ALL')}
               className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentCategory === 'ALL'
                   ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-300 dark:border-slate-700 font-black'
@@ -528,7 +597,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             {/* Agent Button */}
             <button
               type="button"
-              onClick={() => onCategoryTypeChange?.(currentCategory === 'AGENT' ? 'ALL' : 'AGENT')}
+              onClick={() => handleCategoryToggle('AGENT')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentCategory === 'AGENT'
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-500/30 ring-2 ring-purple-400 font-black'
@@ -550,7 +619,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             {/* PP Button */}
             <button
               type="button"
-              onClick={() => onCategoryTypeChange?.(currentCategory === 'PP' ? 'ALL' : 'PP')}
+              onClick={() => handleCategoryToggle('PP')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentCategory === 'PP'
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-400 font-black'
@@ -572,7 +641,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             {/* CC Button */}
             <button
               type="button"
-              onClick={() => onCategoryTypeChange?.(currentCategory === 'CC' ? 'ALL' : 'CC')}
+              onClick={() => handleCategoryToggle('CC')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentCategory === 'CC'
                   ? 'bg-amber-600 text-white shadow-md shadow-amber-500/30 ring-2 ring-amber-400 font-black'
@@ -594,7 +663,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             {/* IPD Button */}
             <button
               type="button"
-              onClick={() => onCategoryTypeChange?.(currentCategory === 'IPD' ? 'ALL' : 'IPD')}
+              onClick={() => handleCategoryToggle('IPD')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentCategory === 'IPD'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400 font-black'
