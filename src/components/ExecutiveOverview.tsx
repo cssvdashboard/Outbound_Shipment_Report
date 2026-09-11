@@ -745,7 +745,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               {/* Quick Metrics Strip */}
               {modalStats && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5">
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 shadow-sm">
                     <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Average Transit Time</span>
                     <span className="text-base sm:text-lg font-black text-indigo-600 dark:text-indigo-400 font-mono">
                       {modalStats.avgTT} <span className="text-xs font-medium text-slate-500 dark:text-slate-400">days</span>
@@ -755,7 +755,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800">
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 shadow-sm">
                     <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">Total Volume &amp; Wt</span>
                     <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
                       {modalAllShipments.length.toLocaleString()} AWBs
@@ -765,7 +765,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs col-span-2 dark:bg-slate-900/90 dark:border-slate-800 flex flex-col justify-between">
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 shadow-sm col-span-2 flex flex-col justify-between">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -807,7 +807,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                           setModalSelectedCountry(val || null);
                           setModalCurrentPage(1);
                         }}
-                        className="w-full bg-white border border-slate-300 text-slate-800 hover:border-emerald-500 focus:border-emerald-500 rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-2xs dark:bg-slate-950 dark:border-slate-700 dark:text-emerald-400 dark:hover:border-emerald-500/60"
+                        className="w-full bg-slate-50 border border-slate-300 text-slate-800 hover:border-emerald-500 focus:border-emerald-500 rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none shadow-2xs dark:bg-slate-950 dark:border-slate-700 dark:text-emerald-400 dark:hover:border-emerald-500/60"
                       >
                         <option value="" className="bg-white text-slate-700 dark:bg-slate-900 dark:text-slate-300 font-medium">
                           All Destinations ({modalAllShipments.length.toLocaleString()} AWBs • {modalCountryBreakdown.length} countries)
@@ -839,7 +839,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
               {/* Categorized Root-Cause / Delay Reason Breakdown (Specifically for RTS, Undelivered & All Statuses) */}
               {modalCategoryBreakdown.length > 0 && (
-                <div className="mb-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs dark:bg-slate-900/90 dark:border-slate-800/80 space-y-2.5 transition-all">
+                <div className="mb-3 p-3 rounded-2xl bg-white dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 shadow-sm space-y-2.5 transition-all">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
@@ -980,11 +980,11 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
 
             {/* Modal Table Container */}
-            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 my-1 transition-all ${
+            <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-2xl border-2 border-slate-300 dark:border-slate-700 bg-white shadow-sm dark:bg-slate-950 my-1 transition-all ${
               showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
             }`}>
               <table className="w-full text-center text-xs min-w-[950px]">
-                <thead className="sticky top-0 bg-slate-100 border-b border-slate-200 text-slate-700 font-bold uppercase text-[10px] tracking-wider z-10 select-none dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300">
+                <thead className="sticky top-0 bg-slate-100 border-b-2 border-slate-300 text-slate-800 font-bold uppercase text-[10px] tracking-wider z-10 select-none dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200">
                   <tr>
                     <th
                       onClick={() => handleSort('awb')}
