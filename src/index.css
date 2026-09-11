@@ -15,9 +15,9 @@
   :root {
     /* Eye-Soothing Warm Alabaster & Slate (Light Mode) */
     --bg-primary: #f8fafc;
-    --bg-surface: rgba(255, 255, 255, 0.90);
+    --bg-surface: rgba(255, 255, 255, 0.95);
     --bg-surface-elevated: #ffffff;
-    --border-subtle: #e2e8f0;
+    --border-subtle: #cbd5e1;
     --border-focus: rgba(37, 99, 235, 0.45);
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -29,7 +29,7 @@
     --bg-primary: #0b0f19;
     --bg-surface: rgba(15, 23, 42, 0.88);
     --bg-surface-elevated: #131d31;
-    --border-subtle: rgba(148, 163, 184, 0.14);
+    --border-subtle: #334155;
     --border-focus: rgba(56, 189, 248, 0.5);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
@@ -50,7 +50,7 @@
   background: var(--bg-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
+  border: 2px solid var(--border-subtle);
   border-radius: 1.25rem;
 }
 
@@ -58,7 +58,7 @@
   background: var(--bg-surface-elevated);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-subtle);
+  border: 2px solid var(--border-subtle);
   border-radius: 1.125rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

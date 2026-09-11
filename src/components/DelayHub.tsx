@@ -487,10 +487,10 @@ export const DelayHub: React.FC<DelayHubProps> = ({
             setActiveCategory('transit');
             openModal({ category: 'transit', title: 'Transit Delays (All Incidents)' });
           }}
-          className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
+          className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-2 ${
             activeCategory === 'transit'
-              ? 'ring-2 ring-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 shadow-sm dark:shadow-glow-indigo'
-              : 'hover:border-indigo-300 dark:hover:border-indigo-500/40'
+              ? 'ring-2 ring-indigo-500 border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 shadow-sm dark:shadow-glow-indigo'
+              : 'border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/40'
           }`}
           title="Click to view all Transit Delay AWBs"
         >
@@ -522,10 +522,10 @@ export const DelayHub: React.FC<DelayHubProps> = ({
             setActiveCategory('clearance');
             openModal({ category: 'clearance', title: 'Customs Clearance Delays (All Causes)' });
           }}
-          className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
+          className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-2 ${
             activeCategory === 'clearance'
-              ? 'ring-2 ring-amber-500 bg-amber-50/70 dark:bg-amber-950/40 shadow-sm dark:shadow-glow-amber'
-              : 'hover:border-amber-300 dark:hover:border-amber-500/40'
+              ? 'ring-2 ring-amber-500 border-amber-500 bg-amber-50/70 dark:bg-amber-950/40 shadow-sm dark:shadow-glow-amber'
+              : 'border-slate-300 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500/40'
           }`}
           title="Click to view all Customs Clearance Delay AWBs"
         >
@@ -557,10 +557,10 @@ export const DelayHub: React.FC<DelayHubProps> = ({
             setActiveCategory('destination');
             openModal({ category: 'destination', title: 'Destination Delays (All Exceptions)' });
           }}
-          className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
+          className={`glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-2 ${
             activeCategory === 'destination'
-              ? 'ring-2 ring-rose-500 bg-rose-50/70 dark:bg-rose-950/40 shadow-sm dark:shadow-glow-rose'
-              : 'hover:border-rose-300 dark:hover:border-rose-500/40'
+              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/70 dark:bg-rose-950/40 shadow-sm dark:shadow-glow-rose'
+              : 'border-slate-300 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500/40'
           }`}
           title="Click to view all Destination Delay AWBs"
         >
@@ -591,7 +591,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           onClick={() => {
             openModal({ category: 'weekend', title: 'Weekend & Non-Working Day Hold Delays' });
           }}
-          className="glass-card p-4 rounded-2xl cursor-pointer transition-all hover:border-cyan-400 dark:hover:border-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] group"
+          className="glass-card p-4 rounded-2xl cursor-pointer transition-all border-2 border-slate-300 dark:border-slate-700 hover:border-cyan-400 dark:hover:border-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] group"
           title="Click to view all Weekend Delay AWBs"
         >
           <div className="flex items-center justify-between">
@@ -619,7 +619,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
       </div>
 
       {/* 2. CATEGORY BREAKDOWN & CHART INTERFACE */}
-      <div className="glass-panel p-5 rounded-2xl space-y-5 border border-slate-200 dark:border-slate-800/80">
+      <div className="glass-panel p-5 rounded-2xl space-y-5 border-2 border-slate-300 dark:border-slate-700">
         
         {/* Header with Category Tabs and Search */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800/80">
@@ -714,7 +714,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Chart View */}
-          <div className="lg:col-span-5 glass-card p-4 rounded-xl flex flex-col justify-between border border-slate-200 dark:border-slate-800/80">
+          <div className="lg:col-span-5 glass-card p-4 rounded-xl flex flex-col justify-between border-2 border-slate-300 dark:border-slate-700">
             <div>
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-xs font-extrabold uppercase text-slate-800 dark:text-slate-300 tracking-wider">
@@ -746,7 +746,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           </div>
 
           {/* Ranked Table View */}
-          <div className="lg:col-span-7 glass-card rounded-xl overflow-hidden flex flex-col justify-between border border-slate-200 dark:border-slate-800/80">
+          <div className="lg:col-span-7 glass-card rounded-xl overflow-hidden flex flex-col justify-between border-2 border-slate-300 dark:border-slate-700">
             <div className="max-h-[380px] overflow-y-auto">
               <table className="w-full text-left text-xs">
                 <thead className="sticky top-0 bg-slate-100 dark:bg-[#0b0f19] border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10">

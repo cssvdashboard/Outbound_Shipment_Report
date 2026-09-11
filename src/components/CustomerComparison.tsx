@@ -374,7 +374,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
       {/* 🏆 1. CUSTOMER RANKING BOX (TOP 10 DYNAMIC) */}
       {top10Rank.length > 0 && (
-        <div className="glass-panel rounded-2xl border border-slate-300 dark:border-slate-700 overflow-hidden relative z-10 shadow-sm">
+        <div className="glass-panel rounded-2xl border-2 border-slate-300 dark:border-slate-700 overflow-hidden relative z-10 shadow-sm">
           {/* Table Header Bar */}
           <div className="flex items-center gap-2.5 px-5 py-3 border-b border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
             <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 shrink-0">
@@ -551,7 +551,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       )}
 
       {/* 2. SELECTION & CONFIGURATION PANEL */}
-      <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 shadow-sm">
+      <div className="glass-panel p-5 rounded-2xl space-y-4 relative z-40 overflow-visible border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60 shadow-sm">
         <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800/80 relative ${isAutoLoadDropdownOpen ? 'z-50' : 'z-20'}`}>
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 shrink-0">
@@ -966,8 +966,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
             return (
               <div
                 key={c.customer}
-                className={`glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all ${
-                  isFastest ? 'border-emerald-400/60 dark:border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20' : ''
+                className={`glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all border-2 border-slate-300 dark:border-slate-700 ${
+                  isFastest ? 'border-emerald-500/70 dark:border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/20' : ''
                 }`}
               >
                 {/* Highlight badges */}
@@ -990,7 +990,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
                 <div className="mt-4 space-y-3">
                   {/* Transit Time Metric */}
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                     <div className="text-[11px] text-slate-600 dark:text-slate-400 font-bold flex items-center justify-between">
                       <span><strong>Avg Transit Time</strong></span>
                       <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
@@ -1007,21 +1007,21 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
                   {/* Volume, Weight & On-time Stats */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700">
                       <span className="text-slate-600 dark:text-slate-400 text-[11px] block font-bold"><strong>AWB Volume</strong></span>
                       <span className="text-base font-black text-slate-900 dark:text-white font-mono">
                         <strong>{c.awbCount.toLocaleString()}</strong>
                       </span>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700">
                       <span className="text-slate-600 dark:text-slate-400 text-[11px] block font-bold"><strong>On-Time (≤5d)</strong></span>
                       <span className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
                         <strong>{c.onTimePercentage}%</strong>
                       </span>
                     </div>
 
-                    <div className="col-span-2 p-2.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800/60 flex items-center justify-between">
+                    <div className="col-span-2 p-2.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/30 border-2 border-violet-300 dark:border-violet-700 flex items-center justify-between">
                       <span className="text-violet-700 dark:text-violet-400 text-[11px] font-bold flex items-center gap-1">
                         <Weight className="w-3 h-3" />
                         <strong>Total Weight</strong>
@@ -1033,7 +1033,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   </div>
 
                   {/* Delay Breakdown Summary */}
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 text-xs">
                     <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1 font-bold">
                       <span><strong>Recorded Delays</strong></span>
                       <span className="font-mono text-amber-700 dark:text-amber-400 font-black"><strong>{c.delayCount} AWBs</strong></span>

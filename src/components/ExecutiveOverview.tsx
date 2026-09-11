@@ -343,7 +343,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total AWB Volume */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-sky-100 dark:border-white/10 hover:border-sky-400 dark:hover:border-sky-500/50 shadow-sm hover:shadow-md transition-all">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-sky-400 dark:hover:border-sky-500/50 shadow-sm hover:shadow-md transition-all">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-sky-500/10 blur-xl group-hover:bg-sky-500/20 transition-all pointer-events-none" />
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-sky-500 text-white shadow-md shadow-sky-500/30 dark:bg-sky-500/15 dark:text-sky-400 dark:border dark:border-sky-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Package className="w-4 h-4" />
@@ -362,7 +362,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         </div>
 
         {/* Transit Time Performance */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-indigo-100 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/50 shadow-sm hover:shadow-md transition-all">
+        <div className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/50 shadow-sm hover:shadow-md transition-all">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-indigo-500/10 blur-xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border dark:border-indigo-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Clock className="w-4 h-4" />
@@ -382,7 +382,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           className={`glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 ${
             selectedTTRange === 'Within 4-5 Days'
               ? 'ring-2 ring-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 shadow-glow-emerald'
-              : 'border-emerald-100 dark:border-white/10 hover:border-emerald-400 dark:hover:border-emerald-500/50 shadow-sm hover:shadow-md'
+              : 'border-slate-300 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500/50 shadow-sm hover:shadow-md'
           }`}
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-emerald-500/10 blur-xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
@@ -403,7 +403,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         {/* Delay Bottlenecks */}
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 dark:hover:border-amber-500/50 transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-amber-200 dark:border-white/10 shadow-sm hover:shadow-md"
+          className="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 dark:hover:border-amber-500/50 transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 shadow-sm hover:shadow-md"
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-amber-500/10 blur-xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
           <div className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400 dark:border dark:border-amber-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
@@ -433,7 +433,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* REQUIREMENT 2: Delivery Timeline Breakdown */}
-        <div className="lg:col-span-5 glass-card p-5 rounded-2xl flex flex-col justify-between">
+        <div className="lg:col-span-5 glass-card p-5 rounded-2xl flex flex-col justify-between border-2 border-slate-300 dark:border-slate-700">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
@@ -519,7 +519,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         </div>
 
         {/* REQUIREMENT 3: Final Resolution Breakdown (CLICK TO OPEN POPUP MODAL) */}
-        <div className="lg:col-span-7 glass-card p-5 rounded-2xl flex flex-col justify-between">
+        <div className="lg:col-span-7 glass-card p-5 rounded-2xl flex flex-col justify-between border-2 border-slate-300 dark:border-slate-700">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
@@ -583,12 +583,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       setModalSearch('');
                       setModalCurrentPage(1);
                     }}
-                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border ${
+                    className={`p-3 rounded-2xl text-left transition-all relative overflow-hidden group border-2 ${
                       isNegative
-                        ? 'bg-rose-50/70 border-rose-200 hover:border-rose-400 hover:bg-rose-100/60 shadow-xs hover:shadow-md dark:bg-slate-900/90 dark:border-rose-500/50 dark:hover:border-rose-400 dark:shadow-[0_0_15px_rgba(244,63,94,0.15)] dark:hover:shadow-[0_0_25px_rgba(244,63,94,0.35)] hover:scale-[1.02] active:scale-[0.98]'
+                        ? 'bg-rose-50/70 border-rose-300 hover:border-rose-500 hover:bg-rose-100/60 shadow-xs hover:shadow-md dark:bg-slate-900/90 dark:border-rose-500/50 dark:hover:border-rose-400 dark:shadow-[0_0_15px_rgba(244,63,94,0.15)] dark:hover:shadow-[0_0_25px_rgba(244,63,94,0.35)] hover:scale-[1.02] active:scale-[0.98]'
                         : isSuccess
-                        ? 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-100/60 shadow-xs hover:shadow-md dark:bg-gradient-to-br dark:from-emerald-950/30 dark:via-slate-900/90 dark:to-slate-900 dark:border-emerald-900/50 dark:hover:border-emerald-500 dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
-                        : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100/80 shadow-xs hover:shadow-md dark:bg-slate-900/80 dark:border-slate-800 dark:hover:border-blue-500/60 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
+                        ? 'bg-emerald-50/70 border-emerald-300 hover:border-emerald-500 hover:bg-emerald-100/60 shadow-xs hover:shadow-md dark:bg-gradient-to-br dark:from-emerald-950/30 dark:via-slate-900/90 dark:to-slate-900 dark:border-emerald-700 dark:hover:border-emerald-500 dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-[1.02] active:scale-[0.98]'
+                        : 'bg-slate-50 border-slate-300 hover:border-slate-400 hover:bg-slate-100/80 shadow-xs hover:shadow-md dark:bg-slate-900/80 dark:border-slate-700 dark:hover:border-blue-500/60 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
@@ -1462,7 +1462,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-indigo-100 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
+          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
         >
           <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border dark:border-indigo-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Plane className="w-4 h-4" />
@@ -1481,7 +1481,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-amber-200 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
+          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
         >
           <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400 dark:border dark:border-amber-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <FileText className="w-4 h-4" />
@@ -1500,7 +1500,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
         <div
           onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-rose-200 dark:border-white/10 hover:border-rose-400 dark:hover:border-rose-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
+          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
         >
           <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-rose-500 text-white shadow-md shadow-rose-500/30 dark:bg-rose-500/15 dark:text-rose-400 dark:border dark:border-rose-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
             <Truck className="w-4 h-4" />

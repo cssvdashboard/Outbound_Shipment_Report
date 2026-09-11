@@ -363,7 +363,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
   return (
     <div className="space-y-4">
       {/* Header with Title and Search/Export Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-slate-300 dark:border-slate-700 backdrop-blur-sm shadow-sm">
         <div>
           <div className="flex items-center gap-2">
             <Globe className="w-5 h-5 text-sky-600 dark:text-sky-400" />
@@ -409,7 +409,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
 
       {/* Table Container with high-contrast, prominent grid borders and centered content */}
-      <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40">
+      <div className="rounded-2xl overflow-hidden shadow-sm border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40">
         <div className="max-h-[580px] overflow-x-auto overflow-y-auto">
           <table className="w-full text-center text-xs min-w-[1000px] border-collapse border-spacing-0">
             <thead className="sticky top-0 bg-slate-100 dark:bg-[#0f172a] border-b-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 font-extrabold uppercase text-[10px] tracking-wider z-10 shadow-sm">
@@ -760,7 +760,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             }
           }}
         >
-          <div className="glass-panel w-full max-w-6xl max-h-[92vh] flex flex-col rounded-3xl shadow-2xl relative bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 p-4 sm:p-6 overflow-hidden">
+          <div className="glass-panel w-full max-w-6xl max-h-[92vh] flex flex-col rounded-3xl shadow-2xl relative bg-white dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-700 p-4 sm:p-6 overflow-hidden">
             
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
@@ -801,7 +801,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             {/* Quick Metrics Strip */}
             {modalStats && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3 shrink-0">
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                   <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Average Transit Time</span>
                   <span className="text-sm sm:text-base font-extrabold text-indigo-700 dark:text-indigo-400 font-mono">
                     {modalStats.avgTT} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">days</span>
@@ -811,7 +811,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                   <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">On-Time Delivery Rate</span>
                   <span className="text-sm sm:text-base font-extrabold text-emerald-700 dark:text-emerald-400 font-mono">
                     {modalStats.onTimeRate}%
@@ -821,7 +821,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                   <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Total Volume</span>
                   <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white font-mono">
                     {modalStats.total.toLocaleString()} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">AWBs</span>
@@ -831,7 +831,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                   <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Total Weight</span>
                   <span className="text-sm sm:text-base font-extrabold text-sky-700 dark:text-sky-400 font-mono">
                     {modalStats.totalWeight} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">kg</span>
@@ -903,7 +903,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             </div>
 
             {/* Modal Table Content */}
-            <div className="flex-1 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/60 my-1 min-h-[260px]">
+            <div className="flex-1 overflow-y-auto border-2 border-slate-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900/60 my-1 min-h-[260px]">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="sticky top-0 bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
                   <tr>

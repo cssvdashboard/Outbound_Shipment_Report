@@ -202,7 +202,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   const totalDestinationsCount = allDestinations.length > 0 ? allDestinations.length : 127;
 
   return (
-    <div className="sticky top-16 z-30 w-full bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-xl border-y border-slate-200/90 dark:border-slate-800/80 py-3 px-3 sm:px-6 lg:px-8 shadow-sm">
+    <div className="sticky top-16 z-30 w-full bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-xl border-y-2 border-slate-300 dark:border-slate-700 py-3 px-3 sm:px-6 lg:px-8 shadow-sm">
       <div className="max-w-[1700px] mx-auto">
         
         {/* Main Controls: Customer Search, Destination Search & Reset Button */}
@@ -238,10 +238,10 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                     ? selectedCustomer
                     : 'Search Customer by name...'
                 }
-                className={`w-full pl-10 pr-16 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+                className={`w-full pl-10 pr-16 py-2.5 text-xs font-bold rounded-xl border-2 transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
                   selectedCustomer
                     ? 'bg-emerald-50/70 border-emerald-400 text-emerald-950 dark:bg-emerald-950/40 dark:border-emerald-500/60 dark:text-emerald-200 placeholder:text-emerald-800 dark:placeholder:text-emerald-300'
-                    : 'bg-white border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
                 }`}
               />
 
@@ -396,10 +396,10 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
                 onKeyDown={handleDestKeyDown}
                 placeholder={selectedDestination || 'Search Destination'}
                 title={selectedDestination || (destSearch || 'Search Destination')}
-                className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                className={`w-full pl-10 pr-24 py-2.5 text-xs font-bold rounded-xl border-2 transition-all shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                   selectedDestination
                     ? 'bg-blue-50/70 border-blue-400 text-blue-900 dark:bg-blue-950/40 dark:border-blue-500/60 dark:text-blue-200 placeholder:text-blue-800 dark:placeholder:text-blue-300'
-                    : 'bg-white border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 placeholder:italic placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500'
                 }`}
               />
 
@@ -510,7 +510,7 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
           </div>
 
           {/* 3. CATEGORY SWITCH BUTTONS: ALL, AGENT, PP, CC */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-inner shrink-0 overflow-x-auto">
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 shadow-inner shrink-0 overflow-x-auto">
             {/* All */}
             <button
               type="button"
@@ -618,10 +618,10 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
           <button
             type="button"
             onClick={handleReset}
-            className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shrink-0 border ${
+            className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shrink-0 border-2 ${
               totalActiveFilters > 0
                 ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/25 hover:scale-[1.02]'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700/80 hover:scale-[1.02]'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700/80 hover:scale-[1.02]'
             }`}
             title="Reset all search queries and active filters"
           >

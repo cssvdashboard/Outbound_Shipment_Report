@@ -321,7 +321,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* Card 1: Overall Fleet Average Transit Time */}
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 flex flex-col justify-between">
+        <div className="glass-card p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
@@ -343,7 +343,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
         </div>
 
         {/* Card 2: Fastest Day of Week */}
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 flex flex-col justify-between">
+        <div className="glass-card p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
               <TrendingDown className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -369,7 +369,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
         </div>
 
         {/* Card 3: Peak Volume Day */}
-        <div className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 flex flex-col justify-between">
+        <div className="glass-card p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
               <Truck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -397,7 +397,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 3. DYNAMIC CUSTOMER, DESTINATION & MONTH FILTER CONTROLS */}
-      <div className="glass-card p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 space-y-4 relative z-30">
+      <div className="glass-card p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-sm dark:shadow-2xl bg-white dark:bg-slate-950/40 space-y-4 relative z-30">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-violet-500" />
@@ -681,7 +681,7 @@ export const CalendarComparison: React.FC<CalendarComparisonProps> = ({
       </div>
 
       {/* 4. MAIN CALENDAR TRANSIT MATRIX TABLE (Sunday–Saturday Vertically at Left) */}
-      <div className="glass-card rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/40 relative z-10">
+      <div className="glass-card rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 relative z-10">
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 dark:bg-[#0f172a]">
           <div>
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">

@@ -204,7 +204,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
     <div className="w-full space-y-4 animate-fade-in">
       
       {/* 1. TOP HEADER & METRICS STRIP */}
-      <div className="glass-panel p-4 sm:p-5 rounded-2xl space-y-4 shadow-sm border border-slate-200 dark:border-slate-800/80">
+      <div className="glass-panel p-4 sm:p-5 rounded-2xl space-y-4 shadow-sm border-2 border-slate-300 dark:border-slate-700">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="p-3 rounded-2xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25">
@@ -251,19 +251,19 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
         {/* Dynamic Metric Badges Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-white border-2 border-slate-300 shadow-sm dark:bg-slate-900/80 dark:border-slate-700 flex items-center justify-between">
             <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>Average TT:</strong></span>
             <span className="text-sm font-black text-indigo-800 dark:text-indigo-400 font-mono"><strong>{tableSummary.avgTT} days</strong></span>
           </div>
-          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-white border-2 border-slate-300 shadow-sm dark:bg-slate-900/80 dark:border-slate-700 flex items-center justify-between">
             <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>On-Time Rate:</strong></span>
             <span className="text-sm font-black text-emerald-800 dark:text-emerald-400 font-mono"><strong>{tableSummary.onTimePct}%</strong></span>
           </div>
-          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-white border-2 border-slate-300 shadow-sm dark:bg-slate-900/80 dark:border-slate-700 flex items-center justify-between">
             <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>Gross Weight:</strong></span>
             <span className="text-sm font-black text-slate-900 dark:text-white font-mono"><strong>{tableSummary.totalWt} kg</strong></span>
           </div>
-          <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-sm dark:bg-slate-900/80 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-white border-2 border-slate-300 shadow-sm dark:bg-slate-900/80 dark:border-slate-700 flex items-center justify-between">
             <span className="text-xs text-slate-600 dark:text-slate-400 font-bold"><strong>Active Delays:</strong></span>
             <span className="text-sm font-black text-amber-800 dark:text-amber-400 font-mono"><strong>{tableSummary.delaysCount} AWBs</strong></span>
           </div>
@@ -331,7 +331,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       </div>
 
       {/* 2. MAIN WIDESCREEN TABLE CONTAINER */}
-      <div className="rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950/40">
+      <div className="rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40">
         <div className="max-h-[640px] overflow-x-auto overflow-y-auto">
           <table className="w-full text-center text-xs border-collapse border-spacing-0">
             <thead className="sticky top-0 bg-slate-100 dark:bg-[#0f172a] border-b-2 border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 font-bold uppercase text-[10px] tracking-wider z-10 shadow-sm">
@@ -693,7 +693,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       {/* 4. SHIPMENT DETAIL MODAL DOSSIER */}
       {selectedShipment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel w-full max-w-2xl p-6 sm:p-7 rounded-3xl space-y-5 shadow-2xl relative bg-white dark:bg-slate-950 border border-slate-200 dark:border-sky-500/40">
+          <div className="glass-panel w-full max-w-2xl p-6 sm:p-7 rounded-3xl space-y-5 shadow-2xl relative bg-white dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-700">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
@@ -738,17 +738,17 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
             {/* Dossier Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Customer Account</strong></span>
                 <span className="font-black text-slate-900 dark:text-white mt-1 block text-sm"><strong>{selectedShipment.customer}</strong></span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Shipper Name</strong></span>
                 <span className="font-black text-slate-900 dark:text-white mt-1 block text-sm"><strong>{selectedShipment.shprName}</strong></span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Recipient &amp; Delivery City</strong></span>
                 <span className="font-bold text-slate-900 dark:text-white mt-1 block text-sm">
                   <strong>{selectedShipment.recipient || 'N/A'}</strong>
@@ -758,7 +758,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Transit Time &amp; Resolution</strong></span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="font-black text-indigo-700 dark:text-indigo-400 font-mono text-base">
@@ -777,28 +777,28 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Pickup Date</strong></span>
                 <span className="font-bold text-slate-900 dark:text-white mt-1 block font-mono">
                   <strong>{formatExcelDate(selectedShipment.pickup)}</strong>
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>POD / Delivery Date</strong></span>
                 <span className="font-bold text-slate-900 dark:text-white mt-1 block font-mono">
                   <strong>{formatExcelDate(selectedShipment.pod)}</strong>
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Package Pieces</strong></span>
                 <span className="font-black text-slate-900 dark:text-white mt-1 block font-mono text-sm">
                   <strong>{selectedShipment.pkgCount || 1} pcs</strong>
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Gross Weight</strong></span>
                 <span className="font-black text-slate-900 dark:text-white mt-1 block font-mono text-sm">
                   <strong>{formatWeight(selectedShipment.weight)} kg</strong>
@@ -808,7 +808,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
             {/* Delays section */}
             {(selectedShipment.clearanceDelay || selectedShipment.transitDelay || selectedShipment.destinationDelay || selectedShipment.remarks) && (
-              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/30 text-xs space-y-2">
+              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-300 dark:border-amber-500/40 text-xs space-y-2">
                 <div className="font-black text-amber-800 dark:text-amber-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   <span><strong>Logged Delay Exceptions &amp; Remarks</strong></span>
@@ -830,7 +830,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
             {/* Description */}
             {selectedShipment.description && (
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 text-xs">
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Description of Goods</strong></span>
                 <p className="text-slate-800 dark:text-slate-200 mt-1 leading-relaxed font-medium">{selectedShipment.description}</p>
               </div>
