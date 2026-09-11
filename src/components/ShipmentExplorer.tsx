@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
+import { getPickupISODate } from '../utils/analytics';
 import * as XLSX from 'xlsx';
 
 interface ShipmentExplorerProps {
@@ -24,7 +25,7 @@ interface ShipmentExplorerProps {
   totalRawCount: number;
 }
 
-type SortField = 'awb' | 'destination' | 'customer' | 'shprName' | 'tt' | 'ttRange' | 'finalResolution' | 'weight';
+type SortField = 'awb' | 'destination' | 'customer' | 'shprName' | 'pickup' | 'weight' | 'tt' | 'ttRange' | 'finalResolution';
 type SortOrder = 'asc' | 'desc';
 
 export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
@@ -100,6 +101,17 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
     // 3. Sorting
     return [...list].sort((a, b) => {
+      if (sortField === 'pickup') {
+        const dateA = getPickupISODate(a.pickup) || '';
+        const dateB = getPickupISODate(b.pickup) || '';
+        return sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+      }
+      if (sortField === 'weight') {
+        const wtA = typeof a.weight === 'number' ? a.weight : parseFloat(String(a.weight)) || 0;
+        const wtB = typeof b.weight === 'number' ? b.weight : parseFloat(String(b.weight)) || 0;
+        return sortOrder === 'asc' ? wtA - wtB : wtB - wtA;
+      }
+
       let valA: any = a[sortField];
       let valB: any = b[sortField];
 
@@ -369,6 +381,26 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 </th>
 
                 <th
+                  onClick={() => handleSort('pickup')}
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span><strong>Pickup Date</strong></span>
+                    {renderSortIcon('pickup')}
+                  </div>
+                </th>
+
+                <th
+                  onClick={() => handleSort('weight')}
+                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span><strong>Weight (kg)</strong></span>
+                    {renderSortIcon('weight')}
+                  </div>
+                </th>
+
+                <th
                   onClick={() => handleSort('tt')}
                   className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[110px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
                 >
@@ -468,6 +500,26 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                       </div>
                     </td>
 
+                    {/* Pickup Date */}
+                    <td className="py-2.5 px-3 text-center font-mono font-medium text-xs text-slate-700 dark:text-slate-300 border-r border-slate-200 dark:border-slate-600 align-middle whitespace-nowrap">
+                      {s.pickup ? (
+                        <span><strong>{formatExcelDate(s.pickup)}</strong></span>
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-600">-</span>
+                      )}
+                    </td>
+
+                    {/* Weight (kg) */}
+                    <td className="py-2.5 px-3 text-center font-mono text-xs border-r border-slate-200 dark:border-slate-600 align-middle whitespace-nowrap">
+                      {s.weight !== undefined && s.weight !== null && s.weight > 0 ? (
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                          <strong>{formatWeight(s.weight)}</strong> <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">kg</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-600">-</span>
+                      )}
+                    </td>
+
                     {/* Transit Time */}
                     <td className="py-2.5 px-3 text-center font-mono font-extrabold text-sm border-r border-slate-200 dark:border-slate-600 align-middle">
                       <span
@@ -562,7 +614,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
               {paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="py-16 text-center text-slate-400">
+                  <td colSpan={12} className="py-16 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Package className="w-8 h-8 text-slate-600" />
                       <p className="text-sm font-bold text-slate-800 dark:text-white"><strong>No shipment records found</strong></p>

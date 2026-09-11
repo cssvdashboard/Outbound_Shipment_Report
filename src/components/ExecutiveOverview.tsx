@@ -20,6 +20,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { MetricSummary, RatioBreakdown, Shipment } from '../types/logistics';
+import { formatExcelDate, formatWeight } from '../utils/formatters';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -817,7 +818,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <div className={`flex-1 overflow-x-auto overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 shadow-lg my-1 transition-all ${
               showCauseBreakdown ? 'max-h-[46vh]' : 'max-h-[62vh]'
             }`}>
-              <table className="w-full text-left text-xs min-w-[850px]">
+              <table className="w-full text-left text-xs min-w-[950px]">
                 <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10">
                   <tr>
                     <th className="py-2.5 px-3">AWB Tracking #</th>
@@ -825,6 +826,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     <th className="py-2.5 px-3">Customer Account</th>
                     <th className="py-2.5 px-3">Shipper Name</th>
                     <th className="py-2.5 px-3">Recipient / City</th>
+                    <th className="py-2.5 px-3">Pickup Date</th>
+                    <th className="py-2.5 px-2.5 text-right">Weight (kg)</th>
                     <th className="py-2.5 px-2.5 text-right">TT (Days)</th>
                     <th className="py-2.5 px-2.5">Timeline</th>
                     <th className="py-2.5 px-3">Logged Delays &amp; Remarks</th>
@@ -849,6 +852,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                       <td className="py-2 px-3 text-slate-300 max-w-[130px] truncate">
                         <div className="font-semibold text-white">{s.recipient || '-'}</div>
                         <div className="text-[10px] text-slate-400 font-medium">{s.city}</div>
+                      </td>
+                      <td className="py-2 px-3 font-mono text-slate-300 whitespace-nowrap">
+                        {formatExcelDate(s.pickup)}
+                      </td>
+                      <td className="py-2 px-2.5 text-right font-mono font-bold text-slate-200 whitespace-nowrap">
+                        {s.weight ? `${formatWeight(s.weight)}` : '-'}
                       </td>
                       <td className="py-2 px-2.5 text-right font-mono font-bold text-indigo-400">
                         {Number(s.tt || 0).toFixed(1)} d
