@@ -248,17 +248,31 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
   // Find best performer (fastest average TT among top 10 customers with > 0 AWBs)
   const fastestCustomer = useMemo(() => {
-    const valid = top10Rank.filter((c) => c.awbCount > 0);
+    const valid = top10Rank.filter((c) => c.awbCount > 0 && c.avgTT > 0);
     if (valid.length === 0) return null;
     return [...valid].sort((a, b) => a.avgTT - b.avgTT)[0]?.customer;
   }, [top10Rank]);
 
-  // Find highest volume customer
+  // Find highest volume customer in top 10 rank table
   const highestVolumeCustomer = useMemo(() => {
     const valid = top10Rank.filter((c) => c.awbCount > 0);
     if (valid.length === 0) return null;
     return [...valid].sort((a, b) => b.awbCount - a.awbCount)[0]?.customer;
   }, [top10Rank]);
+
+  // Best performer among the selected comparison cards
+  const fastestComparisonCustomer = useMemo(() => {
+    const valid = comparisonData.filter((c) => c.awbCount > 0 && c.avgTT > 0);
+    if (valid.length < 2) return null;
+    return [...valid].sort((a, b) => a.avgTT - b.avgTT)[0]?.customer;
+  }, [comparisonData]);
+
+  // Highest volume customer among the selected comparison cards
+  const highestVolComparisonCustomer = useMemo(() => {
+    const valid = comparisonData.filter((c) => c.awbCount > 0);
+    if (valid.length < 2) return null;
+    return [...valid].sort((a, b) => b.awbCount - a.awbCount)[0]?.customer;
+  }, [comparisonData]);
 
   const handleAddCustomer = (customer: string) => {
     if (!selectedCustomers.includes(customer)) {
@@ -960,14 +974,16 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
       {comparisonData.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
           {comparisonData.map((c) => {
-            const isFastest = c.customer === fastestCustomer && c.awbCount > 0;
-            const isHighestVol = c.customer === highestVolumeCustomer && c.awbCount > 0;
+            const isFastest = c.customer === fastestComparisonCustomer && c.awbCount > 0 && c.avgTT > 0;
+            const isHighestVol = c.customer === highestVolComparisonCustomer && c.awbCount > 0;
 
             return (
               <div
                 key={c.customer}
-                className={`glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all border-2 border-slate-300 dark:border-slate-700 ${
-                  isFastest ? 'border-emerald-500/70 dark:border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/20' : ''
+                className={`glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all border-2 ${
+                  isFastest
+                    ? 'border-emerald-500/80 dark:border-emerald-500/70 bg-emerald-50/40 dark:bg-emerald-950/25 shadow-lg shadow-emerald-500/10'
+                    : 'border-slate-300 dark:border-slate-700'
                 }`}
               >
                 {/* Highlight badges */}
@@ -975,29 +991,44 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   <div className="font-extrabold text-slate-900 dark:text-white text-sm line-clamp-2" title={c.customer}>
                     <strong>{c.customer}</strong>
                   </div>
-                  {isFastest && (
-                    <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
-                      <Trophy className="w-3 h-3" />
-                      <strong>Fastest</strong>
-                    </span>
-                  )}
-                  {isHighestVol && !isFastest && (
-                    <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
-                      <strong>Top Vol</strong>
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
+                    {isFastest && (
+                      <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/40 shadow-sm">
+                        <Trophy className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <strong>Fastest</strong>
+                      </span>
+                    )}
+                    {isHighestVol && (
+                      <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/40 shadow-sm">
+                        <strong>Top Vol</strong>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-4 space-y-3">
                   {/* Transit Time Metric */}
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
-                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-bold flex items-center justify-between">
-                      <span><strong>Avg Transit Time</strong></span>
-                      <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <div className={`p-3 rounded-xl border-2 transition-all ${
+                    isFastest
+                      ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-400/80 dark:border-emerald-500/60 shadow-sm'
+                      : 'bg-slate-50 dark:bg-slate-900/90 border-slate-300 dark:border-slate-700'
+                  }`}>
+                    <div className="text-[11px] font-bold flex items-center justify-between">
+                      <span className={isFastest ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'}>
+                        <strong>Avg Transit Time</strong>
+                      </span>
+                      <Clock className={`w-3.5 h-3.5 ${isFastest ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
                     </div>
-                    <div className="text-2xl font-black text-indigo-700 dark:text-indigo-400 mt-1 flex items-baseline gap-1 font-mono">
+                    <div className={`text-2xl font-black mt-1 flex items-baseline gap-1 font-mono ${
+                      isFastest ? 'text-emerald-700 dark:text-emerald-400' : 'text-indigo-700 dark:text-indigo-400'
+                    }`}>
                       <span><strong>{c.avgTT > 0 ? c.avgTT : '-'}</strong></span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400">days</span>
+                      {isFastest && (
+                        <span className="ml-auto text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-200/90 dark:bg-emerald-900/70 text-emerald-800 dark:text-emerald-300 font-sans tracking-wide">
+                          Fastest
+                        </span>
+                      )}
                     </div>
                     <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 flex items-center justify-between font-mono font-bold">
                       <span><strong>Min: {c.minTT}d</strong></span>
