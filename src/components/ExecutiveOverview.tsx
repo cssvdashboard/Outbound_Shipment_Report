@@ -66,6 +66,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   const [modalCurrentPage, setModalCurrentPage] = useState<number>(1);
   const [inspectedShipment, setInspectedShipment] = useState<Shipment | null>(null);
   const [showCauseBreakdown, setShowCauseBreakdown] = useState<boolean>(true);
+  const [showCountryBreakdownModal, setShowCountryBreakdownModal] = useState<boolean>(false);
+  const [countryModalSearch, setCountryModalSearch] = useState<string>('');
 
   // Helper to extract the primary reason/delay for any shipment
   const getShipmentPrimaryReason = (s: Shipment): string => {
@@ -189,6 +191,30 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     return modalFilteredShipments.slice(start, start + modalPageSize);
   }, [modalFilteredShipments, modalValidCurrentPage, modalPageSize]);
 
+  // Country breakdown for active resolution modal
+  const modalCountryBreakdown = useMemo(() => {
+    if (modalAllShipments.length === 0) return [];
+    const countryCounts: Record<string, number> = {};
+    for (const s of modalAllShipments) {
+      const dest = (s.destination || 'UNKNOWN').trim().toUpperCase();
+      countryCounts[dest] = (countryCounts[dest] || 0) + 1;
+    }
+    const total = modalAllShipments.length;
+    return Object.entries(countryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([country, count]) => ({
+        country,
+        count,
+        percentage: Number(((count / total) * 100).toFixed(1))
+      }));
+  }, [modalAllShipments]);
+
+  const filteredCountryBreakdown = useMemo(() => {
+    if (!countryModalSearch.trim()) return modalCountryBreakdown;
+    const q = countryModalSearch.trim().toLowerCase();
+    return modalCountryBreakdown.filter((c) => c.country.toLowerCase().includes(q));
+  }, [modalCountryBreakdown, countryModalSearch]);
+
   // Modal Summary Stats
   const modalStats = useMemo(() => {
     if (modalAllShipments.length === 0) return null;
@@ -197,7 +223,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     let maxTT = 0;
     let totalWeight = 0;
     let totalPkgs = 0;
-    const countryCounts: Record<string, number> = {};
 
     for (const s of modalAllShipments) {
       sumTT += s.tt;
@@ -205,13 +230,11 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       if (s.tt > maxTT) maxTT = s.tt;
       totalWeight += s.weight || 0;
       totalPkgs += s.pkgCount || 0;
-      if (s.destination) countryCounts[s.destination] = (countryCounts[s.destination] || 0) + 1;
     }
 
-    const topCountries = Object.entries(countryCounts)
-      .sort((a, b) => b[1] - a[1])
+    const topCountries = modalCountryBreakdown
       .slice(0, 4)
-      .map(([c, count]) => `${c} (${count})`)
+      .map(({ country, count }) => `${country} (${count})`)
       .join(', ');
 
     return {
@@ -222,7 +245,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
       totalPkgs,
       topCountries: topCountries || 'N/A'
     };
-  }, [modalAllShipments]);
+  }, [modalAllShipments, modalCountryBreakdown]);
 
   // Modal Export Handlers
   const handleExportModalExcel = () => {
@@ -626,23 +649,15 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                         }`}>
                           {modalAllShipments.length.toLocaleString()} Total AWBs
                         </span>
-                        {isModalNegative && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-600 text-white shadow-xs dark:bg-rose-950 dark:text-rose-400 dark:border dark:border-rose-700">
-                            Negative Exception
-                          </span>
-                        )}
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
-                        {isModalNegative 
-                          ? `Detailed negative exception logs & outlier shipment records for status: "${modalResolution}"`
-                          : `Filtered shipment records from Shipment Explorer for status: "${modalResolution}"`
-                        }
-                      </p>
                     </div>
                   </div>
 
                   <button
-                    onClick={() => setModalResolution(null)}
+                    onClick={() => {
+                      setModalResolution(null);
+                      setShowCountryBreakdownModal(false);
+                    }}
                     className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:border-slate-700 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
@@ -672,15 +687,31 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 col-span-2 shadow-md">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Top Impacted Countries</span>
-                    <span className="text-xs sm:text-sm font-black text-emerald-400 mt-0.5 block truncate">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCountryModalSearch('');
+                      setShowCountryBreakdownModal(true);
+                    }}
+                    className="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 col-span-2 shadow-md text-left transition-all cursor-pointer group relative overflow-hidden focus:outline-none focus:ring-1 focus:ring-emerald-500/40"
+                    title="Click to view full country-wise impacted shipment breakdown"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                        Top Impacted Countries
+                      </span>
+                      <span className="text-[10px] font-bold text-emerald-400 group-hover:underline flex items-center gap-0.5">
+                        View All ({modalCountryBreakdown.length}) →
+                      </span>
+                    </div>
+                    <span className="text-xs sm:text-sm font-black text-emerald-400 mt-1 block truncate">
                       {modalStats.topCountries}
                     </span>
                     <span className="text-[10px] text-slate-400 block font-medium mt-0.5">
-                      Sorted by shipment concentration
+                      Sorted by shipment concentration • Click to open country breakdown popup
                     </span>
-                  </div>
+                  </button>
                 </div>
               )}
 
@@ -975,6 +1006,164 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* 4. COUNTRY-WISE IMPACTED SHIPMENTS POPUP MODAL */}
+            {showCountryBreakdownModal && (
+              <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in">
+                <div className="w-full max-w-2xl max-h-[88vh] p-5 sm:p-6 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden bg-slate-950 border border-emerald-500/40 text-slate-200">
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-lg font-extrabold text-white">
+                            Country-Wise Impacted Shipments
+                          </h3>
+                          <span className="px-2 py-0.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
+                            {modalResolution}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Total <strong className="text-white font-mono">{modalAllShipments.length.toLocaleString()} AWBs</strong> across{' '}
+                          <strong className="text-white font-mono">{modalCountryBreakdown.length} countries</strong>
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCountryBreakdownModal(false)}
+                      className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
+                      title="Close popup"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Quick Summary Cards */}
+                  <div className="grid grid-cols-3 gap-2.5 my-3.5">
+                    <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Countries</span>
+                      <span className="text-base font-black text-white font-mono">{modalCountryBreakdown.length}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Impacted Shipments</span>
+                      <span className="text-base font-black text-emerald-400 font-mono">{modalAllShipments.length.toLocaleString()}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center truncate">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Top Concentration</span>
+                      <span className="text-base font-black text-sky-400 font-mono truncate block">
+                        {modalCountryBreakdown[0] ? `${modalCountryBreakdown[0].country} (${modalCountryBreakdown[0].count})` : '-'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Search Filter Input */}
+                  <div className="relative mb-3">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={countryModalSearch}
+                      onChange={(e) => setCountryModalSearch(e.target.value)}
+                      placeholder="Search country code (e.g. US, IN, BR, CA)..."
+                      className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 font-medium"
+                    />
+                    {countryModalSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setCountryModalSearch('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Country List Table */}
+                  <div className="flex-1 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 max-h-[46vh]">
+                    <table className="w-full text-center text-xs">
+                      <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-300 font-bold uppercase text-[10px] tracking-wider z-10">
+                        <tr>
+                          <th className="py-2.5 px-3 text-center">Rank</th>
+                          <th className="py-2.5 px-3 text-center">Country</th>
+                          <th className="py-2.5 px-3 text-center">Impacted Shipments</th>
+                          <th className="py-2.5 px-4 text-center min-w-[140px]">Share (%)</th>
+                          <th className="py-2.5 px-3 text-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 font-sans">
+                        {filteredCountryBreakdown.map((item, index) => (
+                          <tr key={item.country} className="hover:bg-slate-900/90 transition-colors">
+                            <td className="py-2.5 px-3 text-center font-mono text-slate-400 font-bold text-[11px]">
+                              #{index + 1}
+                            </td>
+                            <td className="py-2.5 px-3 text-center">
+                              <span className="inline-block px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono font-bold text-xs text-white">
+                                {item.country}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-center font-mono font-bold text-sm text-emerald-400">
+                              {item.count.toLocaleString()} <span className="text-[11px] font-normal text-slate-400">AWBs</span>
+                            </td>
+                            <td className="py-2.5 px-4 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-24 bg-slate-800 h-2 rounded-full overflow-hidden">
+                                  <div
+                                    className="bg-emerald-500 h-full rounded-full transition-all"
+                                    style={{ width: `${Math.min(100, Math.max(5, item.percentage))}%` }}
+                                  />
+                                </div>
+                                <span className="font-mono font-bold text-[11px] text-slate-300 min-w-[38px] text-right">
+                                  {item.percentage}%
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setModalSearch(item.country);
+                                  setShowCountryBreakdownModal(false);
+                                }}
+                                className="px-2.5 py-1 rounded bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-700 text-emerald-400 text-[10px] font-bold transition-colors cursor-pointer"
+                                title={`Filter main table to ${item.country}`}
+                              >
+                                Filter Table
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredCountryBreakdown.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
+                              No countries match &quot;{countryModalSearch}&quot;
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="pt-3.5 mt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span>
+                      Showing <strong className="text-white font-mono">{filteredCountryBreakdown.length}</strong> of{' '}
+                      <strong className="text-white font-mono">{modalCountryBreakdown.length}</strong> countries
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCountryBreakdownModal(false)}
+                      className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 cursor-pointer transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
