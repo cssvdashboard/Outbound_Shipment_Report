@@ -6,9 +6,6 @@ import {
   AlertTriangle,
   ShieldAlert,
   ArrowUpRight,
-  Plane,
-  FileText,
-  Truck,
   X,
   Search,
   Download,
@@ -1457,67 +1454,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           </div>
         </div>
       )}
-
-      {/* 4. QUICK OPERATIONAL SUMMARY HIGHLIGHTS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div
-          onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
-        >
-          <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border dark:border-indigo-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
-            <Plane className="w-4 h-4" />
-          </div>
-          <div className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
-            <strong>Transit Delay Incidents</strong>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-white mt-1.5 flex items-baseline justify-center gap-1.5">
-            <span><strong>{summary.transitDelayCount.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">AWBs</span>
-          </div>
-          <span className="text-xs text-indigo-700 dark:text-indigo-400 font-extrabold mt-1.5 group-hover:underline">
-            CDG, US, Gateway bottlenecks →
-          </span>
-        </div>
-
-        <div
-          onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
-        >
-          <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400 dark:border dark:border-amber-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
-            <FileText className="w-4 h-4" />
-          </div>
-          <div className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
-            <strong>Customs Clearance Delays</strong>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-white mt-1.5 flex items-baseline justify-center gap-1.5">
-            <span><strong>{summary.clearanceDelayCount.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">AWBs</span>
-          </div>
-          <span className="text-xs text-amber-700 dark:text-amber-400 font-extrabold mt-1.5 group-hover:underline">
-            Invoices, KYC, Inspections →
-          </span>
-        </div>
-
-        <div
-          onClick={() => onNavigateTab('delays')}
-          className="glass-card p-4 sm:p-5 rounded-2xl cursor-pointer bg-white dark:bg-slate-900/40 border-2 border-slate-300 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-sm hover:shadow-md"
-        >
-          <div className="absolute top-3.5 right-3.5 p-2.5 rounded-xl bg-rose-500 text-white shadow-md shadow-rose-500/30 dark:bg-rose-500/15 dark:text-rose-400 dark:border dark:border-rose-500/20 dark:shadow-none group-hover:scale-110 transition-transform">
-            <Truck className="w-4 h-4" />
-          </div>
-          <div className="text-xs font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
-            <strong>Destination Delays</strong>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-white mt-1.5 flex items-baseline justify-center gap-1.5">
-            <span><strong>{summary.destinationDelayCount.toLocaleString()}</strong></span>
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">AWBs</span>
-          </div>
-          <span className="text-xs text-rose-700 dark:text-rose-400 font-extrabold mt-1.5 group-hover:underline">
-            Last-mile &amp; delivery exceptions →
-          </span>
-        </div>
-      </div>
-
     </div>
   );
 };
