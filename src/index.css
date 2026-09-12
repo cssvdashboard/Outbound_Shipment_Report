@@ -43,6 +43,11 @@
     letter-spacing: -0.015em;
     min-height: 100vh;
   }
+
+  .font-mono {
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 /* Glassmorphism & Bento Box Utilities */
