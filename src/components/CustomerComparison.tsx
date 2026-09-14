@@ -202,18 +202,18 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
     const topByAwb = Array.from(awbMap.entries())
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 15)
+      .slice(0, 50)
       .map(([name]) => name);
 
     const topByWt = Array.from(wtMap.entries())
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 15)
+      .slice(0, 50)
       .map(([name]) => name);
 
     return Array.from(new Set([...topByAwb, ...topByWt]));
   }, [shipments]);
 
-  // Compute ranking metrics strictly for candidate top customers (~20-25 customers instead of 1,316)
+  // Compute ranking metrics strictly for candidate top customers (~50-100 customers instead of 1,316)
   const rankingMetrics = useMemo(() => {
     if (candidateTopCustomers.length === 0) return [];
     return computeCustomerComparison(shipments, 'ALL', candidateTopCustomers);
@@ -231,8 +231,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
     return computeCustomerComparison(shipments, selectedDestination, selectedCustomers);
   }, [shipments, selectedDestination, selectedCustomers]);
 
-  // Top 10 customer ranking that dynamically changes based on active AWB count / Total Weight sort
-  const top10Rank = useMemo(() => {
+  // Top 50 customer ranking that dynamically changes based on active AWB count / Total Weight sort
+  const top50Rank = useMemo(() => {
     return [...rankingMetrics]
       .sort((a, b) => {
         if (rankSort.field === 'awb') {
@@ -240,25 +240,25 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
         }
         return rankSort.dir === 'desc' ? b.totalWeight - a.totalWeight : a.totalWeight - b.totalWeight;
       })
-      .slice(0, 10);
+      .slice(0, 50);
   }, [rankingMetrics, rankSort]);
 
-  const maxAwb = useMemo(() => Math.max(...top10Rank.map((x) => x.awbCount), 1), [top10Rank]);
-  const maxWt = useMemo(() => Math.max(...top10Rank.map((x) => x.totalWeight), 1), [top10Rank]);
+  const maxAwb = useMemo(() => Math.max(...top50Rank.map((x) => x.awbCount), 1), [top50Rank]);
+  const maxWt = useMemo(() => Math.max(...top50Rank.map((x) => x.totalWeight), 1), [top50Rank]);
 
-  // Find best performer (fastest average TT among top 10 customers with > 0 AWBs)
+  // Find best performer (fastest average TT among top 50 customers with > 0 AWBs)
   const fastestCustomer = useMemo(() => {
-    const valid = top10Rank.filter((c) => c.awbCount > 0 && c.avgTT > 0);
+    const valid = top50Rank.filter((c) => c.awbCount > 0 && c.avgTT > 0);
     if (valid.length === 0) return null;
     return [...valid].sort((a, b) => a.avgTT - b.avgTT)[0]?.customer;
-  }, [top10Rank]);
+  }, [top50Rank]);
 
-  // Find highest volume customer in top 10 rank table
+  // Find highest volume customer in top 50 rank table
   const highestVolumeCustomer = useMemo(() => {
-    const valid = top10Rank.filter((c) => c.awbCount > 0);
+    const valid = top50Rank.filter((c) => c.awbCount > 0);
     if (valid.length === 0) return null;
     return [...valid].sort((a, b) => b.awbCount - a.awbCount)[0]?.customer;
-  }, [top10Rank]);
+  }, [top50Rank]);
 
   // Best performer among the selected comparison cards
   const fastestComparisonCustomer = useMemo(() => {
@@ -386,23 +386,28 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* 🏆 1. CUSTOMER RANKING BOX (TOP 10 DYNAMIC) */}
-      {top10Rank.length > 0 && (
+      {/* 🏆 1. CUSTOMER RANKING BOX (TOP 50 DYNAMIC) */}
+      {top50Rank.length > 0 && (
         <div className="glass-panel rounded-2xl border-2 border-slate-300 dark:border-slate-700 overflow-hidden relative z-10 shadow-sm">
           {/* Table Header Bar */}
-          <div className="flex items-center gap-2.5 px-5 py-3 border-b border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
-            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 shrink-0">
-              <Trophy className="w-4 h-4" />
+          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 shrink-0">
+                <Trophy className="w-4 h-4" />
+              </div>
+              <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                Customer Ranking (Top 50)
+              </h3>
             </div>
-            <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
-              Customer Ranking
-            </h3>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+              Showing {top50Rank.length} of 50
+            </span>
           </div>
 
           {/* Table Container */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[580px] overflow-y-auto">
             <table className="w-full text-xs border-collapse border border-slate-300 dark:border-slate-700">
-              <thead className="bg-slate-100/95 dark:bg-slate-900/95 shadow-sm">
+              <thead className="bg-slate-100/95 dark:bg-slate-900/95 shadow-sm sticky top-0 z-10 backdrop-blur-sm">
                 <tr>
                   <th className="px-4 py-2.5 text-center align-middle font-black text-slate-600 dark:text-slate-300 w-14 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">#</th>
                   <th className="px-4 py-2.5 text-center align-middle font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">Customer</th>
@@ -443,7 +448,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {top10Rank.map((c, idx) => {
+                {top50Rank.map((c, idx) => {
                   const isFastestRow = c.customer === fastestCustomer && c.awbCount > 0;
                   const isTopVolRow = c.customer === highestVolumeCustomer && c.awbCount > 0;
                   const awbPct = (c.awbCount / maxAwb) * 100;
@@ -462,7 +467,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                     >
                       {/* Rank badge */}
                       <td className="px-4 py-3 text-center align-middle border border-slate-300 dark:border-slate-700">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black ${
+                        <span className={`inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1 rounded-full text-[10px] font-black ${
                           idx === 0
                             ? 'bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/40 shadow-sm'
                             : idx === 1
@@ -554,11 +559,11 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
           {/* Table Footer Summary */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 px-5 py-2.5 bg-slate-50/60 dark:bg-slate-900/60 text-[11px] text-slate-500 dark:text-slate-400 font-semibold border-t border-slate-300 dark:border-slate-700 text-center">
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <span>Showing: <strong className="text-slate-800 dark:text-slate-200">Top 10 Customers</strong> (Ranked by {rankSort.field === 'awb' ? 'AWB Count' : 'Total Weight'})</span>
+              <span>Showing: <strong className="text-slate-800 dark:text-slate-200">Top 50 Customers</strong> (Ranked by {rankSort.field === 'awb' ? 'AWB Count' : 'Total Weight'})</span>
               <span>•</span>
-              <span>Top 10 AWBs: <strong className="text-sky-600 dark:text-sky-400">{top10Rank.reduce((acc, curr) => acc + curr.awbCount, 0).toLocaleString()}</strong></span>
+              <span>Top 50 AWBs: <strong className="text-sky-600 dark:text-sky-400">{top50Rank.reduce((acc, curr) => acc + curr.awbCount, 0).toLocaleString()}</strong></span>
               <span>•</span>
-              <span>Top 10 Weight: <strong className="text-violet-600 dark:text-violet-400">{(top10Rank.reduce((acc, curr) => acc + curr.totalWeight, 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Tons ({(top10Rank.reduce((acc, curr) => acc + curr.totalWeight, 0)).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kg)</strong></span>
+              <span>Top 50 Weight: <strong className="text-violet-600 dark:text-violet-400">{(top50Rank.reduce((acc, curr) => acc + curr.totalWeight, 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Tons ({(top50Rank.reduce((acc, curr) => acc + curr.totalWeight, 0)).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kg)</strong></span>
             </div>
           </div>
         </div>
