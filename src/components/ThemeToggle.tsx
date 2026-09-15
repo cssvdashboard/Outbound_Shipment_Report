@@ -1,38 +1,20 @@
 import React, { useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { getStoredTheme, setStoredTheme } from '../services/storage';
+import { ThemeType, getStoredTheme, setStoredTheme } from '../services/storage';
+import { applyThemeToDOM } from './ThemeModeMenu';
 
 /**
  * Self-contained theme toggle.
- * Manages its own state — does NOT cause App or any dashboard component to re-render.
- * The DOM class change on <html> is what drives all visual theming via CSS.
+ * Cycles between dark and light, compatible with extended themes.
  */
 export const ThemeToggle: React.FC = () => {
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => getStoredTheme());
+  const [theme, setTheme] = useState<ThemeType>(() => getStoredTheme());
 
   const handleToggle = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    const root = document.documentElement;
-
-    // 1. Freeze transitions so browser paints new colors in 0ms without running transitions
-    root.classList.add('no-transitions');
-
-    // 2. Instantly swap theme class
-    root.classList.remove('dark', 'light');
-    root.classList.add(newTheme);
-
-    // 3. Persist
+    const newTheme: ThemeType = theme === 'dark' || theme === 'midnight' || theme === 'amoled' ? 'light' : 'dark';
+    applyThemeToDOM(newTheme);
     setStoredTheme(newTheme);
-
-    // 4. Update local icon state
     setTheme(newTheme);
-
-    // 5. Restore transitions on the next frame after DOM has repainted
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        root.classList.remove('no-transitions');
-      });
-    });
   };
 
   return (

@@ -15,7 +15,8 @@ import { Shipment } from '../types/logistics';
 import * as XLSX from 'xlsx';
 
 import { DateRangePicker } from './DateRangePicker';
-import { ThemeToggle } from './ThemeToggle';
+import { ThemeModeMenu } from './ThemeModeMenu';
+import { DisplayMode } from '../services/storage';
 
 interface HeaderProps {
   datasetMeta: DatasetMeta;
@@ -34,6 +35,8 @@ interface HeaderProps {
   onResetToDefault: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  currentMode: DisplayMode;
+  onModeChange: (mode: DisplayMode) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -47,7 +50,9 @@ export const Header: React.FC<HeaderProps> = ({
   availablePickupDates,
   onResetToDefault,
   activeTab,
-  onTabChange
+  onTabChange,
+  currentMode,
+  onModeChange
 }) => {
 
   const handleExportExcel = () => {
@@ -139,8 +144,8 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {/* Theme Switcher — self-contained, does not re-render App */}
-            <ThemeToggle />
+            {/* Theme & Display Mode Switcher */}
+            <ThemeModeMenu currentMode={currentMode} onModeChange={onModeChange} />
           </div>
         </div>
 

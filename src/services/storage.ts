@@ -47,12 +47,31 @@ export async function clearSavedDataset(): Promise<void> {
   }
 }
 
-export function getStoredTheme(): 'dark' | 'light' {
+const STORAGE_KEY_MODE = 'transitpulse_display_mode';
+
+export type ThemeType = 'dark' | 'light' | 'midnight' | 'warm' | 'amoled';
+export type DisplayMode = 'standard' | 'compact' | 'tv' | 'incident';
+
+export function getStoredTheme(): ThemeType {
   const stored = localStorage.getItem(STORAGE_KEY_THEME);
-  if (stored === 'light' || stored === 'dark') return stored;
+  if (stored === 'light' || stored === 'dark' || stored === 'midnight' || stored === 'warm' || stored === 'amoled') {
+    return stored;
+  }
   return 'dark'; // Dark mode is default
 }
 
-export function setStoredTheme(theme: 'dark' | 'light'): void {
+export function setStoredTheme(theme: ThemeType): void {
   localStorage.setItem(STORAGE_KEY_THEME, theme);
+}
+
+export function getStoredDisplayMode(): DisplayMode {
+  const stored = localStorage.getItem(STORAGE_KEY_MODE);
+  if (stored === 'standard' || stored === 'compact' || stored === 'tv' || stored === 'incident') {
+    return stored;
+  }
+  return 'standard';
+}
+
+export function setStoredDisplayMode(mode: DisplayMode): void {
+  localStorage.setItem(STORAGE_KEY_MODE, mode);
 }

@@ -36,6 +36,42 @@
     --text-muted: #64748b;
   }
 
+  html.midnight {
+    /* Executive Midnight Navy & Deep Sapphire */
+    --bg-primary: #070d1e;
+    --bg-surface: rgba(13, 27, 54, 0.92);
+    --bg-surface-elevated: #0f244a;
+    --border-subtle: #1e3a6a;
+    --border-focus: rgba(56, 189, 248, 0.6);
+    --text-primary: #f0f7ff;
+    --text-secondary: #9fc3e9;
+    --text-muted: #648bb5;
+  }
+
+  html.warm {
+    /* Warm Paper / Eye-Care Sepia */
+    --bg-primary: #fbf8f2;
+    --bg-surface: rgba(255, 253, 250, 0.96);
+    --bg-surface-elevated: #ffffff;
+    --border-subtle: #e2dac9;
+    --border-focus: rgba(180, 83, 9, 0.5);
+    --text-primary: #292524;
+    --text-secondary: #57534e;
+    --text-muted: #78716c;
+  }
+
+  html.amoled {
+    /* AMOLED Pitch Black / High Contrast Terminal */
+    --bg-primary: #000000;
+    --bg-surface: rgba(10, 10, 10, 0.96);
+    --bg-surface-elevated: #121212;
+    --border-subtle: #27272a;
+    --border-focus: rgba(34, 197, 94, 0.6);
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+  }
+
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -173,6 +209,131 @@ html.light ::-webkit-scrollbar-thumb:hover {
 }
 .glow-indigo {
   box-shadow: 0 0 24px -4px rgba(129, 140, 248, 0.25);
+}
+
+/* ========================================================================= */
+/* EXTENDED THEMES: MIDNIGHT NAVY, WARM SEPIA, AMOLED PITCH BLACK             */
+/* ========================================================================= */
+
+/* Midnight Navy */
+html.midnight body {
+  background-color: #070d1e !important;
+}
+html.midnight .bg-slate-900,
+html.midnight .dark\:bg-slate-900,
+html.midnight .dark\:bg-slate-950,
+html.midnight .dark\:bg-\[\#0f172a\],
+html.midnight .dark\:bg-\[\#0b0f19\] {
+  background-color: #0d1b36 !important;
+}
+html.midnight .dark\:bg-slate-800,
+html.midnight .dark\:bg-slate-850 {
+  background-color: #12254a !important;
+}
+html.midnight .dark\:border-slate-700,
+html.midnight .dark\:border-slate-800,
+html.midnight .dark\:border-slate-600 {
+  border-color: #1e3a6a !important;
+}
+html.midnight ::-webkit-scrollbar-track {
+  background: #070d1e !important;
+}
+html.midnight ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #0284c7 0%, #1d4ed8 100%) !important;
+  border-color: #070d1e !important;
+}
+
+/* Warm Paper / Sepia Eye-Care */
+html.warm body {
+  background-color: #fbf8f2 !important;
+  color: #292524 !important;
+}
+html.warm .bg-white,
+html.warm .bg-slate-50,
+html.warm .bg-slate-100 {
+  background-color: #f5efe6 !important;
+}
+html.warm .border-slate-200,
+html.warm .border-slate-300 {
+  border-color: #e2dac9 !important;
+}
+html.warm ::-webkit-scrollbar-track {
+  background: #fbf8f2 !important;
+}
+html.warm ::-webkit-scrollbar-thumb {
+  background: #c8bead !important;
+  border-color: #fbf8f2 !important;
+}
+
+/* AMOLED Pitch Black */
+html.amoled body {
+  background-color: #000000 !important;
+}
+html.amoled .bg-slate-900,
+html.amoled .dark\:bg-slate-900,
+html.amoled .dark\:bg-slate-950,
+html.amoled .dark\:bg-\[\#0f172a\],
+html.amoled .dark\:bg-\[\#0b0f19\],
+html.amoled .dark\:bg-slate-800 {
+  background-color: #050505 !important;
+}
+html.amoled .dark\:border-slate-700,
+html.amoled .dark\:border-slate-800,
+html.amoled .dark\:border-slate-600 {
+  border-color: #262626 !important;
+}
+html.amoled ::-webkit-scrollbar-track {
+  background: #000000 !important;
+}
+html.amoled ::-webkit-scrollbar-thumb {
+  background: #27272a !important;
+  border-color: #000000 !important;
+}
+
+/* ========================================================================= */
+/* FUNCTIONAL DISPLAY MODES (Compact, TV Wallboard, Incident Mode)           */
+/* ========================================================================= */
+
+/* Compact Dense Mode (Power Users) */
+.mode-compact table th {
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
+  font-size: 0.68rem !important;
+}
+.mode-compact table td {
+  padding-top: 0.22rem !important;
+  padding-bottom: 0.22rem !important;
+  font-size: 0.72rem !important;
+}
+.mode-compact .glass-card {
+  padding: 0.75rem !important;
+}
+
+/* Operations TV / Wallboard presentation styling */
+.mode-tv {
+  letter-spacing: 0.01em;
+}
+.mode-tv .tv-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
+  z-index: 9999;
+  transition: width 1s linear;
+}
+
+/* Incident / Exception Alert Mode */
+.mode-incident .incident-active-pulse {
+  animation: pulseIncident 2s infinite;
+}
+@keyframes pulseIncident {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
 }
 
 /* ========================================================================= */
