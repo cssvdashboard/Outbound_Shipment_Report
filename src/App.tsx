@@ -73,6 +73,14 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    if (displayMode === 'tv') {
+      setTvSecondsRemaining(15);
+      setIsTvPaused(false);
+    }
+  };
+
   // 1c. TV Wallboard auto-rotation loop (15s per slide in requested order)
   useEffect(() => {
     if (displayMode !== 'tv' || isTvPaused) return;
@@ -95,6 +103,26 @@ export const App: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [displayMode, isTvPaused]);
+
+  // 1c2. Spacebar shortcut to pause and resume in TV mode
+  useEffect(() => {
+    if (displayMode !== 'tv') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+        return;
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsTvPaused((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [displayMode]);
 
   // 1d. Incident Mode Filter: isolates active delayed & exception shipments
   const displayedShipments = useMemo(() => {
@@ -177,44 +205,21 @@ export const App: React.FC = () => {
       displayMode === 'compact' ? 'mode-compact' : ''
     } ${displayMode === 'tv' ? 'mode-tv' : ''} ${displayMode === 'incident' ? 'mode-incident' : ''}`}>
       
-      {/* TV Mode Top Progress Bar (15s per slide) */}
-      {displayMode === 'tv' && !isTvPaused && (
-        <div 
-          className="tv-progress-bar"
-          style={{ width: `${((15 - tvSecondsRemaining) / 15) * 100}%` }}
-        />
-      )}
-
-      {/* TV Wallboard Floating Control Widget */}
+      {/* TV Mode Top Progress Bar (15s per slide, toggleable via Spacebar) */}
       {displayMode === 'tv' && (
-        <aside 
-          aria-label="TV Wallboard Controls"
-          className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-slate-900/95 dark:bg-[#070d1e]/95 text-white border-2 border-sky-500/60 shadow-2xl backdrop-blur-md animate-fade-in"
-        >
-          <div className="flex items-center gap-1.5">
-            <Tv className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-black uppercase tracking-wider text-sky-300">Wallboard</span>
-            {isTvPaused && (
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                Paused
-              </span>
-            )}
-          </div>
-          <button
-            onClick={() => setIsTvPaused(!isTvPaused)}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
-            title={isTvPaused ? 'Resume Rotation' : 'Pause Rotation'}
-          >
-            {isTvPaused ? <Play className="w-3.5 h-3.5 text-emerald-400" /> : <Pause className="w-3.5 h-3.5 text-amber-400" />}
-          </button>
-          <button
-            onClick={() => handleDisplayModeChange('standard')}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 transition-colors cursor-pointer"
-            title="Exit Wallboard"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </aside>
+        <>
+          <div 
+            className={`tv-progress-bar transition-all ${isTvPaused ? '!bg-amber-400 opacity-60' : ''}`}
+            style={{ width: isTvPaused ? '100%' : `${((15 - tvSecondsRemaining) / 15) * 100}%` }}
+          />
+          {isTvPaused && (
+            <div className="fixed top-2.5 right-4 z-50 px-3 py-1.5 rounded-xl bg-slate-900/90 dark:bg-black/90 text-amber-300 border border-amber-500/40 text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2 animate-fade-in">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span>Wallboard Paused</span>
+              <span className="text-[10.5px] text-slate-400 font-normal">(Press Space to Resume)</span>
+            </div>
+          )}
+        </>
       )}
 
       <div className="flex-1 flex flex-col">
@@ -235,7 +240,7 @@ export const App: React.FC = () => {
           onDatasetUpdate={handleDatasetUpdate}
           onResetToDefault={handleResetToDefault}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           currentMode={displayMode}
           onModeChange={handleDisplayModeChange}
         />
@@ -306,7 +311,7 @@ export const App: React.FC = () => {
                   selectedTTRange={filters.selectedTTRanges[0] || null}
                   onSelectResolution={setFinalResolutionFilter}
                   onSelectTTRange={setTTRangeFilter}
-                  onNavigateTab={setActiveTab}
+                  onNavigateTab={handleTabChange}
                 />
               )}
 
@@ -321,7 +326,7 @@ export const App: React.FC = () => {
                   activeTransitFilter={filters.selectedTransitDelays}
                   activeClearanceFilter={filters.selectedClearanceDelays}
                   activeDestinationFilter={filters.selectedDestinationDelays}
-                  onNavigateTab={setActiveTab}
+                  onNavigateTab={handleTabChange}
                 />
               )}
 

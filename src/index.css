@@ -72,28 +72,28 @@
     --text-muted: #71717a;
   }
 
-  html.fedex {
-    /* FedEx Express Iconic Deep Purple & Vibrant Orange */
-    --bg-primary: #0c0817;
-    --bg-surface: rgba(22, 12, 38, 0.94);
-    --bg-surface-elevated: #1e1136;
-    --border-subtle: #3b1e68;
-    --border-focus: rgba(255, 98, 0, 0.65);
-    --text-primary: #ffffff;
-    --text-secondary: #c4b5fd;
-    --text-muted: #9d8ec2;
+  html.nordic {
+    /* Nordic Forest & Eye-Comfort Sage */
+    --bg-primary: #0a1412;
+    --bg-surface: rgba(14, 28, 25, 0.94);
+    --bg-surface-elevated: #15312a;
+    --border-subtle: #244940;
+    --border-focus: rgba(52, 211, 153, 0.65);
+    --text-primary: #f0fdf4;
+    --text-secondary: #a7f3d0;
+    --text-muted: #6ee7b7;
   }
 
-  html.dhl {
-    /* DHL Express Aero Yellow & Racing Red */
-    --bg-primary: #121008;
-    --bg-surface: rgba(28, 24, 12, 0.94);
-    --bg-surface-elevated: #262010;
-    --border-subtle: #4a3e1b;
-    --border-focus: rgba(255, 204, 0, 0.65);
-    --text-primary: #ffffff;
-    --text-secondary: #fef08a;
-    --text-muted: #a39460;
+  html.teal {
+    /* Calm Oceanic Teal / Optical Ergonomics */
+    --bg-primary: #07151e;
+    --bg-surface: rgba(11, 30, 42, 0.94);
+    --bg-surface-elevated: #10384f;
+    --border-subtle: #1c5270;
+    --border-focus: rgba(45, 212, 191, 0.65);
+    --text-primary: #f0fdfa;
+    --text-secondary: #99f6e4;
+    --text-muted: #5eead4;
   }
 
   body {
@@ -314,60 +314,60 @@ html.amoled ::-webkit-scrollbar-thumb {
   border-color: #000000 !important;
 }
 
-/* FedEx Express Iconic Purple & Orange */
-html.fedex body {
-  background-color: #0c0817 !important;
+/* Nordic Forest & Eye-Comfort Sage */
+html.nordic body {
+  background-color: #0a1412 !important;
 }
-html.fedex .bg-slate-900,
-html.fedex .dark\:bg-slate-900,
-html.fedex .dark\:bg-slate-950,
-html.fedex .dark\:bg-\[\#0f172a\],
-html.fedex .dark\:bg-\[\#0b0f19\] {
-  background-color: #160c26 !important;
+html.nordic .bg-slate-900,
+html.nordic .dark\:bg-slate-900,
+html.nordic .dark\:bg-slate-950,
+html.nordic .dark\:bg-\[\#0f172a\],
+html.nordic .dark\:bg-\[\#0b0f19\] {
+  background-color: #0f221e !important;
 }
-html.fedex .dark\:bg-slate-800,
-html.fedex .dark\:bg-slate-850 {
-  background-color: #24143d !important;
+html.nordic .dark\:bg-slate-800,
+html.nordic .dark\:bg-slate-850 {
+  background-color: #16332d !important;
 }
-html.fedex .dark\:border-slate-700,
-html.fedex .dark\:border-slate-800,
-html.fedex .dark\:border-slate-600 {
-  border-color: #3b1e68 !important;
+html.nordic .dark\:border-slate-700,
+html.nordic .dark\:border-slate-800,
+html.nordic .dark\:border-slate-600 {
+  border-color: #244940 !important;
 }
-html.fedex ::-webkit-scrollbar-track {
-  background: #0c0817 !important;
+html.nordic ::-webkit-scrollbar-track {
+  background: #0a1412 !important;
 }
-html.fedex ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff6200 0%, #4d148c 100%) !important;
-  border-color: #0c0817 !important;
+html.nordic ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #10b981 0%, #065f46 100%) !important;
+  border-color: #0a1412 !important;
 }
 
-/* DHL Express Aero Yellow & Red */
-html.dhl body {
-  background-color: #121008 !important;
+/* Calm Oceanic Teal / Optical Ergonomics */
+html.teal body {
+  background-color: #07151e !important;
 }
-html.dhl .bg-slate-900,
-html.dhl .dark\:bg-slate-900,
-html.dhl .dark\:bg-slate-950,
-html.dhl .dark\:bg-\[\#0f172a\],
-html.dhl .dark\:bg-\[\#0b0f19\] {
-  background-color: #1c180c !important;
+html.teal .bg-slate-900,
+html.teal .dark\:bg-slate-900,
+html.teal .dark\:bg-slate-950,
+html.teal .dark\:bg-\[\#0f172a\],
+html.teal .dark\:bg-\[\#0b0f19\] {
+  background-color: #0c2331 !important;
 }
-html.dhl .dark\:bg-slate-800,
-html.dhl .dark\:bg-slate-850 {
-  background-color: #292312 !important;
+html.teal .dark\:bg-slate-800,
+html.teal .dark\:bg-slate-850 {
+  background-color: #14354b !important;
 }
-html.dhl .dark\:border-slate-700,
-html.dhl .dark\:border-slate-800,
-html.dhl .dark\:border-slate-600 {
-  border-color: #4a3e1b !important;
+html.teal .dark\:border-slate-700,
+html.teal .dark\:border-slate-800,
+html.teal .dark\:border-slate-600 {
+  border-color: #1c5270 !important;
 }
-html.dhl ::-webkit-scrollbar-track {
-  background: #121008 !important;
+html.teal ::-webkit-scrollbar-track {
+  background: #07151e !important;
 }
-html.dhl ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ffcc00 0%, #d40511 100%) !important;
-  border-color: #121008 !important;
+html.teal ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%) !important;
+  border-color: #07151e !important;
 }
 
 /* ========================================================================= */

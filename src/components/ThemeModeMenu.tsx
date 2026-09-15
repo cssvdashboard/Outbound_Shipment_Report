@@ -10,8 +10,8 @@ import {
   Check, 
   Sparkles,
   Zap,
-  Truck,
-  Plane
+  TreePine,
+  Compass
 } from 'lucide-react';
 import { 
   ThemeType, 
@@ -48,22 +48,22 @@ interface ModeOption {
 
 const THEME_OPTIONS: ThemeOption[] = [
   {
-    id: 'fedex',
-    label: 'FedEx Express',
-    tagline: 'Iconic Purple & Orange',
-    swatchBg: 'bg-[#160c26]',
-    swatchBorder: 'border-purple-800',
-    swatchAccent: 'bg-[#ff6200]',
-    icon: <Truck className="w-3.5 h-3.5 text-[#ff6200]" />
+    id: 'nordic',
+    label: 'Nordic Sage',
+    tagline: 'Forest pine & eye-comfort mint',
+    swatchBg: 'bg-[#0a1412]',
+    swatchBorder: 'border-emerald-800',
+    swatchAccent: 'bg-emerald-400',
+    icon: <TreePine className="w-3.5 h-3.5 text-emerald-400" />
   },
   {
-    id: 'dhl',
-    label: 'DHL Express',
-    tagline: 'Aero Yellow & Racing Red',
-    swatchBg: 'bg-[#1c180c]',
-    swatchBorder: 'border-amber-700',
-    swatchAccent: 'bg-[#ffcc00]',
-    icon: <Plane className="w-3.5 h-3.5 text-amber-400" />
+    id: 'teal',
+    label: 'Calm Oceanic',
+    tagline: 'Deep soothing nautical teal',
+    swatchBg: 'bg-[#07151e]',
+    swatchBorder: 'border-teal-800',
+    swatchAccent: 'bg-teal-400',
+    icon: <Compass className="w-3.5 h-3.5 text-teal-400" />
   },
   {
     id: 'dark',
@@ -151,7 +151,7 @@ export const applyThemeToDOM = (newTheme: ThemeType) => {
   root.classList.add('no-transitions');
 
   // 2. Remove all theme classes
-  root.classList.remove('dark', 'light', 'midnight', 'warm', 'amoled', 'fedex', 'dhl');
+  root.classList.remove('dark', 'light', 'midnight', 'warm', 'amoled', 'nordic', 'teal');
 
   // 3. Apply base dark or light plus optional variant
   if (newTheme === 'light') {
@@ -162,10 +162,10 @@ export const applyThemeToDOM = (newTheme: ThemeType) => {
     root.classList.add('dark', 'midnight');
   } else if (newTheme === 'amoled') {
     root.classList.add('dark', 'amoled');
-  } else if (newTheme === 'fedex') {
-    root.classList.add('dark', 'fedex');
-  } else if (newTheme === 'dhl') {
-    root.classList.add('dark', 'dhl');
+  } else if (newTheme === 'nordic') {
+    root.classList.add('dark', 'nordic');
+  } else if (newTheme === 'teal') {
+    root.classList.add('dark', 'teal');
   } else {
     // Standard dark
     root.classList.add('dark');
