@@ -48,41 +48,6 @@
     --text-muted: #648bb5;
   }
 
-  html.warm {
-    /* Warm Paper / Eye-Care Sepia */
-    --bg-primary: #fbf8f2;
-    --bg-surface: rgba(255, 253, 250, 0.96);
-    --bg-surface-elevated: #ffffff;
-    --border-subtle: #e2dac9;
-    --border-focus: rgba(180, 83, 9, 0.5);
-    --text-primary: #292524;
-    --text-secondary: #57534e;
-    --text-muted: #78716c;
-  }
-
-  html.amoled {
-    /* AMOLED Pitch Black / High Contrast Terminal */
-    --bg-primary: #000000;
-    --bg-surface: rgba(10, 10, 10, 0.96);
-    --bg-surface-elevated: #121212;
-    --border-subtle: #27272a;
-    --border-focus: rgba(34, 197, 94, 0.6);
-    --text-primary: #ffffff;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
-  }
-
-  html.nordic {
-    /* Nordic Forest & Eye-Comfort Sage */
-    --bg-primary: #0a1412;
-    --bg-surface: rgba(14, 28, 25, 0.94);
-    --bg-surface-elevated: #15312a;
-    --border-subtle: #244940;
-    --border-focus: rgba(52, 211, 153, 0.65);
-    --text-primary: #f0fdf4;
-    --text-secondary: #a7f3d0;
-    --text-muted: #6ee7b7;
-  }
 
   html.teal {
     /* Calm Oceanic Teal / Optical Ergonomics */
@@ -267,81 +232,6 @@ html.midnight ::-webkit-scrollbar-thumb {
   border-color: #070d1e !important;
 }
 
-/* Warm Paper / Sepia Eye-Care */
-html.warm body {
-  background-color: #fbf8f2 !important;
-  color: #292524 !important;
-}
-html.warm .bg-white,
-html.warm .bg-slate-50,
-html.warm .bg-slate-100 {
-  background-color: #f5efe6 !important;
-}
-html.warm .border-slate-200,
-html.warm .border-slate-300 {
-  border-color: #e2dac9 !important;
-}
-html.warm ::-webkit-scrollbar-track {
-  background: #fbf8f2 !important;
-}
-html.warm ::-webkit-scrollbar-thumb {
-  background: #c8bead !important;
-  border-color: #fbf8f2 !important;
-}
-
-/* AMOLED Pitch Black */
-html.amoled body {
-  background-color: #000000 !important;
-}
-html.amoled .bg-slate-900,
-html.amoled .dark\:bg-slate-900,
-html.amoled .dark\:bg-slate-950,
-html.amoled .dark\:bg-\[\#0f172a\],
-html.amoled .dark\:bg-\[\#0b0f19\],
-html.amoled .dark\:bg-slate-800 {
-  background-color: #050505 !important;
-}
-html.amoled .dark\:border-slate-700,
-html.amoled .dark\:border-slate-800,
-html.amoled .dark\:border-slate-600 {
-  border-color: #262626 !important;
-}
-html.amoled ::-webkit-scrollbar-track {
-  background: #000000 !important;
-}
-html.amoled ::-webkit-scrollbar-thumb {
-  background: #27272a !important;
-  border-color: #000000 !important;
-}
-
-/* Nordic Forest & Eye-Comfort Sage */
-html.nordic body {
-  background-color: #0a1412 !important;
-}
-html.nordic .bg-slate-900,
-html.nordic .dark\:bg-slate-900,
-html.nordic .dark\:bg-slate-950,
-html.nordic .dark\:bg-\[\#0f172a\],
-html.nordic .dark\:bg-\[\#0b0f19\] {
-  background-color: #0f221e !important;
-}
-html.nordic .dark\:bg-slate-800,
-html.nordic .dark\:bg-slate-850 {
-  background-color: #16332d !important;
-}
-html.nordic .dark\:border-slate-700,
-html.nordic .dark\:border-slate-800,
-html.nordic .dark\:border-slate-600 {
-  border-color: #244940 !important;
-}
-html.nordic ::-webkit-scrollbar-track {
-  background: #0a1412 !important;
-}
-html.nordic ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #10b981 0%, #065f46 100%) !important;
-  border-color: #0a1412 !important;
-}
-
 /* Calm Oceanic Teal / Optical Ergonomics */
 html.teal body {
   background-color: #07151e !important;
@@ -400,7 +290,6 @@ html.teal ::-webkit-scrollbar-thumb {
   height: 4px;
   background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
   z-index: 9999;
-  transition: width 1s linear;
 }
 
 /* Incident / Exception Alert Mode */

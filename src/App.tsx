@@ -209,8 +209,11 @@ export const App: React.FC = () => {
       {displayMode === 'tv' && (
         <>
           <div 
-            className={`tv-progress-bar transition-all ${isTvPaused ? '!bg-amber-400 opacity-60' : ''}`}
-            style={{ width: isTvPaused ? '100%' : `${((15 - tvSecondsRemaining) / 15) * 100}%` }}
+            className={`tv-progress-bar ${isTvPaused ? '!bg-amber-400 opacity-70' : ''}`}
+            style={{ 
+              width: `${Math.min(100, Math.max(0, ((15 - tvSecondsRemaining) / 15) * 100))}%`,
+              transition: isTvPaused || tvSecondsRemaining === 15 ? 'none' : 'width 1s linear'
+            }}
           />
           {isTvPaused && (
             <div className="fixed top-2.5 right-4 z-50 px-3 py-1.5 rounded-xl bg-slate-900/90 dark:bg-black/90 text-amber-300 border border-amber-500/40 text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2 animate-fade-in">

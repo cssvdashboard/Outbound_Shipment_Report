@@ -9,8 +9,6 @@ import {
   AlertTriangle, 
   Check, 
   Sparkles,
-  Zap,
-  TreePine,
   Compass
 } from 'lucide-react';
 import { 
@@ -48,24 +46,6 @@ interface ModeOption {
 
 const THEME_OPTIONS: ThemeOption[] = [
   {
-    id: 'nordic',
-    label: 'Nordic Sage',
-    tagline: 'Forest pine & eye-comfort mint',
-    swatchBg: 'bg-[#0a1412]',
-    swatchBorder: 'border-emerald-800',
-    swatchAccent: 'bg-emerald-400',
-    icon: <TreePine className="w-3.5 h-3.5 text-emerald-400" />
-  },
-  {
-    id: 'teal',
-    label: 'Calm Oceanic',
-    tagline: 'Deep soothing nautical teal',
-    swatchBg: 'bg-[#07151e]',
-    swatchBorder: 'border-teal-800',
-    swatchAccent: 'bg-teal-400',
-    icon: <Compass className="w-3.5 h-3.5 text-teal-400" />
-  },
-  {
     id: 'dark',
     label: 'Slate Dark',
     tagline: 'Deep slate & indigo accent',
@@ -84,13 +64,13 @@ const THEME_OPTIONS: ThemeOption[] = [
     icon: <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
   },
   {
-    id: 'amoled',
-    label: 'AMOLED Black',
-    tagline: 'True #000000 pitch black',
-    swatchBg: 'bg-black',
-    swatchBorder: 'border-zinc-800',
-    swatchAccent: 'bg-emerald-400',
-    icon: <Zap className="w-3.5 h-3.5 text-emerald-400" />
+    id: 'teal',
+    label: 'Calm Oceanic',
+    tagline: 'Deep soothing nautical teal',
+    swatchBg: 'bg-[#07151e]',
+    swatchBorder: 'border-teal-800',
+    swatchAccent: 'bg-teal-400',
+    icon: <Compass className="w-3.5 h-3.5 text-teal-400" />
   },
   {
     id: 'light',
@@ -100,15 +80,6 @@ const THEME_OPTIONS: ThemeOption[] = [
     swatchBorder: 'border-slate-300',
     swatchAccent: 'bg-blue-600',
     icon: <Sun className="w-3.5 h-3.5 text-amber-500" />
-  },
-  {
-    id: 'warm',
-    label: 'Warm Sepia',
-    tagline: 'Paper cream for zero eye-strain',
-    swatchBg: 'bg-[#fbf8f2]',
-    swatchBorder: 'border-amber-200',
-    swatchAccent: 'bg-amber-700',
-    icon: <Sun className="w-3.5 h-3.5 text-amber-600" />
   }
 ];
 
@@ -156,14 +127,8 @@ export const applyThemeToDOM = (newTheme: ThemeType) => {
   // 3. Apply base dark or light plus optional variant
   if (newTheme === 'light') {
     root.classList.add('light');
-  } else if (newTheme === 'warm') {
-    root.classList.add('light', 'warm');
   } else if (newTheme === 'midnight') {
     root.classList.add('dark', 'midnight');
-  } else if (newTheme === 'amoled') {
-    root.classList.add('dark', 'amoled');
-  } else if (newTheme === 'nordic') {
-    root.classList.add('dark', 'nordic');
   } else if (newTheme === 'teal') {
     root.classList.add('dark', 'teal');
   } else {
@@ -253,7 +218,7 @@ export const ThemeModeMenu: React.FC<ThemeModeMenuProps> = ({ currentMode, onMod
                 </span>
               </div>
               <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-                7 Palettes
+                4 Palettes
               </span>
             </div>
 

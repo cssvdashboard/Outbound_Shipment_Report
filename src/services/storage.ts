@@ -49,12 +49,12 @@ export async function clearSavedDataset(): Promise<void> {
 
 const STORAGE_KEY_MODE = 'transitpulse_display_mode';
 
-export type ThemeType = 'dark' | 'light' | 'midnight' | 'warm' | 'amoled' | 'nordic' | 'teal';
+export type ThemeType = 'dark' | 'light' | 'midnight' | 'teal';
 export type DisplayMode = 'standard' | 'compact' | 'tv' | 'incident';
 
 export function getStoredTheme(): ThemeType {
   const stored = localStorage.getItem(STORAGE_KEY_THEME);
-  if (stored === 'light' || stored === 'dark' || stored === 'midnight' || stored === 'warm' || stored === 'amoled' || stored === 'nordic' || stored === 'teal') {
+  if (stored === 'light' || stored === 'dark' || stored === 'midnight' || stored === 'teal') {
     return stored;
   }
   return 'dark'; // Dark mode is default
