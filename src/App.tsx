@@ -68,23 +68,26 @@ export const App: React.FC = () => {
     setStoredDisplayMode(newMode);
     if (newMode === 'tv') {
       setIsTvPaused(false);
-      setTvSecondsRemaining(30);
+      setTvSecondsRemaining(15);
+      setActiveTab('overview');
     }
   };
 
-  // 1c. TV Wallboard auto-rotation loop
+  // 1c. TV Wallboard auto-rotation loop (15s per slide in requested order)
   useEffect(() => {
     if (displayMode !== 'tv' || isTvPaused) return;
 
     const interval = setInterval(() => {
       setTvSecondsRemaining((prev) => {
         if (prev <= 1) {
-          const tvTabs = ['overview', 'delays', 'country', 'comparison', 'explorer'];
+          // Requested sequence: Overview -> Destination Details -> Weekly TT -> Monthly comparison -> Shipment Explorer -> Shipper comparison -> delay analysis
+          const tvTabs = ['overview', 'country', 'calendar', 'monthly', 'explorer', 'comparison', 'delays'];
           setActiveTab((curr) => {
-            const nextIdx = (tvTabs.indexOf(curr) + 1) % tvTabs.length;
+            const currentIdx = tvTabs.indexOf(curr);
+            const nextIdx = currentIdx === -1 ? 0 : (currentIdx + 1) % tvTabs.length;
             return tvTabs[nextIdx];
           });
-          return 30;
+          return 15;
         }
         return prev - 1;
       });
@@ -174,11 +177,11 @@ export const App: React.FC = () => {
       displayMode === 'compact' ? 'mode-compact' : ''
     } ${displayMode === 'tv' ? 'mode-tv' : ''} ${displayMode === 'incident' ? 'mode-incident' : ''}`}>
       
-      {/* TV Mode Top Progress Bar */}
+      {/* TV Mode Top Progress Bar (15s per slide) */}
       {displayMode === 'tv' && !isTvPaused && (
         <div 
           className="tv-progress-bar"
-          style={{ width: `${((30 - tvSecondsRemaining) / 30) * 100}%` }}
+          style={{ width: `${((15 - tvSecondsRemaining) / 15) * 100}%` }}
         />
       )}
 
@@ -191,11 +194,12 @@ export const App: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <Tv className="w-4 h-4 text-sky-400" />
             <span className="text-xs font-black uppercase tracking-wider text-sky-300">Wallboard</span>
+            {isTvPaused && (
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                Paused
+              </span>
+            )}
           </div>
-          <div className="h-4 w-px bg-slate-700" />
-          <span className="text-xs font-mono font-bold text-slate-200">
-            {isTvPaused ? 'Paused' : `Next in ${tvSecondsRemaining}s`}
-          </span>
           <button
             onClick={() => setIsTvPaused(!isTvPaused)}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"

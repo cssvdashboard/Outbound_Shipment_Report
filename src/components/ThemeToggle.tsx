@@ -11,7 +11,7 @@ export const ThemeToggle: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>(() => getStoredTheme());
 
   const handleToggle = () => {
-    const newTheme: ThemeType = theme === 'dark' || theme === 'midnight' || theme === 'amoled' ? 'light' : 'dark';
+    const newTheme: ThemeType = theme === 'light' || theme === 'warm' ? 'dark' : 'light';
     applyThemeToDOM(newTheme);
     setStoredTheme(newTheme);
     setTheme(newTheme);

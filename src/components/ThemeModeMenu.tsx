@@ -9,7 +9,9 @@ import {
   AlertTriangle, 
   Check, 
   Sparkles,
-  Zap
+  Zap,
+  Truck,
+  Plane
 } from 'lucide-react';
 import { 
   ThemeType, 
@@ -45,6 +47,24 @@ interface ModeOption {
 }
 
 const THEME_OPTIONS: ThemeOption[] = [
+  {
+    id: 'fedex',
+    label: 'FedEx Express',
+    tagline: 'Iconic Purple & Orange',
+    swatchBg: 'bg-[#160c26]',
+    swatchBorder: 'border-purple-800',
+    swatchAccent: 'bg-[#ff6200]',
+    icon: <Truck className="w-3.5 h-3.5 text-[#ff6200]" />
+  },
+  {
+    id: 'dhl',
+    label: 'DHL Express',
+    tagline: 'Aero Yellow & Racing Red',
+    swatchBg: 'bg-[#1c180c]',
+    swatchBorder: 'border-amber-700',
+    swatchAccent: 'bg-[#ffcc00]',
+    icon: <Plane className="w-3.5 h-3.5 text-amber-400" />
+  },
   {
     id: 'dark',
     label: 'Slate Dark',
@@ -109,7 +129,7 @@ const MODE_OPTIONS: ModeOption[] = [
   {
     id: 'tv',
     label: 'Operations TV',
-    tagline: 'Auto-rotates tabs on 30s timer',
+    tagline: 'Auto-rotates tabs on 15s timer',
     icon: <Tv className="w-3.5 h-3.5 text-sky-400" />,
     badge: 'Wallboard',
     badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/40'
@@ -131,7 +151,7 @@ export const applyThemeToDOM = (newTheme: ThemeType) => {
   root.classList.add('no-transitions');
 
   // 2. Remove all theme classes
-  root.classList.remove('dark', 'light', 'midnight', 'warm', 'amoled');
+  root.classList.remove('dark', 'light', 'midnight', 'warm', 'amoled', 'fedex', 'dhl');
 
   // 3. Apply base dark or light plus optional variant
   if (newTheme === 'light') {
@@ -142,6 +162,10 @@ export const applyThemeToDOM = (newTheme: ThemeType) => {
     root.classList.add('dark', 'midnight');
   } else if (newTheme === 'amoled') {
     root.classList.add('dark', 'amoled');
+  } else if (newTheme === 'fedex') {
+    root.classList.add('dark', 'fedex');
+  } else if (newTheme === 'dhl') {
+    root.classList.add('dark', 'dhl');
   } else {
     // Standard dark
     root.classList.add('dark');
@@ -229,7 +253,7 @@ export const ThemeModeMenu: React.FC<ThemeModeMenuProps> = ({ currentMode, onMod
                 </span>
               </div>
               <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-                5 Palettes
+                7 Palettes
               </span>
             </div>
 
