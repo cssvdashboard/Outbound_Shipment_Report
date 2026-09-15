@@ -376,10 +376,6 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   </div>
                 </th>
 
-                <th className="py-3 px-4 min-w-[200px] font-black border-r border-slate-200 dark:border-slate-600 text-center align-middle">
-                  <strong>Recipient &amp; Destination City</strong>
-                </th>
-
                 <th
                   onClick={() => handleSort('pickup')}
                   className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] font-black border-r border-slate-200 dark:border-slate-600 align-middle"
@@ -487,16 +483,6 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     <td className="py-2.5 px-4 text-slate-700 dark:text-slate-300 font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.shprName}>
                       <div className="line-clamp-2 leading-relaxed text-center">
                         {s.shprName}
-                      </div>
-                    </td>
-
-                    {/* Recipient & City */}
-                    <td className="py-2.5 px-4 border-r border-slate-200 dark:border-slate-600 text-center align-middle">
-                      <div className="font-semibold text-slate-900 dark:text-slate-300 line-clamp-1 text-center" title={s.recipient || 'N/A'}>
-                        {s.recipient || '-'}
-                      </div>
-                      <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1 text-center font-medium">
-                        {s.city ? `${s.city}, ${s.destination}` : s.destination}
                       </div>
                     </td>
 
@@ -614,7 +600,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
               {paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="py-16 text-center text-slate-400">
+                  <td colSpan={11} className="py-16 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Package className="w-8 h-8 text-slate-600" />
                       <p className="text-sm font-bold text-slate-800 dark:text-white"><strong>No shipment records found</strong></p>
