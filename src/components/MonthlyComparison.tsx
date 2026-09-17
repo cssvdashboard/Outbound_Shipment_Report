@@ -169,7 +169,10 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
     return computeMonthlyComparison(effectiveShipments, allMonths);
   }, [effectiveShipments, allMonths]);
 
-  const { months, grandTotalAWBs, overallAvgTT, overallOnTimeRate } = comparison;
+  const { months: rawMonthlyMetrics, grandTotalAWBs, overallAvgTT, overallOnTimeRate } = comparison;
+  const months = useMemo(() => {
+    return rawMonthlyMetrics.filter(m => m.monthId !== '2026-06' && !m.monthLabel.toLowerCase().includes('june 2026'));
+  }, [rawMonthlyMetrics]);
 
   // Default months: Left = July 2026, Right = August 2026
   const defaultLeftMonthId = useMemo(() => {
@@ -775,7 +778,7 @@ export const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({
       ) : (
         <>
           {/* 2. EXECUTIVE MONTH-OVER-MONTH KPI CARDS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${months.length > 2 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-4`}>
         {months.map((m, idx) => {
           const palette = MONTH_PALETTES[idx % MONTH_PALETTES.length];
           return (

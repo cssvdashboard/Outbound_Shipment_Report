@@ -80,6 +80,8 @@ export function computeMonthlyComparison(
 
   if (knownMonths && knownMonths.length > 0) {
     knownMonths.forEach((ym) => {
+      // Exclude June 2026 spillover with partial late-June records
+      if (ym === '2026-06') return;
       monthGroups[ym] = [];
     });
   }
@@ -88,6 +90,8 @@ export function computeMonthlyComparison(
     const d = parseShipmentDate(s.pickup);
     if (!d) return;
     const ym = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    // Exclude June 2026 spillover shipments so only full reporting months are compared
+    if (ym === '2026-06') return;
     if (!monthGroups[ym]) {
       monthGroups[ym] = [];
     }
