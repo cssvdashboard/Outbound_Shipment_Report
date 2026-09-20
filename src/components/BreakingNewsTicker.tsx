@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   AlertTriangle,
-  Calendar,
-  Radio
+  Calendar
 } from 'lucide-react';
 
 interface BreakingNewsTickerProps {
@@ -52,21 +51,17 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
     <div className="w-full bg-white/95 dark:bg-[#070d18]/95 border-y-2 border-amber-400/60 dark:border-amber-500/30 backdrop-blur-md print:hidden shadow-xs transition-colors">
       <div className="w-full px-2 sm:px-4 flex items-center h-10 relative overflow-hidden">
         
-        {/* Left Fixed Update Badge */}
-        <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 h-7 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-[11px] uppercase tracking-wider rounded-lg shrink-0 select-none z-20 shadow-md">
+        {/* Left Fixed Compact Update Badge */}
+        <div className="flex items-center gap-1.5 px-2.5 h-6 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-[10.5px] uppercase tracking-wider rounded-md shrink-0 select-none z-20 shadow-xs">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
           </span>
-          <Radio className="w-3.5 h-3.5 animate-pulse hidden xs:inline" />
           <span className="font-extrabold tracking-tight">UPDATE</span>
         </div>
 
-        {/* Left fade gradient mask */}
-        <div className="pointer-events-none absolute left-[86px] sm:left-[108px] top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-[#070d18] to-transparent z-10" />
-
-        {/* Smooth, leisurely-paced continuous scrolling track (Right to Left) */}
-        <div className="overflow-hidden relative flex-1 flex items-center h-full">
+        {/* Smooth, leisurely-paced continuous scrolling track (Right to Left) with crystal clear visibility */}
+        <div className="overflow-hidden relative flex-1 flex items-center h-full ml-3">
           <div className="animate-ticker-rtl flex items-center py-1">
             {duplicatedItems.map((item, idx) => {
               const Icon = item.icon;
@@ -77,24 +72,24 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
                 >
                   {/* Category Pill */}
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs ${item.tagBg}`}
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border shadow-2xs ${item.tagBg}`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${item.iconColor}`} />
                     <span>{item.tag}</span>
                   </span>
 
                   {/* Headline & Notice Text */}
-                  <div className="inline-flex items-baseline gap-1.5 text-slate-800 dark:text-slate-200">
-                    <span className="font-black text-slate-900 dark:text-white">
+                  <div className="inline-flex items-baseline gap-1.5">
+                    <span className="font-extrabold text-slate-950 dark:text-white">
                       {item.headline}
                     </span>
-                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                    <span className="font-medium text-slate-800 dark:text-slate-100">
                       {item.detail}
                     </span>
                   </div>
 
                   {/* Bulletin Separator */}
-                  <span className="text-amber-500/60 dark:text-amber-400/40 select-none font-bold text-sm ml-3">
+                  <span className="text-amber-500/80 dark:text-amber-400/60 select-none font-bold text-sm ml-3">
                     ◆
                   </span>
                 </div>
@@ -102,9 +97,6 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
             })}
           </div>
         </div>
-
-        {/* Right fade gradient mask */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-[#070d18] to-transparent z-10" />
       </div>
     </div>
   );
