@@ -327,13 +327,13 @@ html.teal ::-webkit-scrollbar-thumb {
 .animate-ticker-ltr {
   display: flex;
   width: max-content;
-  animation: ticker-ltr 90s linear infinite;
+  animation: ticker-ltr 150s linear infinite;
 }
 
 .animate-ticker-rtl {
   display: flex;
   width: max-content;
-  animation: ticker-rtl 90s linear infinite;
+  animation: ticker-rtl 150s linear infinite;
 }
 
 .ticker-paused {

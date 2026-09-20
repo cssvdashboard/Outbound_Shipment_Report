@@ -1,7 +1,8 @@
 import React from 'react';
 import {
   AlertTriangle,
-  Calendar
+  Calendar,
+  Plane
 } from 'lucide-react';
 
 interface BreakingNewsTickerProps {
@@ -20,7 +21,7 @@ interface AlertItem {
 }
 
 export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
-  // Specific user-requested operational disruption and holiday alerts
+  // Specific user-requested operational disruption, holiday, and offload alerts
   const baseBulletins: AlertItem[] = [
     {
       id: 'disruption-italy',
@@ -40,11 +41,56 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       iconColor: 'text-amber-400',
       headline: 'Holiday Alert -',
       detail: 'Japan will remain closed till 09/23/2026.'
+    },
+    {
+      id: 'offload-tg322-16',
+      tag: 'OFFLOAD STATUS',
+      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      icon: Plane,
+      iconColor: 'text-orange-400',
+      headline: '16.09.2026 TG-322 -',
+      detail: '306 kg (17 pcs) out of 631 kg yet to depart from BKK'
+    },
+    {
+      id: 'offload-tg340-17',
+      tag: 'OFFLOAD STATUS',
+      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      icon: Plane,
+      iconColor: 'text-orange-400',
+      headline: '17.09.2026 TG-340 -',
+      detail: '805 kg (96 pcs) out of 1300 kg yet to depart from BKK'
+    },
+    {
+      id: 'offload-tg322-17',
+      tag: 'OFFLOAD STATUS',
+      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      icon: Plane,
+      iconColor: 'text-orange-400',
+      headline: '17.09.2026 TG-322 -',
+      detail: '865 kg (101 pcs) out of 1600 kg yet to depart from BKK'
+    },
+    {
+      id: 'offload-tg340-18',
+      tag: 'OFFLOAD STATUS',
+      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      icon: Plane,
+      iconColor: 'text-orange-400',
+      headline: '18.09.2026 TG-340 -',
+      detail: '1185 kg (79 pcs) out of 2000 kg yet to depart from BKK'
+    },
+    {
+      id: 'offload-tg322-19',
+      tag: 'OFFLOAD STATUS',
+      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      icon: Plane,
+      iconColor: 'text-orange-400',
+      headline: '19.09.2026 TG-322 -',
+      detail: 'Full 600 kg yet to depart from BKK'
     }
   ];
 
   // Repeat items to provide a continuous, seamless looping stream across all screen widths
-  const sequence = [...baseBulletins, ...baseBulletins, ...baseBulletins, ...baseBulletins];
+  const sequence = [...baseBulletins, ...baseBulletins];
   const duplicatedItems = [...sequence, ...sequence];
 
   return (
