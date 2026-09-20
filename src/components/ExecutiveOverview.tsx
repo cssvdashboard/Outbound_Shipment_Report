@@ -74,6 +74,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   const [modalSelectedCountry, setModalSelectedCountry] = useState<string | null>(null);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [hoveredTimelineIndex, setHoveredTimelineIndex] = useState<number | null>(null);
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -127,26 +128,36 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     ]
   };
 
-  const timelineChartOptions = {
+  const hoveredTimelineItem = hoveredTimelineIndex !== null ? deliveryTimeline[hoveredTimelineIndex] : null;
+
+  const timelineChartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    onHover: (_event: any, elements: any[]) => {
+      if (elements && elements.length > 0) {
+        setHoveredTimelineIndex(elements[0].index);
+      } else {
+        setHoveredTimelineIndex(null);
+      }
+    },
+    onClick: (_event: any, elements: any[]) => {
+      if (elements && elements.length > 0) {
+        const item = deliveryTimeline[elements[0].index];
+        if (item) {
+          onSelectTTRange(item.name);
+        }
+      }
+    },
     plugins: {
       legend: {
         display: false
       },
       tooltip: {
-        callbacks: {
-          label: function (context: any) {
-            const val = context.raw || 0;
-            const total = summary.totalCount;
-            const pct = total > 0 ? ((val / total) * 100).toFixed(2) : 0;
-            return ` ${val.toLocaleString()} AWBs (${pct}%)`;
-          }
-        }
+        enabled: false // Disabled so it doesn't collide with center text; details cleanly appear in the center black area!
       }
     },
     cutout: '72%'
-  };
+  }), [deliveryTimeline, onSelectTTRange]);
 
   const totalDelays = summary.transitDelayCount + summary.clearanceDelayCount + summary.destinationDelayCount + (summary.weekendDelayCount || 0);
   const delayRate = summary.totalCount > 0 ? ((totalDelays / summary.totalCount) * 100).toFixed(2) : '0';
@@ -446,28 +457,61 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
 
             {/* Donut Chart Container */}
-            <div className="h-56 my-3 relative flex items-center justify-center">
+            <div
+              className="h-56 my-3 relative flex items-center justify-center cursor-pointer"
+              onMouseLeave={() => setHoveredTimelineIndex(null)}
+            >
               <Doughnut data={timelineChartData} options={timelineChartOptions} />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none select-none text-center">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
-                  <strong>Total AWBs</strong>
-                </span>
-                <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight leading-tight">
-                  <strong>{summary.totalCount.toLocaleString()}</strong>
-                </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                  {summary.onTimePercentage}% ≤ 5d SLA
-                </span>
+
+              {/* Dynamic Center Hole Display (The Black Area) */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none select-none text-center transition-all duration-200">
+                {hoveredTimelineItem ? (
+                  <div className="flex flex-col items-center justify-center animate-fade-in">
+                    <span
+                      className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-sm"
+                      style={{
+                        color: hoveredTimelineItem.color || '#10b981',
+                        backgroundColor: `${hoveredTimelineItem.color || '#10b981'}15`,
+                        borderColor: `${hoveredTimelineItem.color || '#10b981'}40`
+                      }}
+                    >
+                      {hoveredTimelineItem.name}
+                    </span>
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight leading-tight my-0.5">
+                      {hoveredTimelineItem.count.toLocaleString()}
+                    </span>
+                    <span
+                      className="text-xs font-black"
+                      style={{ color: hoveredTimelineItem.color || '#10b981' }}
+                    >
+                      {hoveredTimelineItem.percentage}%{' '}
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-sans">of total</span>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                      <strong>Total AWBs</strong>
+                    </span>
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight leading-tight">
+                      <strong>{summary.totalCount.toLocaleString()}</strong>
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                      {summary.onTimePercentage}% ≤ 5d SLA
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Interactive Timeline Metric Detail Cards (Delivery Performance Breakdown) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
-            {deliveryTimeline.map((item) => {
+            {deliveryTimeline.map((item, idx) => {
               const isSelected =
                 selectedTTRange === item.name ||
                 (selectedTTRanges?.includes(item.name) && selectedTTRanges.length === 1);
+              const isHovered = hoveredTimelineIndex === idx;
 
               const colorConfigs: Record<
                 string,
@@ -570,9 +614,13 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   key={item.name}
                   type="button"
                   onClick={() => onSelectTTRange(item.name)}
+                  onMouseEnter={() => setHoveredTimelineIndex(idx)}
+                  onMouseLeave={() => setHoveredTimelineIndex(null)}
                   className={`p-3 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 flex flex-col justify-between ${
                     isSelected
                       ? `${style.bg} ${style.activeBorder}`
+                      : isHovered
+                      ? `${style.bg} border-slate-400 dark:border-slate-600 scale-[1.02] shadow-md`
                       : `border-slate-200 dark:border-slate-800 ${style.hoverClass} shadow-sm hover:shadow-md`
                   }`}
                 >
