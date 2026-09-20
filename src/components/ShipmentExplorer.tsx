@@ -69,9 +69,9 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
     // 1. Quick Filter Pills
     if (quickFilter === 'ontime') {
-      list = list.filter((s) => s.ttRange === 'Within 4-5 Days' || (s.tt > 0 && s.tt <= 5));
+      list = list.filter((s) => s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (s.tt > 0 && s.tt <= 5));
     } else if (quickFilter === 'delayed') {
-      list = list.filter((s) => s.ttRange === 'More Than 5 Days' || s.tt > 5);
+      list = list.filter((s) => s.ttRange === 'Within 6 Days' || s.ttRange === 'Within 7 Days' || s.ttRange === 'More Than 7 Days' || s.ttRange === 'More Than 5 Days' || s.tt > 5);
     } else if (quickFilter === 'customs') {
       list = list.filter((s) => s.clearanceDelay && s.clearanceDelay !== '-');
     } else if (quickFilter === 'transit') {
@@ -525,12 +525,32 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     <td className="py-2.5 px-3 text-center border-r border-slate-200 dark:border-slate-600 align-middle">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold border shadow-xs ${
-                          s.ttRange === 'Within 4-5 Days' || s.tt <= 5
+                          s.tt <= 0 || s.ttRange === 'Undelivered'
+                            ? 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                            : s.tt <= 4 || s.ttRange === 'Within 4 Days'
                             ? 'bg-emerald-100/70 text-emerald-900 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30'
-                            : 'bg-amber-100/70 text-amber-900 border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
+                            : s.tt <= 5 || s.ttRange === 'Within 5 Days'
+                            ? 'bg-cyan-100/70 text-cyan-900 border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-400 dark:border-cyan-500/30'
+                            : s.tt <= 6 || s.ttRange === 'Within 6 Days'
+                            ? 'bg-indigo-100/70 text-indigo-900 border-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30'
+                            : s.tt <= 7 || s.ttRange === 'Within 7 Days'
+                            ? 'bg-amber-100/70 text-amber-900 border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30'
+                            : 'bg-rose-100/70 text-rose-900 border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30'
                         }`}
                       >
-                        <strong>{s.tt <= 5 ? 'Within 4-5d' : '> 5 Days'}</strong>
+                        <strong>
+                          {s.tt <= 0 || s.ttRange === 'Undelivered'
+                            ? 'Undelivered'
+                            : s.tt <= 4 || s.ttRange === 'Within 4 Days'
+                            ? '≤ 4 Days'
+                            : s.tt <= 5 || s.ttRange === 'Within 5 Days'
+                            ? '5 Days'
+                            : s.tt <= 6 || s.ttRange === 'Within 6 Days'
+                            ? '6 Days'
+                            : s.tt <= 7 || s.ttRange === 'Within 7 Days'
+                            ? '7 Days'
+                            : '> 7 Days'}
+                        </strong>
                       </span>
                     </td>
 

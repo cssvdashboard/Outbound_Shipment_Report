@@ -90,9 +90,20 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
       let tt = typeof ttRaw === 'number' ? ttRaw : (parseFloat(String(ttRaw)) || 0);
       if (isNaN(tt) || tt < 0) tt = 0;
 
-      let ttRange = String(normalizeKey(row, ['TT Range', 'TTRange', 'Delivery Timeline']) || '').trim();
-      if (!ttRange) {
-        ttRange = tt <= 5 ? 'Within 4-5 Days' : 'More Than 5 Days';
+      // Do NOT take information from Excel's 'TT Range' column; derive performance breakdown strictly from TT
+      let ttRange: string;
+      if (tt <= 0) {
+        ttRange = 'Undelivered';
+      } else if (tt <= 4) {
+        ttRange = 'Within 4 Days';
+      } else if (tt <= 5) {
+        ttRange = 'Within 5 Days';
+      } else if (tt <= 6) {
+        ttRange = 'Within 6 Days';
+      } else if (tt <= 7) {
+        ttRange = 'Within 7 Days';
+      } else {
+        ttRange = 'More Than 7 Days';
       }
 
       const transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();

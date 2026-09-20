@@ -238,13 +238,16 @@ export function useLogisticsData() {
     });
   }, []);
 
-  const setTTRangeFilter = useCallback((range: string | null) => {
+  const setTTRangeFilter = useCallback((range: string | string[] | null) => {
     setFilters((prev) => {
       if (!range) return { ...prev, selectedTTRanges: [] };
-      const exists = prev.selectedTTRanges.includes(range);
+      const incoming = Array.isArray(range) ? range : [range];
+      const isSame =
+        prev.selectedTTRanges.length === incoming.length &&
+        incoming.every((r) => prev.selectedTTRanges.includes(r));
       return {
         ...prev,
-        selectedTTRanges: exists ? [] : [range]
+        selectedTTRanges: isSame ? [] : incoming
       };
     });
   }, []);

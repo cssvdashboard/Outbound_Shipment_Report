@@ -45,8 +45,9 @@ interface ExecutiveOverviewProps {
   rawShipments: Shipment[];
   selectedFinalResolution: string | null;
   selectedTTRange: string | null;
+  selectedTTRanges?: string[];
   onSelectResolution: (resolution: string) => void;
-  onSelectTTRange: (range: string) => void;
+  onSelectTTRange: (range: string | string[]) => void;
   onNavigateTab: (tab: string) => void;
 }
 
@@ -56,6 +57,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   finalResolutions,
   filteredShipments,
   selectedTTRange,
+  selectedTTRanges,
   onSelectTTRange,
   onNavigateTab
 }) => {
@@ -117,8 +119,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     datasets: [
       {
         data: deliveryTimeline.map((d) => d.count),
-        backgroundColor: ['#10b981', '#f59e0b'],
-        borderColor: ['#047857', '#d97706'],
+        backgroundColor: deliveryTimeline.map((d) => d.color || '#10b981'),
+        borderColor: deliveryTimeline.map((d) => d.color || '#047857'),
         borderWidth: 2,
         hoverOffset: 8
       }
@@ -373,11 +375,12 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           </div>
         </div>
 
-        {/* Delivery Timeline (Within 4-5 Days) */}
+        {/* Delivery Timeline (On-Time Rate <= 5 Days) */}
         <div
-          onClick={() => onSelectTTRange('Within 4-5 Days')}
+          onClick={() => onSelectTTRange(['Within 4 Days', 'Within 5 Days'])}
           className={`glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 ${
-            selectedTTRange === 'Within 4-5 Days'
+            (selectedTTRange === 'Within 4-5 Days') ||
+            (selectedTTRanges?.includes('Within 4 Days') && selectedTTRanges?.includes('Within 5 Days'))
               ? 'ring-2 ring-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 shadow-glow-emerald'
               : 'border-slate-300 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500/50 shadow-sm hover:shadow-md'
           }`}
@@ -445,73 +448,121 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             <div className="h-56 my-3 relative flex items-center justify-center">
               <Doughnut data={timelineChartData} options={timelineChartOptions} />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none select-none text-center">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
-                  <strong>On-Time</strong>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                  <strong>Total AWBs</strong>
                 </span>
-                <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono tracking-tight leading-tight">
-                  <strong>{summary.onTimePercentage}%</strong>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight leading-tight">
+                  <strong>{summary.totalCount.toLocaleString()}</strong>
+                </span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                  {summary.onTimePercentage}% ≤ 5d SLA
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Interactive Timeline Metric Detail Cards */}
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => onSelectTTRange('Within 4-5 Days')}
-              className={`p-3 sm:p-4 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 ${
-                selectedTTRange === 'Within 4-5 Days'
-                  ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-400/30 shadow-glow-emerald'
-                  : 'border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/15 shadow-sm hover:shadow-md'
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-black mb-1">
-                <span className="text-emerald-800 dark:text-emerald-400 font-extrabold uppercase text-[11px] tracking-wider">Within 4–5 Days</span>
-                <span className="font-mono font-black text-emerald-700 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md border border-emerald-300 dark:border-none">{summary.onTimePercentage}%</span>
-              </div>
-              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white mt-1">
-                {summary.onTimeCount.toLocaleString()}
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
-              </div>
-              <div className="w-full bg-slate-200 dark:bg-emerald-950/60 rounded-full h-2 mt-2 overflow-hidden">
-                <div
-                  className="bg-emerald-500 dark:bg-emerald-400 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${summary.onTimePercentage}%` }}
-                />
-              </div>
-              <div className="text-[11px] text-emerald-700 dark:text-emerald-400/80 mt-1.5 font-bold">
-                {selectedTTRange === 'Within 4-5 Days' ? '✓ Filter Applied (Click to reset)' : 'Click to filter on-time →'}
-              </div>
-            </button>
+          {/* Interactive Timeline Metric Detail Cards (5 Performance Breakdown Tiers) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+            {deliveryTimeline.map((item) => {
+              const isSelected =
+                selectedTTRange === item.name ||
+                (selectedTTRanges?.includes(item.name) && selectedTTRanges.length === 1);
 
-            <button
-              type="button"
-              onClick={() => onSelectTTRange('More Than 5 Days')}
-              className={`p-3 sm:p-4 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 ${
-                selectedTTRange === 'More Than 5 Days'
-                  ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-400/30 shadow-glow-amber'
-                  : 'border-amber-200 dark:border-amber-500/20 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-500/15 shadow-sm hover:shadow-md'
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-black mb-1">
-                <span className="text-amber-800 dark:text-amber-400 font-extrabold uppercase text-[11px] tracking-wider">&gt; 5 Working Days</span>
-                <span className="font-mono font-black text-amber-700 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-950/60 px-1.5 py-0.5 rounded-md border border-amber-300 dark:border-none">{summary.delayedTimelinePercentage}%</span>
-              </div>
-              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white mt-1">
-                {summary.delayedTimelineCount.toLocaleString()}
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
-              </div>
-              <div className="w-full bg-slate-200 dark:bg-amber-950/60 rounded-full h-2 mt-2 overflow-hidden">
-                <div
-                  className="bg-amber-500 dark:bg-amber-400 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${summary.delayedTimelinePercentage}%` }}
-                />
-              </div>
-              <div className="text-[11px] text-amber-700 dark:text-amber-400/80 mt-1.5 font-bold">
-                {selectedTTRange === 'More Than 5 Days' ? '✓ Filter Applied (Click to reset)' : 'Click to filter delayed →'}
-              </div>
-            </button>
+              const colorConfigs: Record<
+                string,
+                { bg: string; activeBorder: string; text: string; badgeBg: string; barBg: string; hoverClass: string }
+              > = {
+                'Within 4 Days': {
+                  bg: 'bg-emerald-50/90 dark:bg-emerald-950/40',
+                  activeBorder: 'border-emerald-500 ring-2 ring-emerald-400/30 shadow-glow-emerald',
+                  text: 'text-emerald-800 dark:text-emerald-400',
+                  badgeBg: 'bg-emerald-100/80 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-300 dark:border-none',
+                  barBg: 'bg-emerald-500 dark:bg-emerald-400',
+                  hoverClass: 'hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/15'
+                },
+                'Within 5 Days': {
+                  bg: 'bg-cyan-50/90 dark:bg-cyan-950/40',
+                  activeBorder: 'border-cyan-500 ring-2 ring-cyan-400/30 shadow-glow-cyan',
+                  text: 'text-cyan-800 dark:text-cyan-400',
+                  badgeBg: 'bg-cyan-100/80 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-400 border-cyan-300 dark:border-none',
+                  barBg: 'bg-cyan-500 dark:bg-cyan-400',
+                  hoverClass: 'hover:border-cyan-400 hover:bg-cyan-50/50 dark:hover:bg-cyan-500/15'
+                },
+                'Within 6 Days': {
+                  bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
+                  activeBorder: 'border-indigo-500 ring-2 ring-indigo-400/30 shadow-glow-indigo',
+                  text: 'text-indigo-800 dark:text-indigo-400',
+                  badgeBg: 'bg-indigo-100/80 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border-indigo-300 dark:border-none',
+                  barBg: 'bg-indigo-500 dark:bg-indigo-400',
+                  hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/15'
+                },
+                'Within 7 Days': {
+                  bg: 'bg-amber-50/90 dark:bg-amber-950/40',
+                  activeBorder: 'border-amber-500 ring-2 ring-amber-400/30 shadow-glow-amber',
+                  text: 'text-amber-800 dark:text-amber-400',
+                  badgeBg: 'bg-amber-100/80 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border-amber-300 dark:border-none',
+                  barBg: 'bg-amber-500 dark:bg-amber-400',
+                  hoverClass: 'hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-500/15'
+                },
+                'More Than 7 Days': {
+                  bg: 'bg-rose-50/90 dark:bg-rose-950/40',
+                  activeBorder: 'border-rose-500 ring-2 ring-rose-400/30 shadow-glow-rose',
+                  text: 'text-rose-800 dark:text-rose-400',
+                  badgeBg: 'bg-rose-100/80 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border-rose-300 dark:border-none',
+                  barBg: 'bg-rose-500 dark:bg-rose-400',
+                  hoverClass: 'hover:border-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-500/15'
+                },
+                'Undelivered': {
+                  bg: 'bg-slate-50/90 dark:bg-slate-900/60',
+                  activeBorder: 'border-slate-500 ring-2 ring-slate-400/30',
+                  text: 'text-slate-800 dark:text-slate-400',
+                  badgeBg: 'bg-slate-100/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-none',
+                  barBg: 'bg-slate-500 dark:bg-slate-400',
+                  hoverClass: 'hover:border-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/40'
+                }
+              };
+
+              const style = colorConfigs[item.name] || colorConfigs['Within 4 Days'];
+
+              return (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => onSelectTTRange(item.name)}
+                  className={`p-2.5 sm:p-3 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 flex flex-col justify-between ${
+                    isSelected
+                      ? `${style.bg} ${style.activeBorder}`
+                      : `border-slate-200 dark:border-slate-800 ${style.hoverClass} shadow-sm hover:shadow-md`
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between text-xs font-black mb-1 gap-1">
+                      <span className={`${style.text} font-extrabold uppercase text-[10px] tracking-wider truncate`}>
+                        {item.name}
+                      </span>
+                      <span className={`font-mono font-black text-[10px] px-1.5 py-0.5 rounded-md border shrink-0 ${style.badgeBg}`}>
+                        {item.percentage}%
+                      </span>
+                    </div>
+                    <div className="text-base sm:text-lg font-black text-slate-950 dark:text-white mt-1">
+                      {item.count.toLocaleString()}
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={`${style.barBg} h-1.5 rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.min(item.percentage, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-bold truncate">
+                      {isSelected ? '✓ Filter Applied' : 'Click to filter →'}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -312,6 +312,7 @@ export const App: React.FC = () => {
                   rawShipments={rawShipments}
                   selectedFinalResolution={filters.selectedFinalResolutions[0] || null}
                   selectedTTRange={filters.selectedTTRanges[0] || null}
+                  selectedTTRanges={filters.selectedTTRanges}
                   onSelectResolution={setFinalResolutionFilter}
                   onSelectTTRange={setTTRangeFilter}
                   onNavigateTab={handleTabChange}

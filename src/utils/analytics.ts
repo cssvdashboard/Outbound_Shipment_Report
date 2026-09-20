@@ -186,7 +186,7 @@ export function computeSummaryMetrics(shipments: Shipment[]): MetricSummary {
     if (tt > 0 && tt < minTT) minTT = tt;
     if (tt > maxTT) maxTT = tt;
 
-    if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    if (s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
       onTimeCount++;
     } else {
       delayedTimelineCount++;
@@ -228,31 +228,73 @@ export function computeDeliveryTimeline(shipments: Shipment[]): RatioBreakdown[]
   const total = shipments.length;
   if (total === 0) return [];
 
-  let within = 0;
-  let moreThan = 0;
+  let within4 = 0;
+  let within5 = 0;
+  let within6 = 0;
+  let within7 = 0;
+  let moreThan7 = 0;
+  let undelivered = 0;
 
   for (const s of shipments) {
-    if (s.ttRange === 'Within 4-5 Days' || (s.tt > 0 && s.tt <= 5)) {
-      within++;
+    const tt = s.tt;
+    if (s.ttRange === 'Within 4 Days' || (tt > 0 && tt <= 4)) {
+      within4++;
+    } else if (s.ttRange === 'Within 5 Days' || (tt > 4 && tt <= 5)) {
+      within5++;
+    } else if (s.ttRange === 'Within 6 Days' || (tt > 5 && tt <= 6)) {
+      within6++;
+    } else if (s.ttRange === 'Within 7 Days' || (tt > 6 && tt <= 7)) {
+      within7++;
+    } else if (s.ttRange === 'More Than 7 Days' || tt > 7) {
+      moreThan7++;
     } else {
-      moreThan++;
+      undelivered++;
     }
   }
 
-  return [
+  const list: RatioBreakdown[] = [
     {
-      name: 'Within 4-5 Days',
-      count: within,
-      percentage: Math.round((within / total) * 10000) / 100,
+      name: 'Within 4 Days',
+      count: within4,
+      percentage: Math.round((within4 / total) * 10000) / 100,
       color: '#10b981' // emerald
     },
     {
-      name: 'More Than 5 Days',
-      count: moreThan,
-      percentage: Math.round((moreThan / total) * 10000) / 100,
+      name: 'Within 5 Days',
+      count: within5,
+      percentage: Math.round((within5 / total) * 10000) / 100,
+      color: '#06b6d4' // cyan / teal
+    },
+    {
+      name: 'Within 6 Days',
+      count: within6,
+      percentage: Math.round((within6 / total) * 10000) / 100,
+      color: '#6366f1' // indigo
+    },
+    {
+      name: 'Within 7 Days',
+      count: within7,
+      percentage: Math.round((within7 / total) * 10000) / 100,
       color: '#f59e0b' // amber
+    },
+    {
+      name: 'More Than 7 Days',
+      count: moreThan7,
+      percentage: Math.round((moreThan7 / total) * 10000) / 100,
+      color: '#ef4444' // red / rose
     }
   ];
+
+  if (undelivered > 0) {
+    list.push({
+      name: 'Undelivered',
+      count: undelivered,
+      percentage: Math.round((undelivered / total) * 10000) / 100,
+      color: '#64748b' // slate
+    });
+  }
+
+  return list;
 }
 
 export function computeFinalResolutions(shipments: Shipment[]): RatioBreakdown[] {
@@ -355,7 +397,7 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
     if (tt > 0 && tt < c.minTT) c.minTT = tt;
     if (tt > c.maxTT) c.maxTT = tt;
 
-    if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    if (s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
       c.onTime++;
     }
 
@@ -449,7 +491,7 @@ export function computeCustomerComparison(
     if (tt > 0 && tt < acc.minTT) acc.minTT = tt;
     if (tt > acc.maxTT) acc.maxTT = tt;
 
-    if (s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    if (s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
       acc.onTimeCount++;
     }
 
@@ -466,7 +508,7 @@ export function computeCustomerComparison(
       acc.destinationDelays++;
       hasDelay = true;
     }
-    if (hasDelay || s.ttRange === 'More Than 5 Days' || tt > 5) {
+    if (hasDelay || tt > 5 || s.ttRange === 'Within 6 Days' || s.ttRange === 'Within 7 Days' || s.ttRange === 'More Than 7 Days' || s.ttRange === 'More Than 5 Days') {
       acc.delayCount++;
     }
   }
