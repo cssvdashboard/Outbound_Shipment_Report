@@ -461,8 +461,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
           </div>
 
-          {/* Interactive Timeline Metric Detail Cards (5 Performance Breakdown Tiers) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+          {/* Interactive Timeline Metric Detail Cards (Delivery Performance Breakdown) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
             {deliveryTimeline.map((item) => {
               const isSelected =
                 selectedTTRange === item.name ||
@@ -529,35 +529,35 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   key={item.name}
                   type="button"
                   onClick={() => onSelectTTRange(item.name)}
-                  className={`p-2.5 sm:p-3 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 flex flex-col justify-between ${
+                  className={`p-3 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 flex flex-col justify-between ${
                     isSelected
                       ? `${style.bg} ${style.activeBorder}`
                       : `border-slate-200 dark:border-slate-800 ${style.hoverClass} shadow-sm hover:shadow-md`
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between text-xs font-black mb-1 gap-1">
-                      <span className={`${style.text} font-extrabold uppercase text-[10px] tracking-wider truncate`}>
+                    <div className="flex items-start justify-between gap-1 mb-1.5">
+                      <span className={`${style.text} font-extrabold uppercase text-[11px] leading-tight break-words`}>
                         {item.name}
                       </span>
-                      <span className={`font-mono font-black text-[10px] px-1.5 py-0.5 rounded-md border shrink-0 ${style.badgeBg}`}>
+                      <span className={`font-mono font-black text-[11px] px-1.5 py-0.5 rounded-md border shrink-0 ${style.badgeBg}`}>
                         {item.percentage}%
                       </span>
                     </div>
                     <div className="text-base sm:text-lg font-black text-slate-950 dark:text-white mt-1">
                       {item.count.toLocaleString()}
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 ml-1">AWBs</span>
                     </div>
                   </div>
-                  <div className="mt-2">
+                  <div className="mt-2.5">
                     <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
                       <div
                         className={`${style.barBg} h-1.5 rounded-full transition-all duration-500`}
                         style={{ width: `${Math.min(item.percentage, 100)}%` }}
                       />
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-bold truncate">
-                      {isSelected ? '✓ Filter Applied' : 'Click to filter →'}
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 font-bold">
+                      {isSelected ? '✓ Filter Active' : 'Click to filter'}
                     </div>
                   </div>
                 </button>
