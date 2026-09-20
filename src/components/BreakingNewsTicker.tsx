@@ -29,7 +29,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       tagBg: 'bg-rose-500/20 border-rose-500/40 text-rose-300',
       icon: AlertTriangle,
       iconColor: 'text-rose-400',
-      headline: 'Service Disruption Update (09/08/2026) -',
+      headline: '(09/08/2026) -',
       detail:
         'FedEx Italy is experiencing temporary service disruptions due to an operational contingency involving the area of Piacenza.'
     },
@@ -39,7 +39,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       tagBg: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
       icon: Calendar,
       iconColor: 'text-amber-400',
-      headline: 'Holiday Alert -',
+      headline: '',
       detail: 'Japan will remain closed till 09/23/2026.'
     },
     {
@@ -126,9 +126,11 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
 
                   {/* Headline & Notice Text */}
                   <div className="inline-flex items-baseline gap-1.5">
-                    <span className="font-extrabold text-slate-950 dark:text-white">
-                      {item.headline}
-                    </span>
+                    {item.headline ? (
+                      <span className="font-extrabold text-slate-950 dark:text-white">
+                        {item.headline}
+                      </span>
+                    ) : null}
                     <span className="font-medium text-slate-800 dark:text-slate-100">
                       {item.detail}
                     </span>
