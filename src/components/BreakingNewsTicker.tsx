@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   AlertTriangle,
   Calendar,
-  Radio,
-  Pause,
-  Play,
-  ArrowRight,
-  ArrowLeft
+  Radio
 } from 'lucide-react';
 
 interface BreakingNewsTickerProps {
@@ -25,9 +21,6 @@ interface AlertItem {
 }
 
 export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
-  const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [scrollDirection, setScrollDirection] = useState<'ltr' | 'rtl'>('ltr');
-
   // Specific user-requested operational disruption and holiday alerts
   const baseBulletins: AlertItem[] = [
     {
@@ -74,11 +67,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
 
         {/* Smooth, leisurely-paced continuous scrolling track */}
         <div className="overflow-hidden relative flex-1 flex items-center h-full">
-          <div
-            className={`${
-              scrollDirection === 'ltr' ? 'animate-ticker-ltr' : 'animate-ticker-rtl'
-            } ${isPaused ? 'ticker-paused' : ''} flex items-center py-1`}
-          >
+          <div className="animate-ticker-ltr flex items-center py-1">
             {duplicatedItems.map((item, idx) => {
               const Icon = item.icon;
               return (
@@ -115,37 +104,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
         </div>
 
         {/* Right fade gradient mask */}
-        <div className="pointer-events-none absolute right-[70px] sm:right-[85px] top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-[#070d18] to-transparent z-10" />
-
-        {/* Right Controls: Direction Toggle & Pause/Play */}
-        <div className="flex items-center gap-1 px-2 h-7 rounded-lg bg-slate-100/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 shrink-0 z-20">
-          <button
-            type="button"
-            onClick={() => setScrollDirection((prev) => (prev === 'ltr' ? 'rtl' : 'ltr'))}
-            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-            title={`Switch Direction (Currently: ${scrollDirection === 'ltr' ? 'Left to Right' : 'Right to Left'})`}
-          >
-            {scrollDirection === 'ltr' ? (
-              <ArrowRight className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            ) : (
-              <ArrowLeft className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsPaused((prev) => !prev)}
-            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-            title={isPaused ? 'Resume Ticker' : 'Pause Ticker'}
-          >
-            {isPaused ? (
-              <Play className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            ) : (
-              <Pause className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-            )}
-          </button>
-        </div>
-
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-[#070d18] to-transparent z-10" />
       </div>
     </div>
   );
