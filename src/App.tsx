@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLogisticsData } from './hooks/useLogisticsData';
 import { Header } from './components/Header';
 import { SmartFilterBar } from './components/SmartFilterBar';
+import { BreakingNewsTicker } from './components/BreakingNewsTicker';
 import { ExecutiveOverview } from './components/ExecutiveOverview';
 import { DelayHub } from './components/DelayHub';
 import { CountryMatrix } from './components/CountryMatrix';
@@ -246,6 +247,12 @@ export const App: React.FC = () => {
           onTabChange={handleTabChange}
           currentMode={displayMode}
           onModeChange={handleDisplayModeChange}
+        />
+
+        {/* 1b. CONTINUOUS LIVE BREAKING NEWS INTEL TICKER */}
+        <BreakingNewsTicker
+          shipments={displayedShipments}
+          rawShipments={rawShipments}
         />
 
         {/* 2. CUSTOMER, DESTINATION & QUICK CATEGORY FILTER BAR */}

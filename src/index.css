@@ -305,6 +305,46 @@ html.teal ::-webkit-scrollbar-thumb {
   }
 }
 
+/* Continuous Breaking News Ticker Animations */
+@keyframes ticker-ltr {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes ticker-rtl {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker-ltr {
+  display: flex;
+  width: max-content;
+  animation: ticker-ltr 42s linear infinite;
+}
+
+.animate-ticker-rtl {
+  display: flex;
+  width: max-content;
+  animation: ticker-rtl 42s linear infinite;
+}
+
+.ticker-paused {
+  animation-play-state: paused !important;
+}
+
+.animate-ticker-ltr:hover,
+.animate-ticker-rtl:hover {
+  animation-play-state: paused;
+}
+
 /* ========================================================================= */
 /* PRINT / PDF EXPORT STYLESHEET                                            */
 /* ========================================================================= */
