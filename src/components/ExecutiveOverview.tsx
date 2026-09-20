@@ -377,10 +377,11 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
         {/* Delivery Timeline (On-Time Rate <= 5 Days) */}
         <div
-          onClick={() => onSelectTTRange(['Within 4 Days', 'Within 5 Days'])}
+          onClick={() => onSelectTTRange(['Day 1–4', 'Day 5'])}
           className={`glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900/40 border-2 ${
-            (selectedTTRange === 'Within 4-5 Days') ||
-            (selectedTTRanges?.includes('Within 4 Days') && selectedTTRanges?.includes('Within 5 Days'))
+            (selectedTTRanges?.includes('Day 1–4') && selectedTTRanges?.includes('Day 5')) ||
+            (selectedTTRanges?.includes('Within 4 Days') && selectedTTRanges?.includes('Within 5 Days')) ||
+            selectedTTRange === 'Within 4-5 Days'
               ? 'ring-2 ring-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 shadow-glow-emerald'
               : 'border-slate-300 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500/50 shadow-sm hover:shadow-md'
           }`}
@@ -472,6 +473,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 string,
                 { bg: string; activeBorder: string; text: string; badgeBg: string; barBg: string; hoverClass: string }
               > = {
+                'Day 1–4': {
+                  bg: 'bg-emerald-50/90 dark:bg-emerald-950/40',
+                  activeBorder: 'border-emerald-500 ring-2 ring-emerald-400/30 shadow-glow-emerald',
+                  text: 'text-emerald-800 dark:text-emerald-400',
+                  badgeBg: 'bg-emerald-100/80 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-300 dark:border-none',
+                  barBg: 'bg-emerald-500 dark:bg-emerald-400',
+                  hoverClass: 'hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/15'
+                },
                 'Within 4 Days': {
                   bg: 'bg-emerald-50/90 dark:bg-emerald-950/40',
                   activeBorder: 'border-emerald-500 ring-2 ring-emerald-400/30 shadow-glow-emerald',
@@ -479,6 +488,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   badgeBg: 'bg-emerald-100/80 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-300 dark:border-none',
                   barBg: 'bg-emerald-500 dark:bg-emerald-400',
                   hoverClass: 'hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/15'
+                },
+                'Day 5': {
+                  bg: 'bg-cyan-50/90 dark:bg-cyan-950/40',
+                  activeBorder: 'border-cyan-500 ring-2 ring-cyan-400/30 shadow-glow-cyan',
+                  text: 'text-cyan-800 dark:text-cyan-400',
+                  badgeBg: 'bg-cyan-100/80 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-400 border-cyan-300 dark:border-none',
+                  barBg: 'bg-cyan-500 dark:bg-cyan-400',
+                  hoverClass: 'hover:border-cyan-400 hover:bg-cyan-50/50 dark:hover:bg-cyan-500/15'
                 },
                 'Within 5 Days': {
                   bg: 'bg-cyan-50/90 dark:bg-cyan-950/40',
@@ -488,6 +505,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   barBg: 'bg-cyan-500 dark:bg-cyan-400',
                   hoverClass: 'hover:border-cyan-400 hover:bg-cyan-50/50 dark:hover:bg-cyan-500/15'
                 },
+                'Day 6': {
+                  bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
+                  activeBorder: 'border-indigo-500 ring-2 ring-indigo-400/30 shadow-glow-indigo',
+                  text: 'text-indigo-800 dark:text-indigo-400',
+                  badgeBg: 'bg-indigo-100/80 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border-indigo-300 dark:border-none',
+                  barBg: 'bg-indigo-500 dark:bg-indigo-400',
+                  hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/15'
+                },
                 'Within 6 Days': {
                   bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
                   activeBorder: 'border-indigo-500 ring-2 ring-indigo-400/30 shadow-glow-indigo',
@@ -496,6 +521,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   barBg: 'bg-indigo-500 dark:bg-indigo-400',
                   hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/15'
                 },
+                'Day 7': {
+                  bg: 'bg-amber-50/90 dark:bg-amber-950/40',
+                  activeBorder: 'border-amber-500 ring-2 ring-amber-400/30 shadow-glow-amber',
+                  text: 'text-amber-800 dark:text-amber-400',
+                  badgeBg: 'bg-amber-100/80 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border-amber-300 dark:border-none',
+                  barBg: 'bg-amber-500 dark:bg-amber-400',
+                  hoverClass: 'hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-500/15'
+                },
                 'Within 7 Days': {
                   bg: 'bg-amber-50/90 dark:bg-amber-950/40',
                   activeBorder: 'border-amber-500 ring-2 ring-amber-400/30 shadow-glow-amber',
@@ -503,6 +536,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   badgeBg: 'bg-amber-100/80 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border-amber-300 dark:border-none',
                   barBg: 'bg-amber-500 dark:bg-amber-400',
                   hoverClass: 'hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-500/15'
+                },
+                'Day 8+': {
+                  bg: 'bg-rose-50/90 dark:bg-rose-950/40',
+                  activeBorder: 'border-rose-500 ring-2 ring-rose-400/30 shadow-glow-rose',
+                  text: 'text-rose-800 dark:text-rose-400',
+                  badgeBg: 'bg-rose-100/80 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border-rose-300 dark:border-none',
+                  barBg: 'bg-rose-500 dark:bg-rose-400',
+                  hoverClass: 'hover:border-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-500/15'
                 },
                 'More Than 7 Days': {
                   bg: 'bg-rose-50/90 dark:bg-rose-950/40',
@@ -522,7 +563,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 }
               };
 
-              const style = colorConfigs[item.name] || colorConfigs['Within 4 Days'];
+              const style = colorConfigs[item.name] || colorConfigs['Day 1–4'] || colorConfigs['Within 4 Days'];
 
               return (
                 <button

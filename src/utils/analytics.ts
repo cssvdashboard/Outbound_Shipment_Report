@@ -186,7 +186,7 @@ export function computeSummaryMetrics(shipments: Shipment[]): MetricSummary {
     if (tt > 0 && tt < minTT) minTT = tt;
     if (tt > maxTT) maxTT = tt;
 
-    if (s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    if (s.ttRange === 'Day 1–4' || s.ttRange === 'Day 5' || s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
       onTimeCount++;
     } else {
       delayedTimelineCount++;
@@ -237,15 +237,15 @@ export function computeDeliveryTimeline(shipments: Shipment[]): RatioBreakdown[]
 
   for (const s of shipments) {
     const tt = s.tt;
-    if (s.ttRange === 'Within 4 Days' || (tt > 0 && tt <= 4)) {
+    if (s.ttRange === 'Day 1–4' || s.ttRange === 'Within 4 Days' || (tt > 0 && tt <= 4)) {
       within4++;
-    } else if (s.ttRange === 'Within 5 Days' || (tt > 4 && tt <= 5)) {
+    } else if (s.ttRange === 'Day 5' || s.ttRange === 'Within 5 Days' || (tt > 4 && tt <= 5)) {
       within5++;
-    } else if (s.ttRange === 'Within 6 Days' || (tt > 5 && tt <= 6)) {
+    } else if (s.ttRange === 'Day 6' || s.ttRange === 'Within 6 Days' || (tt > 5 && tt <= 6)) {
       within6++;
-    } else if (s.ttRange === 'Within 7 Days' || (tt > 6 && tt <= 7)) {
+    } else if (s.ttRange === 'Day 7' || s.ttRange === 'Within 7 Days' || (tt > 6 && tt <= 7)) {
       within7++;
-    } else if (s.ttRange === 'More Than 7 Days' || tt > 7) {
+    } else if (s.ttRange === 'Day 8+' || s.ttRange === 'More Than 7 Days' || tt > 7) {
       moreThan7++;
     } else {
       undelivered++;
@@ -254,31 +254,31 @@ export function computeDeliveryTimeline(shipments: Shipment[]): RatioBreakdown[]
 
   const list: RatioBreakdown[] = [
     {
-      name: 'Within 4 Days',
+      name: 'Day 1–4',
       count: within4,
       percentage: Math.round((within4 / total) * 10000) / 100,
       color: '#10b981' // emerald
     },
     {
-      name: 'Within 5 Days',
+      name: 'Day 5',
       count: within5,
       percentage: Math.round((within5 / total) * 10000) / 100,
       color: '#06b6d4' // cyan / teal
     },
     {
-      name: 'Within 6 Days',
+      name: 'Day 6',
       count: within6,
       percentage: Math.round((within6 / total) * 10000) / 100,
       color: '#6366f1' // indigo
     },
     {
-      name: 'Within 7 Days',
+      name: 'Day 7',
       count: within7,
       percentage: Math.round((within7 / total) * 10000) / 100,
       color: '#f59e0b' // amber
     },
     {
-      name: 'More Than 7 Days',
+      name: 'Day 8+',
       count: moreThan7,
       percentage: Math.round((moreThan7 / total) * 10000) / 100,
       color: '#ef4444' // red / rose
@@ -397,7 +397,7 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
     if (tt > 0 && tt < c.minTT) c.minTT = tt;
     if (tt > c.maxTT) c.maxTT = tt;
 
-    if (s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    if (s.ttRange === 'Day 1–4' || s.ttRange === 'Day 5' || s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
       c.onTime++;
     }
 
@@ -491,7 +491,7 @@ export function computeCustomerComparison(
     if (tt > 0 && tt < acc.minTT) acc.minTT = tt;
     if (tt > acc.maxTT) acc.maxTT = tt;
 
-    if (s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    if (s.ttRange === 'Day 1–4' || s.ttRange === 'Day 5' || s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
       acc.onTimeCount++;
     }
 
@@ -508,7 +508,7 @@ export function computeCustomerComparison(
       acc.destinationDelays++;
       hasDelay = true;
     }
-    if (hasDelay || tt > 5 || s.ttRange === 'Within 6 Days' || s.ttRange === 'Within 7 Days' || s.ttRange === 'More Than 7 Days' || s.ttRange === 'More Than 5 Days') {
+    if (hasDelay || tt > 5 || s.ttRange === 'Day 6' || s.ttRange === 'Day 7' || s.ttRange === 'Day 8+' || s.ttRange === 'Within 6 Days' || s.ttRange === 'Within 7 Days' || s.ttRange === 'More Than 7 Days' || s.ttRange === 'More Than 5 Days') {
       acc.delayCount++;
     }
   }

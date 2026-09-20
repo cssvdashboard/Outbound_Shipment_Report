@@ -95,15 +95,15 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
       if (tt <= 0) {
         ttRange = 'Undelivered';
       } else if (tt <= 4) {
-        ttRange = 'Within 4 Days';
+        ttRange = 'Day 1–4';
       } else if (tt <= 5) {
-        ttRange = 'Within 5 Days';
+        ttRange = 'Day 5';
       } else if (tt <= 6) {
-        ttRange = 'Within 6 Days';
+        ttRange = 'Day 6';
       } else if (tt <= 7) {
-        ttRange = 'Within 7 Days';
+        ttRange = 'Day 7';
       } else {
-        ttRange = 'More Than 7 Days';
+        ttRange = 'Day 8+';
       }
 
       const transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();

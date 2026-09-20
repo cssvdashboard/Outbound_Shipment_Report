@@ -14,7 +14,7 @@ export interface Shipment {
   pickup?: string | number;
   pod?: string | number;
   tt: number;
-  ttRange: string; // "Within 4 Days" | "Within 5 Days" | "Within 6 Days" | "Within 7 Days" | "More Than 7 Days" | "Undelivered"
+  ttRange: string; // "Day 1–4" | "Day 5" | "Day 6" | "Day 7" | "Day 8+" | "Undelivered"
   transitDelay?: string;
   clearanceDelay?: string;
   destinationDelay?: string;
