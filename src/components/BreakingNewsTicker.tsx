@@ -52,22 +52,22 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
     <div className="w-full bg-white/95 dark:bg-[#070d18]/95 border-y-2 border-amber-400/60 dark:border-amber-500/30 backdrop-blur-md print:hidden shadow-xs transition-colors">
       <div className="w-full px-2 sm:px-4 flex items-center h-10 relative overflow-hidden">
         
-        {/* Left Fixed Breaking Live Intel Badge */}
+        {/* Left Fixed Update Badge */}
         <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 h-7 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-[11px] uppercase tracking-wider rounded-lg shrink-0 select-none z-20 shadow-md">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
           </span>
           <Radio className="w-3.5 h-3.5 animate-pulse hidden xs:inline" />
-          <span className="font-extrabold tracking-tight">LIVE INTEL</span>
+          <span className="font-extrabold tracking-tight">UPDATE</span>
         </div>
 
         {/* Left fade gradient mask */}
-        <div className="pointer-events-none absolute left-[96px] sm:left-[118px] top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-[#070d18] to-transparent z-10" />
+        <div className="pointer-events-none absolute left-[86px] sm:left-[108px] top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-[#070d18] to-transparent z-10" />
 
-        {/* Smooth, leisurely-paced continuous scrolling track */}
+        {/* Smooth, leisurely-paced continuous scrolling track (Right to Left) */}
         <div className="overflow-hidden relative flex-1 flex items-center h-full">
-          <div className="animate-ticker-ltr flex items-center py-1">
+          <div className="animate-ticker-rtl flex items-center py-1">
             {duplicatedItems.map((item, idx) => {
               const Icon = item.icon;
               return (
