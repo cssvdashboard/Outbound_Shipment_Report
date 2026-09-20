@@ -76,17 +76,29 @@ export interface RatioBreakdown {
 export interface CountryPerformance {
   countryCode: string;
   awbCount: number;
-  avgTT: number;
+  avgTT?: number;
   maxTT: number;
   minTT: number;
   onTimeCount: number;
   onTimePercentage: number;
-  transitDelays: number;
-  clearanceDelays: number;
-  destinationDelays: number;
-  weekendDelays: number;
-  totalDelays: number;
+  transitDelays?: number;
+  clearanceDelays?: number;
+  destinationDelays?: number;
+  weekendDelays?: number;
+  totalDelays?: number;
   totalWeight?: number;
+  day1to4Count: number;
+  day1to4Percentage: number;
+  day5Count: number;
+  day5Percentage: number;
+  day6Count: number;
+  day6Percentage: number;
+  day7Count: number;
+  day7Percentage: number;
+  day8PlusCount: number;
+  day8PlusPercentage: number;
+  undeliveredCount: number;
+  undeliveredPercentage: number;
 }
 
 export interface CustomerComparisonMetric {

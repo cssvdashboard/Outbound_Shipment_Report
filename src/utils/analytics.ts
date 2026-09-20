@@ -369,6 +369,12 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
       destinationDelays: number;
       weekendDelays: number;
       totalWeight: number;
+      day1to4: number;
+      day5: number;
+      day6: number;
+      day7: number;
+      day8Plus: number;
+      undelivered: number;
     }
   > = {};
 
@@ -385,7 +391,13 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
         clearanceDelays: 0,
         destinationDelays: 0,
         weekendDelays: 0,
-        totalWeight: 0
+        totalWeight: 0,
+        day1to4: 0,
+        day5: 0,
+        day6: 0,
+        day7: 0,
+        day8Plus: 0,
+        undelivered: 0
       };
     }
 
@@ -397,8 +409,21 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
     if (tt > 0 && tt < c.minTT) c.minTT = tt;
     if (tt > c.maxTT) c.maxTT = tt;
 
-    if (s.ttRange === 'Day 1–4' || s.ttRange === 'Day 5' || s.ttRange === 'Within 4 Days' || s.ttRange === 'Within 5 Days' || s.ttRange === 'Within 4-5 Days' || (tt > 0 && tt <= 5)) {
+    // Day-wise milestone accumulation
+    if (s.ttRange === 'Day 1–4' || s.ttRange === 'Within 4 Days' || (tt > 0 && tt <= 4)) {
+      c.day1to4++;
       c.onTime++;
+    } else if (s.ttRange === 'Day 5' || s.ttRange === 'Within 5 Days' || (tt > 4 && tt <= 5)) {
+      c.day5++;
+      c.onTime++;
+    } else if (s.ttRange === 'Day 6' || s.ttRange === 'Within 6 Days' || (tt > 5 && tt <= 6)) {
+      c.day6++;
+    } else if (s.ttRange === 'Day 7' || s.ttRange === 'Within 7 Days' || (tt > 6 && tt <= 7)) {
+      c.day7++;
+    } else if (s.ttRange === 'Day 8+' || s.ttRange === 'More Than 7 Days' || tt > 7) {
+      c.day8Plus++;
+    } else {
+      c.undelivered++;
     }
 
     if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') {
@@ -431,7 +456,19 @@ export function computeCountryPerformance(shipments: Shipment[]): CountryPerform
         clearanceDelays: d.clearanceDelays,
         destinationDelays: d.destinationDelays,
         weekendDelays: d.weekendDelays,
-        totalDelays
+        totalDelays,
+        day1to4Count: d.day1to4,
+        day1to4Percentage: d.count > 0 ? Math.round((d.day1to4 / d.count) * 10000) / 100 : 0,
+        day5Count: d.day5,
+        day5Percentage: d.count > 0 ? Math.round((d.day5 / d.count) * 10000) / 100 : 0,
+        day6Count: d.day6,
+        day6Percentage: d.count > 0 ? Math.round((d.day6 / d.count) * 10000) / 100 : 0,
+        day7Count: d.day7,
+        day7Percentage: d.count > 0 ? Math.round((d.day7 / d.count) * 10000) / 100 : 0,
+        day8PlusCount: d.day8Plus,
+        day8PlusPercentage: d.count > 0 ? Math.round((d.day8Plus / d.count) * 10000) / 100 : 0,
+        undeliveredCount: d.undelivered,
+        undeliveredPercentage: d.count > 0 ? Math.round((d.undelivered / d.count) * 10000) / 100 : 0
       };
     })
     .sort((a, b) => b.awbCount - a.awbCount);

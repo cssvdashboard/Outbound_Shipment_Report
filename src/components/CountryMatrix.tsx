@@ -4,11 +4,8 @@ import {
   Search,
   ArrowUpDown,
   Download,
-  ShieldAlert,
-  Plane,
   MapPin,
   Calendar,
-  AlertTriangle,
   X,
   Copy,
   Check,
@@ -20,10 +17,23 @@ import {
   Clock,
   Eye,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  RotateCcw,
+  Sparkles,
+  ChevronDown
 } from 'lucide-react';
-import { CountryPerformance, Shipment } from '../types/logistics';
+import { CountryPerformance, Shipment, RatioBreakdown } from '../types/logistics';
+import { computeDeliveryTimeline } from '../utils/analytics';
 import * as XLSX from 'xlsx';
+import { Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface CountryMatrixProps {
   countryData: CountryPerformance[];
@@ -33,8 +43,8 @@ interface CountryMatrixProps {
 }
 
 export interface CountryModalTarget {
-  countryCode?: string; // If undefined, applies to all destinations
-  category: 'all' | 'clearance' | 'transit' | 'destination' | 'weekend' | 'totalDelays';
+  countryCode?: string; // If undefined or 'ALL', applies to all destinations
+  category: 'all' | 'day1to4' | 'day5' | 'day6' | 'day7' | 'day8Plus' | 'undelivered' | 'clearance' | 'transit' | 'destination' | 'weekend' | 'totalDelays';
   title: string;
 }
 
@@ -42,15 +52,14 @@ type SortField =
   | 'countryCode'
   | 'awbCount'
   | 'totalWeight'
-  | 'avgTT'
-  | 'minTT'
-  | 'maxTT'
   | 'onTimePercentage'
-  | 'clearanceDelays'
-  | 'transitDelays'
-  | 'destinationDelays'
-  | 'weekendDelays'
-  | 'totalDelays';
+  | 'day1to4Count'
+  | 'day5Count'
+  | 'day6Count'
+  | 'day7Count'
+  | 'day8PlusCount'
+  | 'minTT'
+  | 'maxTT';
 
 type SortOrder = 'asc' | 'desc';
 
@@ -63,8 +72,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('awbCount');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [selectedFocusCountry, setSelectedFocusCountry] = useState<string>('ALL');
 
-  // Modal State for Country & Delay AWB List Popup Window
+  // Modal State for Country & Day-Wise AWB List Popup Window
   const [modalTarget, setModalTarget] = useState<CountryModalTarget | null>(null);
   const [modalSearch, setModalSearch] = useState<string>('');
   const [modalPageSize, setModalPageSize] = useState<number>(25);
@@ -102,6 +112,71 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     return map;
   }, [effectiveShipments]);
 
+  // Destination shipments for the focus chart (either ALL or selected country)
+  const focusShipments = useMemo(() => {
+    if (selectedFocusCountry === 'ALL') {
+      return effectiveShipments;
+    }
+    return effectiveShipments.filter(
+      (s) => (s.destination || 'UNKNOWN').toUpperCase() === selectedFocusCountry.toUpperCase()
+    );
+  }, [effectiveShipments, selectedFocusCountry]);
+
+  // Day-wise delivery performance timeline for the doughnut chart & matrix cards
+  const focusDeliveryTimeline: RatioBreakdown[] = useMemo(() => {
+    return computeDeliveryTimeline(focusShipments);
+  }, [focusShipments]);
+
+  // Calculate focus on-time stats
+  const focusStats = useMemo(() => {
+    const total = focusShipments.length;
+    if (total === 0) return { total: 0, onTimeCount: 0, onTimePercentage: 0 };
+    const day1to4 = focusDeliveryTimeline.find((d) => d.name === 'Day 1–4')?.count || 0;
+    const day5 = focusDeliveryTimeline.find((d) => d.name === 'Day 5')?.count || 0;
+    const onTimeCount = day1to4 + day5;
+    const onTimePercentage = Math.round((onTimeCount / total) * 10000) / 100;
+    return { total, onTimeCount, onTimePercentage };
+  }, [focusShipments, focusDeliveryTimeline]);
+
+  // Donut chart configuration for Destination Day-Wise Delivery Breakdown
+  const doughnutChartData = useMemo(() => {
+    return {
+      labels: focusDeliveryTimeline.map((d) => `${d.name} (${d.percentage}%)`),
+      datasets: [
+        {
+          data: focusDeliveryTimeline.map((d) => d.count),
+          backgroundColor: focusDeliveryTimeline.map((d) => d.color || '#10b981'),
+          borderColor: focusDeliveryTimeline.map((d) => d.color || '#047857'),
+          borderWidth: 2,
+          hoverOffset: 8
+        }
+      ]
+    };
+  }, [focusDeliveryTimeline]);
+
+  const doughnutChartOptions = useMemo(() => {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context: any) {
+              const val = context.raw || 0;
+              const total = focusShipments.length;
+              const pct = total > 0 ? ((val / total) * 100).toFixed(2) : 0;
+              return ` ${val.toLocaleString()} AWBs (${pct}%)`;
+            }
+          }
+        }
+      },
+      cutout: '72%'
+    };
+  }, [focusShipments.length]);
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -136,14 +211,11 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     return list;
   }, [countryData, countryWeightMap, searchTerm, sortField, sortOrder]);
 
-
-
   const handleExport = () => {
     if (filteredAndSortedData.length === 0) return;
 
     const exportRows = filteredAndSortedData.map((c) => {
       const share = totalAWBs > 0 ? ((c.awbCount / totalAWBs) * 100).toFixed(2) : '0';
-      const delayRate = c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : '0';
       const weightInKg = c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
       const weightInTons = weightInKg / 1000;
 
@@ -153,24 +225,28 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         'Volume Share (%)': `${share}%`,
         'Weight (Tons)': Number(weightInTons.toFixed(2)),
         'Weight (Kg)': Number(weightInKg.toFixed(1)),
-        'Avg TT (Days)': c.avgTT,
-        'Min TT (Days)': c.minTT,
-        'Max TT (Days)': c.maxTT,
         'On-Time (%)': `${c.onTimePercentage}%`,
-        'On-Time Count': c.onTimeCount,
-        'Clearance Delays': c.clearanceDelays,
-        'Transit Delays': c.transitDelays,
-        'Destination Delays': c.destinationDelays,
-        'Weekend Delays': c.weekendDelays,
-        'Total Delays': c.totalDelays,
-        'Delay Rate (%)': `${delayRate}%`
+        'On-Time Count (<=5d)': c.onTimeCount,
+        'Day 1–4 (AWB)': c.day1to4Count,
+        'Day 1–4 (%)': `${c.day1to4Percentage}%`,
+        'Day 5 (AWB)': c.day5Count,
+        'Day 5 (%)': `${c.day5Percentage}%`,
+        'Day 6 (AWB)': c.day6Count,
+        'Day 6 (%)': `${c.day6Percentage}%`,
+        'Day 7 (AWB)': c.day7Count,
+        'Day 7 (%)': `${c.day7Percentage}%`,
+        'Day 8+ (AWB)': c.day8PlusCount,
+        'Day 8+ (%)': `${c.day8PlusPercentage}%`,
+        'Undelivered (AWB)': c.undeliveredCount,
+        'Min TT (Days)': c.minTT,
+        'Max TT (Days)': c.maxTT
       };
     });
 
     const worksheet = XLSX.utils.json_to_sheet(exportRows);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Country_Performance');
-    XLSX.writeFile(workbook, `Destination_Performance_Matrix_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Destination_DayWise');
+    XLSX.writeFile(workbook, `Destination_DayWise_Breakdown_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   // Filter shipments for the active popup modal
@@ -180,7 +256,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
     return effectiveShipments.filter((s) => {
       // 1. Destination Country check
-      if (countryCode) {
+      if (countryCode && countryCode !== 'ALL') {
         const destCode = (s.destination || 'UNKNOWN').toUpperCase().trim();
         if (destCode !== countryCode.toUpperCase().trim()) return false;
       }
@@ -190,31 +266,25 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         return true;
       }
 
-      if (category === 'clearance') {
-        return Boolean(s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '');
-      }
+      const tt = typeof s.tt === 'number' && !isNaN(s.tt) ? s.tt : 0;
 
-      if (category === 'transit') {
-        return Boolean(s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '');
+      if (category === 'day1to4') {
+        return s.ttRange === 'Day 1–4' || s.ttRange === 'Within 4 Days' || (tt > 0 && tt <= 4);
       }
-
-      if (category === 'destination') {
-        return Boolean(s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '');
+      if (category === 'day5') {
+        return s.ttRange === 'Day 5' || s.ttRange === 'Within 5 Days' || (tt > 4 && tt <= 5);
       }
-
-      if (category === 'weekend') {
-        const wd = (s.weekendDelay || '').toString().toLowerCase().trim();
-        return wd === 'yes' || wd === '1' || wd === 'true';
+      if (category === 'day6') {
+        return s.ttRange === 'Day 6' || s.ttRange === 'Within 6 Days' || (tt > 5 && tt <= 6);
       }
-
-      if (category === 'totalDelays') {
-        const hasClearance = Boolean(s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '');
-        const hasTransit = Boolean(s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '');
-        const hasDest = Boolean(s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '');
-        const wd = (s.weekendDelay || '').toString().toLowerCase().trim();
-        const hasWeekend = wd === 'yes' || wd === '1' || wd === 'true';
-        const isTtDelayed = typeof s.tt === 'number' && s.tt > 5;
-        return hasClearance || hasTransit || hasDest || hasWeekend || isTtDelayed;
+      if (category === 'day7') {
+        return s.ttRange === 'Day 7' || s.ttRange === 'Within 7 Days' || (tt > 6 && tt <= 7);
+      }
+      if (category === 'day8Plus') {
+        return s.ttRange === 'Day 8+' || s.ttRange === 'More Than 7 Days' || tt > 7;
+      }
+      if (category === 'undelivered') {
+        return s.ttRange === 'Undelivered' || (s.finalResolution?.toLowerCase() !== 'delivered' && tt <= 0);
       }
 
       return true;
@@ -234,9 +304,6 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
         (s.city && s.city.toLowerCase().includes(q)) ||
         (s.destLocCd && s.destLocCd.toLowerCase().includes(q)) ||
         (s.finalResolution && s.finalResolution.toLowerCase().includes(q)) ||
-        (s.transitDelay && s.transitDelay.toLowerCase().includes(q)) ||
-        (s.clearanceDelay && s.clearanceDelay.toLowerCase().includes(q)) ||
-        (s.destinationDelay && s.destinationDelay.toLowerCase().includes(q)) ||
         (s.remarks && s.remarks.toLowerCase().includes(q))
       );
     });
@@ -253,7 +320,6 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
   const modalStats = useMemo(() => {
     if (modalAllShipments.length === 0) return null;
     const total = modalAllShipments.length;
-    let sumTT = 0;
     let minTT = Number.MAX_VALUE;
     let maxTT = 0;
     let onTimeCount = 0;
@@ -262,17 +328,15 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
 
     for (const s of modalAllShipments) {
       const tt = typeof s.tt === 'number' && !isNaN(s.tt) ? s.tt : 0;
-      sumTT += tt;
       if (tt > 0 && tt < minTT) minTT = tt;
       if (tt > maxTT) maxTT = tt;
-      if (tt <= 5) onTimeCount++;
+      if (tt > 0 && tt <= 5) onTimeCount++;
       totalWeight += s.weight || 0;
       totalPkgs += s.pkgCount || 0;
     }
 
     return {
       total,
-      avgTT: (sumTT / total).toFixed(2),
       minTT: minTT === Number.MAX_VALUE ? '0.00' : minTT.toFixed(2),
       maxTT: maxTT.toFixed(2),
       onTimeRate: ((onTimeCount / total) * 100).toFixed(1),
@@ -294,12 +358,8 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
       'City': s.city || '',
       'Pickup Date': s.pickup || '',
       'Transit Time (Days)': s.tt,
-      'TT Range': s.ttRange,
+      'Delivery Milestone': s.ttRange,
       'Final Resolution': s.finalResolution || 'Delivered',
-      'Clearance Delay': s.clearanceDelay || '',
-      'Transit Delay': s.transitDelay || '',
-      'Destination Delay': s.destinationDelay || '',
-      'Weekend Delay': s.weekendDelay || '',
       'Remarks': s.remarks || '',
       'Weight (kg)': s.weight,
       'Package Count': s.pkgCount
@@ -324,12 +384,8 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
       'City': s.city || '',
       'Pickup Date': s.pickup || '',
       'Transit Time (Days)': s.tt,
-      'TT Range': s.ttRange,
+      'Delivery Milestone': s.ttRange,
       'Final Resolution': s.finalResolution || 'Delivered',
-      'Clearance Delay': s.clearanceDelay || '',
-      'Transit Delay': s.transitDelay || '',
-      'Destination Delay': s.destinationDelay || '',
-      'Weekend Delay': s.weekendDelay || '',
       'Remarks': s.remarks || ''
     }));
 
@@ -360,391 +416,614 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
     setTimeout(() => setCopiedAwb(null), 2000);
   };
 
+  // Milestone color and styling definitions
+  const milestoneStyleMap: Record<
+    string,
+    {
+      bg: string;
+      activeBorder: string;
+      text: string;
+      badgeBg: string;
+      barBg: string;
+      borderClass: string;
+      badgeClass: string;
+    }
+  > = {
+    'Day 1–4': {
+      bg: 'bg-emerald-50/90 dark:bg-emerald-950/40',
+      activeBorder: 'border-emerald-500 ring-2 ring-emerald-400/30 shadow-glow-emerald',
+      text: 'text-emerald-800 dark:text-emerald-300',
+      badgeBg: 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/50',
+      barBg: 'bg-emerald-500',
+      borderClass: 'border-emerald-300 dark:border-emerald-700/60',
+      badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
+    },
+    'Day 5': {
+      bg: 'bg-cyan-50/90 dark:bg-cyan-950/40',
+      activeBorder: 'border-cyan-500 ring-2 ring-cyan-400/30 shadow-glow-cyan',
+      text: 'text-cyan-800 dark:text-cyan-300',
+      badgeBg: 'bg-cyan-100/80 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300 border-cyan-300 dark:border-cyan-700/50',
+      barBg: 'bg-cyan-500',
+      borderClass: 'border-cyan-300 dark:border-cyan-700/60',
+      badgeClass: 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/40'
+    },
+    'Day 6': {
+      bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
+      activeBorder: 'border-indigo-500 ring-2 ring-indigo-400/30 shadow-glow-indigo',
+      text: 'text-indigo-800 dark:text-indigo-300',
+      badgeBg: 'bg-indigo-100/80 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700/50',
+      barBg: 'bg-indigo-500',
+      borderClass: 'border-indigo-300 dark:border-indigo-700/60',
+      badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
+    },
+    'Day 7': {
+      bg: 'bg-amber-50/90 dark:bg-amber-950/40',
+      activeBorder: 'border-amber-500 ring-2 ring-amber-400/30 shadow-glow-amber',
+      text: 'text-amber-800 dark:text-amber-300',
+      badgeBg: 'bg-amber-100/80 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-700/50',
+      barBg: 'bg-amber-500',
+      borderClass: 'border-amber-300 dark:border-amber-700/60',
+      badgeClass: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40'
+    },
+    'Day 8+': {
+      bg: 'bg-rose-50/90 dark:bg-rose-950/40',
+      activeBorder: 'border-rose-500 ring-2 ring-rose-400/30 shadow-glow-rose',
+      text: 'text-rose-800 dark:text-rose-300',
+      badgeBg: 'bg-rose-100/80 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-700/50',
+      barBg: 'bg-rose-500',
+      borderClass: 'border-rose-300 dark:border-rose-700/60',
+      badgeClass: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
+    },
+    'Undelivered': {
+      bg: 'bg-slate-50/90 dark:bg-slate-900/60',
+      activeBorder: 'border-slate-400 ring-2 ring-slate-400/30',
+      text: 'text-slate-700 dark:text-slate-300',
+      badgeBg: 'bg-slate-200/80 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700',
+      barBg: 'bg-slate-500',
+      borderClass: 'border-slate-300 dark:border-slate-700',
+      badgeClass: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+    }
+  };
+
+  // Helper to open modal for specific milestone
+  const openMilestoneModal = (category: CountryModalTarget['category'], milestoneName: string, countryCode?: string) => {
+    const effectiveCountry = countryCode || (selectedFocusCountry !== 'ALL' ? selectedFocusCountry : undefined);
+    const countryLabel = effectiveCountry ? `${effectiveCountry} — ` : 'All Destinations — ';
+    setModalTarget({
+      countryCode: effectiveCountry,
+      category,
+      title: `${countryLabel}${milestoneName} Shipments`
+    });
+    setModalSearch('');
+    setModalCurrentPage(1);
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Header with Title and Search/Export Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-slate-300 dark:border-slate-700 backdrop-blur-sm shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <Globe className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-              <strong>Destination Performance Matrix</strong>
-            </h2>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 font-bold border border-sky-300 dark:border-sky-500/30">
-              {filteredAndSortedData.length} Countries
-            </span>
+    <div className="space-y-5">
+      {/* ========================================================================= */}
+      {/* SECTION 1: DESTINATION DAY-WISE DOUGHNUT CHART MATRIX                     */}
+      {/* ========================================================================= */}
+      <div className="glass-card p-5 sm:p-6 rounded-3xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60 shadow-sm">
+        
+        {/* Header with Title & Country Focus Selector */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Destination Delivery Speed Matrix (Day-Wise Breakdown)</span>
+              </h2>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              Day-by-day milestone distribution for outbound destinations. Click any card or slice to inspect shipment records.
+            </p>
           </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            Comprehensive country-by-country delivery speeds, on-time rates, volume distribution, and delay breakdowns.
-            <span className="text-sky-700 dark:text-sky-400 font-semibold ml-1">Click on any number or row to view the underlying AWB list.</span>
-          </p>
+
+          {/* Focus Country Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-bold">
+              <span>Focus:</span>
+            </div>
+            <div className="relative">
+              <select
+                value={selectedFocusCountry}
+                onChange={(e) => setSelectedFocusCountry(e.target.value)}
+                className="appearance-none pl-3 pr-8 py-1.5 rounded-xl text-xs font-black bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-700 focus:outline-none focus:border-sky-500 cursor-pointer shadow-sm"
+              >
+                <option value="ALL">All Destinations ({effectiveShipments.length.toLocaleString()} AWBs)</option>
+                {countryData.map((c) => (
+                  <option key={c.countryCode} value={c.countryCode}>
+                    {c.countryCode} — {c.awbCount.toLocaleString()} AWBs ({c.onTimePercentage}% ≤5d)
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {selectedFocusCountry !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => setSelectedFocusCountry('ALL')}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-sky-50 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-500/40 hover:bg-sky-100 transition-colors cursor-pointer"
+                title="Reset to All Destinations"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-center">
-          {/* Country Search */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Filter country code..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-sky-500 w-44 shadow-inner"
-            />
+        {/* Visual Matrix Grid: Left Doughnut Chart + Right Interactive Milestone Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4 items-center">
+          
+          {/* Doughnut Chart Matrix Display */}
+          <div className="lg:col-span-4 flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80">
+            <div className="h-60 w-full relative flex items-center justify-center">
+              <Doughnut data={doughnutChartData} options={doughnutChartOptions} />
+              
+              {/* Doughnut Inner Center Stat */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none select-none text-center">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider">
+                  {selectedFocusCountry === 'ALL' ? 'All Destinations' : selectedFocusCountry}
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight leading-tight">
+                  {focusStats.total.toLocaleString()}
+                </span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                  {focusStats.onTimePercentage}% ≤ 5d SLA
+                </span>
+              </div>
+            </div>
+
+            <div className="text-center mt-2">
+              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                {focusStats.onTimeCount.toLocaleString()} of {focusStats.total.toLocaleString()} delivered within 5 days SLA
+              </span>
+            </div>
           </div>
 
-          {/* Export Button */}
-          <button
-            type="button"
-            onClick={handleExport}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-600 transition-colors cursor-pointer shadow-sm"
-            title="Export country performance table with full delay breakdown to Excel"
-          >
-            <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="hidden sm:inline"><strong>Export</strong></span>
-          </button>
+          {/* Milestone Breakdown Cards Matrix */}
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {focusDeliveryTimeline.map((item) => {
+              const styles = milestoneStyleMap[item.name] || milestoneStyleMap['Undelivered'];
+              const categoryKey =
+                item.name === 'Day 1–4'
+                  ? 'day1to4'
+                  : item.name === 'Day 5'
+                  ? 'day5'
+                  : item.name === 'Day 6'
+                  ? 'day6'
+                  : item.name === 'Day 7'
+                  ? 'day7'
+                  : item.name === 'Day 8+'
+                  ? 'day8Plus'
+                  : 'undelivered';
+
+              return (
+                <div
+                  key={item.name}
+                  onClick={() => openMilestoneModal(categoryKey as any, item.name)}
+                  className={`p-3.5 rounded-2xl border-2 ${styles.borderClass} ${styles.bg} hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm flex flex-col justify-between group`}
+                  title={`Click to view all ${item.count.toLocaleString()} shipments in ${item.name}`}
+                >
+                  <div className="flex items-center justify-between gap-1 mb-2">
+                    <span className={`text-xs font-black ${styles.text} uppercase tracking-wide group-hover:underline`}>
+                      {item.name}
+                    </span>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${styles.badgeClass}`}>
+                      {item.percentage}%
+                    </span>
+                  </div>
+
+                  <div className="my-1">
+                    <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                      {item.count.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+                      AWBs
+                    </div>
+                  </div>
+
+                  {/* Visual Progress Bar */}
+                  <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-300 dark:border-slate-700">
+                    <div
+                      className={`h-1.5 rounded-full ${styles.barBg}`}
+                      style={{ width: `${Math.min(item.percentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
         </div>
       </div>
 
+      {/* ========================================================================= */}
+      {/* SECTION 2: DESTINATION DETAILS TABLE (DAY-WISE PERFORMANCE BREAKDOWN)     */}
+      {/* ========================================================================= */}
+      <div className="space-y-3">
+        {/* Table Toolbar with Search and Export */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-slate-300 dark:border-slate-700 backdrop-blur-sm shadow-sm">
+          <div>
+            <div className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                Destination Day-Wise Performance Breakdown
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 font-bold border border-sky-300 dark:border-sky-500/30">
+                {filteredAndSortedData.length} Countries
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+              Detailed milestone counts and percentages per country.
+              <span className="text-sky-700 dark:text-sky-400 font-semibold ml-1">
+                Click any day cell to view individual shipments for that milestone.
+              </span>
+            </p>
+          </div>
 
+          <div className="flex items-center gap-2 self-end sm:self-center">
+            {/* Country Search */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Filter country code..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-sky-500 w-44 shadow-inner"
+              />
+            </div>
 
-      {/* Table Container with high-contrast, prominent grid borders and centered content */}
-      <div className="rounded-2xl overflow-hidden shadow-sm border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40">
-        <div className="max-h-[580px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-center text-xs min-w-[1000px] border-collapse border-spacing-0">
-            <thead className="sticky top-0 bg-slate-100 dark:bg-[#0f172a] border-b-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 font-extrabold uppercase text-[10px] tracking-wider z-10 shadow-sm">
-              <tr className="border-b border-slate-300 dark:border-slate-600">
-                <th
-                  onClick={() => handleSort('countryCode')}
-                  className="py-3 px-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700 text-center"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>Country</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('awbCount')}
-                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>Volume (AWB)</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('totalWeight')}
-                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>Weight (Tons / Kg)</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('avgTT')}
-                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>Avg TT</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('minTT')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>Min TT</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('maxTT')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>Max TT</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('onTimePercentage')}
-                  className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r-2 border-slate-400 dark:border-slate-600"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <span><strong>On-Time %</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('clearanceDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors font-black bg-slate-100 dark:bg-purple-950/20 border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <ShieldAlert className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                    <span className="text-purple-700 dark:text-purple-300"><strong>Clearance</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-purple-600 dark:text-purple-400/80" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('transitDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors font-black bg-slate-100 dark:bg-sky-950/20 border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <Plane className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                    <span className="text-sky-700 dark:text-sky-300"><strong>Transit</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-sky-600 dark:text-sky-400/80" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('destinationDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors font-black bg-slate-100 dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                    <span className="text-amber-700 dark:text-amber-300"><strong>Dest. Delay</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-amber-600 dark:text-amber-400/80" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('weekendDelays')}
-                  className="py-3 px-2 text-center cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors font-black bg-slate-100 dark:bg-rose-950/20 border-r border-slate-300 dark:border-slate-700"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                    <span className="text-rose-700 dark:text-rose-300"><strong>Weekend</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-rose-600 dark:text-rose-400/80" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('totalDelays')}
-                  className="py-3 px-3 text-center cursor-pointer hover:bg-amber-100/60 dark:hover:bg-yellow-950/40 transition-colors font-black bg-slate-100 dark:bg-yellow-950/20"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-yellow-400" />
-                    <span className="text-amber-700 dark:text-yellow-300"><strong>Total Delays</strong></span>
-                    <ArrowUpDown className="w-3 h-3 text-amber-600 dark:text-yellow-400/80" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-300 dark:divide-slate-700/80 font-sans">
-              {filteredAndSortedData.map((c) => {
-                const sharePct = totalAWBs > 0 ? ((c.awbCount / totalAWBs) * 100).toFixed(1) : 0;
+            {/* Export Button */}
+            <button
+              type="button"
+              onClick={handleExport}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-600 transition-colors cursor-pointer shadow-sm"
+              title="Export country performance table with day-wise breakdown to Excel"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">Export Excel</span>
+            </button>
+          </div>
+        </div>
 
-                return (
-                  <tr
-                    key={c.countryCode}
-                    className="hover:bg-blue-50/60 dark:hover:bg-slate-800/60 transition-colors border-b border-slate-300 dark:border-slate-700/80 bg-white dark:bg-slate-900/40 even:bg-slate-50/70 dark:even:bg-slate-900/80"
+        {/* Table Container with Day-Wise Breakdown Columns */}
+        <div className="rounded-2xl overflow-hidden shadow-sm border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40">
+          <div className="max-h-[580px] overflow-x-auto overflow-y-auto">
+            <table className="w-full text-center text-xs min-w-[1000px] border-collapse border-spacing-0">
+              <thead className="sticky top-0 bg-slate-100 dark:bg-[#0f172a] border-b-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 font-extrabold uppercase text-[10px] tracking-wider z-10 shadow-sm">
+                <tr className="border-b border-slate-300 dark:border-slate-600">
+                  {/* Country */}
+                  <th
+                    onClick={() => handleSort('countryCode')}
+                    className="py-3 px-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700 text-center"
                   >
-                    {/* Country Code (Clickable) */}
-                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white text-center align-middle border-r border-slate-300 dark:border-slate-700">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModalTarget({ countryCode: c.countryCode, category: 'all', title: `${c.countryCode} — All Outbound Shipments` });
-                          setModalSearch('');
-                          setModalCurrentPage(1);
-                        }}
-                        className="flex items-center justify-center gap-2 mx-auto cursor-pointer group hover:opacity-90"
-                        title={`Click to view all ${c.awbCount.toLocaleString()} shipments to ${c.countryCode}`}
-                      >
-                        <span className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 dark:bg-slate-800 dark:border-slate-600 dark:text-sky-400 flex items-center justify-center font-mono text-xs font-black shadow-xs shrink-0 group-hover:border-blue-500 group-hover:bg-blue-100 dark:group-hover:bg-sky-950/60 transition-colors">
-                          {c.countryCode}
-                        </span>
-                        <span className="text-slate-900 dark:text-white font-extrabold group-hover:text-blue-600 dark:group-hover:text-sky-300 group-hover:underline transition-colors"><strong>{c.countryCode}</strong></span>
-                      </button>
-                    </td>
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Country</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    </div>
+                  </th>
 
-                    {/* Volume (AWB) (Clickable) */}
-                    <td className="py-2.5 px-3 text-center align-middle font-black text-slate-900 dark:text-white font-mono border-r border-slate-300 dark:border-slate-700">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModalTarget({ countryCode: c.countryCode, category: 'all', title: `${c.countryCode} — All Outbound Shipments` });
-                          setModalSearch('');
-                          setModalCurrentPage(1);
-                        }}
-                        className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:bg-slate-100 dark:hover:bg-slate-800/70 p-1 rounded-xl transition-all w-full"
-                        title={`Click to view all ${c.awbCount.toLocaleString()} AWBs for ${c.countryCode}`}
-                      >
-                        <div className="text-slate-900 dark:text-white text-sm font-black group-hover:text-blue-600 dark:group-hover:text-sky-300 group-hover:underline transition-colors">
-                          <strong>{c.awbCount.toLocaleString()}</strong>
-                        </div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 font-bold font-sans">
-                          {sharePct}% of total
-                        </div>
-                      </button>
-                    </td>
+                  {/* Volume (AWB) */}
+                  <th
+                    onClick={() => handleSort('awbCount')}
+                    className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Volume (AWB)</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    </div>
+                  </th>
 
-                    {/* Weight (Tons / Kg) */}
-                    <td className="py-2.5 px-3 text-center align-middle font-mono border-r border-slate-300 dark:border-slate-700">
-                      {(() => {
-                        const weightInKg = c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
-                        const weightInTons = weightInKg / 1000;
-                        return (
-                          <div className="flex flex-col items-center justify-center">
-                            <div className="text-slate-900 dark:text-white text-xs font-black">
-                              <strong>{weightInTons.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Tons</strong>
-                            </div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-sans">
-                              {weightInKg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg
-                            </div>
+                  {/* Weight */}
+                  <th
+                    onClick={() => handleSort('totalWeight')}
+                    className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Weight (Tons / Kg)</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    </div>
+                  </th>
+
+                  {/* On-Time % (<= 5 Days SLA) */}
+                  <th
+                    onClick={() => handleSort('onTimePercentage')}
+                    className="py-3 px-3 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r-2 border-slate-400 dark:border-slate-600 bg-emerald-50/30 dark:bg-emerald-950/10"
+                  >
+                    <div className="flex items-center justify-center gap-1 text-emerald-800 dark:text-emerald-300">
+                      <span>On-Time % (≤5d)</span>
+                      <ArrowUpDown className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                  </th>
+
+                  {/* Day 1–4 */}
+                  <th
+                    onClick={() => handleSort('day1to4Count')}
+                    className="py-3 px-2.5 text-center cursor-pointer hover:bg-emerald-100/60 dark:hover:bg-emerald-950/40 transition-colors font-black bg-emerald-50/50 dark:bg-emerald-950/20 border-r border-slate-300 dark:border-slate-700 text-emerald-800 dark:text-emerald-300"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Day 1–4</span>
+                      <ArrowUpDown className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                  </th>
+
+                  {/* Day 5 */}
+                  <th
+                    onClick={() => handleSort('day5Count')}
+                    className="py-3 px-2.5 text-center cursor-pointer hover:bg-cyan-100/60 dark:hover:bg-cyan-950/40 transition-colors font-black bg-cyan-50/50 dark:bg-cyan-950/20 border-r border-slate-300 dark:border-slate-700 text-cyan-800 dark:text-cyan-300"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Day 5</span>
+                      <ArrowUpDown className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                    </div>
+                  </th>
+
+                  {/* Day 6 */}
+                  <th
+                    onClick={() => handleSort('day6Count')}
+                    className="py-3 px-2.5 text-center cursor-pointer hover:bg-indigo-100/60 dark:hover:bg-indigo-950/40 transition-colors font-black bg-indigo-50/50 dark:bg-indigo-950/20 border-r border-slate-300 dark:border-slate-700 text-indigo-800 dark:text-indigo-300"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Day 6</span>
+                      <ArrowUpDown className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                  </th>
+
+                  {/* Day 7 */}
+                  <th
+                    onClick={() => handleSort('day7Count')}
+                    className="py-3 px-2.5 text-center cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-950/40 transition-colors font-black bg-amber-50/50 dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700 text-amber-800 dark:text-amber-300"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Day 7</span>
+                      <ArrowUpDown className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    </div>
+                  </th>
+
+                  {/* Day 8+ */}
+                  <th
+                    onClick={() => handleSort('day8PlusCount')}
+                    className="py-3 px-2.5 text-center cursor-pointer hover:bg-rose-100/60 dark:hover:bg-rose-950/40 transition-colors font-black bg-rose-50/50 dark:bg-rose-950/20 border-r border-slate-300 dark:border-slate-700 text-rose-800 dark:text-rose-300"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Day 8+</span>
+                      <ArrowUpDown className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                    </div>
+                  </th>
+
+                  {/* Min TT */}
+                  <th
+                    onClick={() => handleSort('minTT')}
+                    className="py-3 px-2 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black border-r border-slate-300 dark:border-slate-700"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Min TT</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    </div>
+                  </th>
+
+                  {/* Max TT */}
+                  <th
+                    onClick={() => handleSort('maxTT')}
+                    className="py-3 px-2 text-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors font-black"
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Max TT</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-300 dark:divide-slate-700/80 font-sans">
+                {filteredAndSortedData.map((c) => {
+                  const sharePct = totalAWBs > 0 ? ((c.awbCount / totalAWBs) * 100).toFixed(1) : 0;
+                  const isFocused = selectedFocusCountry === c.countryCode;
+
+                  return (
+                    <tr
+                      key={c.countryCode}
+                      className={`hover:bg-blue-50/60 dark:hover:bg-slate-800/60 transition-colors border-b border-slate-300 dark:border-slate-700/80 ${
+                        isFocused
+                          ? 'bg-sky-50/80 dark:bg-sky-950/40 ring-1 ring-sky-400/40'
+                          : 'bg-white dark:bg-slate-900/40 even:bg-slate-50/70 dark:even:bg-slate-900/80'
+                      }`}
+                    >
+                      {/* Country Code (Clickable) */}
+                      <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white text-center align-middle border-r border-slate-300 dark:border-slate-700">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalTarget({ countryCode: c.countryCode, category: 'all', title: `${c.countryCode} — All Outbound Shipments` });
+                              setModalSearch('');
+                              setModalCurrentPage(1);
+                            }}
+                            className="flex items-center justify-center gap-1.5 cursor-pointer group hover:opacity-90"
+                            title={`Click to view all ${c.awbCount.toLocaleString()} shipments to ${c.countryCode}`}
+                          >
+                            <span className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 dark:bg-slate-800 dark:border-slate-600 dark:text-sky-400 flex items-center justify-center font-mono text-xs font-black shadow-xs shrink-0 group-hover:border-blue-500 group-hover:bg-blue-100 dark:group-hover:bg-sky-950/60 transition-colors">
+                              {c.countryCode}
+                            </span>
+                            <span className="text-slate-900 dark:text-white font-extrabold group-hover:text-blue-600 dark:group-hover:text-sky-300 group-hover:underline transition-colors">
+                              {c.countryCode}
+                            </span>
+                          </button>
+
+                          {/* Focus Button */}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFocusCountry(c.countryCode)}
+                            className={`p-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                              isFocused
+                                ? 'bg-sky-500 text-white shadow-xs'
+                                : 'text-slate-400 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                            title={`Focus Day-Wise chart on ${c.countryCode}`}
+                          >
+                            <Eye className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </td>
+
+                      {/* Volume (AWB) */}
+                      <td className="py-2.5 px-3 text-center align-middle font-black text-slate-900 dark:text-white font-mono border-r border-slate-300 dark:border-slate-700">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTarget({ countryCode: c.countryCode, category: 'all', title: `${c.countryCode} — All Outbound Shipments` });
+                            setModalSearch('');
+                            setModalCurrentPage(1);
+                          }}
+                          className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:bg-slate-100 dark:hover:bg-slate-800/70 p-1 rounded-xl transition-all w-full"
+                          title={`Click to view all ${c.awbCount.toLocaleString()} AWBs for ${c.countryCode}`}
+                        >
+                          <div className="text-slate-900 dark:text-white text-sm font-black group-hover:text-blue-600 dark:group-hover:text-sky-300 group-hover:underline transition-colors">
+                            {c.awbCount.toLocaleString()}
                           </div>
-                        );
-                      })()}
-                    </td>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 font-bold font-sans">
+                            {sharePct}% of total
+                          </div>
+                        </button>
+                      </td>
 
-                    {/* Avg TT */}
-                    <td className="py-2.5 px-3 text-center align-middle font-mono font-black text-sm border-r border-slate-300 dark:border-slate-700">
-                      <span
-                        className={
-                          c.avgTT <= 4.5
-                            ? 'text-emerald-600 dark:text-emerald-400 font-black'
-                            : c.avgTT <= 5.5
-                            ? 'text-amber-600 dark:text-amber-400 font-black'
-                            : 'text-rose-600 dark:text-rose-400 font-black'
-                        }
-                      >
-                        <strong>{c.avgTT} d</strong>
-                      </span>
-                    </td>
+                      {/* Weight (Tons / Kg) */}
+                      <td className="py-2.5 px-3 text-center align-middle font-mono border-r border-slate-300 dark:border-slate-700">
+                        {(() => {
+                          const weightInKg = c.totalWeight ?? (countryWeightMap.get(c.countryCode.toUpperCase()) || 0);
+                          const weightInTons = weightInKg / 1000;
+                          return (
+                            <div className="flex flex-col items-center justify-center">
+                              <div className="text-slate-900 dark:text-white text-xs font-black">
+                                {weightInTons.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Tons
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-sans">
+                                {weightInKg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </td>
 
-                    {/* Min TT */}
-                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-700 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
-                      {c.minTT} d
-                    </td>
-
-                    {/* Max TT */}
-                    <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-700 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
-                      {c.maxTT} d
-                    </td>
-
-                    {/* On-Time Rate */}
-                    <td className="py-2.5 px-3 text-center align-middle border-r-2 border-slate-400 dark:border-slate-600">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs">
-                          <strong>{c.onTimePercentage}%</strong>
-                        </span>
-                        <div className="w-10 bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 hidden sm:block overflow-hidden border border-slate-300 dark:border-slate-700">
-                          <div
-                            className="bg-emerald-500 dark:bg-emerald-400 h-1.5 rounded-full"
-                            style={{ width: `${Math.min(c.onTimePercentage, 100)}%` }}
-                          />
+                      {/* On-Time Rate (<=5d) */}
+                      <td className="py-2.5 px-3 text-center align-middle border-r-2 border-slate-400 dark:border-slate-600 bg-emerald-50/20 dark:bg-emerald-950/10">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs">
+                            {c.onTimePercentage}%
+                          </span>
+                          <div className="w-10 bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 hidden sm:block overflow-hidden border border-slate-300 dark:border-slate-700">
+                            <div
+                              className="bg-emerald-500 dark:bg-emerald-400 h-1.5 rounded-full"
+                              style={{ width: `${Math.min(c.onTimePercentage, 100)}%` }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Clearance Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle dark:bg-purple-950/20 border-r border-slate-300 dark:border-slate-700">
-                      {c.clearanceDelays > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setModalTarget({ countryCode: c.countryCode, category: 'clearance', title: `${c.countryCode} — Clearance Delays` });
-                            setModalSearch('');
-                            setModalCurrentPage(1);
-                          }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/25 dark:text-purple-200 dark:border-purple-400/40 shadow-xs hover:bg-purple-100 hover:border-purple-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
-                          title={`Click to view ${c.clearanceDelays} clearance delay AWBs for ${c.countryCode}`}
-                        >
-                          <strong>{c.clearanceDelays}</strong>
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
-                      )}
-                    </td>
+                      {/* Day 1–4 Milestone */}
+                      <td className="py-2.5 px-2 text-center align-middle border-r border-slate-300 dark:border-slate-700 bg-emerald-50/30 dark:bg-emerald-950/15">
+                        {c.day1to4Count > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openMilestoneModal('day1to4', 'Day 1–4', c.countryCode)}
+                            className="inline-flex flex-col items-center justify-center px-2 py-0.5 rounded-lg font-mono bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer w-full max-w-[85px]"
+                            title={`Click to view ${c.day1to4Count.toLocaleString()} shipments delivered in Day 1–4 to ${c.countryCode}`}
+                          >
+                            <span className="text-xs font-black">{c.day1to4Count.toLocaleString()}</span>
+                            <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">{c.day1to4Percentage}%</span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
+                        )}
+                      </td>
 
-                    {/* Transit Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle dark:bg-sky-950/20 border-r border-slate-300 dark:border-slate-700">
-                      {c.transitDelays > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setModalTarget({ countryCode: c.countryCode, category: 'transit', title: `${c.countryCode} — Transit Delays` });
-                            setModalSearch('');
-                            setModalCurrentPage(1);
-                          }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/25 dark:text-sky-200 dark:border-sky-400/40 shadow-xs hover:bg-sky-100 hover:border-sky-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
-                          title={`Click to view ${c.transitDelays} transit delay AWBs for ${c.countryCode}`}
-                        >
-                          <strong>{c.transitDelays}</strong>
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
-                      )}
-                    </td>
+                      {/* Day 5 Milestone */}
+                      <td className="py-2.5 px-2 text-center align-middle border-r border-slate-300 dark:border-slate-700 bg-cyan-50/30 dark:bg-cyan-950/15">
+                        {c.day5Count > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openMilestoneModal('day5', 'Day 5', c.countryCode)}
+                            className="inline-flex flex-col items-center justify-center px-2 py-0.5 rounded-lg font-mono bg-cyan-100 text-cyan-800 border border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer w-full max-w-[85px]"
+                            title={`Click to view ${c.day5Count.toLocaleString()} shipments delivered on Day 5 to ${c.countryCode}`}
+                          >
+                            <span className="text-xs font-black">{c.day5Count.toLocaleString()}</span>
+                            <span className="text-[10px] text-cyan-700 dark:text-cyan-400 font-bold">{c.day5Percentage}%</span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
+                        )}
+                      </td>
 
-                    {/* Destination Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700">
-                      {c.destinationDelays > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setModalTarget({ countryCode: c.countryCode, category: 'destination', title: `${c.countryCode} — Destination Delays` });
-                            setModalSearch('');
-                            setModalCurrentPage(1);
-                          }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/25 dark:text-amber-200 dark:border-amber-400/40 shadow-xs hover:bg-amber-100 hover:border-amber-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
-                          title={`Click to view ${c.destinationDelays} destination delay AWBs for ${c.countryCode}`}
-                        >
-                          <strong>{c.destinationDelays}</strong>
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
-                      )}
-                    </td>
+                      {/* Day 6 Milestone */}
+                      <td className="py-2.5 px-2 text-center align-middle border-r border-slate-300 dark:border-slate-700 bg-indigo-50/30 dark:bg-indigo-950/15">
+                        {c.day6Count > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openMilestoneModal('day6', 'Day 6', c.countryCode)}
+                            className="inline-flex flex-col items-center justify-center px-2 py-0.5 rounded-lg font-mono bg-indigo-100 text-indigo-800 border border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer w-full max-w-[85px]"
+                            title={`Click to view ${c.day6Count.toLocaleString()} shipments delivered on Day 6 to ${c.countryCode}`}
+                          >
+                            <span className="text-xs font-black">{c.day6Count.toLocaleString()}</span>
+                            <span className="text-[10px] text-indigo-700 dark:text-indigo-400 font-bold">{c.day6Percentage}%</span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
+                        )}
+                      </td>
 
-                    {/* Weekend Delays (Clickable) */}
-                    <td className="py-2.5 px-2 text-center align-middle dark:bg-rose-950/20 border-r border-slate-300 dark:border-slate-700">
-                      {c.weekendDelays > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setModalTarget({ countryCode: c.countryCode, category: 'weekend', title: `${c.countryCode} — Weekend Delays` });
-                            setModalSearch('');
-                            setModalCurrentPage(1);
-                          }}
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-mono font-black bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/25 dark:text-rose-200 dark:border-rose-400/40 shadow-xs hover:bg-rose-100 hover:border-rose-300 hover:scale-110 active:scale-95 transition-all cursor-pointer"
-                          title={`Click to view ${c.weekendDelays} weekend delay AWBs for ${c.countryCode}`}
-                        >
-                          <strong>{c.weekendDelays}</strong>
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
-                      )}
-                    </td>
+                      {/* Day 7 Milestone */}
+                      <td className="py-2.5 px-2 text-center align-middle border-r border-slate-300 dark:border-slate-700 bg-amber-50/30 dark:bg-amber-950/15">
+                        {c.day7Count > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openMilestoneModal('day7', 'Day 7', c.countryCode)}
+                            className="inline-flex flex-col items-center justify-center px-2 py-0.5 rounded-lg font-mono bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer w-full max-w-[85px]"
+                            title={`Click to view ${c.day7Count.toLocaleString()} shipments delivered on Day 7 to ${c.countryCode}`}
+                          >
+                            <span className="text-xs font-black">{c.day7Count.toLocaleString()}</span>
+                            <span className="text-[10px] text-amber-700 dark:text-amber-400 font-bold">{c.day7Percentage}%</span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
+                        )}
+                      </td>
 
-                    {/* Total Delays (Clickable) */}
-                    <td className="py-2.5 px-3 text-center align-middle dark:bg-yellow-950/20">
-                      {c.totalDelays > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setModalTarget({ countryCode: c.countryCode, category: 'totalDelays', title: `${c.countryCode} — Total Delays` });
-                            setModalSearch('');
-                            setModalCurrentPage(1);
-                          }}
-                          className="flex flex-col items-center justify-center mx-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all w-full"
-                          title={`Click to view all ${c.totalDelays} delayed AWBs for ${c.countryCode}`}
-                        >
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-md text-[11px] font-mono font-black bg-amber-50 text-amber-700 border border-amber-300 dark:bg-yellow-500/30 dark:text-yellow-200 dark:border-yellow-400/60 shadow-xs group-hover:bg-amber-100 group-hover:border-amber-400">
-                            <strong>{c.totalDelays}</strong>
-                          </span>
-                          <span className="text-[10px] text-amber-600 dark:text-yellow-400 font-mono font-black mt-0.5 group-hover:underline">
-                            <strong>{c.awbCount > 0 ? ((c.totalDelays / c.awbCount) * 100).toFixed(2) : 0}%</strong>
-                          </span>
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {/* Day 8+ Milestone */}
+                      <td className="py-2.5 px-2 text-center align-middle border-r border-slate-300 dark:border-slate-700 bg-rose-50/30 dark:bg-rose-950/15">
+                        {c.day8PlusCount > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openMilestoneModal('day8Plus', 'Day 8+', c.countryCode)}
+                            className="inline-flex flex-col items-center justify-center px-2 py-0.5 rounded-lg font-mono bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer w-full max-w-[85px]"
+                            title={`Click to view ${c.day8PlusCount.toLocaleString()} shipments delivered in Day 8+ to ${c.countryCode}`}
+                          >
+                            <span className="text-xs font-black">{c.day8PlusCount.toLocaleString()}</span>
+                            <span className="text-[10px] text-rose-700 dark:text-rose-400 font-bold">{c.day8PlusPercentage}%</span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs font-bold">-</span>
+                        )}
+                      </td>
+
+                      {/* Min TT */}
+                      <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-700 dark:text-slate-300 font-bold border-r border-slate-300 dark:border-slate-700">
+                        {c.minTT} d
+                      </td>
+
+                      {/* Max TT */}
+                      <td className="py-2.5 px-2 text-center align-middle font-mono text-slate-700 dark:text-slate-300 font-bold">
+                        {c.maxTT} d
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -773,7 +1052,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                       {modalTarget.title}
                     </h3>
-                    {modalTarget.countryCode && (
+                    {modalTarget.countryCode && modalTarget.countryCode !== 'ALL' && (
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-black bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/40">
                         {modalTarget.countryCode}
                       </span>
@@ -783,7 +1062,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Viewing individual shipment records. Click any row to inspect complete tracking milestones &amp; notes.
+                    Viewing individual shipment records. Click any row to inspect complete tracking details &amp; notes.
                   </p>
                 </div>
               </div>
@@ -802,12 +1081,12 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
             {modalStats && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3 shrink-0">
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
-                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Average Transit Time</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Transit Time Range</span>
                   <span className="text-sm sm:text-base font-extrabold text-indigo-700 dark:text-indigo-400 font-mono">
-                    {modalStats.avgTT} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">days</span>
+                    {modalStats.minTT}d – {modalStats.maxTT}d
                   </span>
                   <span className="text-[10px] text-slate-500 block font-mono">
-                    Min: {modalStats.minTT}d • Max: {modalStats.maxTT}d
+                    Min to Max speed
                   </span>
                 </div>
 
@@ -854,7 +1133,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     setModalSearch(e.target.value);
                     setModalCurrentPage(1);
                   }}
-                  placeholder="Search within this list (AWB, Customer, Shipper, Destination, Delay Reason, Remarks...)"
+                  placeholder="Search within this list (AWB, Customer, Shipper, Destination, Remarks...)"
                   className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
                 />
                 {modalSearch && (
@@ -913,8 +1192,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     <th className="py-2.5 px-3">Shipper</th>
                     <th className="py-2.5 px-3 text-center">Dest</th>
                     <th className="py-2.5 px-3 text-right">TT (Days)</th>
+                    <th className="py-2.5 px-3 text-center">Milestone</th>
                     <th className="py-2.5 px-3 text-center">Resolution</th>
-                    <th className="py-2.5 px-3">Delay Reason / Remarks</th>
+                    <th className="py-2.5 px-3">Remarks</th>
                     <th className="py-2.5 px-3 text-center">Action</th>
                   </tr>
                 </thead>
@@ -925,33 +1205,8 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                       const isDelivered = s.finalResolution?.toLowerCase() === 'delivered';
                       const isNegativeRes = ['rts', 'lost', 'destroyed', 'seized', 'undelivered'].includes(s.finalResolution?.toLowerCase().trim() || '');
 
-                      const delayBadge = s.clearanceDelay && s.clearanceDelay !== '-' ? (
-                        <span className="inline-flex items-center gap-1 text-purple-800 dark:text-purple-300 bg-purple-100 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-300 dark:border-purple-500/30 text-[10px] font-semibold">
-                          <ShieldAlert className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-                          {s.clearanceDelay}
-                        </span>
-                      ) : s.transitDelay && s.transitDelay !== '-' ? (
-                        <span className="inline-flex items-center gap-1 text-sky-800 dark:text-sky-300 bg-sky-100 dark:bg-sky-500/10 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-500/30 text-[10px] font-semibold">
-                          <Plane className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                          {s.transitDelay}
-                        </span>
-                      ) : s.destinationDelay && s.destinationDelay !== '-' ? (
-                        <span className="inline-flex items-center gap-1 text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-500/30 text-[10px] font-semibold">
-                          <MapPin className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                          {s.destinationDelay}
-                        </span>
-                      ) : (s.weekendDelay || '').toString().toLowerCase().includes('yes') ? (
-                        <span className="inline-flex items-center gap-1 text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-500/10 px-2 py-0.5 rounded border border-rose-300 dark:border-rose-500/30 text-[10px] font-semibold">
-                          <Calendar className="w-3 h-3 text-rose-600 dark:text-rose-400" />
-                          Weekend Hold
-                        </span>
-                      ) : s.remarks ? (
-                        <span className="text-slate-600 dark:text-slate-400 truncate max-w-[200px] block" title={s.remarks}>
-                          {s.remarks}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-600 font-mono text-[11px]">-</span>
-                      );
+                      const milestoneKey = s.ttRange || (s.tt > 0 && s.tt <= 4 ? 'Day 1–4' : s.tt === 5 ? 'Day 5' : s.tt === 6 ? 'Day 6' : s.tt === 7 ? 'Day 7' : s.tt > 7 ? 'Day 8+' : 'Undelivered');
+                      const milestoneStyle = milestoneStyleMap[milestoneKey] || milestoneStyleMap['Undelivered'];
 
                       return (
                         <tr
@@ -997,6 +1252,11 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black border ${milestoneStyle.badgeClass}`}>
+                              {s.ttRange || milestoneKey}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
                             <span
                               className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 isDelivered
@@ -1010,7 +1270,13 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                             </span>
                           </td>
                           <td className="py-2.5 px-3">
-                            {delayBadge}
+                            {s.remarks ? (
+                              <span className="text-slate-600 dark:text-slate-400 truncate max-w-[200px] block" title={s.remarks}>
+                                {s.remarks}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 dark:text-slate-600 font-mono text-[11px]">-</span>
+                            )}
                           </td>
                           <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
                             <button
@@ -1028,7 +1294,7 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                     })
                   ) : (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-500 dark:text-slate-400">
+                      <td colSpan={10} className="py-12 text-center text-slate-500 dark:text-slate-400">
                         <Package className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
                         <p className="font-semibold text-sm">No shipment records found</p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Try refining your search filter</p>
@@ -1152,21 +1418,9 @@ export const CountryMatrix: React.FC<CountryMatrixProps> = ({
                 <span className="text-slate-500 dark:text-slate-400 text-[11px]">{inspectedShipment.ttRange}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Transit Delay</span>
-                <span className="font-bold text-indigo-700 dark:text-indigo-300 block mt-0.5">
-                  {inspectedShipment.transitDelay || 'None'}
-                </span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Clearance Delay</span>
-                <span className="font-bold text-amber-700 dark:text-amber-300 block mt-0.5">
-                  {inspectedShipment.clearanceDelay || 'None'}
-                </span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 block text-[10px]">Destination Delay</span>
-                <span className="font-bold text-rose-700 dark:text-rose-300 block mt-0.5">
-                  {inspectedShipment.destinationDelay || 'None'}
+                <span className="text-slate-500 block text-[10px]">Delivery Milestone</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 block mt-0.5">
+                  {inspectedShipment.ttRange}
                 </span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
