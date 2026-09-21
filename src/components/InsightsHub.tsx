@@ -77,7 +77,6 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
         if (selectedDayBucket === '2' && r.daysToPod !== 2) return false;
         if (selectedDayBucket === '3-4' && (r.daysToPod < 3 || r.daysToPod > 4)) return false;
         if (selectedDayBucket === '5+' && r.daysToPod < 5) return false;
-        if (selectedDayBucket === '<0' && r.daysToPod >= 0) return false;
       }
 
       if (searchTerm) {
@@ -649,9 +648,16 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
                           {r.commitDateFormatted}
                         </td>
 
-                        {/* POD Date */}
-                        <td className="py-2 px-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap font-mono">
-                          {r.podFormatted}
+                        {/* POD Date (Strictly on or before commit time) */}
+                        <td className="py-2 px-2 whitespace-nowrap font-mono">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
+                              {r.podFormatted}
+                            </span>
+                            <span className="text-[10px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20" title="POD date/time strictly did not cross commit time">
+                              ✓ On-Time
+                            </span>
+                          </div>
                         </td>
 
                         {/* Days to POD */}

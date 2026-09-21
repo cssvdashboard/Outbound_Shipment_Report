@@ -2,12 +2,13 @@ import { Shipment, InsightsAWBRecord, InsightsAnalysisResult, CountryInsights, D
 
 /**
  * Converts Excel serial numbers or standard date strings into a JavaScript Date.
+ * Uses UTC epoch so hours/minutes match Excel clock time regardless of client timezone.
  */
 export function parseDateSafe(val: any): Date | null {
   if (val === undefined || val === null || val === '') return null;
   if (typeof val === 'number') {
     if (isNaN(val) || val <= 0) return null;
-    // Excel base epoch is Dec 30, 1899 (accounting for leap year bug)
+    // Excel base epoch is Dec 30, 1899 UTC
     return new Date(Math.round((val - 25569) * 86400 * 1000));
   }
   const str = String(val).trim();
@@ -24,23 +25,23 @@ export function parseDateSafe(val: any): Date | null {
 }
 
 /**
- * Returns UTC/local calendar day timestamp at 00:00:00 to compare dates ignoring time (Order 4).
+ * Returns UTC calendar day timestamp at 00:00:00 to compare dates ignoring time (Order 4).
  */
 export function getCalendarDayTimestamp(date: Date): number {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
 
 /**
- * Formats a Date object into a clean readable string (e.g., "YYYY-MM-DD HH:mm").
+ * Formats a Date object into a clean readable string (e.g., "YYYY-MM-DD HH:mm") matching Excel clock time.
  */
 export function formatDateTimeDisplay(date: Date | null): string {
   if (!date || isNaN(date.getTime())) return '-';
   const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-  const yyyy = date.getFullYear();
-  const mm = pad(date.getMonth() + 1);
-  const dd = pad(date.getDate());
-  const hh = pad(date.getHours());
-  const min = pad(date.getMinutes());
+  const yyyy = date.getUTCFullYear();
+  const mm = pad(date.getUTCMonth() + 1);
+  const dd = pad(date.getUTCDate());
+  const hh = pad(date.getUTCHours());
+  const min = pad(date.getUTCMinutes());
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
 
@@ -50,9 +51,9 @@ export function formatDateTimeDisplay(date: Date | null): string {
 export function formatDateOnlyDisplay(date: Date | null): string {
   if (!date || isNaN(date.getTime())) return '-';
   const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-  const yyyy = date.getFullYear();
-  const mm = pad(date.getMonth() + 1);
-  const dd = pad(date.getDate());
+  const yyyy = date.getUTCFullYear();
+  const mm = pad(date.getUTCMonth() + 1);
+  const dd = pad(date.getUTCDate());
   return `${yyyy}-${mm}-${dd}`;
 }
 
@@ -62,7 +63,7 @@ export function formatDateOnlyDisplay(date: Date | null): string {
  * Order 2: POD date cannot exceed Commit Date (podDate <= commitDate)
  * Order 3: Select only AWBs which have Dex 01 or Stat 41 date
  * Order 4: Dex 01 or Stat 41 date >= Sips date (ignoring time, calendar date only)
- * Order 5: Calculate days to POD from Dex 01 or Stat 41 date
+ * Order 5: Calculate days to POD from Dex 01 or Stat 41 date (must be >= 0, exception prior to/on delivery)
  */
 export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult {
   let step1Delivered = 0;
@@ -98,15 +99,16 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
     if (!sipsDate) continue;
 
     const sipsCalDay = getCalendarDayTimestamp(sipsDate);
+    const podCalDay = getCalendarDayTimestamp(podDate);
 
-    // Determine primary exception event that satisfies >= SIPS date
+    // Determine primary exception event that satisfies >= SIPS date AND occurred on or before delivery
     let selectedEventDate: Date | null = null;
     let selectedType: 'DEX 01' | 'STAT 41' = 'DEX 01';
 
-    if (dex01Date && getCalendarDayTimestamp(dex01Date) >= sipsCalDay) {
+    if (dex01Date && getCalendarDayTimestamp(dex01Date) >= sipsCalDay && getCalendarDayTimestamp(dex01Date) <= podCalDay) {
       selectedEventDate = dex01Date;
       selectedType = 'DEX 01';
-    } else if (stat41Date && getCalendarDayTimestamp(stat41Date) >= sipsCalDay) {
+    } else if (stat41Date && getCalendarDayTimestamp(stat41Date) >= sipsCalDay && getCalendarDayTimestamp(stat41Date) <= podCalDay) {
       selectedEventDate = stat41Date;
       selectedType = 'STAT 41';
     }
@@ -114,11 +116,10 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
     if (!selectedEventDate) continue;
     step4DexStatGteSips++;
 
-    // Order 5: Calculate days to POD from DEX 01 or STAT 41 date
+    // Order 5: Calculate days to POD from DEX 01 or STAT 41 date (>= 0)
     const eventCalDay = getCalendarDayTimestamp(selectedEventDate);
-    const podCalDay = getCalendarDayTimestamp(podDate);
-    const daysToPod = Math.round((podCalDay - eventCalDay) / (86400 * 1000));
-    const exactDaysToPod = Number(((podDate.getTime() - selectedEventDate.getTime()) / (86400 * 1000)).toFixed(1));
+    const daysToPod = Math.max(0, Math.round((podCalDay - eventCalDay) / (86400 * 1000)));
+    const exactDaysToPod = Number(Math.max(0, (podDate.getTime() - selectedEventDate.getTime()) / (86400 * 1000)).toFixed(1));
 
     const pickupDate = parseDateSafe(s.pickup);
 
