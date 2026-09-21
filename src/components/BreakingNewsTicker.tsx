@@ -29,9 +29,9 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       tagBg: 'bg-rose-500/20 border-rose-500/40 text-rose-300',
       icon: AlertTriangle,
       iconColor: 'text-rose-400',
-      headline: '(09/08/2026) -',
+      headline: '08.09.2026 \u00A0\u00A0 (FedEx Italy) -',
       detail:
-        'FedEx Italy is experiencing temporary service disruptions due to an operational contingency involving the area of Piacenza.'
+        'Temporary service disruptions due to an operational contingency involving the area of Piacenza.'
     },
     {
       id: 'holiday-japan',
@@ -39,8 +39,8 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       tagBg: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
       icon: Calendar,
       iconColor: 'text-amber-400',
-      headline: '',
-      detail: 'Japan will remain closed till 09/23/2026.'
+      headline: '23.09.2026 \u00A0\u00A0 (Japan) -',
+      detail: 'Operations will remain closed till 23.09.2026.'
     },
     {
       id: 'offload-tg322-16',
@@ -95,15 +95,15 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
 
   return (
     <div className="w-full bg-white/95 dark:bg-[#070d18]/95 border-y-2 border-amber-400/60 dark:border-amber-500/30 backdrop-blur-md print:hidden shadow-xs transition-colors">
-      <div className="w-full px-2 sm:px-4 flex items-center h-10 relative overflow-hidden">
+      <div className="w-full px-2 sm:px-4 flex items-center h-12 relative overflow-hidden">
         
         {/* Left Fixed Compact Update Badge */}
-        <div className="flex items-center gap-1.5 px-2.5 h-6 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-[10.5px] uppercase tracking-wider rounded-md shrink-0 select-none z-20 shadow-xs">
+        <div className="flex items-center gap-1.5 px-3 h-7 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-xs uppercase tracking-wider rounded-md shrink-0 select-none z-20 shadow-xs">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
           </span>
-          <span className="font-extrabold tracking-tight">UPDATE</span>
+          <span className="font-extrabold tracking-tight text-xs">UPDATE</span>
         </div>
 
         {/* Smooth, leisurely-paced continuous scrolling track (Right to Left) with crystal clear visibility */}
@@ -114,24 +114,24 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
               return (
                 <div
                   key={`${item.id}-${idx}`}
-                  className="inline-flex items-center gap-2.5 sm:gap-3 px-5 sm:px-8 text-xs whitespace-nowrap cursor-default select-text group"
+                  className="inline-flex items-center gap-3 px-6 sm:px-8 text-sm sm:text-[14.5px] whitespace-nowrap cursor-default select-text group"
                 >
                   {/* Category Pill */}
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border shadow-2xs ${item.tagBg}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider border shadow-2xs ${item.tagBg}`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${item.iconColor}`} />
                     <span>{item.tag}</span>
                   </span>
 
                   {/* Headline & Notice Text */}
-                  <div className="inline-flex items-baseline gap-1.5">
+                  <div className="inline-flex items-baseline gap-2">
                     {item.headline ? (
-                      <span className="font-extrabold text-slate-950 dark:text-white">
+                      <span className="font-bold text-slate-950 dark:text-white">
                         {item.headline}
                       </span>
                     ) : null}
-                    <span className="font-medium text-slate-800 dark:text-slate-100">
+                    <span className="font-semibold text-slate-800 dark:text-slate-100">
                       {item.detail}
                     </span>
                   </div>
