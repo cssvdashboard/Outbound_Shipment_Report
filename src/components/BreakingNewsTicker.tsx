@@ -39,7 +39,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       tagBg: 'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-500/20 dark:border-amber-500/40 dark:text-amber-300',
       icon: Calendar,
       iconColor: 'text-amber-800 dark:text-amber-400',
-      headline: '23.09.2026 \u00A0\u00A0 (Japan) -',
+      headline: '',
       detail: 'Japan will remain closed till 23.09.2026.'
     },
     {
