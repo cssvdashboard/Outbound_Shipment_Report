@@ -85,9 +85,9 @@ export function useLogisticsData() {
           setIsServerConnected(false);
         }
 
-        // 2. Fallback to IndexedDB (only if custom dataset AND contains shipmentType with IPD support)
+        // 2. Fallback to IndexedDB (only if custom dataset AND contains updated fields like commitDate or sips)
         const { data, meta } = await loadSavedDataset();
-        if (data && data.length > 0 && meta && meta.isCustom && data.some((s) => s.shipmentType !== undefined)) {
+        if (data && data.length > 0 && meta && meta.isCustom && data.some((s) => s.commitDate !== undefined || s.sips !== undefined)) {
           setRawShipments(data);
           setDatasetMeta(meta);
         } else {

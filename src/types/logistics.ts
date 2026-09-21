@@ -23,6 +23,10 @@ export interface Shipment {
   remarks?: string;
   shipmentType?: string; // 'PP' | 'CC' | 'IPD'
   isAgent?: boolean;     // true if customer has 'agent'
+  sips?: string | number;
+  commitDate?: string | number;
+  dex01?: string | number;
+  stat41?: string | number;
 }
 
 export type FilterMode = 'include' | 'exclude';
@@ -115,4 +119,72 @@ export interface CustomerComparisonMetric {
   transitDelays: number;
   clearanceDelays: number;
   destinationDelays: number;
+}
+
+export interface InsightsAWBRecord {
+  awb: string;
+  country: string;
+  destLocCd: string;
+  customer: string;
+  shprName: string;
+  finalResolution: string;
+  commitDateRaw?: string | number;
+  commitDateFormatted: string;
+  podRaw?: string | number;
+  podFormatted: string;
+  sipsRaw?: string | number;
+  sipsFormatted: string;
+  dex01Raw?: string | number;
+  dex01Formatted: string;
+  stat41Raw?: string | number;
+  stat41Formatted: string;
+  primaryExceptionType: 'DEX 01' | 'STAT 41';
+  primaryExceptionDateFormatted: string;
+  daysToPod: number; // Order 5: Calendar days from DEX 01/STAT 41 date to POD
+  exactDaysToPod: number; // Exact fractional days
+  isSameDayPod: boolean;
+  remarks?: string;
+  pickupRaw?: string | number;
+  pickupFormatted: string;
+  weight?: number;
+  pkgCount?: number;
+}
+
+export interface DestLocInsights {
+  locId: string;
+  awbCount: number;
+  avgDaysToPod: number;
+  records: InsightsAWBRecord[];
+}
+
+export interface CountryInsights {
+  countryCode: string;
+  awbCount: number;
+  destLocs: DestLocInsights[];
+  avgDaysToPod: number;
+}
+
+export interface InsightsFunnel {
+  step1_delivered: number;
+  step2_podWithinCommit: number;
+  step3_hasDexOrStat: number;
+  step4_dexStatGteSips: number; // The final qualifying set
+}
+
+export interface InsightsAnalysisResult {
+  funnel: InsightsFunnel;
+  totalInsightsAWBs: number;
+  impactedCountriesCount: number;
+  impactedDestLocCount: number;
+  overallAvgDaysToPod: number;
+  countries: CountryInsights[];
+  allRecords: InsightsAWBRecord[];
+  daysDistribution: {
+    sameDay: number;
+    oneDay: number;
+    twoDays: number;
+    threeToFourDays: number;
+    fivePlusDays: number;
+    negativeDays: number;
+  };
 }

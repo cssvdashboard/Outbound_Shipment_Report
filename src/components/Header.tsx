@@ -8,7 +8,8 @@ import {
   CheckCircle2,
   AlertCircle,
   CalendarDays,
-  CalendarRange
+  CalendarRange,
+  Sparkles
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { Shipment } from '../types/logistics';
@@ -172,6 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
               { id: 'explorer', label: 'Shipment Explorer', icon: FileSpreadsheet, color: 'text-indigo-500' },
               { id: 'comparison', label: 'Shipper Comparison', icon: CheckCircle2, color: 'text-emerald-500' },
               { id: 'delays', label: 'Delay Analysis', icon: AlertCircle, color: 'text-amber-500' },
+              { id: 'insights', label: 'Insights', icon: Sparkles, color: 'text-rose-500' },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

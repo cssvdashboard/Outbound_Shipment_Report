@@ -23,6 +23,10 @@ export interface ServerShipment {
   weekendDelay?: string;
   finalResolution: string;
   remarks?: string;
+  sips?: string | number;
+  commitDate?: string | number;
+  dex01?: string | number;
+  stat41?: string | number;
 }
 
 export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[]; error?: string } {
@@ -116,6 +120,11 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
 
       const remarks = String(normalizeKey(row, ['REMARKS', 'Remarks', 'Comment']) || '').trim();
 
+      const sips = normalizeKey(row, ['SIPS', 'Sips Date', 'Sips']);
+      const commitDate = normalizeKey(row, ['COMMIT TIME', 'Commit Date', 'Commit Time', 'CommitDate', 'Commit']);
+      const dex01 = normalizeKey(row, ['DEX 01', 'DEX01', 'Dex 01', 'Dex01', 'DEX_01']);
+      const stat41 = normalizeKey(row, ['STAT 41', 'STAT41', 'Stat 41', 'Stat41', 'STAT_41']);
+
       return {
         awb,
         mawb,
@@ -138,7 +147,11 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
         destinationDelay,
         weekendDelay,
         finalResolution,
-        remarks
+        remarks,
+        sips,
+        commitDate,
+        dex01,
+        stat41
       };
     }).filter(s => s.awb || s.customer || s.shprName);
 

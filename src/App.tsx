@@ -10,6 +10,7 @@ import { CustomerComparison } from './components/CustomerComparison';
 import { ShipmentExplorer } from './components/ShipmentExplorer';
 import { CalendarComparison } from './components/CalendarComparison';
 import { MonthlyComparison } from './components/MonthlyComparison';
+import { InsightsHub } from './components/InsightsHub';
 import { getStoredTheme, getStoredDisplayMode, setStoredDisplayMode, DisplayMode } from './services/storage';
 import { applyThemeToDOM } from './components/ThemeModeMenu';
 import { Loader2, Play, Pause, X, AlertTriangle, Tv } from 'lucide-react';
@@ -89,8 +90,8 @@ export const App: React.FC = () => {
     const interval = setInterval(() => {
       setTvSecondsRemaining((prev) => {
         if (prev <= 1) {
-          // Requested sequence: Overview -> Destination Details -> Weekly TT -> Monthly comparison -> Shipment Explorer -> Shipper comparison -> delay analysis
-          const tvTabs = ['overview', 'country', 'calendar', 'monthly', 'explorer', 'comparison', 'delays'];
+          // Requested sequence: Overview -> Destination Details -> Weekly TT -> Monthly comparison -> Shipment Explorer -> Shipper comparison -> delay analysis -> insights
+          const tvTabs = ['overview', 'country', 'calendar', 'monthly', 'explorer', 'comparison', 'delays', 'insights'];
           setActiveTab((curr) => {
             const currentIdx = tvTabs.indexOf(curr);
             const nextIdx = currentIdx === -1 ? 0 : (currentIdx + 1) % tvTabs.length;
@@ -339,6 +340,10 @@ export const App: React.FC = () => {
                   activeDestinationFilter={filters.selectedDestinationDelays}
                   onNavigateTab={handleTabChange}
                 />
+              )}
+
+              {activeTab === 'insights' && (
+                <InsightsHub shipments={displayedShipments} />
               )}
 
               {activeTab === 'country' && (

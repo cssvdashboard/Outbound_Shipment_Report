@@ -103,6 +103,11 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
       else if (rawType) shipmentType = rawType;
       const isAgent = /agent/i.test(customer);
 
+      const sips = normalizeKey(row, ['SIPS', 'Sips Date', 'Sips']);
+      const commitDate = normalizeKey(row, ['COMMIT TIME', 'Commit Date', 'Commit Time', 'CommitDate', 'Commit']);
+      const dex01 = normalizeKey(row, ['DEX 01', 'DEX01', 'Dex 01', 'Dex01', 'DEX_01']);
+      const stat41 = normalizeKey(row, ['STAT 41', 'STAT41', 'Stat 41', 'Stat41', 'STAT_41']);
+
       return {
         awb,
         mawb,
@@ -127,7 +132,11 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
         finalResolution,
         remarks,
         shipmentType,
-        isAgent
+        isAgent,
+        sips,
+        commitDate,
+        dex01,
+        stat41
       };
     }).filter(s => s.awb || s.customer || s.shprName);
 
