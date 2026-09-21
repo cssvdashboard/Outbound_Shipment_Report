@@ -26,9 +26,9 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
     {
       id: 'disruption-italy',
       tag: 'SERVICE DISRUPTION',
-      tagBg: 'bg-rose-500/20 border-rose-500/40 text-rose-300',
+      tagBg: 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-500/20 dark:border-rose-500/40 dark:text-rose-300',
       icon: AlertTriangle,
-      iconColor: 'text-rose-400',
+      iconColor: 'text-rose-700 dark:text-rose-400',
       headline: '08.09.2026 \u00A0\u00A0 (FedEx Italy) -',
       detail:
         'Temporary service disruptions due to an operational contingency involving the area of Piacenza.'
@@ -36,54 +36,54 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
     {
       id: 'holiday-japan',
       tag: 'HOLIDAY ALERT',
-      tagBg: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
+      tagBg: 'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-500/20 dark:border-amber-500/40 dark:text-amber-300',
       icon: Calendar,
-      iconColor: 'text-amber-400',
+      iconColor: 'text-amber-800 dark:text-amber-400',
       headline: '23.09.2026 \u00A0\u00A0 (Japan) -',
       detail: 'Operations will remain closed till 23.09.2026.'
     },
     {
       id: 'offload-tg322-16',
       tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
-      iconColor: 'text-orange-400',
+      iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '16.09.2026 \u00A0\u00A0 (TG 322) -',
       detail: '306 kg (17 pcs) out of 631 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg340-17',
       tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
-      iconColor: 'text-orange-400',
+      iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '17.09.2026 \u00A0\u00A0 (TG 340) -',
       detail: '805 kg (96 pcs) out of 1300 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg322-17',
       tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
-      iconColor: 'text-orange-400',
+      iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '17.09.2026 \u00A0\u00A0 (TG 322) -',
       detail: '865 kg (101 pcs) out of 1600 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg340-18',
       tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
-      iconColor: 'text-orange-400',
+      iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '18.09.2026 \u00A0\u00A0 (TG 340) -',
       detail: '1185 kg (79 pcs) out of 2000 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg322-19',
       tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
-      iconColor: 'text-orange-400',
+      iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '19.09.2026 \u00A0\u00A0 (TG 322) -',
       detail: 'Full 600 kg yet to depart from BKK'
     }
@@ -118,7 +118,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
                 >
                   {/* Category Pill */}
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider border shadow-2xs ${item.tagBg}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider border shadow-2xs ${item.tagBg}`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${item.iconColor}`} />
                     <span>{item.tag}</span>
