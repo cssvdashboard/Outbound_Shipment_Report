@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-40 w-full border-b-2 border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-[#0b0f19]/90 backdrop-blur-xl shadow-sm">
       <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="relative flex items-center justify-between h-16 gap-4">
-          
+
           {/* Brand Logo & Title */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
@@ -181,18 +181,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
-                  className={`group relative flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                    isActive
+                  className={`group relative flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer ${isActive
                       ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white shadow-lg shadow-blue-500/35 border-2 border-blue-400 -translate-y-0.5 ring-2 ring-blue-500/25'
                       : 'bg-white dark:bg-[#0f172a] text-slate-700 hover:text-slate-950 dark:text-slate-200 dark:hover:text-white border-2 border-slate-300 dark:border-slate-700 shadow-sm hover:border-blue-400 dark:hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-800/90 hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10 active:translate-y-0'
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                      isActive
+                    className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive
                         ? 'bg-white/20 border border-white/30 text-white shadow-inner'
                         : 'bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 group-hover:scale-110 group-hover:border-blue-400/50'
-                    }`}
+                      }`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : tab.color}`} />
                   </span>
