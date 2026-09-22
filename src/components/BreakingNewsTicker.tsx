@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   AlertTriangle,
-  Calendar,
   Plane
 } from 'lucide-react';
 
@@ -34,13 +33,14 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
         'Temporary service disruptions due to an operational contingency involving the area of Piacenza.'
     },
     {
-      id: 'holiday-japan',
-      tag: 'HOLIDAY ALERT',
-      tagBg: 'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-500/20 dark:border-amber-500/40 dark:text-amber-300',
-      icon: Calendar,
-      iconColor: 'text-amber-800 dark:text-amber-400',
-      headline: '',
-      detail: 'Japan will remain closed till 09/23/2026.'
+      id: 'gateway-delay-dwc',
+      tag: 'GATEWAY DELAY',
+      tagBg: 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-500/20 dark:border-rose-500/40 dark:text-rose-300',
+      icon: AlertTriangle,
+      iconColor: 'text-rose-700 dark:text-rose-400',
+      headline: '09/22/2023 -',
+      detail:
+        '(G9 519) - 22 AWB Missed Connection from DWC \u00A0|\u00A0 (G9 511) - 11 AWB Missed Connection from DWC.'
     },
     {
       id: 'offload-tg322-16',
