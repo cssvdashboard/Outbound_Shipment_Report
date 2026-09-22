@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   ShieldAlert,
-  ArrowUpRight,
   X,
   Search,
   Download,
@@ -447,11 +446,11 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         {/* REQUIREMENT 2: Delivery Timeline Breakdown */}
         <div className="lg:col-span-5 glass-card p-5 rounded-2xl flex flex-col justify-between border-2 border-slate-300 dark:border-slate-700">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-center pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Delivery Timeline Distribution
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white text-center">
+                  Deliver Timeline
                 </h2>
               </div>
             </div>
@@ -550,20 +549,20 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   hoverClass: 'hover:border-cyan-400 hover:bg-cyan-50/50 dark:hover:bg-cyan-500/15'
                 },
                 'Day 6': {
-                  bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
-                  activeBorder: 'border-indigo-500 ring-2 ring-indigo-400/30 shadow-glow-indigo',
-                  text: 'text-indigo-800 dark:text-indigo-400',
-                  badgeBg: 'bg-indigo-100/80 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border-indigo-300 dark:border-none',
-                  barBg: 'bg-indigo-500 dark:bg-indigo-400',
-                  hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/15'
+                  bg: 'bg-blue-50/90 dark:bg-blue-950/40',
+                  activeBorder: 'border-blue-500 ring-2 ring-blue-400/30 shadow-glow-blue',
+                  text: 'text-blue-800 dark:text-blue-400',
+                  badgeBg: 'bg-blue-100/80 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 border-blue-300 dark:border-none',
+                  barBg: 'bg-blue-500 dark:bg-blue-400',
+                  hoverClass: 'hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-500/15'
                 },
                 'Within 6 Days': {
-                  bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
-                  activeBorder: 'border-indigo-500 ring-2 ring-indigo-400/30 shadow-glow-indigo',
-                  text: 'text-indigo-800 dark:text-indigo-400',
-                  badgeBg: 'bg-indigo-100/80 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border-indigo-300 dark:border-none',
-                  barBg: 'bg-indigo-500 dark:bg-indigo-400',
-                  hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/15'
+                  bg: 'bg-blue-50/90 dark:bg-blue-950/40',
+                  activeBorder: 'border-blue-500 ring-2 ring-blue-400/30 shadow-glow-blue',
+                  text: 'text-blue-800 dark:text-blue-400',
+                  badgeBg: 'bg-blue-100/80 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 border-blue-300 dark:border-none',
+                  barBg: 'bg-blue-500 dark:bg-blue-400',
+                  hoverClass: 'hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-500/15'
                 },
                 'Day 7': {
                   bg: 'bg-amber-50/90 dark:bg-amber-950/40',
@@ -616,7 +615,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   onClick={() => onSelectTTRange(item.name)}
                   onMouseEnter={() => setHoveredTimelineIndex(idx)}
                   onMouseLeave={() => setHoveredTimelineIndex(null)}
-                  className={`p-3 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 flex flex-col justify-between ${
+                  className={`p-3 rounded-2xl text-left transition-all bg-white dark:bg-slate-900/40 border-2 flex flex-col justify-between group ${
                     isSelected
                       ? `${style.bg} ${style.activeBorder}`
                       : isHovered
@@ -645,8 +644,14 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                         style={{ width: `${Math.min(item.percentage, 100)}%` }}
                       />
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 font-bold">
-                      {isSelected ? '✓ Filter Active' : 'Click to filter'}
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 font-bold h-4 flex items-center">
+                      {isSelected ? (
+                        <span className="text-emerald-600 dark:text-emerald-400">✓ Filter Active</span>
+                      ) : (
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          Click to filter
+                        </span>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -658,11 +663,11 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         {/* REQUIREMENT 3: Final Resolution Breakdown (CLICK TO OPEN POPUP MODAL) */}
         <div className="lg:col-span-7 glass-card p-5 rounded-2xl flex flex-col justify-between border-2 border-slate-300 dark:border-slate-700">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-center pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-blue-400" />
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Final Resolution &amp; Outcome Status
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white text-center">
+                  Final Resolution
                 </h2>
               </div>
             </div>
@@ -798,16 +803,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 );
               })}
             </div>
-          </div>
-
-          {/* Quick Hub Navigation Link */}
-          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end text-xs">
-            <button
-              onClick={() => onNavigateTab('delays')}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
-            >
-              Open Delay Hub <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
 
