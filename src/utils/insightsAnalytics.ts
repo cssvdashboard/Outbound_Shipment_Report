@@ -61,15 +61,15 @@ export function formatDateOnlyDisplay(date: Date | null): string {
  * Processes shipments through the strict 5-order pipeline:
  * Order 1: Final Resolution is "Delivered"
  * Order 2: POD date cannot exceed Commit Date (podDate <= commitDate)
- * Order 3: Select only AWBs which have Dex 01 or Stat 41 date
- * Order 4: Dex 01 or Stat 41 date >= Sips date (ignoring time, calendar date only)
- * Order 5: Calculate days to POD from Dex 01 or Stat 41 date (must be >= 0, exception prior to/on delivery)
+ * Order 3: Exclude all DEX 01 AWBs and select only AWBs which have Stat 41 date
+ * Order 4: Stat 41 date >= Sips date and <= POD date (ignoring time, calendar date only)
+ * Order 5: Calculate days to POD from difference between POD Date - SIPS (must be >= 0)
  */
 export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult {
   let step1Delivered = 0;
   let step2PodWithinCommit = 0;
-  let step3HasDexOrStat = 0;
-  let step4DexStatGteSips = 0;
+  let step3HasStat = 0;
+  let step4StatGteSips = 0;
 
   const qualifyingRecords: InsightsAWBRecord[] = [];
 
@@ -87,39 +87,29 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
     if (podDate.getTime() > commitDate.getTime()) continue;
     step2PodWithinCommit++;
 
-    // Order 3: Must have DEX 01 or STAT 41 date
+    // Exclude all DEX 01 AWBs
     const dex01Date = parseDateSafe(s.dex01);
+    if (dex01Date || s.dex01) continue;
+
+    // Order 3: Must have STAT 41 date
     const stat41Date = parseDateSafe(s.stat41);
+    if (!stat41Date) continue;
+    step3HasStat++;
 
-    if (!dex01Date && !stat41Date) continue;
-    step3HasDexOrStat++;
-
-    // Order 4: DEX 01 or STAT 41 date should be as Sips date or later dates of sips (ignore time)
+    // Order 4: STAT 41 date should be as Sips date or later dates of sips, and on or before delivery (ignore time)
     const sipsDate = parseDateSafe(s.sips);
     if (!sipsDate) continue;
 
     const sipsCalDay = getCalendarDayTimestamp(sipsDate);
     const podCalDay = getCalendarDayTimestamp(podDate);
+    const statCalDay = getCalendarDayTimestamp(stat41Date);
 
-    // Determine primary exception event that satisfies >= SIPS date AND occurred on or before delivery
-    let selectedEventDate: Date | null = null;
-    let selectedType: 'DEX 01' | 'STAT 41' = 'DEX 01';
+    if (statCalDay < sipsCalDay || statCalDay > podCalDay) continue;
+    step4StatGteSips++;
 
-    if (dex01Date && getCalendarDayTimestamp(dex01Date) >= sipsCalDay && getCalendarDayTimestamp(dex01Date) <= podCalDay) {
-      selectedEventDate = dex01Date;
-      selectedType = 'DEX 01';
-    } else if (stat41Date && getCalendarDayTimestamp(stat41Date) >= sipsCalDay && getCalendarDayTimestamp(stat41Date) <= podCalDay) {
-      selectedEventDate = stat41Date;
-      selectedType = 'STAT 41';
-    }
-
-    if (!selectedEventDate) continue;
-    step4DexStatGteSips++;
-
-    // Order 5: Calculate days to POD from DEX 01 or STAT 41 date (>= 0)
-    const eventCalDay = getCalendarDayTimestamp(selectedEventDate);
-    const daysToPod = Math.max(0, Math.round((podCalDay - eventCalDay) / (86400 * 1000)));
-    const exactDaysToPod = Number(Math.max(0, (podDate.getTime() - selectedEventDate.getTime()) / (86400 * 1000)).toFixed(1));
+    // Order 5: Calculate days to POD from difference between POD Date - SIPS (>= 0)
+    const daysToPod = Math.max(0, Math.round((podCalDay - sipsCalDay) / (86400 * 1000)));
+    const exactDaysToPod = Number(Math.max(0, (podDate.getTime() - sipsDate.getTime()) / (86400 * 1000)).toFixed(1));
 
     const pickupDate = parseDateSafe(s.pickup);
 
@@ -137,11 +127,11 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
       sipsRaw: s.sips,
       sipsFormatted: formatDateTimeDisplay(sipsDate),
       dex01Raw: s.dex01,
-      dex01Formatted: formatDateTimeDisplay(dex01Date),
+      dex01Formatted: '-',
       stat41Raw: s.stat41,
       stat41Formatted: formatDateTimeDisplay(stat41Date),
-      primaryExceptionType: selectedType,
-      primaryExceptionDateFormatted: formatDateTimeDisplay(selectedEventDate),
+      primaryExceptionType: 'STAT 41',
+      primaryExceptionDateFormatted: formatDateTimeDisplay(stat41Date),
       daysToPod,
       exactDaysToPod,
       isSameDayPod: daysToPod === 0,
@@ -249,8 +239,8 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
     funnel: {
       step1_delivered: step1Delivered,
       step2_podWithinCommit: step2PodWithinCommit,
-      step3_hasDexOrStat: step3HasDexOrStat,
-      step4_dexStatGteSips: step4DexStatGteSips
+      step3_hasDexOrStat: step3HasStat,
+      step4_dexStatGteSips: step4StatGteSips
     },
     totalInsightsAWBs: qualifyingRecords.length,
     impactedCountriesCount: countries.length,

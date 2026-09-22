@@ -34,7 +34,7 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(25);
   const [copiedAwb, setCopiedAwb] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<'daysToPod' | 'awb' | 'country' | 'destLocCd' | 'podFormatted' | 'commitDateFormatted' | 'sipsFormatted'>('daysToPod');
+  const [sortField, setSortField] = useState<'daysToPod' | 'awb' | 'country' | 'destLocCd' | 'stat41Formatted' | 'podFormatted' | 'commitDateFormatted' | 'sipsFormatted'>('daysToPod');
   const [sortAsc, setSortAsc] = useState<boolean>(true);
 
   // Available Dest Locs based on selectedCountry
@@ -122,11 +122,10 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
       'AWB Number': r.awb,
       'Country': r.country,
       'Dest Loc': r.destLocCd,
-      'DEX 01 Scan': r.dex01Formatted !== '-' ? r.dex01Formatted : '',
       'STAT 41 Scan': r.stat41Formatted !== '-' ? r.stat41Formatted : '',
       'SIPS Date': r.sipsFormatted,
       'Commit Time': r.commitDateFormatted,
-      'POD Date': r.podFormatted,
+      'POD Scan': r.podFormatted,
       'Days to POD': r.daysToPod
     }));
 
@@ -200,7 +199,7 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              AWBs with DEX 01 or STAT 41 scan on/after SIPS, delivered on/before commit time.
+              AWBs with STAT 41 scan on/after SIPS, delivered on/before commit time. Days to POD is POD Date − SIPS.
             </p>
           </div>
         </div>
@@ -408,8 +407,15 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
-                <th className="py-3 px-2">DEX 01 Scan</th>
-                <th className="py-3 px-2">STAT 41 Scan</th>
+                <th 
+                  onClick={() => handleSort('stat41Formatted')} 
+                  className="py-3 px-2 cursor-pointer hover:text-slate-950 dark:hover:text-white"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>STAT 41 Scan</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
                 <th 
                   onClick={() => handleSort('sipsFormatted')} 
                   className="py-3 px-2 cursor-pointer hover:text-slate-950 dark:hover:text-white"
@@ -433,7 +439,7 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
                   className="py-3 px-2 cursor-pointer hover:text-slate-950 dark:hover:text-white"
                 >
                   <div className="flex items-center gap-1">
-                    <span>POD Date</span>
+                    <span>POD Scan</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
@@ -451,7 +457,7 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
               {paginatedRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     <AlertCircle className="w-7 h-7 mx-auto mb-2 opacity-50" />
                     <p className="text-sm font-semibold">No qualifying AWBs found</p>
                     <p className="text-xs text-slate-500 mt-1">Try resetting filters or adjusting search term</p>
@@ -495,17 +501,6 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
                       <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
                         {r.destLocCd}
                       </span>
-                    </td>
-
-                    {/* DEX 01 Scan Date */}
-                    <td className="py-2.5 px-2 text-[11px] font-mono whitespace-nowrap">
-                      {r.dex01Formatted !== '-' ? (
-                        <span className="text-amber-600 dark:text-amber-400 font-semibold">
-                          {r.dex01Formatted}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
                     </td>
 
                     {/* STAT 41 Scan Date */}
