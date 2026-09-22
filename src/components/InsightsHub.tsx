@@ -197,7 +197,7 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              AWBs with STAT 41 scan on/after SIPS, delivered on/before commit time, taking 2+ days (POD Date − SIPS ≥ 2).
+              AWBs with weekday SIPS (excluding Sat/Sun), STAT 41 scan on/after SIPS, delivered on/before commit time, taking 2+ days (POD Date − SIPS ≥ 2).
             </p>
           </div>
         </div>

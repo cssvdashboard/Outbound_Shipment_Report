@@ -58,11 +58,35 @@ export function formatDateOnlyDisplay(date: Date | null): string {
 }
 
 /**
+ * Specific AWBs excluded from Insights Tab calculations based on business criteria
+ */
+export const EXCLUDED_INSIGHT_AWBS = new Set<string>([
+  '382418597681',
+  '874527386188',
+  '875036402439',
+  '875300613391',
+  '875818613191',
+  '874921161608',
+  '817726722560',
+  '382567180149',
+  '874981557038',
+  '875204992095',
+  '817726013566',
+  '875729673077',
+  '875922948785',
+  '875730800622',
+  '876090069832',
+  '817782230770',
+  '817782230895',
+  '817782838826'
+]);
+
+/**
  * Processes shipments through the strict 5-order pipeline:
  * Order 1: Final Resolution is "Delivered"
  * Order 2: POD date cannot exceed Commit Date (podDate <= commitDate)
  * Order 3: Exclude all DEX 01 AWBs and select only AWBs which have Stat 41 date
- * Order 4: Stat 41 date >= Sips date and <= POD date (ignoring time, calendar date only)
+ * Order 4: SIPS date cannot be Saturday or Sunday; Stat 41 date >= Sips date and <= POD date (ignoring time, calendar date only)
  * Order 5: Calculate days to POD from difference between POD Date - SIPS (must be >= 0)
  */
 export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult {
@@ -74,6 +98,13 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
   const qualifyingRecords: InsightsAWBRecord[] = [];
 
   for (const s of shipments) {
+    // Exclude requested AWBs from Insights Tab
+    const rawAwb = String(s.awb || '').trim();
+    const cleanAwb = rawAwb.replace(/\s+/g, '');
+    if (EXCLUDED_INSIGHT_AWBS.has(rawAwb) || EXCLUDED_INSIGHT_AWBS.has(cleanAwb)) {
+      continue;
+    }
+
     // Order 1: Final Resolution === 'Delivered'
     const finalRes = (s.finalResolution || '').trim().toLowerCase();
     if (finalRes !== 'delivered') continue;
@@ -96,9 +127,13 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
     if (!stat41Date) continue;
     step3HasStat++;
 
-    // Order 4: STAT 41 date should be as Sips date or later dates of sips, and on or before delivery (ignore time)
+    // Order 4: SIPS date cannot be on Saturday or Sunday; STAT 41 date should be as Sips date or later dates of sips, and on or before delivery (ignore time)
     const sipsDate = parseDateSafe(s.sips);
     if (!sipsDate) continue;
+
+    // Exclude shipments where SIPS date falls on either Saturday (6) or Sunday (0)
+    const sipsDayOfWeek = sipsDate.getUTCDay();
+    if (sipsDayOfWeek === 0 || sipsDayOfWeek === 6) continue;
 
     const sipsCalDay = getCalendarDayTimestamp(sipsDate);
     const podCalDay = getCalendarDayTimestamp(podDate);
