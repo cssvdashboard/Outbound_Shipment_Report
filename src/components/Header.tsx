@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-950 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-                <strong>Dashboard - Export</strong>
+                <strong>Customer Service Dashboard - Export</strong>
               </h1>
             </div>
           </div>
