@@ -104,12 +104,12 @@ export function calculateInsights(shipments: Shipment[]): InsightsAnalysisResult
     const podCalDay = getCalendarDayTimestamp(podDate);
     const statCalDay = getCalendarDayTimestamp(stat41Date);
 
-    if (statCalDay < sipsCalDay || statCalDay > podCalDay) continue;
-    step4StatGteSips++;
-
-    // Order 5: Calculate days to POD from difference between POD Date - SIPS (>= 0)
+    // Order 5: Calculate days to POD from difference between POD Date - SIPS (keep only 2+ days, exclude 0d and 1d)
     const daysToPod = Math.max(0, Math.round((podCalDay - sipsCalDay) / (86400 * 1000)));
     const exactDaysToPod = Number(Math.max(0, (podDate.getTime() - sipsDate.getTime()) / (86400 * 1000)).toFixed(1));
+
+    if (daysToPod < 2) continue;
+    step4StatGteSips++;
 
     const pickupDate = parseDateSafe(s.pickup);
 

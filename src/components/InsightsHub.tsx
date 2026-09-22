@@ -67,8 +67,6 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
       if (selectedDestLoc && r.destLocCd !== selectedDestLoc) return false;
 
       if (selectedDayBucket) {
-        if (selectedDayBucket === '0' && r.daysToPod !== 0) return false;
-        if (selectedDayBucket === '1' && r.daysToPod !== 1) return false;
         if (selectedDayBucket === '2' && r.daysToPod !== 2) return false;
         if (selectedDayBucket === '3-4' && (r.daysToPod < 3 || r.daysToPod > 4)) return false;
         if (selectedDayBucket === '5+' && r.daysToPod < 5) return false;
@@ -199,7 +197,7 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              AWBs with STAT 41 scan on/after SIPS, delivered on/before commit time. Days to POD is POD Date − SIPS.
+              AWBs with STAT 41 scan on/after SIPS, delivered on/before commit time, taking 2+ days (POD Date − SIPS ≥ 2).
             </p>
           </div>
         </div>
@@ -322,26 +320,6 @@ export const InsightsHub: React.FC<InsightsHubProps> = ({ shipments }) => {
             }`}
           >
             All ({insightsData.totalInsightsAWBs})
-          </button>
-          <button
-            onClick={() => setSelectedDayBucket(selectedDayBucket === '0' ? null : '0')}
-            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-              selectedDayBucket === '0'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
-            }`}
-          >
-            0d ({insightsData.daysDistribution.sameDay})
-          </button>
-          <button
-            onClick={() => setSelectedDayBucket(selectedDayBucket === '1' ? null : '1')}
-            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-              selectedDayBucket === '1'
-                ? 'bg-sky-600 text-white shadow-xs'
-                : 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20'
-            }`}
-          >
-            1d ({insightsData.daysDistribution.oneDay})
           </button>
           <button
             onClick={() => setSelectedDayBucket(selectedDayBucket === '2' ? null : '2')}
