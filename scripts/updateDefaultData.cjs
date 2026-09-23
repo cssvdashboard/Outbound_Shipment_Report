@@ -42,10 +42,10 @@ function parseFile(filePath, defaultSheetName) {
 
   return rawRows.map(row => {
     const awb = String(normalizeKey(row, ['AWB', 'Airway Bill', 'Tracking Number', 'Tracking No', 'Track Number']) || '').trim();
-    const mawb = String(normalizeKey(row, ['MAWB', 'Master AWB']) || '').trim();
+    const mawb = String(normalizeKey(row, ['MAWB', 'Master AWB', 'Flight Master']) || '').trim();
     const destination = String(normalizeKey(row, ['DESTINATION', 'Dest', 'Country Code', 'Country', 'Dest Country']) || '').trim().toUpperCase();
     const rampId = String(normalizeKey(row, ['Ramp ID', 'RampId', 'Ramp', 'Dest Ramp']) || '').trim();
-    const destLocCd = String(normalizeKey(row, ['Dest Loc Cd', 'DestLocCd', 'Dest Location', 'Dest Loc Id', 'Dest Loc']) || '').trim();
+    const destLocCd = String(normalizeKey(row, ['Dest Loc Cd', 'DestLocCd', 'Dest Location', 'Dest Loc Id', 'Dest Loc ID', 'Dest Loc']) || '').trim();
     const customer = String(normalizeKey(row, ['CUSTOMER', 'Customer Name', 'Client']) || '').trim();
     const shprName = String(normalizeKey(row, ['SHPR NAME', 'Shipper Name', 'Shipper', 'SHPR']) || '').trim();
     const recipient = String(normalizeKey(row, ['RECIPIENT', 'Receiver', 'Consignee', 'Recipient Name And Company']) || '').trim();
@@ -81,7 +81,7 @@ function parseFile(filePath, defaultSheetName) {
     }
 
     const transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();
-    const clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay']) || '').trim();
+    const clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay', 'Clearanace Delay']) || '').trim();
     const destinationDelay = String(normalizeKey(row, ['DESTIANTION DELAY', 'DESTINATION DELAY', 'Destination Delay', 'Delivery Delay']) || '').trim();
     const weekendDelay = String(normalizeKey(row, ['WEEKEND DELAY', 'Weekend Delay']) || '').trim();
     
@@ -139,7 +139,19 @@ function parseFile(filePath, defaultSheetName) {
 const julyShipments = parseFile(path.resolve(__dirname, '../July Final Draft.xlsx'), 'Data');
 const augustShipments = parseFile(path.resolve(__dirname, '../August Final Draft.xlsx'), 'Sheet1');
 
-const combined = [...julyShipments, ...augustShipments];
+// Look for September Final Draft if present
+const septExcelPath = [
+  path.resolve(__dirname, '../September Final Draft.xlsx'),
+  path.resolve(__dirname, '../September Final draft.xlsx'),
+  path.resolve(__dirname, '../september final draft.xlsx')
+].find(p => fs.existsSync(p));
+
+const septShipments = septExcelPath ? parseFile(septExcelPath) : [];
+if (septShipments.length > 0) {
+  console.log(`Included ${septShipments.length} records from September file.`);
+}
+
+const combined = [...julyShipments, ...augustShipments, ...septShipments];
 console.log(`Total combined shipments: ${combined.length}`);
 
 const withSips = combined.filter(s => s.sips).length;

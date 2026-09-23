@@ -46,10 +46,10 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
 
     const shipments: Shipment[] = rawRows.map((row) => {
       const awb = String(normalizeKey(row, ['AWB', 'Airway Bill', 'Tracking Number', 'Tracking No', 'Track Number', 'Tracking']) || '').trim();
-      const mawb = String(normalizeKey(row, ['MAWB', 'Master AWB']) || '').trim();
+      const mawb = String(normalizeKey(row, ['MAWB', 'Master AWB', 'Flight Master']) || '').trim();
       const destination = String(normalizeKey(row, ['DESTINATION', 'Dest', 'Country Code', 'Country', 'Dest Country']) || '').trim().toUpperCase();
       const rampId = String(normalizeKey(row, ['Ramp ID', 'RampId', 'Ramp', 'Dest Ramp']) || '').trim();
-      const destLocCd = String(normalizeKey(row, ['Dest Loc Cd', 'DestLocCd', 'Dest Location']) || '').trim();
+      const destLocCd = String(normalizeKey(row, ['Dest Loc Cd', 'DestLocCd', 'Dest Location', 'Dest Loc Id', 'Dest Loc ID']) || '').trim();
       const customer = String(normalizeKey(row, ['CUSTOMER', 'Customer Name', 'Client']) || '').trim();
       const shprName = String(normalizeKey(row, ['SHPR NAME', 'Shipper Name', 'Shipper', 'SHPR']) || '').trim();
       const recipient = String(normalizeKey(row, ['RECIPIENT', 'Receiver', 'Consignee', 'Recipient Name And Company']) || '').trim();
@@ -86,7 +86,7 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
       }
 
       const transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();
-      const clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay']) || '').trim();
+      const clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay', 'Clearanace Delay']) || '').trim();
       const destinationDelay = String(normalizeKey(row, ['DESTIANTION DELAY', 'DESTINATION DELAY', 'Destination Delay', 'Delivery Delay']) || '').trim();
       const weekendDelay = String(normalizeKey(row, ['WEEKEND DELAY', 'Weekend Delay']) || '').trim();
       

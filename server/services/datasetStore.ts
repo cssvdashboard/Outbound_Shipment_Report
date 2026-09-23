@@ -31,6 +31,7 @@ const ACTIVE_DATASET_FILE = path.join(DATA_DIR, 'active_dataset.json');
 const DEFAULT_JSON_PATH = path.resolve(__dirname, '../../public/defaultData.json');
 const DEFAULT_EXCEL_PATH = path.resolve(__dirname, '../../July Final Draft.xlsx');
 const AUG_EXCEL_PATH = path.resolve(__dirname, '../../August Final Draft.xlsx');
+const SEPT_EXCEL_PATH = path.resolve(__dirname, '../../September Final Draft.xlsx');
 
 class DatasetStore {
   private shipments: ServerShipment[] = [];
@@ -102,8 +103,8 @@ class DatasetStore {
       }
     }
 
-    // 3. Try to parse from root July and August Excel files
-    if (fs.existsSync(DEFAULT_EXCEL_PATH) || fs.existsSync(AUG_EXCEL_PATH)) {
+    // 3. Try to parse from root July, August, and September Excel files
+    if (fs.existsSync(DEFAULT_EXCEL_PATH) || fs.existsSync(AUG_EXCEL_PATH) || fs.existsSync(SEPT_EXCEL_PATH)) {
       try {
         const combinedShipments: ServerShipment[] = [];
         if (fs.existsSync(DEFAULT_EXCEL_PATH)) {
@@ -122,11 +123,20 @@ class DatasetStore {
             combinedShipments.push(...shipments);
           }
         }
+        if (fs.existsSync(SEPT_EXCEL_PATH)) {
+          console.log('[DatasetStore] Parsing root September Final Draft.xlsx...');
+          const buffer = fs.readFileSync(SEPT_EXCEL_PATH);
+          const { shipments } = parseExcelBuffer(buffer);
+          if (shipments && shipments.length > 0) {
+            combinedShipments.push(...shipments);
+          }
+        }
 
         if (combinedShipments.length > 0) {
+          const hasSept = fs.existsSync(SEPT_EXCEL_PATH);
           this.shipments = combinedShipments;
           this.meta = {
-            filename: 'July & August Final Draft (Default)',
+            filename: hasSept ? 'July, August & September Final Draft (Default)' : 'July & August Final Draft (Default)',
             uploadedAt: 'Parsed from Root Excel',
             rowCount: combinedShipments.length,
             isCustom: false
