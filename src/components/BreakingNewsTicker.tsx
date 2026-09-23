@@ -49,7 +49,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '09/16/2026 \u00A0\u00A0 (TG 322) -',
-      detail: '306 kg (17 pcs) out of 631 kg yet to depart from BKK'
+      detail: '307 kg (17 pcs) out of 631 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg340-17',
@@ -58,7 +58,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '09/17/2026 \u00A0\u00A0 (TG 340) -',
-      detail: '805 kg (96 pcs) out of 1300 kg yet to depart from BKK'
+      detail: '295 kg (23 pcs) out of 1300 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg322-17',
@@ -67,7 +67,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '09/17/2026 \u00A0\u00A0 (TG 322) -',
-      detail: '865 kg (101 pcs) out of 1600 kg yet to depart from BKK'
+      detail: '21 kg (10 pcs) out of 1600 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg340-18',
@@ -76,7 +76,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '09/18/2026 \u00A0\u00A0 (TG 340) -',
-      detail: '1185 kg (79 pcs) out of 2000 kg yet to depart from BKK'
+      detail: '1185 kg (80 pcs) out of 2000 kg yet to depart from BKK'
     },
     {
       id: 'offload-tg322-19',
@@ -85,7 +85,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '09/19/2026 \u00A0\u00A0 (TG 322) -',
-      detail: 'Full 600 kg yet to depart from BKK'
+      detail: 'Full 600 kg (72 pcs) yet to depart from BKK'
     }
   ];
 
