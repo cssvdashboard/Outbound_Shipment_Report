@@ -149,9 +149,16 @@ console.log(`With SIPS: ${withSips}, With Commit: ${withCommit}, With DEX/STAT: 
 
 const publicPath = path.resolve(__dirname, '../public/defaultData.json');
 const srcDataPath = path.resolve(__dirname, '../src/data/defaultData.json');
+const distDataPath = path.resolve(__dirname, '../dist/defaultData.json');
 
 fs.writeFileSync(publicPath, JSON.stringify(combined));
 console.log(`Wrote ${combined.length} records to ${publicPath}`);
 
 fs.writeFileSync(srcDataPath, JSON.stringify(combined));
 console.log(`Wrote ${combined.length} records to ${srcDataPath}`);
+
+if (fs.existsSync(path.resolve(__dirname, '../dist'))) {
+  fs.writeFileSync(distDataPath, JSON.stringify(combined));
+  console.log(`Wrote ${combined.length} records to ${distDataPath}`);
+}
+

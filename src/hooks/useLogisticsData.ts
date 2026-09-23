@@ -54,9 +54,9 @@ export const initialFilterState: FilterState = {
 export function useLogisticsData() {
   const [rawShipments, setRawShipments] = useState<Shipment[]>([]);
   const [datasetMeta, setDatasetMeta] = useState<DatasetMeta>({
-    filename: 'July Final Draft.xlsx (Default)',
-    uploadedAt: 'Preloaded Dataset',
-    rowCount: 27978,
+    filename: 'July & August Final Draft.xlsx (Default)',
+    uploadedAt: 'Preloaded July & August Data',
+    rowCount: 52941,
     isCustom: false
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);

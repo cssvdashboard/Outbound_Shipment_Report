@@ -102,29 +102,41 @@ class DatasetStore {
       }
     }
 
-    // 3. Try to parse from root July Final Draft.xlsx
-    if (fs.existsSync(DEFAULT_EXCEL_PATH)) {
+    // 3. Try to parse from root July and August Excel files
+    if (fs.existsSync(DEFAULT_EXCEL_PATH) || fs.existsSync(AUG_EXCEL_PATH)) {
       try {
-        console.log('[DatasetStore] Parsing root July Final Draft.xlsx...');
-        const buffer = fs.readFileSync(DEFAULT_EXCEL_PATH);
-        const { shipments, error } = parseExcelBuffer(buffer);
-        if (shipments && shipments.length > 0) {
-          this.shipments = shipments;
+        const combinedShipments: ServerShipment[] = [];
+        if (fs.existsSync(DEFAULT_EXCEL_PATH)) {
+          console.log('[DatasetStore] Parsing root July Final Draft.xlsx...');
+          const buffer = fs.readFileSync(DEFAULT_EXCEL_PATH);
+          const { shipments } = parseExcelBuffer(buffer);
+          if (shipments && shipments.length > 0) {
+            combinedShipments.push(...shipments);
+          }
+        }
+        if (fs.existsSync(AUG_EXCEL_PATH)) {
+          console.log('[DatasetStore] Parsing root August Final Draft.xlsx...');
+          const buffer = fs.readFileSync(AUG_EXCEL_PATH);
+          const { shipments } = parseExcelBuffer(buffer);
+          if (shipments && shipments.length > 0) {
+            combinedShipments.push(...shipments);
+          }
+        }
+
+        if (combinedShipments.length > 0) {
+          this.shipments = combinedShipments;
           this.meta = {
             filename: 'July & August Final Draft (Default)',
             uploadedAt: 'Parsed from Root Excel',
-            rowCount: shipments.length,
+            rowCount: combinedShipments.length,
             isCustom: false
           };
           this.isInitialized = true;
-          console.log(`[DatasetStore] Successfully parsed ${this.shipments.length} records from root Excel`);
+          console.log(`[DatasetStore] Successfully parsed ${this.shipments.length} records from root Excel files`);
           return;
         }
-        if (error) {
-          console.error('[DatasetStore] Error parsing root Excel:', error);
-        }
       } catch (err) {
-        console.error('[DatasetStore] Failed parsing root Excel file:', err);
+        console.error('[DatasetStore] Failed parsing root Excel files:', err);
       }
     }
 

@@ -23,6 +23,8 @@ export interface ServerShipment {
   weekendDelay?: string;
   finalResolution: string;
   remarks?: string;
+  shipmentType?: string;
+  isAgent?: boolean;
   sips?: string | number;
   commitDate?: string | number;
   dex01?: string | number;
@@ -70,23 +72,23 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
     };
 
     const shipments: ServerShipment[] = rawRows.map((row) => {
-      const awb = String(normalizeKey(row, ['AWB', 'Airway Bill', 'Tracking Number', 'Tracking No']) || '').trim();
+      const awb = String(normalizeKey(row, ['AWB', 'Airway Bill', 'Tracking Number', 'Tracking No', 'Track Number', 'Tracking']) || '').trim();
       const mawb = String(normalizeKey(row, ['MAWB', 'Master AWB']) || '').trim();
       const destination = String(normalizeKey(row, ['DESTINATION', 'Dest', 'Country Code', 'Country', 'Dest Country']) || '').trim().toUpperCase();
-      const rampId = String(normalizeKey(row, ['Ramp ID', 'RampId', 'Ramp']) || '').trim();
-      const destLocCd = String(normalizeKey(row, ['Dest Loc Cd', 'DestLocCd', 'Dest Location']) || '').trim();
+      const rampId = String(normalizeKey(row, ['Ramp ID', 'RampId', 'Ramp', 'Dest Ramp']) || '').trim();
+      const destLocCd = String(normalizeKey(row, ['Dest Loc Cd', 'DestLocCd', 'Dest Location', 'Dest Loc Id', 'Dest Loc']) || '').trim();
       const customer = String(normalizeKey(row, ['CUSTOMER', 'Customer Name', 'Client']) || '').trim();
       const shprName = String(normalizeKey(row, ['SHPR NAME', 'Shipper Name', 'Shipper', 'SHPR']) || '').trim();
-      const recipient = String(normalizeKey(row, ['RECIPIENT', 'Receiver', 'Consignee']) || '').trim();
+      const recipient = String(normalizeKey(row, ['RECIPIENT', 'Receiver', 'Consignee', 'Recipient Name And Company']) || '').trim();
       
       const pkgCountRaw = normalizeKey(row, ['PKG COUNT', 'Pkg Count', 'Pieces', 'Qty']);
       const pkgCount = typeof pkgCountRaw === 'number' ? pkgCountRaw : (parseInt(String(pkgCountRaw), 10) || 1);
       
-      const weightRaw = normalizeKey(row, ['WEIGHT', 'Weight (kg)', 'Gross Wt', 'Wt']);
+      const weightRaw = normalizeKey(row, ['WEIGHT', 'Weight (kg)', 'Gross Wt', 'Wt', 'Shpmt Weight in Kg', 'Weight in Kg']);
       const weight = typeof weightRaw === 'number' ? weightRaw : (parseFloat(String(weightRaw)) || 0);
       
-      const city = String(normalizeKey(row, ['CITY', 'Dest City', 'Destination City']) || '').trim();
-      const description = String(normalizeKey(row, ['DESCRIPTION', 'Goods Description', 'Commodity']) || '').trim();
+      const city = String(normalizeKey(row, ['CITY', 'Dest City', 'Destination City', 'Dest City Name']) || '').trim();
+      const description = String(normalizeKey(row, ['DESCRIPTION', 'Goods Description', 'Commodity', 'Manifested Description']) || '').trim();
       const pickup = normalizeKey(row, ['PICKUP', 'Pickup Date', 'Pickup Date Time']);
       const pod = normalizeKey(row, ['POD', 'POD Date', 'Delivery Date']);
       
@@ -120,6 +122,14 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
 
       const remarks = String(normalizeKey(row, ['REMARKS', 'Remarks', 'Comment']) || '').trim();
 
+      const rawType = String(normalizeKey(row, ['Shipment Type', 'ShipmentType', 'Type', 'PP/CC', 'Payment Type']) || '').trim().toUpperCase();
+      let shipmentType = 'PP';
+      if (rawType === 'CC') shipmentType = 'CC';
+      else if (rawType === 'IPD') shipmentType = 'IPD';
+      else if (rawType === 'PP') shipmentType = 'PP';
+      else if (rawType) shipmentType = rawType;
+      const isAgent = /agent/i.test(customer);
+
       const sips = normalizeKey(row, ['SIPS', 'Sips Date', 'Sips']);
       const commitDate = normalizeKey(row, ['COMMIT TIME', 'Commit Date', 'Commit Time', 'CommitDate', 'Commit']);
       const dex01 = normalizeKey(row, ['DEX 01', 'DEX01', 'Dex 01', 'Dex01', 'DEX_01']);
@@ -148,6 +158,8 @@ export function parseExcelBuffer(buffer: Buffer): { shipments: ServerShipment[];
         weekendDelay,
         finalResolution,
         remarks,
+        shipmentType,
+        isAgent,
         sips,
         commitDate,
         dex01,
