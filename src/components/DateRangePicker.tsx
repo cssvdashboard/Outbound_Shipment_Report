@@ -67,7 +67,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setEndInput(dateRange.end || '');
   }, [dateRange.start, dateRange.end]);
 
-  // When opening picker, set view to existing date or default to August 2026
+  // When opening picker, set view to existing date or default to latest month in dataset
   const openPicker = (type: 'from' | 'to') => {
     setIsPresetsOpen(false);
     setActivePicker(type);
@@ -80,9 +80,17 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         return;
       }
     }
-    // Default to August 2026
+    // Default to latest date in dataset, or September 2026
+    if (availableDateRange?.max) {
+      const [y, m] = availableDateRange.max.split('-').map(Number);
+      if (y && m) {
+        setViewYear(y);
+        setViewMonth(m - 1);
+        return;
+      }
+    }
     setViewYear(2026);
-    setViewMonth(7);
+    setViewMonth(8); // September (0-indexed)
   };
 
   // Close calendar or presets when clicking outside
@@ -148,12 +156,67 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   // 2. Number of days in the month
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
-  const presets = [
-    { label: 'September 2026 (Full Month)', start: '2026-09-01', end: '2026-09-30' },
-    { label: 'August 2026 (Full Month)', start: '2026-08-01', end: '2026-08-31' },
-    { label: 'July 2026 (Full Month)', start: '2026-07-01', end: '2026-07-31' },
-    { label: 'All Dates (July – September 2026)', start: '2026-07-01', end: '2026-09-30' }
-  ];
+  // Dynamically compute presets based on ANY months present in the dataset!
+  const presets = React.useMemo(() => {
+    const yearMonthSet = new Set<string>();
+    if (availablePickupDates && availablePickupDates.size > 0) {
+      for (const d of availablePickupDates) {
+        if (d && d.length >= 7) {
+          yearMonthSet.add(d.slice(0, 7)); // 'YYYY-MM'
+        }
+      }
+    } else if (availableDateRange?.min && availableDateRange?.max) {
+      yearMonthSet.add(availableDateRange.min.slice(0, 7));
+      yearMonthSet.add(availableDateRange.max.slice(0, 7));
+    }
+
+    // Sort descending: newest month at the top (e.g. September, August, July...)
+    const sortedYMs = Array.from(yearMonthSet).sort().reverse();
+
+    if (sortedYMs.length === 0) {
+      return [
+        { label: 'September 2026 (Full Month)', start: '2026-09-01', end: '2026-09-30' },
+        { label: 'August 2026 (Full Month)', start: '2026-08-01', end: '2026-08-31' },
+        { label: 'July 2026 (Full Month)', start: '2026-07-01', end: '2026-07-31' },
+        { label: 'All Dates (July – September 2026)', start: '2026-07-01', end: '2026-09-30' }
+      ];
+    }
+
+    const items = sortedYMs.map((ym) => {
+      const [yStr, mStr] = ym.split('-');
+      const y = parseInt(yStr, 10);
+      const m = parseInt(mStr, 10);
+      const monthName = MONTH_NAMES[m - 1] || ym;
+      const lastDay = new Date(y, m, 0).getDate();
+      const lastDayStr = String(lastDay).padStart(2, '0');
+      return {
+        label: `${monthName} ${y} (Full Month)`,
+        start: `${ym}-01`,
+        end: `${ym}-${lastDayStr}`
+      };
+    });
+
+    // Summary preset for all dates combined
+    const earliestYM = sortedYMs[sortedYMs.length - 1];
+    const latestYM = sortedYMs[0];
+    const [, emStr] = earliestYM.split('-');
+    const [lyStr, lmStr] = latestYM.split('-');
+    const earliestName = MONTH_NAMES[parseInt(emStr, 10) - 1] || earliestYM;
+    const latestName = MONTH_NAMES[parseInt(lmStr, 10) - 1] || latestYM;
+    const latestLastDay = new Date(parseInt(lyStr, 10), parseInt(lmStr, 10), 0).getDate();
+
+    const allLabel = earliestYM === latestYM
+      ? `All Dates (${latestName} ${lyStr})`
+      : `All Dates (${earliestName} – ${latestName} ${lyStr})`;
+
+    items.push({
+      label: allLabel,
+      start: availableDateRange?.min || `${earliestYM}-01`,
+      end: availableDateRange?.max || `${latestYM}-${String(latestLastDay).padStart(2, '0')}`
+    });
+
+    return items;
+  }, [availablePickupDates, availableDateRange]);
 
   return (
     <div className="relative flex items-center" ref={containerRef}>

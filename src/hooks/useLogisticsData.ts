@@ -85,16 +85,16 @@ export function useLogisticsData() {
           setIsServerConnected(false);
         }
 
-        // 2. Fallback to IndexedDB (only if custom dataset AND contains updated fields like commitDate or sips)
+        // 2. Fallback to IndexedDB (only if legitimate custom dataset with newer data)
         const { data, meta } = await loadSavedDataset();
-        if (data && data.length > 0 && meta && meta.isCustom && data.some((s) => s.commitDate !== undefined || s.sips !== undefined)) {
+        const isStalePreSeptemberCache = meta?.filename?.includes('July & August') || (data && data.length <= 53000 && !meta?.filename?.toLowerCase().includes('september'));
+        
+        if (data && data.length > 0 && meta && meta.isCustom && !isStalePreSeptemberCache && data.some((s) => s.commitDate !== undefined || s.sips !== undefined)) {
           setRawShipments(data);
           setDatasetMeta(meta);
         } else {
-          // If stored data is outdated or missing category fields, clear it and fetch latest default JSON
-          if (data) {
-            await clearSavedDataset();
-          }
+          // If stored data is outdated (e.g. only July & August), clear it and fetch latest default JSON
+          await clearSavedDataset();
           // 3. Fallback to static public JSON with cache buster
           const response = await fetch(`./defaultData.json?v=${Date.now()}`);
           if (!response.ok) throw new Error('Failed to fetch defaultData.json');
