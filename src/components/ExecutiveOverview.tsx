@@ -450,7 +450,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <h2 className="text-sm font-bold text-slate-900 dark:text-white text-center">
-                  Deliver Timeline
+                  Delivery Timeline
                 </h2>
               </div>
             </div>
