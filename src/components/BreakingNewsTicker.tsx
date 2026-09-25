@@ -20,63 +20,16 @@ interface AlertItem {
 }
 
 export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
-  // Specific user-requested operational disruption, holiday, and offload alerts
+  // Specific operational disruption, offload, and damage alerts
   const baseBulletins: AlertItem[] = [
-    {
-      id: 'disruption-italy',
-      tag: 'SERVICE DISRUPTION',
-      tagBg: 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-500/20 dark:border-rose-500/40 dark:text-rose-300',
-      icon: AlertTriangle,
-      iconColor: 'text-rose-700 dark:text-rose-400',
-      headline: '09/08/2026 \u00A0\u00A0 (FedEx Italy) -',
-      detail:
-        'Temporary service disruptions due to an operational contingency involving the area of Piacenza.'
-    },
-    {
-      id: 'gateway-delay-dwc',
-      tag: 'GATEWAY DELAY',
-      tagBg: 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-500/20 dark:border-rose-500/40 dark:text-rose-300',
-      icon: AlertTriangle,
-      iconColor: 'text-rose-700 dark:text-rose-400',
-      headline: '09/22/2023 -',
-      detail:
-        '(G9 519) - 22 AWB Missed Connection from DWC \u00A0|\u00A0 (G9 511) - 11 AWB Missed Connection from DWC.'
-    },
-    {
-      id: 'offload-tg322-16',
-      tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
-      icon: Plane,
-      iconColor: 'text-orange-800 dark:text-orange-400',
-      headline: '09/16/2026 \u00A0\u00A0 (TG 322) -',
-      detail: '307 kg (17 pcs) out of 631 kg yet to depart from BKK'
-    },
-    {
-      id: 'offload-tg340-17',
-      tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
-      icon: Plane,
-      iconColor: 'text-orange-800 dark:text-orange-400',
-      headline: '09/17/2026 \u00A0\u00A0 (TG 340) -',
-      detail: '295 kg (23 pcs) out of 1300 kg yet to depart from BKK'
-    },
-    {
-      id: 'offload-tg322-17',
-      tag: 'OFFLOAD STATUS',
-      tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
-      icon: Plane,
-      iconColor: 'text-orange-800 dark:text-orange-400',
-      headline: '09/17/2026 \u00A0\u00A0 (TG 322) -',
-      detail: '21 kg (10 pcs) out of 1600 kg yet to depart from BKK'
-    },
     {
       id: 'offload-tg340-18',
       tag: 'OFFLOAD STATUS',
       tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
-      headline: '09/18/2026 \u00A0\u00A0 (TG 340) -',
-      detail: '1185 kg (80 pcs) out of 2000 kg yet to depart from BKK'
+      headline: '(TG 340) - 09/18/2026 -',
+      detail: '1185 kg (80 pcs) are yet to depart from BKK. Scheduled for TG401 on 25th September.'
     },
     {
       id: 'offload-tg322-19',
@@ -84,13 +37,22 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       tagBg: 'bg-orange-100 text-orange-950 border-orange-300 dark:bg-orange-500/20 dark:border-orange-500/40 dark:text-orange-300',
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
-      headline: '09/19/2026 \u00A0\u00A0 (TG 322) -',
-      detail: 'Full 600 kg (72 pcs) yet to depart from BKK'
+      headline: '(TG 322) - 09/19/2026 -',
+      detail: '600 kg (72 pcs) are yet to depart from BKK. Scheduled for TG407 on 25th September.'
+    },
+    {
+      id: 'damage-singapore',
+      tag: 'DAMAGE',
+      tagBg: 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-500/20 dark:border-rose-500/40 dark:text-rose-300',
+      icon: AlertTriangle,
+      iconColor: 'text-rose-700 dark:text-rose-400',
+      headline: '',
+      detail: '42 AWB was found damaged at Singapore.'
     }
   ];
 
   // Repeat items to provide a continuous, seamless looping stream across all screen widths
-  const sequence = [...baseBulletins, ...baseBulletins];
+  const sequence = [...baseBulletins, ...baseBulletins, ...baseBulletins];
   const duplicatedItems = [...sequence, ...sequence];
 
   return (
