@@ -210,8 +210,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation Tabs Bar */}
-        <div className="py-2.5 overflow-x-auto no-scrollbar border-t border-slate-200/80 dark:border-slate-800/60">
-          <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 dark:bg-[#070c18]/90 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-inner w-fit min-w-full sm:min-w-0">
+        <div className="py-2.5 overflow-x-auto no-scrollbar border-t border-slate-200/80 dark:border-slate-800/60 flex items-center">
+          <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 dark:bg-[#070c18]/90 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-inner w-fit mx-auto shrink-0">
             {[
               { id: 'overview', label: 'Overview', icon: Package, color: 'text-sky-500' },
               { id: 'country', label: 'Destination Details', icon: Layers, color: 'text-cyan-500' },
