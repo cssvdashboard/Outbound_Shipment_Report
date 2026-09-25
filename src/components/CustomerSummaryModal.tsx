@@ -450,8 +450,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       <style>{`
         @media print {
           @page {
-            size: A4 portrait;
-            margin: 8mm 10mm 6mm 10mm;
+            margin: 10mm 12mm 10mm 12mm;
           }
 
           /* Hide all main app nodes inside #root except the modal */
@@ -635,12 +634,12 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden print:max-h-none print:border-none print:shadow-none print:rounded-none"
       >
         {/* Modal Header */}
-        <div className="relative px-6 py-3.5 print:px-2 print:py-2 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-900 bg-slate-50/80 dark:bg-slate-900/60 print:bg-white flex items-center justify-center shrink-0">
+        <div className="relative px-6 py-3.5 print:px-6 print:py-3.5 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-900 bg-slate-50/80 dark:bg-slate-900/60 print:bg-white flex items-center justify-center shrink-0">
           <div className="flex items-center justify-center gap-2.5 text-center">
-            <div className="w-8 h-8 print:w-6 print:h-6 rounded-xl print:rounded-md bg-indigo-600 print:bg-slate-900 flex items-center justify-center text-white shadow-xs shrink-0">
+            <div className="w-8 h-8 print:w-7 print:h-7 rounded-xl print:rounded-md bg-indigo-600 print:bg-slate-900 flex items-center justify-center text-white shadow-xs shrink-0">
               <Building className="w-4 h-4 print:w-3.5 print:h-3.5" />
             </div>
-            <h2 className="text-base print:text-lg font-black tracking-tight text-slate-900 dark:text-white print:text-slate-950 uppercase font-sans">
+            <h2 className="text-base print:text-xl font-black tracking-tight text-slate-900 dark:text-white print:text-slate-950 uppercase font-sans">
               Export Summary
             </h2>
           </div>
@@ -683,17 +682,17 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 print:p-0 print:space-y-2 print:overflow-visible">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 print:p-0 print:space-y-4 print:overflow-visible">
 
           {/* Account & Scope Banner with CENTERED TIME PERIOD & CUSTOMER */}
-          <div className="p-4 print:p-2 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center gap-1.5 print:gap-1 shadow-xs">
+          <div className="p-4 print:p-4 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center gap-1.5 print:gap-2 shadow-xs">
             <div className="flex flex-col items-center justify-center text-center w-full">
-              <h3 className="text-xl print:text-lg font-black text-slate-950 dark:text-white print:text-slate-950 tracking-tight text-center">
+              <h3 className="text-xl print:text-xl font-black text-slate-950 dark:text-white print:text-slate-950 tracking-tight text-center">
                 {summaryTitle}
               </h3>
               
               {/* Subtle, Understated Time Period & Destination */}
-              <div className="flex items-center justify-center gap-3 mt-1 print:mt-0.5 flex-wrap text-xs print:text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
+              <div className="flex items-center justify-center gap-3 mt-1 print:mt-1.5 flex-wrap text-xs print:text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
                 <div className="inline-flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-slate-400 print:text-slate-500 shrink-0" />
                   <span>Time Period: <strong className="font-semibold text-slate-800 dark:text-slate-200 print:text-slate-900">{timePeriodLabel}</strong></span>
@@ -760,33 +759,33 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* KPI Dashboard Cards */}
-          <div className={`grid gap-3 print:gap-2 ${
+          <div className={`grid gap-3 print:gap-3.5 ${
             metrics.timeline.undelivered > 0
               ? 'grid-cols-2 sm:grid-cols-4 print:grid-cols-4'
               : 'grid-cols-1 sm:grid-cols-3 print:grid-cols-3'
           }`}>
             {/* Total Shipments */}
-            <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
-              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
+            <div className="kpi-card p-3.5 print:p-3.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[11px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
                 <span>Total Shipments</span>
-                <Package className="w-3.5 h-3.5 text-blue-600 print:w-3 print:h-3" />
+                <Package className="w-3.5 h-3.5 text-blue-600 print:w-3.5 print:h-3.5" />
               </div>
-              <div className="text-2xl print:text-xl font-black text-slate-900 dark:text-white print:text-slate-950 mt-1 print:mt-0.5 font-mono">
+              <div className="text-2xl print:text-2xl font-black text-slate-900 dark:text-white print:text-slate-950 mt-1 print:mt-1 font-mono">
                 {metrics.total.toLocaleString()}
               </div>
-              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono mt-0.5">
+              <div className="text-[10.5px] print:text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono mt-0.5">
                 Gross: <strong className="text-slate-700 dark:text-slate-200 print:text-slate-800">{formatWeight(metrics.totalWeight)} kg</strong>
               </div>
             </div>
 
             {/* ON-TIME DELIVERY */}
-            <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
-              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
+            <div className="kpi-card p-3.5 print:p-3.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[11px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
                 <span>ON-TIME DELIVERY</span>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 print:w-3 print:h-3" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 print:w-3.5 print:h-3.5" />
               </div>
               <div
-                className={`text-2xl print:text-xl font-black mt-1 print:mt-0.5 font-mono ${
+                className={`text-2xl print:text-2xl font-black mt-1 print:mt-1 font-mono ${
                   metrics.onTimeRate >= 70
                     ? 'text-emerald-700 dark:text-emerald-400 print:text-emerald-700'
                     : metrics.onTimeRate >= 50
@@ -799,27 +798,27 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Average Transit Time */}
-            <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
-              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
+            <div className="kpi-card p-3.5 print:p-3.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[11px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
                 <span>Avg Transit Time</span>
-                <Clock className="w-3.5 h-3.5 text-indigo-600 print:w-3 print:h-3" />
+                <Clock className="w-3.5 h-3.5 text-indigo-600 print:w-3.5 print:h-3.5" />
               </div>
-              <div className="text-2xl print:text-xl font-black text-indigo-700 dark:text-indigo-400 print:text-indigo-700 mt-1 print:mt-0.5 font-mono">
+              <div className="text-2xl print:text-2xl font-black text-indigo-700 dark:text-indigo-400 print:text-indigo-700 mt-1 print:mt-1 font-mono">
                 {metrics.avgTT > 0 ? `${metrics.avgTT.toFixed(2)}d` : '-'}
               </div>
             </div>
 
             {/* Undelivered Shipments (Only shown if any) */}
             {metrics.timeline.undelivered > 0 && (
-              <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
-                <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
+              <div className="kpi-card p-3.5 print:p-3.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[11px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
                   <span>UNDELIVERED</span>
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 print:w-3 print:h-3" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 print:w-3.5 print:h-3.5" />
                 </div>
-                <div className="text-2xl print:text-xl font-black text-amber-700 dark:text-amber-400 print:text-amber-700 mt-1 print:mt-0.5 font-mono">
+                <div className="text-2xl print:text-2xl font-black text-amber-700 dark:text-amber-400 print:text-amber-700 mt-1 print:mt-1 font-mono">
                   {metrics.timeline.undelivered}
                 </div>
-                <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono mt-0.5">
+                <div className="text-[10.5px] print:text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono mt-0.5">
                   {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}% of scope
                 </div>
               </div>
@@ -827,97 +826,97 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* Delivery Timeline Breakdown */}
-          <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
-            <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 print:text-slate-800 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+          <div className="p-4 print:p-4 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2.5">
+            <h4 className="text-xs print:text-xs font-black uppercase text-slate-700 dark:text-slate-300 print:text-slate-800 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
               <Clock className="w-3.5 h-3.5 text-indigo-500 print:hidden" />
               Delivery Timeline
             </h4>
-            <div className={`grid gap-2 print:gap-1.5 text-center ${
+            <div className={`grid gap-2 print:gap-3 text-center ${
               metrics.timeline.undelivered > 0
                 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print:grid-cols-6'
                 : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 print:grid-cols-5'
             }`}>
               {/* Day 1-4 */}
-              <div className="timeline-day1_4 p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                <div className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400 print:text-emerald-800 flex items-center justify-center gap-1">
+              <div className="timeline-day1_4 p-2.5 print:p-3 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                <div className="text-[10px] print:text-[10.5px] font-black uppercase text-emerald-800 dark:text-emerald-400 print:text-emerald-800 flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Day 1–4
                 </div>
-                <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                <div className="text-lg print:text-xl font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5 print:mt-1">
                   {metrics.timeline.day1_4}
                 </div>
-                <div className="text-[11px] print:text-[10px] font-bold font-mono text-emerald-700 dark:text-emerald-400 print:text-emerald-800 mt-0.5">
+                <div className="text-[11px] print:text-xs font-bold font-mono text-emerald-700 dark:text-emerald-400 print:text-emerald-800 mt-0.5">
                   {metrics.total > 0 ? ((metrics.timeline.day1_4 / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
               {/* Day 5 */}
-              <div className="timeline-day5 p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                <div className="text-[10px] font-black uppercase text-blue-800 dark:text-blue-400 print:text-blue-800 flex items-center justify-center gap-1">
+              <div className="timeline-day5 p-2.5 print:p-3 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                <div className="text-[10px] print:text-[10.5px] font-black uppercase text-blue-800 dark:text-blue-400 print:text-blue-800 flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                   Day 5
                 </div>
-                <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                <div className="text-lg print:text-xl font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5 print:mt-1">
                   {metrics.timeline.day5}
                 </div>
-                <div className="text-[11px] print:text-[10px] font-bold font-mono text-blue-700 dark:text-blue-400 print:text-blue-800 mt-0.5">
+                <div className="text-[11px] print:text-xs font-bold font-mono text-blue-700 dark:text-blue-400 print:text-blue-800 mt-0.5">
                   {metrics.total > 0 ? ((metrics.timeline.day5 / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
               {/* Day 6 */}
-              <div className="timeline-day6 p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                <div className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-400 print:text-amber-800 flex items-center justify-center gap-1">
+              <div className="timeline-day6 p-2.5 print:p-3 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                <div className="text-[10px] print:text-[10.5px] font-black uppercase text-amber-800 dark:text-amber-400 print:text-amber-800 flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                   Day 6
                 </div>
-                <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                <div className="text-lg print:text-xl font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5 print:mt-1">
                   {metrics.timeline.day6}
                 </div>
-                <div className="text-[11px] print:text-[10px] font-bold font-mono text-amber-700 dark:text-amber-400 print:text-amber-800 mt-0.5">
+                <div className="text-[11px] print:text-xs font-bold font-mono text-amber-700 dark:text-amber-400 print:text-amber-800 mt-0.5">
                   {metrics.total > 0 ? ((metrics.timeline.day6 / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
               {/* Day 7 */}
-              <div className="timeline-day7 p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                <div className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-400 print:text-orange-800 flex items-center justify-center gap-1">
+              <div className="timeline-day7 p-2.5 print:p-3 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                <div className="text-[10px] print:text-[10.5px] font-black uppercase text-orange-800 dark:text-orange-400 print:text-orange-800 flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
                   Day 7
                 </div>
-                <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                <div className="text-lg print:text-xl font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5 print:mt-1">
                   {metrics.timeline.day7}
                 </div>
-                <div className="text-[11px] print:text-[10px] font-bold font-mono text-orange-700 dark:text-orange-400 print:text-orange-800 mt-0.5">
+                <div className="text-[11px] print:text-xs font-bold font-mono text-orange-700 dark:text-orange-400 print:text-orange-800 mt-0.5">
                   {metrics.total > 0 ? ((metrics.timeline.day7 / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
               {/* Day 8+ */}
-              <div className="timeline-day8Plus p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                <div className="text-[10px] font-black uppercase text-rose-800 dark:text-rose-400 print:text-rose-800 flex items-center justify-center gap-1">
+              <div className="timeline-day8Plus p-2.5 print:p-3 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                <div className="text-[10px] print:text-[10.5px] font-black uppercase text-rose-800 dark:text-rose-400 print:text-rose-800 flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                   Day 8+
                 </div>
-                <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                <div className="text-lg print:text-xl font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5 print:mt-1">
                   {metrics.timeline.day8Plus}
                 </div>
-                <div className="text-[11px] print:text-[10px] font-bold font-mono text-rose-700 dark:text-rose-400 print:text-rose-800 mt-0.5">
+                <div className="text-[11px] print:text-xs font-bold font-mono text-rose-700 dark:text-rose-400 print:text-rose-800 mt-0.5">
                   {metrics.total > 0 ? ((metrics.timeline.day8Plus / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
               {/* UNDELIVERED (Only shown if any) */}
               {metrics.timeline.undelivered > 0 && (
-                <div className="timeline-undelivered p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                  <div className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 print:text-slate-700 flex items-center justify-center gap-1">
+                <div className="timeline-undelivered p-2.5 print:p-3 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                  <div className="text-[10px] print:text-[10.5px] font-black uppercase text-slate-700 dark:text-slate-300 print:text-slate-700 flex items-center justify-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                     UNDELIVERED
                   </div>
-                  <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                  <div className="text-lg print:text-xl font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5 print:mt-1">
                     {metrics.timeline.undelivered}
                   </div>
-                  <div className="text-[11px] print:text-[10px] font-bold font-mono text-slate-600 dark:text-slate-400 print:text-slate-700 mt-0.5">
+                  <div className="text-[11px] print:text-xs font-bold font-mono text-slate-600 dark:text-slate-400 print:text-slate-700 mt-0.5">
                     {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}%
                   </div>
                 </div>
@@ -926,39 +925,39 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* Two Columns: Destination Details & Destination Delay Categories */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-2 gap-4 print:gap-2.5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3.5">
             
             {/* Top Destinations */}
-            <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
-              <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+            <div className="p-4 print:p-4 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2.5">
+              <h4 className="text-xs print:text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-sky-500 print:hidden" />
                 Destination Details
               </h4>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs print:text-[10.5px]">
+                <table className="w-full text-xs print:text-xs">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase font-black">
-                      <th className="py-2 print:py-1 text-center">Destination</th>
-                      <th className="py-2 print:py-1 text-center">AWBs</th>
-                      <th className="py-2 print:py-1 text-center">Weight</th>
-                      <th className="py-2 print:py-1 text-center">Avg TT</th>
-                      <th className="py-2 print:py-1 text-center">On-Time</th>
+                      <th className="py-2 print:py-1.5 text-center">Destination</th>
+                      <th className="py-2 print:py-1.5 text-center">AWBs</th>
+                      <th className="py-2 print:py-1.5 text-center">Weight</th>
+                      <th className="py-2 print:py-1.5 text-center">Avg TT</th>
+                      <th className="py-2 print:py-1.5 text-center">On-Time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {metrics.destinations.slice(0, 8).map((d, idx) => (
                       <tr key={d.dest} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${idx >= 6 ? 'print:hidden' : ''}`}>
-                        <td className="py-2 print:py-1 text-center font-bold text-slate-800 dark:text-slate-200">{d.dest}</td>
-                        <td className="py-2 print:py-1 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
+                        <td className="py-2 print:py-1.5 text-center font-bold text-slate-800 dark:text-slate-200">{d.dest}</td>
+                        <td className="py-2 print:py-1.5 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
                           {d.count}
                         </td>
-                        <td className="py-2 print:py-1 text-center font-mono text-slate-500 dark:text-slate-400">
+                        <td className="py-2 print:py-1.5 text-center font-mono text-slate-500 dark:text-slate-400">
                           {formatWeight(d.weight)} kg
                         </td>
-                        <td className="py-2 print:py-1 text-center font-mono font-bold text-indigo-700 dark:text-indigo-400 print:text-indigo-700">
+                        <td className="py-2 print:py-1.5 text-center font-mono font-bold text-indigo-700 dark:text-indigo-400 print:text-indigo-700">
                           {d.avgTT > 0 ? `${d.avgTT.toFixed(1)}d` : '-'}
                         </td>
-                        <td className="py-2 print:py-1 text-center font-mono font-black text-emerald-700 dark:text-emerald-400 print:text-emerald-700">
+                        <td className="py-2 print:py-1.5 text-center font-mono font-black text-emerald-700 dark:text-emerald-400 print:text-emerald-700">
                           {d.onTimeRate.toFixed(0)}%
                         </td>
                       </tr>
@@ -976,9 +975,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Delay Categories Table */}
-            <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
+            <div className="p-4 print:p-4 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2.5">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
+                <h4 className="text-xs print:text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:hidden" />
                   Delay Categories
                 </h4>
@@ -993,10 +992,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
 
               <div className="overflow-x-auto max-h-64 print:max-h-none overflow-y-auto print:overflow-visible">
-                <table className="w-full text-xs print:text-[10.5px]">
+                <table className="w-full text-xs print:text-xs">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase font-black">
-                      <th className="py-2 print:py-1 text-center w-8 no-print" title="Toggle Select All">
+                      <th className="py-2 print:py-1.5 text-center w-8 no-print" title="Toggle Select All">
                         <input
                           type="checkbox"
                           checked={allDelaysSelected}
@@ -1005,8 +1004,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                           className="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5 cursor-pointer accent-indigo-600"
                         />
                       </th>
-                      <th className="py-2 print:py-1 text-center">Delay Category</th>
-                      <th className="py-2 print:py-1 text-center">Impacted</th>
+                      <th className="py-2 print:py-1.5 text-center">Delay Category</th>
+                      <th className="py-2 print:py-1.5 text-center">Impacted</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1019,7 +1018,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                             !isSelected ? 'print:hidden opacity-45 bg-slate-100/50 dark:bg-slate-900/40' : ''
                           }`}
                         >
-                          <td className="py-2 print:py-1 text-center w-8 no-print">
+                          <td className="py-2 print:py-1.5 text-center w-8 no-print">
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -1028,10 +1027,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                               className="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5 cursor-pointer accent-indigo-600"
                             />
                           </td>
-                          <td className="py-2 print:py-1 text-center text-slate-700 dark:text-slate-300 font-medium truncate max-w-[280px]" title={item.category}>
+                          <td className="py-2 print:py-1.5 text-center text-slate-700 dark:text-slate-300 font-medium truncate max-w-[280px]" title={item.category}>
                             {item.category}
                           </td>
-                          <td className="py-2 print:py-1 text-center font-mono font-bold text-amber-700 dark:text-amber-400 print:text-amber-700">
+                          <td className="py-2 print:py-1.5 text-center font-mono font-bold text-amber-700 dark:text-amber-400 print:text-amber-700">
                             {item.count} AWBs
                           </td>
                         </tr>
