@@ -29,7 +29,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '(TG 340) - 09/18/2026 -',
-      detail: '1185 kg (80 pcs) are yet to depart from BKK. Scheduled for TG401 on 25th September.'
+      detail: '1185 kg (80 pcs) are yet to depart from BKK. Scheduled for TG403 on 26th September.'
     },
     {
       id: 'offload-tg322-19',
@@ -38,7 +38,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = () => {
       icon: Plane,
       iconColor: 'text-orange-800 dark:text-orange-400',
       headline: '(TG 322) - 09/19/2026 -',
-      detail: '600 kg (72 pcs) are yet to depart from BKK. Scheduled for TG407 on 25th September.'
+      detail: '600 kg (72 pcs) are yet to depart from BKK. Scheduled for TG403 on 26th September.'
     },
     {
       id: 'damage-singapore',
