@@ -442,11 +442,12 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     <div className="customer-modal-portal fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in print:static print:p-0 print:m-0 print:bg-white print:backdrop-none">
       
       {/* Comprehensive Zero-Blank-Page Single-Page Print Style */}
+      {/* Executive Professional Print & PDF Stylesheet */}
       <style>{`
         @media print {
           @page {
             size: A4 portrait;
-            margin: 6mm 7mm 5mm 7mm;
+            margin: 8mm 10mm 6mm 10mm;
           }
 
           /* Hide all main app nodes inside #root except the modal */
@@ -454,16 +455,19 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             display: none !important;
           }
 
+          /* Force immaculate light corporate paper in print */
           html, body.customer-summary-print-active {
+            background-color: #ffffff !important;
             background: #ffffff !important;
             color: #0f172a !important;
             margin: 0 !important;
             padding: 0 !important;
             height: auto !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
+            max-height: none !important;
+            overflow: visible !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
           }
 
           .customer-modal-portal {
@@ -475,9 +479,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             min-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: transparent !important;
+            background: #ffffff !important;
             backdrop-filter: none !important;
-            overflow: hidden !important;
+            overflow: visible !important;
           }
 
           #customer-printable-dossier {
@@ -486,18 +490,15 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             width: 100% !important;
             max-width: 100% !important;
             height: auto !important;
-            max-height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             border: none !important;
+            border-radius: 0 !important;
             box-shadow: none !important;
+            background-color: #ffffff !important;
             background: #ffffff !important;
             color: #0f172a !important;
-            page-break-before: avoid !important;
-            break-before: avoid !important;
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-            overflow: hidden !important;
+            overflow: visible !important;
           }
 
           #customer-printable-dossier .overflow-y-auto {
@@ -506,8 +507,99 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             height: auto !important;
           }
 
+          /* Overwrite all dark mode backgrounds to clean white/light gray in print */
+          #customer-printable-dossier,
+          #customer-printable-dossier div,
+          #customer-printable-dossier table {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* General card & tile borders in print */
+          #customer-printable-dossier .border,
+          #customer-printable-dossier .border-2 {
+            border-width: 1px !important;
+            border-color: #cbd5e1 !important;
+          }
+
+          /* Force light card backgrounds for KPI cards */
+          #customer-printable-dossier .kpi-card {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: none !important;
+          }
+
+          /* Override dark classes on print */
+          #customer-printable-dossier .dark\\:bg-slate-900,
+          #customer-printable-dossier .dark\\:bg-slate-900\\/80,
+          #customer-printable-dossier .dark\\:bg-slate-900\\/90,
+          #customer-printable-dossier .dark\\:bg-slate-900\\/60,
+          #customer-printable-dossier .dark\\:bg-slate-900\\/70,
+          #customer-printable-dossier .dark\\:bg-\\[\\#0c1222\\] {
+            background-color: #ffffff !important;
+          }
+
+          #customer-printable-dossier .dark\\:text-white {
+            color: #0f172a !important;
+          }
+          #customer-printable-dossier .dark\\:text-slate-200,
+          #customer-printable-dossier .dark\\:text-slate-300 {
+            color: #1e293b !important;
+          }
+          #customer-printable-dossier .dark\\:text-slate-400 {
+            color: #475569 !important;
+          }
+
+          /* Professional executive timeline cards in print */
+          #customer-printable-dossier .timeline-day1_4 {
+            background-color: #f0fdf4 !important;
+            border: 1px solid #86efac !important;
+            color: #166534 !important;
+          }
+          #customer-printable-dossier .timeline-day5 {
+            background-color: #eff6ff !important;
+            border: 1px solid #93c5fd !important;
+            color: #1e40af !important;
+          }
+          #customer-printable-dossier .timeline-day6 {
+            background-color: #fffbeb !important;
+            border: 1px solid #fde68a !important;
+            color: #92400e !important;
+          }
+          #customer-printable-dossier .timeline-day7 {
+            background-color: #fff7ed !important;
+            border: 1px solid #fed7aa !important;
+            color: #9a3412 !important;
+          }
+          #customer-printable-dossier .timeline-day8Plus {
+            background-color: #fef2f2 !important;
+            border: 1px solid #fecaca !important;
+            color: #991b1b !important;
+          }
+          #customer-printable-dossier .timeline-undelivered {
+            background-color: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #334155 !important;
+          }
+
+          /* Table headers in print */
+          #customer-printable-dossier th {
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border-bottom: 2px solid #cbd5e1 !important;
+            font-weight: 800 !important;
+          }
+
+          /* Table row borders & zebra striping in print */
+          #customer-printable-dossier td {
+            border-bottom: 1px solid #e2e8f0 !important;
+          }
+          #customer-printable-dossier tbody tr:nth-child(even) td {
+            background-color: #f8fafc !important;
+          }
+
           /* Prevent table cutoffs */
-          tr, .rounded-2xl, .rounded-3xl, table, .grid {
+          tr, .rounded-2xl, .rounded-xl, table, .grid {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
@@ -521,23 +613,21 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       {/* Main Modal Card */}
       <div
         id="customer-printable-dossier"
-        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-[#0c1222] border-2 border-slate-300 dark:border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden print:max-h-none print:border-none print:shadow-none"
+        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-[#0c1222] border-2 border-slate-300 dark:border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden print:max-h-none print:border-none print:shadow-none print:rounded-none"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 print:px-2 print:py-1.5 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 flex items-center justify-between gap-4 shrink-0">
-          <div className="flex items-center gap-3 print:gap-2 min-w-0">
-            <div className="w-10 h-10 print:w-7 print:h-7 rounded-2xl print:rounded-lg bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
-              <Building className="w-5 h-5 print:w-4 print:h-4" />
+        <div className="relative px-6 py-3.5 print:px-2 print:py-2 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-900 bg-slate-50/80 dark:bg-slate-900/60 print:bg-white flex items-center justify-center shrink-0">
+          <div className="flex items-center justify-center gap-2.5 text-center">
+            <div className="w-8 h-8 print:w-6 print:h-6 rounded-xl print:rounded-md bg-indigo-600 print:bg-slate-900 flex items-center justify-center text-white shadow-xs shrink-0">
+              <Building className="w-4 h-4 print:w-3.5 print:h-3.5" />
             </div>
-            <div className="min-w-0">
-              <h2 className="text-base print:text-sm font-black text-slate-900 dark:text-white truncate">
-                Export Summary
-              </h2>
-            </div>
+            <h2 className="text-base print:text-lg font-black tracking-tight text-slate-900 dark:text-white print:text-slate-950 uppercase font-sans">
+              Export Summary
+            </h2>
           </div>
 
           {/* Action Buttons: Copy Email, Print PDF, Close */}
-          <div className="flex items-center gap-2 shrink-0 no-print">
+          <div className="absolute right-6 flex items-center gap-2 shrink-0 no-print">
             <button
               type="button"
               onClick={handleCopyEmail}
@@ -574,43 +664,43 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5 print:p-0 print:space-y-2 print:overflow-visible">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 print:p-0 print:space-y-2 print:overflow-visible">
 
-          {/* Account & Scope Banner with PROMINENT TIME PERIOD */}
-          <div className="p-4 print:p-2 rounded-2xl print:rounded-xl bg-gradient-to-r from-slate-100 via-indigo-50/40 to-sky-50/40 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-sky-950/30 border-2 border-indigo-200/70 dark:border-indigo-800/40 print:border-slate-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 print:gap-1.5">
-            <div className="min-w-0">
-              <h3 className="text-lg print:text-base font-black text-slate-950 dark:text-white truncate">
+          {/* Account & Scope Banner with PROMINENT CENTERED TIME PERIOD & CUSTOMER */}
+          <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/70 print:bg-slate-50/70 border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center gap-2 print:gap-1.5 shadow-xs">
+            <div className="flex flex-col items-center justify-center text-center w-full">
+              <h3 className="text-xl print:text-lg font-black text-slate-950 dark:text-white print:text-slate-950 tracking-tight text-center">
                 {summaryTitle}
               </h3>
               
-              {/* Prominent Time Period Badge */}
-              <div className="flex items-center gap-2 mt-1.5 print:mt-1 flex-wrap">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 print:px-2 print:py-0.5 rounded-xl print:rounded-lg bg-blue-100/90 dark:bg-blue-950/90 text-blue-900 dark:text-sky-300 font-mono text-xs print:text-[11px] font-black border border-blue-300 dark:border-blue-700/60 shadow-xs">
-                  <Calendar className="w-3.5 h-3.5 print:w-3 print:h-3 text-blue-600 dark:text-sky-400 shrink-0" />
-                  <span>Time Period: <strong className="text-slate-900 dark:text-white">{timePeriodLabel}</strong></span>
+              {/* Prominent Time Period Badge - Centered */}
+              <div className="flex items-center justify-center gap-2 mt-1.5 print:mt-1 flex-wrap">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 print:px-2.5 print:py-0.5 rounded-full bg-indigo-50/90 dark:bg-indigo-950/70 print:bg-slate-100 text-indigo-950 dark:text-indigo-200 print:text-slate-800 font-mono text-xs print:text-[11px] font-bold border border-indigo-200 dark:border-indigo-800 print:border-slate-300 shadow-2xs">
+                  <Calendar className="w-3.5 h-3.5 print:w-3 print:h-3 text-indigo-600 dark:text-indigo-400 print:text-slate-700 shrink-0" />
+                  <span>Time Period: <strong className="text-indigo-900 dark:text-white print:text-slate-950">{timePeriodLabel}</strong></span>
                 </div>
 
                 {currentDestination && currentDestination !== 'ALL' && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 print:px-2 print:py-0.5 rounded-xl print:rounded-lg bg-emerald-100/90 dark:bg-emerald-950/90 text-emerald-900 dark:text-emerald-300 font-mono text-xs print:text-[11px] font-black border border-emerald-300 dark:border-emerald-700/60 shadow-xs">
-                    <Globe className="w-3.5 h-3.5 print:w-3 print:h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 print:px-2.5 print:py-0.5 rounded-full bg-emerald-50/90 dark:bg-emerald-950/70 print:bg-emerald-50 text-emerald-950 dark:text-emerald-200 print:text-emerald-900 font-mono text-xs print:text-[11px] font-bold border border-emerald-200 dark:border-emerald-800 print:border-emerald-300 shadow-2xs">
+                    <Globe className="w-3.5 h-3.5 print:w-3 print:h-3 text-emerald-600 dark:text-emerald-400 print:text-emerald-700 shrink-0" />
                     <span>Destination: <strong>{currentDestination}</strong></span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Quick Customer Switcher Dropdown (Hidden when printing) */}
-            <div className="relative w-full sm:w-72 shrink-0 no-print">
+            {/* Quick Customer Switcher Dropdown (Centered, Hidden when printing) */}
+            <div className="relative w-full max-w-xs shrink-0 no-print mt-0.5">
               <div
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between cursor-pointer shadow-xs"
+                className="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between cursor-pointer shadow-xs"
               >
                 <span className="truncate">{effectiveCustomer || 'Switch Customer...'}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1.5" />
               </div>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95">
+                <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95">
                   <div className="p-2 bg-slate-50 dark:bg-slate-950/50">
                     <div className="relative">
                       <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -653,7 +743,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           {/* KPI Dashboard Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-3 print:gap-2">
             {/* Total Shipments */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+            <div className="kpi-card p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Total Shipments</span>
                 <Package className="w-3.5 h-3.5 text-blue-500 print:w-3 print:h-3" />
@@ -667,7 +757,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* On-Time SLA Rate */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+            <div className="kpi-card p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>On-Time SLA Rate</span>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 print:w-3 print:h-3" />
@@ -686,7 +776,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Average Transit Time */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+            <div className="kpi-card p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Avg Transit Time</span>
                 <Clock className="w-3.5 h-3.5 text-indigo-500 print:w-3 print:h-3" />
@@ -697,7 +787,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Logged Delays */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+            <div className="kpi-card p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Logged Delays</span>
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:w-3 print:h-3" />
@@ -716,7 +806,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print:grid-cols-6 gap-2 print:gap-1.5 text-center">
               {/* Day 1-4 */}
-              <div className="p-2.5 print:p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/60 print:border-emerald-400">
+              <div className="timeline-day1_4 p-2.5 print:p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/60 print:border-emerald-400">
                 <div className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-300">Day 1–4</div>
                 <div className="text-lg print:text-base font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
                   {metrics.timeline.day1_4}
@@ -727,7 +817,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
 
               {/* Day 5 */}
-              <div className="p-2.5 print:p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800/60 print:border-blue-400">
+              <div className="timeline-day5 p-2.5 print:p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800/60 print:border-blue-400">
                 <div className="text-[10px] font-black uppercase text-blue-800 dark:text-blue-300">Day 5</div>
                 <div className="text-lg print:text-base font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">
                   {metrics.timeline.day5}
@@ -738,7 +828,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
 
               {/* Day 6 */}
-              <div className="p-2.5 print:p-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 print:border-amber-400">
+              <div className="timeline-day6 p-2.5 print:p-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 print:border-amber-400">
                 <div className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-300">Day 6</div>
                 <div className="text-lg print:text-base font-black text-amber-700 dark:text-amber-400 font-mono mt-0.5">
                   {metrics.timeline.day6}
@@ -749,7 +839,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
 
               {/* Day 7 */}
-              <div className="p-2.5 print:p-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-800/60 print:border-orange-400">
+              <div className="timeline-day7 p-2.5 print:p-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-800/60 print:border-orange-400">
                 <div className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-300">Day 7</div>
                 <div className="text-lg print:text-base font-black text-orange-700 dark:text-orange-400 font-mono mt-0.5">
                   {metrics.timeline.day7}
@@ -760,7 +850,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
 
               {/* Day 8+ */}
-              <div className="p-2.5 print:p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800/60 print:border-rose-400">
+              <div className="timeline-day8Plus p-2.5 print:p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800/60 print:border-rose-400">
                 <div className="text-[10px] font-black uppercase text-rose-800 dark:text-rose-300">Day 8+</div>
                 <div className="text-lg print:text-base font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">
                   {metrics.timeline.day8Plus}
@@ -771,7 +861,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
 
               {/* UNDELIVERED */}
-              <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 print:border-slate-400">
+              <div className="timeline-undelivered p-2.5 print:p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 print:border-slate-400">
                 <div className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">UNDELIVERED</div>
                 <div className="text-lg print:text-base font-black text-slate-800 dark:text-slate-200 font-mono mt-0.5">
                   {metrics.timeline.undelivered}
@@ -911,6 +1001,13 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
             </div>
 
+          </div>
+
+          {/* Official Executive Footer Stamp (Printed on PDF) */}
+          <div className="hidden print:flex items-center justify-between pt-2 border-t border-slate-300 text-[9px] text-slate-500 font-mono">
+            <span>MGH Logistics Intelligence • Outbound Operations</span>
+            <span>Generated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • Confidential</span>
+            <span>Official Client Copy</span>
           </div>
 
           {/* Formatted Email Text Preview Card (Hidden when printing) */}
