@@ -634,8 +634,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden print:max-h-none print:border-none print:shadow-none print:rounded-none"
       >
         {/* Modal Header */}
-        <div className="relative px-6 py-3.5 print:px-6 print:py-3.5 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-900 bg-slate-50/80 dark:bg-slate-900/60 print:bg-white flex items-center justify-center shrink-0">
-          <div className="flex items-center justify-center gap-2.5 text-center">
+        <div className="relative px-6 py-3.5 print:px-6 print:py-3.5 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-900 bg-slate-50/80 dark:bg-slate-900/60 print:bg-white flex items-center justify-between print:justify-center shrink-0">
+          <div className="flex items-center gap-2.5 text-left print:text-center print:justify-center">
             <div className="w-8 h-8 print:w-7 print:h-7 rounded-xl print:rounded-md bg-indigo-600 print:bg-slate-900 flex items-center justify-center text-white shadow-xs shrink-0">
               <Building className="w-4 h-4 print:w-3.5 print:h-3.5" />
             </div>
@@ -645,7 +645,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* Action Buttons: Copy Email, Print PDF, Close */}
-          <div className="absolute right-6 flex items-center gap-2 shrink-0 no-print">
+          <div className="flex items-center gap-2 shrink-0 no-print">
             <button
               type="button"
               onClick={handleCopyEmail}
@@ -684,15 +684,15 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 print:p-0 print:space-y-4 print:overflow-visible">
 
-          {/* Account & Scope Banner with CENTERED TIME PERIOD & CUSTOMER */}
-          <div className="p-4 print:p-4 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center gap-1.5 print:gap-2 shadow-xs">
-            <div className="flex flex-col items-center justify-center text-center w-full">
-              <h3 className="text-xl print:text-xl font-black text-slate-950 dark:text-white print:text-slate-950 tracking-tight text-center">
+          {/* Account & Scope Banner (Left-aligned on screen, Centered for PDF Print) */}
+          <div className="p-4 print:p-4 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 print:flex-col print:items-center print:justify-center print:text-center print:gap-2 shadow-xs">
+            <div className="flex flex-col items-start text-left print:items-center print:justify-center print:text-center">
+              <h3 className="text-xl print:text-xl font-black text-slate-950 dark:text-white print:text-slate-950 tracking-tight text-left print:text-center">
                 {summaryTitle}
               </h3>
               
               {/* Subtle, Understated Time Period & Destination */}
-              <div className="flex items-center justify-center gap-3 mt-1 print:mt-1.5 flex-wrap text-xs print:text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
+              <div className="flex items-center justify-start print:justify-center gap-3 mt-1 print:mt-1.5 flex-wrap text-xs print:text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
                 <div className="inline-flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-slate-400 print:text-slate-500 shrink-0" />
                   <span>Time Period: <strong className="font-semibold text-slate-800 dark:text-slate-200 print:text-slate-900">{timePeriodLabel}</strong></span>
@@ -707,18 +707,18 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
             </div>
 
-            {/* Quick Customer Switcher Dropdown (Centered, Hidden when printing) */}
-            <div className="relative w-full max-w-xs shrink-0 no-print mt-0.5">
+            {/* Quick Customer Switcher Dropdown (Right-aligned on screen, Hidden when printing) */}
+            <div className="relative w-full sm:w-72 shrink-0 no-print mt-1 sm:mt-0">
               <div
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between cursor-pointer shadow-xs"
+                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between cursor-pointer shadow-xs transition-colors"
               >
                 <span className="truncate">{effectiveCustomer || 'Switch Customer...'}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1.5" />
               </div>
 
               {isDropdownOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 mt-1.5 w-full sm:w-80 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95">
                   <div className="p-2 bg-slate-50 dark:bg-slate-950/50">
                     <div className="relative">
                       <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
