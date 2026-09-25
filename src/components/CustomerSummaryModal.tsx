@@ -48,6 +48,14 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
+  // Checkbox state for destination delay categories qualifying for PDF printing (all selected by default)
+  const [unselectedDelayKeys, setUnselectedDelayKeys] = useState<Set<string>>(new Set());
+
+  // Reset selections to all-selected whenever scope changes
+  useEffect(() => {
+    setUnselectedDelayKeys(new Set());
+  }, [initialCustomer, initialDestination, isOpen, dateRange]);
+
   // Sync initial selections when modal opens or props change
   useEffect(() => {
     setSelectedCustomer(initialCustomer || '');
@@ -262,9 +270,6 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       if (s.remarks && s.remarks !== '-' && s.remarks.trim() !== '' && categories.length === 0) {
         categories.push(`Remarks: ${s.remarks}`);
       }
-      if (s.tt > 5.0 && categories.length === 0) {
-        categories.push('Extended Transit Time (>5d SLA)');
-      }
 
       categories.forEach((cat) => {
         const key = `${dest}___${cat}`;
@@ -305,6 +310,43 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       exceptionsList: exceptionsList.slice(0, 50)
     };
   }, [scopedShipments]);
+
+  // Selection handlers for Delay Categories qualifying for PDF printing
+  const allDelayKeys = useMemo(() => {
+    return metrics.destinationDelayCategories.map((item) => `${item.dest}___${item.category}`);
+  }, [metrics.destinationDelayCategories]);
+
+  const allDelaysSelected = unselectedDelayKeys.size === 0;
+
+  const toggleDelayCategory = (key: string) => {
+    setUnselectedDelayKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllDelays = () => {
+    if (allDelaysSelected) {
+      setUnselectedDelayKeys(new Set(allDelayKeys));
+    } else {
+      setUnselectedDelayKeys(new Set());
+    }
+  };
+
+  const selectedPrintCategories = useMemo(() => {
+    return metrics.destinationDelayCategories.filter(
+      (item) => !unselectedDelayKeys.has(`${item.dest}___${item.category}`)
+    );
+  }, [metrics.destinationDelayCategories, unselectedDelayKeys]);
+
+  const selectedPrintImpactedCount = useMemo(() => {
+    return selectedPrintCategories.reduce((sum, item) => sum + item.count, 0);
+  }, [selectedPrintCategories]);
 
   // Display Titles
   const summaryTitle = useMemo(() => {
@@ -359,10 +401,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       lines.push(``);
     }
 
-    if (metrics.destinationDelayCategories.length > 0) {
+    if (selectedPrintCategories.length > 0) {
       lines.push(`⚠️ DESTINATION DELAY CATEGORIES & IMPACTED SHIPMENTS`);
       lines.push(`----------------------------------------------------------------------`);
-      metrics.destinationDelayCategories.slice(0, 10).forEach((dc, idx) => {
+      selectedPrintCategories.slice(0, 15).forEach((dc, idx) => {
         lines.push(`${idx + 1}. [${dc.dest}] ${dc.category.padEnd(30)}: ${dc.count} AWBs (${((dc.count / (metrics.total || 1)) * 100).toFixed(1)}%)`);
       });
       lines.push(``);
@@ -373,7 +415,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     lines.push(`======================================================================`);
 
     return lines.join('\n');
-  }, [summaryTitle, timePeriodLabel, metrics]);
+  }, [summaryTitle, timePeriodLabel, metrics, selectedPrintCategories]);
 
   // Handler: Copy email to clipboard
   const handleCopyEmail = () => {
@@ -608,8 +650,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           {/* KPI Dashboard Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-3 print:gap-2">
             {/* Total Shipments */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
-              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Total Shipments</span>
                 <Package className="w-3.5 h-3.5 text-blue-500 print:w-3 print:h-3" />
               </div>
@@ -622,8 +664,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* On-Time SLA Rate */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
-              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>On-Time SLA Rate</span>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 print:w-3 print:h-3" />
               </div>
@@ -641,8 +683,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Average Transit Time */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
-              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Avg Transit Time</span>
                 <Clock className="w-3.5 h-3.5 text-indigo-500 print:w-3 print:h-3" />
               </div>
@@ -652,8 +694,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Logged Delays */}
-            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
-              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Logged Delays</span>
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:w-3 print:h-3" />
               </div>
@@ -665,7 +707,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
 
           {/* Delivery Timeline Breakdown */}
           <div className="p-4 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 print:border-slate-300">
-            <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-2.5 print:mb-1.5 flex items-center gap-1.5">
+            <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-2.5 print:mb-1.5 flex items-center justify-center sm:justify-start gap-1.5">
               <Clock className="w-3.5 h-3.5 text-indigo-500 print:hidden" />
               Delivery Timeline
             </h4>
@@ -743,7 +785,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             
             {/* Top Destinations */}
             <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
-              <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
+              <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-sky-500 print:hidden" />
                 Destination Details
               </h4>
@@ -751,27 +793,27 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <table className="w-full text-xs print:text-[10.5px]">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase font-black">
-                      <th className="py-2 print:py-1 text-left">Destination</th>
-                      <th className="py-2 print:py-1 text-right">AWBs</th>
-                      <th className="py-2 print:py-1 text-right">Weight</th>
-                      <th className="py-2 print:py-1 text-right">Avg TT</th>
-                      <th className="py-2 print:py-1 text-right">On-Time</th>
+                      <th className="py-2 print:py-1 text-center">Destination</th>
+                      <th className="py-2 print:py-1 text-center">AWBs</th>
+                      <th className="py-2 print:py-1 text-center">Weight</th>
+                      <th className="py-2 print:py-1 text-center">Avg TT</th>
+                      <th className="py-2 print:py-1 text-center">On-Time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {metrics.destinations.slice(0, 8).map((d, idx) => (
                       <tr key={d.dest} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${idx >= 6 ? 'print:hidden' : ''}`}>
-                        <td className="py-2 print:py-1 font-bold text-slate-800 dark:text-slate-200">{d.dest}</td>
-                        <td className="py-2 print:py-1 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
+                        <td className="py-2 print:py-1 text-center font-bold text-slate-800 dark:text-slate-200">{d.dest}</td>
+                        <td className="py-2 print:py-1 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
                           {d.count}
                         </td>
-                        <td className="py-2 print:py-1 text-right font-mono text-slate-500 dark:text-slate-400">
+                        <td className="py-2 print:py-1 text-center font-mono text-slate-500 dark:text-slate-400">
                           {formatWeight(d.weight)} kg
                         </td>
-                        <td className="py-2 print:py-1 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        <td className="py-2 print:py-1 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400">
                           {d.avgTT > 0 ? `${d.avgTT.toFixed(1)}d` : '-'}
                         </td>
-                        <td className="py-2 print:py-1 text-right font-mono font-black text-emerald-600 dark:text-emerald-400">
+                        <td className="py-2 print:py-1 text-center font-mono font-black text-emerald-600 dark:text-emerald-400">
                           {d.onTimeRate.toFixed(0)}%
                         </td>
                       </tr>
@@ -795,42 +837,71 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:hidden" />
                   Destination Delay Categories
                 </h4>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                  {metrics.totalImpactedShipments} Impacted AWBs
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="no-print text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                    {selectedPrintCategories.length}/{metrics.destinationDelayCategories.length} for Print
+                  </span>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    {selectedPrintImpactedCount} Impacted AWBs
+                  </span>
+                </div>
               </div>
 
               <div className="overflow-x-auto max-h-64 print:max-h-none overflow-y-auto print:overflow-visible">
                 <table className="w-full text-xs print:text-[10.5px]">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase font-black">
-                      <th className="py-2 print:py-1 text-left">Destination</th>
-                      <th className="py-2 print:py-1 text-left">Delay Category</th>
-                      <th className="py-2 print:py-1 text-right">Impacted</th>
+                      <th className="py-2 print:py-1 text-center w-8 no-print" title="Toggle Select All">
+                        <input
+                          type="checkbox"
+                          checked={allDelaysSelected}
+                          onChange={toggleAllDelays}
+                          aria-label="Select or deselect all categories for PDF printing"
+                          className="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5 cursor-pointer accent-indigo-600"
+                        />
+                      </th>
+                      <th className="py-2 print:py-1 text-center">Destination</th>
+                      <th className="py-2 print:py-1 text-center">Delay Category</th>
+                      <th className="py-2 print:py-1 text-center">Impacted</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {metrics.destinationDelayCategories.slice(0, 15).map((item, idx) => (
-                      <tr
-                        key={`${item.dest}-${item.category}-${idx}`}
-                        className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${idx >= 6 ? 'print:hidden' : ''}`}
-                      >
-                        <td className="py-2 print:py-1 font-bold font-mono text-slate-800 dark:text-slate-200">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold">
-                            {item.dest}
-                          </span>
-                        </td>
-                        <td className="py-2 print:py-1 text-slate-700 dark:text-slate-300 font-medium truncate max-w-[200px]" title={item.category}>
-                          {item.category}
-                        </td>
-                        <td className="py-2 print:py-1 text-right font-mono font-bold text-amber-600 dark:text-amber-400">
-                          {item.count} AWBs
-                        </td>
-                      </tr>
-                    ))}
+                    {metrics.destinationDelayCategories.map((item, idx) => {
+                      const itemKey = `${item.dest}___${item.category}`;
+                      const isSelected = !unselectedDelayKeys.has(itemKey);
+                      return (
+                        <tr
+                          key={`${item.dest}-${item.category}-${idx}`}
+                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
+                            !isSelected ? 'print:hidden opacity-45 bg-slate-100/50 dark:bg-slate-900/40' : ''
+                          }`}
+                        >
+                          <td className="py-2 print:py-1 text-center w-8 no-print">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleDelayCategory(itemKey)}
+                              aria-label={`Include ${item.dest} ${item.category} in PDF print`}
+                              className="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5 cursor-pointer accent-indigo-600"
+                            />
+                          </td>
+                          <td className="py-2 print:py-1 text-center font-bold font-mono text-slate-800 dark:text-slate-200">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold">
+                              {item.dest}
+                            </span>
+                          </td>
+                          <td className="py-2 print:py-1 text-center text-slate-700 dark:text-slate-300 font-medium truncate max-w-[200px]" title={item.category}>
+                            {item.category}
+                          </td>
+                          <td className="py-2 print:py-1 text-center font-mono font-bold text-amber-600 dark:text-amber-400">
+                            {item.count} AWBs
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {metrics.destinationDelayCategories.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="py-6 text-center text-xs text-slate-400">
+                        <td colSpan={4} className="py-6 text-center text-xs text-slate-400">
                           <div className="flex flex-col items-center justify-center gap-1">
                             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                             <span className="font-semibold text-slate-700 dark:text-slate-300">Clean Performance</span>
