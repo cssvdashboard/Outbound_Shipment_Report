@@ -48,12 +48,12 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  // Checkbox state for destination delay categories qualifying for PDF printing (all selected by default)
-  const [unselectedDelayKeys, setUnselectedDelayKeys] = useState<Set<string>>(new Set());
+  // Checkbox state for delay categories qualifying for PDF printing (all selected by default)
+  const [unselectedDelayCategories, setUnselectedDelayCategories] = useState<Set<string>>(new Set());
 
   // Reset selections to all-selected whenever scope changes
   useEffect(() => {
-    setUnselectedDelayKeys(new Set());
+    setUnselectedDelayCategories(new Set());
   }, [initialCustomer, initialDestination, isOpen, dateRange]);
 
   // Sync initial selections when modal opens or props change
@@ -185,7 +185,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         delayedCount: 0,
         deliveredCount: 0,
         exceptionsCount: 0,
-        destinationDelayCategories: [] as Array<{ dest: string; category: string; count: number }>,
+        delayCategories: [] as Array<{ category: string; count: number }>,
         totalImpactedShipments: 0,
         timeline: { day1_4: 0, day5: 0, day6: 0, day7: 0, day8Plus: 0, undelivered: 0 },
         destinations: [] as Array<{ dest: string; count: number; weight: number; avgTT: number; onTimeRate: number }>,
@@ -248,11 +248,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       destMap.set(dest, existing);
     });
 
-    // Destination-wise delay categories aggregation
-    const delayCategoryMap = new Map<string, { dest: string; category: string; count: number }>();
+    // Delay categories aggregation (grouped directly without country segment)
+    const delayCategoryMap = new Map<string, number>();
 
     scopedShipments.forEach((s) => {
-      const dest = s.destination ? s.destination.toUpperCase() : 'OTHER';
       const categories: string[] = [];
 
       if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') {
@@ -272,17 +271,15 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       }
 
       categories.forEach((cat) => {
-        const key = `${dest}___${cat}`;
-        const existing = delayCategoryMap.get(key) || { dest, category: cat, count: 0 };
-        existing.count++;
-        delayCategoryMap.set(key, existing);
+        delayCategoryMap.set(cat, (delayCategoryMap.get(cat) || 0) + 1);
       });
     });
 
-    const destinationDelayCategories = Array.from(delayCategoryMap.values())
+    const delayCategories = Array.from(delayCategoryMap.entries())
+      .map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count);
 
-    const totalImpactedShipments = destinationDelayCategories.reduce((sum, item) => sum + item.count, 0);
+    const totalImpactedShipments = delayCategories.reduce((sum, item) => sum + item.count, 0);
 
     const destinations = Array.from(destMap.entries())
       .map(([dest, val]) => ({
@@ -303,7 +300,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       delayedCount: total - onTimeCount,
       deliveredCount,
       exceptionsCount: exceptionsList.length,
-      destinationDelayCategories,
+      delayCategories,
       totalImpactedShipments,
       timeline,
       destinations,
@@ -312,37 +309,37 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
   }, [scopedShipments]);
 
   // Selection handlers for Delay Categories qualifying for PDF printing
-  const allDelayKeys = useMemo(() => {
-    return metrics.destinationDelayCategories.map((item) => `${item.dest}___${item.category}`);
-  }, [metrics.destinationDelayCategories]);
+  const allCategoryNames = useMemo(() => {
+    return metrics.delayCategories.map((item) => item.category);
+  }, [metrics.delayCategories]);
 
-  const allDelaysSelected = unselectedDelayKeys.size === 0;
+  const allDelaysSelected = unselectedDelayCategories.size === 0 && metrics.delayCategories.length > 0;
 
-  const toggleDelayCategory = (key: string) => {
-    setUnselectedDelayKeys((prev) => {
+  const toggleDelayCategory = (category: string) => {
+    setUnselectedDelayCategories((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
+      if (next.has(category)) {
+        next.delete(category);
       } else {
-        next.add(key);
+        next.add(category);
       }
       return next;
     });
   };
 
   const toggleAllDelays = () => {
-    if (allDelaysSelected) {
-      setUnselectedDelayKeys(new Set(allDelayKeys));
+    if (unselectedDelayCategories.size === 0) {
+      setUnselectedDelayCategories(new Set(allCategoryNames));
     } else {
-      setUnselectedDelayKeys(new Set());
+      setUnselectedDelayCategories(new Set());
     }
   };
 
   const selectedPrintCategories = useMemo(() => {
-    return metrics.destinationDelayCategories.filter(
-      (item) => !unselectedDelayKeys.has(`${item.dest}___${item.category}`)
+    return metrics.delayCategories.filter(
+      (item) => !unselectedDelayCategories.has(item.category)
     );
-  }, [metrics.destinationDelayCategories, unselectedDelayKeys]);
+  }, [metrics.delayCategories, unselectedDelayCategories]);
 
   const selectedPrintImpactedCount = useMemo(() => {
     return selectedPrintCategories.reduce((sum, item) => sum + item.count, 0);
@@ -402,10 +399,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     }
 
     if (selectedPrintCategories.length > 0) {
-      lines.push(`⚠️ DESTINATION DELAY CATEGORIES & IMPACTED SHIPMENTS`);
+      lines.push(`⚠️ DELAY CATEGORIES & IMPACTED SHIPMENTS`);
       lines.push(`----------------------------------------------------------------------`);
       selectedPrintCategories.slice(0, 15).forEach((dc, idx) => {
-        lines.push(`${idx + 1}. [${dc.dest}] ${dc.category.padEnd(30)}: ${dc.count} AWBs (${((dc.count / (metrics.total || 1)) * 100).toFixed(1)}%)`);
+        lines.push(`${idx + 1}. ${dc.category.padEnd(32)}: ${dc.count} AWBs (${((dc.count / (metrics.total || 1)) * 100).toFixed(1)}%)`);
       });
       lines.push(``);
     }
@@ -830,16 +827,16 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
             </div>
 
-            {/* Destination-Wise Delay Categories Table */}
+            {/* Delay Categories Table */}
             <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:hidden" />
-                  Destination Delay Categories
+                  Delay Categories
                 </h4>
                 <div className="flex items-center gap-2">
                   <span className="no-print text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                    {selectedPrintCategories.length}/{metrics.destinationDelayCategories.length} for Print
+                    {selectedPrintCategories.length}/{metrics.delayCategories.length} for Print
                   </span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                     {selectedPrintImpactedCount} Impacted AWBs
@@ -860,18 +857,16 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                           className="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5 cursor-pointer accent-indigo-600"
                         />
                       </th>
-                      <th className="py-2 print:py-1 text-center">Destination</th>
                       <th className="py-2 print:py-1 text-center">Delay Category</th>
                       <th className="py-2 print:py-1 text-center">Impacted</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {metrics.destinationDelayCategories.map((item, idx) => {
-                      const itemKey = `${item.dest}___${item.category}`;
-                      const isSelected = !unselectedDelayKeys.has(itemKey);
+                    {metrics.delayCategories.map((item, idx) => {
+                      const isSelected = !unselectedDelayCategories.has(item.category);
                       return (
                         <tr
-                          key={`${item.dest}-${item.category}-${idx}`}
+                          key={`${item.category}-${idx}`}
                           className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
                             !isSelected ? 'print:hidden opacity-45 bg-slate-100/50 dark:bg-slate-900/40' : ''
                           }`}
@@ -880,17 +875,12 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => toggleDelayCategory(itemKey)}
-                              aria-label={`Include ${item.dest} ${item.category} in PDF print`}
+                              onChange={() => toggleDelayCategory(item.category)}
+                              aria-label={`Include ${item.category} in PDF print`}
                               className="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5 cursor-pointer accent-indigo-600"
                             />
                           </td>
-                          <td className="py-2 print:py-1 text-center font-bold font-mono text-slate-800 dark:text-slate-200">
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold">
-                              {item.dest}
-                            </span>
-                          </td>
-                          <td className="py-2 print:py-1 text-center text-slate-700 dark:text-slate-300 font-medium truncate max-w-[200px]" title={item.category}>
+                          <td className="py-2 print:py-1 text-center text-slate-700 dark:text-slate-300 font-medium truncate max-w-[280px]" title={item.category}>
                             {item.category}
                           </td>
                           <td className="py-2 print:py-1 text-center font-mono font-bold text-amber-600 dark:text-amber-400">
@@ -899,13 +889,13 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                         </tr>
                       );
                     })}
-                    {metrics.destinationDelayCategories.length === 0 && (
+                    {metrics.delayCategories.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="py-6 text-center text-xs text-slate-400">
+                        <td colSpan={3} className="py-6 text-center text-xs text-slate-400">
                           <div className="flex flex-col items-center justify-center gap-1">
                             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                             <span className="font-semibold text-slate-700 dark:text-slate-300">Clean Performance</span>
-                            <span>No destination delay categories recorded.</span>
+                            <span>No delay categories recorded.</span>
                           </div>
                         </td>
                       </tr>
