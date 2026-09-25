@@ -315,29 +315,25 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
               />
 
               {/* Right side controls: Clear X and Chevron */}
-              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
-                {customerSearch ? (
+              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1.5">
+                {(selectedCustomer || customerSearch) && (
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setCustomerSearch('');
-                      customerInputRef.current?.focus();
+                      if (selectedCustomer) {
+                        onCustomerChange('ALL');
+                      }
+                      setIsCustomerDropdownOpen(false);
+                      customerInputRef.current?.blur();
                     }}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    title="Clear customer search input"
+                    className="flex items-center justify-center w-6 h-6 rounded-lg bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/80 dark:hover:bg-rose-900 text-rose-600 dark:text-rose-300 border border-rose-300 dark:border-rose-800 transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95"
+                    title={selectedCustomer ? `Remove "${selectedCustomer}" and reset shipper to All` : 'Clear customer search input'}
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3.5 h-3.5 stroke-[2.5]" />
                   </button>
-                ) : selectedCustomer ? (
-                  <button
-                    type="button"
-                    onClick={() => onCustomerChange('ALL')}
-                    className="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
-                    title="Reset customer to All"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                ) : null}
+                )}
 
                 <button
                   type="button"
@@ -480,28 +476,24 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
 
               {/* Right side controls: Clear X and Chevron */}
               <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1.5">
-                {destSearch ? (
+                {(selectedDestination || destSearch) && (
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setDestSearch('');
-                      destInputRef.current?.focus();
+                      if (selectedDestination) {
+                        onDestinationChange('ALL');
+                      }
+                      setIsDestDropdownOpen(false);
+                      destInputRef.current?.blur();
                     }}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    title="Clear destination search input"
+                    className="flex items-center justify-center w-6 h-6 rounded-lg bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/80 dark:hover:bg-rose-900 text-rose-600 dark:text-rose-300 border border-rose-300 dark:border-rose-800 transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95"
+                    title={selectedDestination ? `Remove "${selectedDestination}" and reset destination to All` : 'Clear destination search input'}
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3.5 h-3.5 stroke-[2.5]" />
                   </button>
-                ) : selectedDestination ? (
-                  <button
-                    type="button"
-                    onClick={() => onDestinationChange('ALL')}
-                    className="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
-                    title="Reset destination to All countries"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                ) : null}
+                )}
 
                 <button
                   type="button"

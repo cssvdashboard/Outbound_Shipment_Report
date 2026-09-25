@@ -177,6 +177,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         delayedCount: 0,
         deliveredCount: 0,
         exceptionsCount: 0,
+        destinationDelayCategories: [] as Array<{ dest: string; category: string; count: number }>,
+        totalImpactedShipments: 0,
         timeline: { day1_4: 0, day5: 0, day6: 0, day7: 0, day8Plus: 0, undelivered: 0 },
         destinations: [] as Array<{ dest: string; count: number; weight: number; avgTT: number; onTimeRate: number }>,
         exceptionsList: [] as Shipment[]
@@ -238,6 +240,45 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       destMap.set(dest, existing);
     });
 
+    // Destination-wise delay categories aggregation
+    const delayCategoryMap = new Map<string, { dest: string; category: string; count: number }>();
+
+    scopedShipments.forEach((s) => {
+      const dest = s.destination ? s.destination.toUpperCase() : 'OTHER';
+      const categories: string[] = [];
+
+      if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') {
+        categories.push(`Transit: ${s.transitDelay}`);
+      }
+      if (s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '') {
+        categories.push(`Clearance: ${s.clearanceDelay}`);
+      }
+      if (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') {
+        categories.push(`Delivery: ${s.destinationDelay}`);
+      }
+      if (s.weekendDelay && s.weekendDelay.toLowerCase() === 'yes') {
+        categories.push('Weekend Delay');
+      }
+      if (s.remarks && s.remarks !== '-' && s.remarks.trim() !== '' && categories.length === 0) {
+        categories.push(`Remarks: ${s.remarks}`);
+      }
+      if (s.tt > 5.0 && categories.length === 0) {
+        categories.push('Extended Transit Time (>5d SLA)');
+      }
+
+      categories.forEach((cat) => {
+        const key = `${dest}___${cat}`;
+        const existing = delayCategoryMap.get(key) || { dest, category: cat, count: 0 };
+        existing.count++;
+        delayCategoryMap.set(key, existing);
+      });
+    });
+
+    const destinationDelayCategories = Array.from(delayCategoryMap.values())
+      .sort((a, b) => b.count - a.count);
+
+    const totalImpactedShipments = destinationDelayCategories.reduce((sum, item) => sum + item.count, 0);
+
     const destinations = Array.from(destMap.entries())
       .map(([dest, val]) => ({
         dest,
@@ -257,6 +298,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       delayedCount: total - onTimeCount,
       deliveredCount,
       exceptionsCount: exceptionsList.length,
+      destinationDelayCategories,
+      totalImpactedShipments,
       timeline,
       destinations,
       exceptionsList: exceptionsList.slice(0, 50)
@@ -290,10 +333,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     lines.push(`• Time Period Scope        : ${timePeriodLabel}`);
     lines.push(`• Total Outbound Shipments : ${metrics.total} AWBs`);
     lines.push(`• Total Gross Weight       : ${formatWeight(metrics.totalWeight)} kg`);
-    lines.push(`• On-Time Delivery Rate    : ${metrics.onTimeRate.toFixed(1)}% (${metrics.onTimeCount} on-time vs ${metrics.delayedCount} delayed)`);
-    lines.push(`• Average Transit Time     : ${metrics.avgTT.toFixed(2)} days (Target: ≤ 5.0 days)`);
+    lines.push(`• On-Time Delivery Rate    : ${metrics.onTimeRate.toFixed(1)}%`);
+    lines.push(`• Average Transit Time     : ${metrics.avgTT.toFixed(2)} days`);
     lines.push(`• Delivered Shipments      : ${metrics.deliveredCount} AWBs (${((metrics.deliveredCount / (metrics.total || 1)) * 100).toFixed(1)}%)`);
-    lines.push(`• Logged Exceptions/Delays : ${metrics.exceptionsCount} AWBs\n`);
+    lines.push(`• Logged Delay AWBs        : ${metrics.exceptionsCount} AWBs\n`);
 
     lines.push(`⏱️ DELIVERY TIMELINE`);
     lines.push(`----------------------------------------------------------------------`);
@@ -303,7 +346,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     lines.push(`• Day 7                          : ${metrics.timeline.day7} AWBs (${((metrics.timeline.day7 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
     lines.push(`• Day 8+                         : ${metrics.timeline.day8Plus} AWBs (${((metrics.timeline.day8Plus / (metrics.total || 1)) * 100).toFixed(1)}%)`);
     if (metrics.timeline.undelivered > 0) {
-      lines.push(`• UNDELIVERED                    : ${metrics.timeline.undelivered} AWBs`);
+      lines.push(`• UNDELIVERED                    : ${metrics.timeline.undelivered} AWBs (${((metrics.timeline.undelivered / (metrics.total || 1)) * 100).toFixed(1)}%)`);
     }
     lines.push(``);
 
@@ -316,22 +359,11 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
       lines.push(``);
     }
 
-    if (metrics.exceptionsList.length > 0) {
-      lines.push(`⚠️ RECORDED DELAYS (SAMPLE)`);
+    if (metrics.destinationDelayCategories.length > 0) {
+      lines.push(`⚠️ DESTINATION DELAY CATEGORIES & IMPACTED SHIPMENTS`);
       lines.push(`----------------------------------------------------------------------`);
-      metrics.exceptionsList.slice(0, 8).forEach((s, idx) => {
-        const reason = s.clearanceDelay && s.clearanceDelay !== '-'
-          ? `Clearance: ${s.clearanceDelay}`
-          : s.transitDelay && s.transitDelay !== '-'
-          ? `Transit: ${s.transitDelay}`
-          : s.destinationDelay && s.destinationDelay !== '-'
-          ? `Delivery: ${s.destinationDelay}`
-          : s.remarks && s.remarks !== '-'
-          ? `Remarks: ${s.remarks}`
-          : `Extended Transit Time (${formatTT(s.tt)} days)`;
-
-        lines.push(`${idx + 1}. AWB ${s.awb} (${s.destination || 'N/A'}) - TT: ${formatTT(s.tt)}d | Status: ${s.finalResolution || 'Delivered'}`);
-        lines.push(`   Reason: ${reason}`);
+      metrics.destinationDelayCategories.slice(0, 10).forEach((dc, idx) => {
+        lines.push(`${idx + 1}. [${dc.dest}] ${dc.category.padEnd(30)}: ${dc.count} AWBs (${((dc.count / (metrics.total || 1)) * 100).toFixed(1)}%)`);
       });
       lines.push(``);
     }
@@ -454,7 +486,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
             <div className="min-w-0">
               <h2 className="text-base print:text-sm font-black text-slate-900 dark:text-white truncate">
-                Executive Performance Summary
+                Export Summary
               </h2>
             </div>
           </div>
@@ -502,9 +534,6 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           {/* Account & Scope Banner with PROMINENT TIME PERIOD */}
           <div className="p-4 print:p-2 rounded-2xl print:rounded-xl bg-gradient-to-r from-slate-100 via-indigo-50/40 to-sky-50/40 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-sky-950/30 border-2 border-indigo-200/70 dark:border-indigo-800/40 print:border-slate-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 print:gap-1.5">
             <div className="min-w-0">
-              <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-400 block mb-0.5">
-                Active Summary Scope
-              </span>
               <h3 className="text-lg print:text-base font-black text-slate-950 dark:text-white truncate">
                 {summaryTitle}
               </h3>
@@ -609,9 +638,6 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               >
                 {metrics.onTimeRate.toFixed(1)}%
               </div>
-              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5">
-                {metrics.onTimeCount} on-time vs {metrics.delayedCount} delayed
-              </div>
             </div>
 
             {/* Average Transit Time */}
@@ -623,12 +649,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               <div className="text-2xl print:text-lg font-black text-indigo-600 dark:text-indigo-400 mt-1 print:mt-0.5 font-mono">
                 {metrics.avgTT > 0 ? `${metrics.avgTT.toFixed(2)}d` : '-'}
               </div>
-              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Target: ≤ 5.0 Days SLA
-              </div>
             </div>
 
-            {/* Active Exceptions */}
+            {/* Logged Delays */}
             <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
               <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Logged Delays</span>
@@ -636,9 +659,6 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
               <div className="text-2xl print:text-lg font-black text-amber-600 dark:text-amber-400 mt-1 print:mt-0.5 font-mono">
                 {metrics.exceptionsCount}
-              </div>
-              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5">
-                {metrics.deliveredCount} Delivered ({((metrics.deliveredCount / (metrics.total || 1)) * 100).toFixed(0)}%)
               </div>
             </div>
           </div>
@@ -656,6 +676,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <div className="text-lg print:text-base font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
                   {metrics.timeline.day1_4}
                 </div>
+                <div className="text-[11px] print:text-[10px] font-bold font-mono text-emerald-700/90 dark:text-emerald-300/90 mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.day1_4 / metrics.total) * 100).toFixed(1) : '0.0'}%
+                </div>
               </div>
 
               {/* Day 5 */}
@@ -663,6 +686,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <div className="text-[10px] font-black uppercase text-blue-800 dark:text-blue-300">Day 5</div>
                 <div className="text-lg print:text-base font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">
                   {metrics.timeline.day5}
+                </div>
+                <div className="text-[11px] print:text-[10px] font-bold font-mono text-blue-700/90 dark:text-blue-300/90 mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.day5 / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
@@ -672,6 +698,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <div className="text-lg print:text-base font-black text-amber-700 dark:text-amber-400 font-mono mt-0.5">
                   {metrics.timeline.day6}
                 </div>
+                <div className="text-[11px] print:text-[10px] font-bold font-mono text-amber-700/90 dark:text-amber-300/90 mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.day6 / metrics.total) * 100).toFixed(1) : '0.0'}%
+                </div>
               </div>
 
               {/* Day 7 */}
@@ -679,6 +708,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <div className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-300">Day 7</div>
                 <div className="text-lg print:text-base font-black text-orange-700 dark:text-orange-400 font-mono mt-0.5">
                   {metrics.timeline.day7}
+                </div>
+                <div className="text-[11px] print:text-[10px] font-bold font-mono text-orange-700/90 dark:text-orange-300/90 mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.day7 / metrics.total) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
 
@@ -688,6 +720,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <div className="text-lg print:text-base font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">
                   {metrics.timeline.day8Plus}
                 </div>
+                <div className="text-[11px] print:text-[10px] font-bold font-mono text-rose-700/90 dark:text-rose-300/90 mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.day8Plus / metrics.total) * 100).toFixed(1) : '0.0'}%
+                </div>
               </div>
 
               {/* UNDELIVERED */}
@@ -696,11 +731,14 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <div className="text-lg print:text-base font-black text-slate-800 dark:text-slate-200 font-mono mt-0.5">
                   {metrics.timeline.undelivered}
                 </div>
+                <div className="text-[11px] print:text-[10px] font-bold font-mono text-slate-600 dark:text-slate-400 mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}%
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Two Columns: Destination Details & Recorded Delays */}
+          {/* Two Columns: Destination Details & Destination Delay Categories */}
           <div className="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-2 gap-4 print:gap-2.5">
             
             {/* Top Destinations */}
@@ -750,64 +788,59 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
             </div>
 
-            {/* Active Delay Exceptions Table */}
+            {/* Destination-Wise Delay Categories Table */}
             <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:hidden" />
-                  Recorded Delays
+                  Destination Delay Categories
                 </h4>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                  {metrics.exceptionsCount} logged
+                  {metrics.totalImpactedShipments} Impacted AWBs
                 </span>
               </div>
 
-              <div className="space-y-2 print:space-y-1.5 max-h-64 print:max-h-none overflow-y-auto print:overflow-visible pr-1">
-                {metrics.exceptionsList.slice(0, 12).map((s, idx) => {
-                  const delayReason = s.clearanceDelay && s.clearanceDelay !== '-'
-                    ? `Clearance: ${s.clearanceDelay}`
-                    : s.transitDelay && s.transitDelay !== '-'
-                    ? `Transit: ${s.transitDelay}`
-                    : s.destinationDelay && s.destinationDelay !== '-'
-                    ? `Delivery: ${s.destinationDelay}`
-                    : s.remarks && s.remarks !== '-'
-                    ? `Remarks: ${s.remarks}`
-                    : `TT: ${formatTT(s.tt)} days`;
-
-                  return (
-                    <div
-                      key={s.awb}
-                      className={`p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 text-xs print:text-[10px] flex flex-col gap-0.5 ${
-                        idx >= 5 ? 'print:hidden' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-black text-slate-900 dark:text-slate-100">
-                          AWB: {s.awb}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] print:text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono">
-                            {s.destination}
+              <div className="overflow-x-auto max-h-64 print:max-h-none overflow-y-auto print:overflow-visible">
+                <table className="w-full text-xs print:text-[10.5px]">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase font-black">
+                      <th className="py-2 print:py-1 text-left">Destination</th>
+                      <th className="py-2 print:py-1 text-left">Delay Category</th>
+                      <th className="py-2 print:py-1 text-right">Impacted</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {metrics.destinationDelayCategories.slice(0, 15).map((item, idx) => (
+                      <tr
+                        key={`${item.dest}-${item.category}-${idx}`}
+                        className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${idx >= 6 ? 'print:hidden' : ''}`}
+                      >
+                        <td className="py-2 print:py-1 font-bold font-mono text-slate-800 dark:text-slate-200">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold">
+                            {item.dest}
                           </span>
-                          <span className="text-[10px] print:text-[9px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                            {formatTT(s.tt)}d
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[11px] print:text-[9.5px] text-amber-700 dark:text-amber-300 font-medium">
-                        {delayReason}
-                      </p>
-                    </div>
-                  );
-                })}
-
-                {metrics.exceptionsList.length === 0 && (
-                  <div className="py-6 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-1">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Clean Performance</span>
-                    <span>No active delays or exceptions logged for this selection.</span>
-                  </div>
-                )}
+                        </td>
+                        <td className="py-2 print:py-1 text-slate-700 dark:text-slate-300 font-medium truncate max-w-[200px]" title={item.category}>
+                          {item.category}
+                        </td>
+                        <td className="py-2 print:py-1 text-right font-mono font-bold text-amber-600 dark:text-amber-400">
+                          {item.count} AWBs
+                        </td>
+                      </tr>
+                    ))}
+                    {metrics.destinationDelayCategories.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="py-6 text-center text-xs text-slate-400">
+                          <div className="flex flex-col items-center justify-center gap-1">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">Clean Performance</span>
+                            <span>No destination delay categories recorded.</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 
