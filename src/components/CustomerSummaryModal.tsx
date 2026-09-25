@@ -378,10 +378,14 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     lines.push(`• Time Period Scope        : ${timePeriodLabel}`);
     lines.push(`• Total Outbound Shipments : ${metrics.total} AWBs`);
     lines.push(`• Total Gross Weight       : ${formatWeight(metrics.totalWeight)} kg`);
-    lines.push(`• On-Time Delivery Rate    : ${metrics.onTimeRate.toFixed(1)}%`);
+    lines.push(`• On-Time Delivery         : ${metrics.onTimeRate.toFixed(1)}%`);
     lines.push(`• Average Transit Time     : ${metrics.avgTT.toFixed(2)} days`);
     lines.push(`• Delivered Shipments      : ${metrics.deliveredCount} AWBs (${((metrics.deliveredCount / (metrics.total || 1)) * 100).toFixed(1)}%)`);
-    lines.push(`• Logged Delay AWBs        : ${metrics.exceptionsCount} AWBs\n`);
+    if (metrics.timeline.undelivered > 0) {
+      lines.push(`• Undelivered Shipments    : ${metrics.timeline.undelivered} AWBs (${((metrics.timeline.undelivered / (metrics.total || 1)) * 100).toFixed(1)}%)\n`);
+    } else {
+      lines.push(``);
+    }
 
     lines.push(`⏱️ DELIVERY TIMELINE`);
     lines.push(`----------------------------------------------------------------------`);
@@ -756,7 +760,11 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* KPI Dashboard Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-3 print:gap-2">
+          <div className={`grid gap-3 print:gap-2 ${
+            metrics.timeline.undelivered > 0
+              ? 'grid-cols-2 sm:grid-cols-4 print:grid-cols-4'
+              : 'grid-cols-1 sm:grid-cols-3 print:grid-cols-3'
+          }`}>
             {/* Total Shipments */}
             <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
@@ -771,10 +779,10 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
             </div>
 
-            {/* On-Time SLA Rate */}
+            {/* ON-TIME DELIVERY */}
             <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                <span>On-Time SLA Rate</span>
+                <span>ON-TIME DELIVERY</span>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 print:w-3 print:h-3" />
               </div>
               <div
@@ -801,16 +809,21 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               </div>
             </div>
 
-            {/* Logged Delays */}
-            <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
-              <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                <span>Logged Delays</span>
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 print:w-3 print:h-3" />
+            {/* Undelivered Shipments (Only shown if any) */}
+            {metrics.timeline.undelivered > 0 && (
+              <div className="kpi-card p-3.5 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
+                  <span>UNDELIVERED</span>
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 print:w-3 print:h-3" />
+                </div>
+                <div className="text-2xl print:text-xl font-black text-amber-700 dark:text-amber-400 print:text-amber-700 mt-1 print:mt-0.5 font-mono">
+                  {metrics.timeline.undelivered}
+                </div>
+                <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono mt-0.5">
+                  {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}% of scope
+                </div>
               </div>
-              <div className="text-2xl print:text-xl font-black text-amber-700 dark:text-amber-400 print:text-amber-700 mt-1 print:mt-0.5 font-mono">
-                {metrics.exceptionsCount}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Delivery Timeline Breakdown */}
@@ -819,7 +832,11 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               <Clock className="w-3.5 h-3.5 text-indigo-500 print:hidden" />
               Delivery Timeline
             </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print:grid-cols-6 gap-2 print:gap-1.5 text-center">
+            <div className={`grid gap-2 print:gap-1.5 text-center ${
+              metrics.timeline.undelivered > 0
+                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print:grid-cols-6'
+                : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 print:grid-cols-5'
+            }`}>
               {/* Day 1-4 */}
               <div className="timeline-day1_4 p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
                 <div className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400 print:text-emerald-800 flex items-center justify-center gap-1">
@@ -890,19 +907,21 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 </div>
               </div>
 
-              {/* UNDELIVERED */}
-              <div className="timeline-undelivered p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
-                <div className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 print:text-slate-700 flex items-center justify-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                  UNDELIVERED
+              {/* UNDELIVERED (Only shown if any) */}
+              {metrics.timeline.undelivered > 0 && (
+                <div className="timeline-undelivered p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50/80 dark:bg-slate-800/40 print:bg-slate-50/80 border border-slate-200 dark:border-slate-700/60 print:border-slate-200">
+                  <div className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 print:text-slate-700 flex items-center justify-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                    UNDELIVERED
+                  </div>
+                  <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
+                    {metrics.timeline.undelivered}
+                  </div>
+                  <div className="text-[11px] print:text-[10px] font-bold font-mono text-slate-600 dark:text-slate-400 print:text-slate-700 mt-0.5">
+                    {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}%
+                  </div>
                 </div>
-                <div className="text-lg print:text-base font-black text-slate-900 dark:text-white print:text-slate-900 font-mono mt-0.5">
-                  {metrics.timeline.undelivered}
-                </div>
-                <div className="text-[11px] print:text-[10px] font-bold font-mono text-slate-600 dark:text-slate-400 print:text-slate-700 mt-0.5">
-                  {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}%
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
