@@ -759,11 +759,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* KPI Dashboard Cards */}
-          <div className={`grid gap-3 print:gap-3.5 ${
-            metrics.timeline.undelivered > 0
-              ? 'grid-cols-2 sm:grid-cols-4 print:grid-cols-4'
-              : 'grid-cols-1 sm:grid-cols-3 print:grid-cols-3'
-          }`}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 print:grid-cols-3 gap-3 print:gap-3.5">
             {/* Total Shipments */}
             <div className="kpi-card p-3.5 print:p-3.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
               <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[11px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
@@ -785,7 +781,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 print:w-3.5 print:h-3.5" />
               </div>
               <div
-                className={`text-2xl print:text-2xl font-black mt-1 print:mt-1 font-mono ${
+                className={`text-2xl print:text-xl font-black mt-1 print:mt-1 font-mono ${
                   metrics.onTimeRate >= 70
                     ? 'text-emerald-700 dark:text-emerald-400 print:text-emerald-700'
                     : metrics.onTimeRate >= 50
@@ -807,22 +803,6 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 {metrics.avgTT > 0 ? `${metrics.avgTT.toFixed(2)}d` : '-'}
               </div>
             </div>
-
-            {/* Undelivered Shipments (Only shown if any) */}
-            {metrics.timeline.undelivered > 0 && (
-              <div className="kpi-card p-3.5 print:p-3.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col items-center justify-center text-center shadow-xs">
-                <div className="flex items-center justify-center gap-1.5 text-[11px] print:text-[11px] font-bold text-slate-500 dark:text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                  <span>UNDELIVERED</span>
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 print:w-3.5 print:h-3.5" />
-                </div>
-                <div className="text-2xl print:text-2xl font-black text-amber-700 dark:text-amber-400 print:text-amber-700 mt-1 print:mt-1 font-mono">
-                  {metrics.timeline.undelivered}
-                </div>
-                <div className="text-[10.5px] print:text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono mt-0.5">
-                  {metrics.total > 0 ? ((metrics.timeline.undelivered / metrics.total) * 100).toFixed(1) : '0.0'}% of scope
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Delivery Timeline Breakdown */}
