@@ -254,20 +254,26 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     scopedShipments.forEach((s) => {
       const categories: string[] = [];
 
+      const cleanReason = (val: string) => val.replace(/^(clearance|transit|delivery|remarks)\s*:\s*/i, '').trim();
+
       if (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') {
-        categories.push(`Transit: ${s.transitDelay}`);
+        const cleaned = cleanReason(s.transitDelay);
+        if (cleaned) categories.push(cleaned);
       }
       if (s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '') {
-        categories.push(`Clearance: ${s.clearanceDelay}`);
+        const cleaned = cleanReason(s.clearanceDelay);
+        if (cleaned) categories.push(cleaned);
       }
       if (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') {
-        categories.push(`Delivery: ${s.destinationDelay}`);
+        const cleaned = cleanReason(s.destinationDelay);
+        if (cleaned) categories.push(cleaned);
       }
       if (s.weekendDelay && s.weekendDelay.toLowerCase() === 'yes') {
         categories.push('Weekend Delay');
       }
       if (s.remarks && s.remarks !== '-' && s.remarks.trim() !== '' && categories.length === 0) {
-        categories.push(`Remarks: ${s.remarks}`);
+        const cleaned = cleanReason(s.remarks);
+        if (cleaned) categories.push(cleaned);
       }
 
       categories.forEach((cat) => {
