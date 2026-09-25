@@ -295,20 +295,20 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     lines.push(`• Delivered Shipments      : ${metrics.deliveredCount} AWBs (${((metrics.deliveredCount / (metrics.total || 1)) * 100).toFixed(1)}%)`);
     lines.push(`• Logged Exceptions/Delays : ${metrics.exceptionsCount} AWBs\n`);
 
-    lines.push(`⏱️ DELIVERY TIMELINE DISTRIBUTION`);
+    lines.push(`⏱️ DELIVERY TIMELINE`);
     lines.push(`----------------------------------------------------------------------`);
-    lines.push(`• Day 1–4 (Express delivery)     : ${metrics.timeline.day1_4} AWBs (${((metrics.timeline.day1_4 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
-    lines.push(`• Day 5   (Standard SLA on-time) : ${metrics.timeline.day5} AWBs (${((metrics.timeline.day5 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
-    lines.push(`• Day 6   (Minor delay)          : ${metrics.timeline.day6} AWBs (${((metrics.timeline.day6 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
+    lines.push(`• Day 1–4                        : ${metrics.timeline.day1_4} AWBs (${((metrics.timeline.day1_4 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
+    lines.push(`• Day 5                          : ${metrics.timeline.day5} AWBs (${((metrics.timeline.day5 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
+    lines.push(`• Day 6                          : ${metrics.timeline.day6} AWBs (${((metrics.timeline.day6 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
     lines.push(`• Day 7                          : ${metrics.timeline.day7} AWBs (${((metrics.timeline.day7 / (metrics.total || 1)) * 100).toFixed(1)}%)`);
-    lines.push(`• Day 8+  (Critical delay)       : ${metrics.timeline.day8Plus} AWBs (${((metrics.timeline.day8Plus / (metrics.total || 1)) * 100).toFixed(1)}%)`);
+    lines.push(`• Day 8+                         : ${metrics.timeline.day8Plus} AWBs (${((metrics.timeline.day8Plus / (metrics.total || 1)) * 100).toFixed(1)}%)`);
     if (metrics.timeline.undelivered > 0) {
-      lines.push(`• Undelivered / In-Transit       : ${metrics.timeline.undelivered} AWBs`);
+      lines.push(`• UNDELIVERED                    : ${metrics.timeline.undelivered} AWBs`);
     }
     lines.push(``);
 
     if (metrics.destinations.length > 0) {
-      lines.push(`🌍 DESTINATION MARKET BREAKDOWN`);
+      lines.push(`🌍 DESTINATION DETAILS`);
       lines.push(`----------------------------------------------------------------------`);
       metrics.destinations.slice(0, 6).forEach((d, idx) => {
         lines.push(`${idx + 1}. ${d.dest.padEnd(6)}: ${String(d.count).padStart(4)} AWBs (${formatWeight(d.weight)} kg) | On-Time: ${d.onTimeRate.toFixed(1)}% | Avg TT: ${d.avgTT.toFixed(2)}d`);
@@ -317,7 +317,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     }
 
     if (metrics.exceptionsList.length > 0) {
-      lines.push(`⚠️ ACTIVE LOGGED DELAYS & ROOT CAUSES (SAMPLE)`);
+      lines.push(`⚠️ RECORDED DELAYS (SAMPLE)`);
       lines.push(`----------------------------------------------------------------------`);
       metrics.exceptionsList.slice(0, 8).forEach((s, idx) => {
         const reason = s.clearanceDelay && s.clearanceDelay !== '-'
@@ -364,12 +364,12 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
   return (
     <div className="customer-modal-portal fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in print:static print:p-0 print:m-0 print:bg-white print:backdrop-none">
       
-      {/* Comprehensive Zero-Blank-Page Print Style */}
+      {/* Comprehensive Zero-Blank-Page Single-Page Print Style */}
       <style>{`
         @media print {
           @page {
             size: A4 portrait;
-            margin: 8mm 10mm 10mm 10mm;
+            margin: 6mm 7mm 5mm 7mm;
           }
 
           /* Hide all main app nodes inside #root except the modal */
@@ -377,14 +377,14 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             display: none !important;
           }
 
-          body.customer-summary-print-active {
+          html, body.customer-summary-print-active {
             background: #ffffff !important;
             color: #0f172a !important;
             margin: 0 !important;
             padding: 0 !important;
             height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -400,7 +400,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             padding: 0 !important;
             background: transparent !important;
             backdrop-filter: none !important;
-            overflow: visible !important;
+            overflow: hidden !important;
           }
 
           #customer-printable-dossier {
@@ -409,7 +409,7 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             width: 100% !important;
             max-width: 100% !important;
             height: auto !important;
-            max-height: none !important;
+            max-height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             border: none !important;
@@ -418,7 +418,9 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             color: #0f172a !important;
             page-break-before: avoid !important;
             break-before: avoid !important;
-            overflow: visible !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            overflow: hidden !important;
           }
 
           #customer-printable-dossier .overflow-y-auto {
@@ -445,23 +447,15 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-[#0c1222] border-2 border-slate-300 dark:border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden print:max-h-none print:border-none print:shadow-none"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 flex items-center justify-between gap-4 shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
-              <Building className="w-5 h-5" />
+        <div className="px-6 py-4 print:px-2 print:py-1.5 border-b border-slate-200 dark:border-slate-800 print:border-b-2 print:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 flex items-center justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-3 print:gap-2 min-w-0">
+            <div className="w-10 h-10 print:w-7 print:h-7 rounded-2xl print:rounded-lg bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+              <Building className="w-5 h-5 print:w-4 print:h-4" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-black text-slate-900 dark:text-white truncate">
-                  Executive Performance Summary
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-100 text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 no-print">
-                  Client Briefing
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                Comprehensive outbound SLA report ready for client communication &amp; executive review.
-              </p>
+              <h2 className="text-base print:text-sm font-black text-slate-900 dark:text-white truncate">
+                Executive Performance Summary
+              </h2>
             </div>
           </div>
 
@@ -503,37 +497,32 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-5 print:p-0 print:space-y-2 print:overflow-visible">
 
           {/* Account & Scope Banner with PROMINENT TIME PERIOD */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-100 via-indigo-50/40 to-sky-50/40 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-sky-950/30 border-2 border-indigo-200/70 dark:border-indigo-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="p-4 print:p-2 rounded-2xl print:rounded-xl bg-gradient-to-r from-slate-100 via-indigo-50/40 to-sky-50/40 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-sky-950/30 border-2 border-indigo-200/70 dark:border-indigo-800/40 print:border-slate-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 print:gap-1.5">
             <div className="min-w-0">
               <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-400 block mb-0.5">
                 Active Summary Scope
               </span>
-              <h3 className="text-lg font-black text-slate-950 dark:text-white truncate">
+              <h3 className="text-lg print:text-base font-black text-slate-950 dark:text-white truncate">
                 {summaryTitle}
               </h3>
               
               {/* Prominent Time Period Badge */}
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-100/90 dark:bg-blue-950/90 text-blue-900 dark:text-sky-300 font-mono text-xs font-black border border-blue-300 dark:border-blue-700/60 shadow-xs">
-                  <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400 shrink-0" />
+              <div className="flex items-center gap-2 mt-1.5 print:mt-1 flex-wrap">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 print:px-2 print:py-0.5 rounded-xl print:rounded-lg bg-blue-100/90 dark:bg-blue-950/90 text-blue-900 dark:text-sky-300 font-mono text-xs print:text-[11px] font-black border border-blue-300 dark:border-blue-700/60 shadow-xs">
+                  <Calendar className="w-3.5 h-3.5 print:w-3 print:h-3 text-blue-600 dark:text-sky-400 shrink-0" />
                   <span>Time Period: <strong className="text-slate-900 dark:text-white">{timePeriodLabel}</strong></span>
                 </div>
 
                 {currentDestination && currentDestination !== 'ALL' && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-100/90 dark:bg-emerald-950/90 text-emerald-900 dark:text-emerald-300 font-mono text-xs font-black border border-emerald-300 dark:border-emerald-700/60 shadow-xs">
-                    <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 print:px-2 print:py-0.5 rounded-xl print:rounded-lg bg-emerald-100/90 dark:bg-emerald-950/90 text-emerald-900 dark:text-emerald-300 font-mono text-xs print:text-[11px] font-black border border-emerald-300 dark:border-emerald-700/60 shadow-xs">
+                    <Globe className="w-3.5 h-3.5 print:w-3 print:h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>Destination: <strong>{currentDestination}</strong></span>
                   </div>
                 )}
               </div>
-
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">
-                Scope Volume: <strong>{metrics.total}</strong> outbound shipments totaling{' '}
-                <strong>{formatWeight(metrics.totalWeight)} kg</strong>
-              </p>
             </div>
 
             {/* Quick Customer Switcher Dropdown (Hidden when printing) */}
@@ -588,29 +577,29 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
           </div>
 
           {/* KPI Dashboard Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-3 print:gap-2">
             {/* Total Shipments */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
+              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Total Shipments</span>
-                <Package className="w-3.5 h-3.5 text-blue-500" />
+                <Package className="w-3.5 h-3.5 text-blue-500 print:w-3 print:h-3" />
               </div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 font-mono">
+              <div className="text-2xl print:text-lg font-black text-slate-900 dark:text-white mt-1 print:mt-0.5 font-mono">
                 {metrics.total.toLocaleString()}
               </div>
-              <div className="text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                 Gross: <strong>{formatWeight(metrics.totalWeight)} kg</strong>
               </div>
             </div>
 
             {/* On-Time SLA Rate */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
+              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>On-Time SLA Rate</span>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 print:w-3 print:h-3" />
               </div>
               <div
-                className={`text-2xl font-black mt-1 font-mono ${
+                className={`text-2xl print:text-lg font-black mt-1 print:mt-0.5 font-mono ${
                   metrics.onTimeRate >= 70
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : metrics.onTimeRate >= 50
@@ -620,137 +609,131 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
               >
                 {metrics.onTimeRate.toFixed(1)}%
               </div>
-              <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5">
                 {metrics.onTimeCount} on-time vs {metrics.delayedCount} delayed
               </div>
             </div>
 
             {/* Average Transit Time */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
+              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Avg Transit Time</span>
-                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                <Clock className="w-3.5 h-3.5 text-indigo-500 print:w-3 print:h-3" />
               </div>
-              <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1 font-mono">
+              <div className="text-2xl print:text-lg font-black text-indigo-600 dark:text-indigo-400 mt-1 print:mt-0.5 font-mono">
                 {metrics.avgTT > 0 ? `${metrics.avgTT.toFixed(2)}d` : '-'}
               </div>
-              <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Target: ≤ 5.0 Days SLA
               </div>
             </div>
 
             {/* Active Exceptions */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-slate-700 print:border-slate-300">
+              <div className="flex items-center justify-between text-[11px] print:text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Logged Delays</span>
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:w-3 print:h-3" />
               </div>
-              <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 font-mono">
+              <div className="text-2xl print:text-lg font-black text-amber-600 dark:text-amber-400 mt-1 print:mt-0.5 font-mono">
                 {metrics.exceptionsCount}
               </div>
-              <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <div className="text-[10.5px] print:text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5">
                 {metrics.deliveredCount} Delivered ({((metrics.deliveredCount / (metrics.total || 1)) * 100).toFixed(0)}%)
               </div>
             </div>
           </div>
 
-          {/* Delivery Timeline Distribution Breakdown */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-            <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-indigo-500" />
-              Delivery Timeline Distribution
+          {/* Delivery Timeline Breakdown */}
+          <div className="p-4 print:p-2 rounded-2xl print:rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 print:border-slate-300">
+            <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-2.5 print:mb-1.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-indigo-500 print:hidden" />
+              Delivery Timeline
             </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print:grid-cols-6 gap-2 print:gap-1.5 text-center">
               {/* Day 1-4 */}
-              <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/60">
+              <div className="p-2.5 print:p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/60 print:border-emerald-400">
                 <div className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-300">Day 1–4</div>
-                <div className="text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
+                <div className="text-lg print:text-base font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
                   {metrics.timeline.day1_4}
                 </div>
-                <div className="text-[10px] text-emerald-600 dark:text-emerald-400/80">Express</div>
               </div>
 
               {/* Day 5 */}
-              <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800/60">
+              <div className="p-2.5 print:p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800/60 print:border-blue-400">
                 <div className="text-[10px] font-black uppercase text-blue-800 dark:text-blue-300">Day 5</div>
-                <div className="text-lg font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">
+                <div className="text-lg print:text-base font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">
                   {metrics.timeline.day5}
                 </div>
-                <div className="text-[10px] text-blue-600 dark:text-blue-400/80">On-Time SLA</div>
               </div>
 
               {/* Day 6 */}
-              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60">
+              <div className="p-2.5 print:p-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 print:border-amber-400">
                 <div className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-300">Day 6</div>
-                <div className="text-lg font-black text-amber-700 dark:text-amber-400 font-mono mt-0.5">
+                <div className="text-lg print:text-base font-black text-amber-700 dark:text-amber-400 font-mono mt-0.5">
                   {metrics.timeline.day6}
                 </div>
-                <div className="text-[10px] text-amber-600 dark:text-amber-400/80">Minor Delay</div>
               </div>
 
               {/* Day 7 */}
-              <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-800/60">
+              <div className="p-2.5 print:p-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-800/60 print:border-orange-400">
                 <div className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-300">Day 7</div>
-                <div className="text-lg font-black text-orange-700 dark:text-orange-400 font-mono mt-0.5">
+                <div className="text-lg print:text-base font-black text-orange-700 dark:text-orange-400 font-mono mt-0.5">
                   {metrics.timeline.day7}
                 </div>
-                <div className="text-[10px] text-orange-600 dark:text-orange-400/80">+2 Days Delay</div>
               </div>
 
               {/* Day 8+ */}
-              <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800/60">
+              <div className="p-2.5 print:p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800/60 print:border-rose-400">
                 <div className="text-[10px] font-black uppercase text-rose-800 dark:text-rose-300">Day 8+</div>
-                <div className="text-lg font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">
+                <div className="text-lg print:text-base font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">
                   {metrics.timeline.day8Plus}
                 </div>
-                <div className="text-[10px] text-rose-600 dark:text-rose-400/80">Critical Delay</div>
               </div>
 
-              {/* Undelivered */}
-              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
-                <div className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">In-Transit</div>
-                <div className="text-lg font-black text-slate-800 dark:text-slate-200 font-mono mt-0.5">
+              {/* UNDELIVERED */}
+              <div className="p-2.5 print:p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 print:border-slate-400">
+                <div className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">UNDELIVERED</div>
+                <div className="text-lg print:text-base font-black text-slate-800 dark:text-slate-200 font-mono mt-0.5">
                   {metrics.timeline.undelivered}
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">Undelivered</div>
               </div>
             </div>
           </div>
 
-          {/* Two Columns: Destination Breakdown & Active Exception List */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Two Columns: Destination Details & Recorded Delays */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-2 gap-4 print:gap-2.5">
             
             {/* Top Destinations */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
               <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-sky-500" />
-                Destination Market Breakdown
+                <Globe className="w-3.5 h-3.5 text-sky-500 print:hidden" />
+                Destination Details
               </h4>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs print:text-[10.5px]">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase font-black">
-                      <th className="py-2 text-left">Destination</th>
-                      <th className="py-2 text-right">AWBs</th>
-                      <th className="py-2 text-right">Weight</th>
-                      <th className="py-2 text-right">Avg TT</th>
-                      <th className="py-2 text-right">On-Time</th>
+                      <th className="py-2 print:py-1 text-left">Destination</th>
+                      <th className="py-2 print:py-1 text-right">AWBs</th>
+                      <th className="py-2 print:py-1 text-right">Weight</th>
+                      <th className="py-2 print:py-1 text-right">Avg TT</th>
+                      <th className="py-2 print:py-1 text-right">On-Time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {metrics.destinations.slice(0, 8).map((d) => (
-                      <tr key={d.dest} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                        <td className="py-2 font-bold text-slate-800 dark:text-slate-200">{d.dest}</td>
-                        <td className="py-2 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {metrics.destinations.slice(0, 8).map((d, idx) => (
+                      <tr key={d.dest} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${idx >= 6 ? 'print:hidden' : ''}`}>
+                        <td className="py-2 print:py-1 font-bold text-slate-800 dark:text-slate-200">{d.dest}</td>
+                        <td className="py-2 print:py-1 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
                           {d.count}
                         </td>
-                        <td className="py-2 text-right font-mono text-slate-500 dark:text-slate-400">
+                        <td className="py-2 print:py-1 text-right font-mono text-slate-500 dark:text-slate-400">
                           {formatWeight(d.weight)} kg
                         </td>
-                        <td className="py-2 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        <td className="py-2 print:py-1 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
                           {d.avgTT > 0 ? `${d.avgTT.toFixed(1)}d` : '-'}
                         </td>
-                        <td className="py-2 text-right font-mono font-black text-emerald-600 dark:text-emerald-400">
+                        <td className="py-2 print:py-1 text-right font-mono font-black text-emerald-600 dark:text-emerald-400">
                           {d.onTimeRate.toFixed(0)}%
                         </td>
                       </tr>
@@ -768,19 +751,19 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
             </div>
 
             {/* Active Delay Exceptions Table */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-4 print:p-2.5 rounded-2xl print:rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 print:border-slate-300 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-                  Active Exceptions &amp; Delay Root Causes
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 print:hidden" />
+                  Recorded Delays
                 </h4>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                   {metrics.exceptionsCount} logged
                 </span>
               </div>
 
-              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                {metrics.exceptionsList.slice(0, 12).map((s) => {
+              <div className="space-y-2 print:space-y-1.5 max-h-64 print:max-h-none overflow-y-auto print:overflow-visible pr-1">
+                {metrics.exceptionsList.slice(0, 12).map((s, idx) => {
                   const delayReason = s.clearanceDelay && s.clearanceDelay !== '-'
                     ? `Clearance: ${s.clearanceDelay}`
                     : s.transitDelay && s.transitDelay !== '-'
@@ -794,22 +777,24 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                   return (
                     <div
                       key={s.awb}
-                      className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 text-xs flex flex-col gap-1"
+                      className={`p-2.5 print:p-1.5 rounded-xl print:rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 text-xs print:text-[10px] flex flex-col gap-0.5 ${
+                        idx >= 5 ? 'print:hidden' : ''
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-mono font-black text-slate-900 dark:text-slate-100">
                           AWB: {s.awb}
                         </span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono">
+                          <span className="text-[10px] print:text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono">
                             {s.destination}
                           </span>
-                          <span className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                          <span className="text-[10px] print:text-[9px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
                             {formatTT(s.tt)}d
                           </span>
                         </div>
                       </div>
-                      <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+                      <p className="text-[11px] print:text-[9.5px] text-amber-700 dark:text-amber-300 font-medium">
                         {delayReason}
                       </p>
                     </div>
@@ -817,8 +802,8 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
                 })}
 
                 {metrics.exceptionsList.length === 0 && (
-                  <div className="py-8 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-1">
-                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                  <div className="py-6 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-1">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Clean Performance</span>
                     <span>No active delays or exceptions logged for this selection.</span>
                   </div>
@@ -852,33 +837,27 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 flex items-center justify-between gap-4 shrink-0 no-print">
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            Scope: <strong className="text-slate-800 dark:text-slate-200">{summaryTitle}</strong>
-          </span>
+        <div className="px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 flex items-center justify-end gap-2 shrink-0 no-print">
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+              copiedEmail
+                ? 'bg-emerald-600 text-white'
+                : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+            }`}
+          >
+            {copiedEmail ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copiedEmail ? 'Copied to Clipboard' : 'Copy Email Summary'}</span>
+          </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleCopyEmail}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
-                copiedEmail
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-              }`}
-            >
-              {copiedEmail ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedEmail ? 'Copied to Clipboard' : 'Copy Email Summary'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer"
+          >
+            Close
+          </button>
         </div>
 
       </div>
