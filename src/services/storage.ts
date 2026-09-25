@@ -47,6 +47,20 @@ export async function clearSavedDataset(): Promise<void> {
   }
 }
 
+export async function updateShipmentInStorage(awb: string, updates: Partial<Shipment>): Promise<void> {
+  try {
+    const list = (await get<Shipment[]>(STORAGE_KEY_DATA)) || [];
+    const cleanAwb = String(awb).trim();
+    const idx = list.findIndex(s => String(s.awb).trim() === cleanAwb);
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], ...updates };
+      await set(STORAGE_KEY_DATA, list);
+    }
+  } catch (error) {
+    console.error('Failed to update single shipment in IndexedDB:', error);
+  }
+}
+
 const STORAGE_KEY_MODE = 'transitpulse_display_mode';
 
 export type ThemeType = 'dark' | 'light' | 'midnight' | 'teal';

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseExcelBuffer, ServerShipment } from '../utils/excelParser.js';
+import { syncShipmentToSourceExcel } from './excelSync.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,6 +43,8 @@ class DatasetStore {
     isCustom: false
   };
   private isInitialized = false;
+  private masterFilePaths = [DEFAULT_EXCEL_PATH, AUG_EXCEL_PATH, SEPT_EXCEL_PATH];
+  private lastKnownMtimes: Record<string, number> = {};
 
   constructor() {
     this.ensureDataDirectory();
@@ -51,6 +54,101 @@ class DatasetStore {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
+  }
+
+  public recordMasterMtimes(): void {
+    for (const p of this.masterFilePaths) {
+      if (fs.existsSync(p)) {
+        try {
+          this.lastKnownMtimes[p] = fs.statSync(p).mtimeMs;
+        } catch {}
+      }
+    }
+  }
+
+  public updateRecordedMtime(filePath: string): void {
+    const resolved = path.resolve(filePath);
+    if (fs.existsSync(resolved)) {
+      try {
+        this.lastKnownMtimes[resolved] = fs.statSync(resolved).mtimeMs;
+      } catch {}
+    }
+  }
+
+  public hasExternalExcelModifications(): boolean {
+    for (const p of this.masterFilePaths) {
+      if (fs.existsSync(p)) {
+        try {
+          const currentMtime = fs.statSync(p).mtimeMs;
+          const recorded = this.lastKnownMtimes[p] || 0;
+          if (currentMtime > recorded + 2000) {
+            return true;
+          }
+        } catch {}
+      }
+    }
+    return false;
+  }
+
+  public async reloadFromMasterExcelFiles(): Promise<DatasetMeta> {
+    console.log('[DatasetStore] 🔄 Parsing master Excel files on disk (July, August, September)...');
+    const combinedShipments: ServerShipment[] = [];
+    if (fs.existsSync(DEFAULT_EXCEL_PATH)) {
+      try {
+        console.log('[DatasetStore] Parsing root July Final Draft.xlsx...');
+        const buffer = fs.readFileSync(DEFAULT_EXCEL_PATH);
+        const { shipments } = parseExcelBuffer(buffer);
+        if (shipments && shipments.length > 0) combinedShipments.push(...shipments);
+      } catch (e) {
+        console.error('[DatasetStore] Error reading July Excel:', e);
+      }
+    }
+    if (fs.existsSync(AUG_EXCEL_PATH)) {
+      try {
+        console.log('[DatasetStore] Parsing root August Final Draft.xlsx...');
+        const buffer = fs.readFileSync(AUG_EXCEL_PATH);
+        const { shipments } = parseExcelBuffer(buffer);
+        if (shipments && shipments.length > 0) combinedShipments.push(...shipments);
+      } catch (e) {
+        console.error('[DatasetStore] Error reading August Excel:', e);
+      }
+    }
+    if (fs.existsSync(SEPT_EXCEL_PATH)) {
+      try {
+        console.log('[DatasetStore] Parsing root September Final Draft.xlsx...');
+        const buffer = fs.readFileSync(SEPT_EXCEL_PATH);
+        const { shipments } = parseExcelBuffer(buffer);
+        if (shipments && shipments.length > 0) combinedShipments.push(...shipments);
+      } catch (e) {
+        console.error('[DatasetStore] Error reading September Excel:', e);
+      }
+    }
+
+    if (combinedShipments.length > 0) {
+      const hasSept = fs.existsSync(SEPT_EXCEL_PATH);
+      this.shipments = combinedShipments;
+      this.meta = {
+        filename: hasSept ? 'July, August & September Final Draft (Default)' : 'July & August Final Draft (Default)',
+        uploadedAt: new Date().toISOString(),
+        rowCount: combinedShipments.length,
+        isCustom: false
+      };
+      this.ensureDataDirectory();
+      try {
+        fs.writeFileSync(ACTIVE_DATASET_FILE, JSON.stringify({ meta: this.meta, shipments: this.shipments }), 'utf-8');
+      } catch (err) {
+        console.error('[DatasetStore] Error writing active_dataset.json after Excel reload:', err);
+      }
+      if (fs.existsSync(DEFAULT_JSON_PATH)) {
+        try {
+          fs.writeFileSync(DEFAULT_JSON_PATH, JSON.stringify(this.shipments), 'utf-8');
+        } catch {}
+      }
+      this.recordMasterMtimes();
+      console.log(`[DatasetStore] ✅ Successfully reloaded ${combinedShipments.length} records from master Excel files.`);
+    }
+
+    return this.meta;
   }
 
   public async initialize(): Promise<void> {
@@ -72,7 +170,18 @@ class DatasetStore {
             isCustom: true
           };
           this.isInitialized = true;
-          console.log(`[DatasetStore] Loaded ${this.shipments.length} records from persisted storage (${this.meta.filename})`);
+          this.recordMasterMtimes();
+
+          // Check if any root Excel file was modified externally after the active_dataset was saved
+          const fileStat = fs.statSync(ACTIVE_DATASET_FILE);
+          const datasetSavedTime = fileStat.mtimeMs;
+          const anyNewerExcel = this.masterFilePaths.some(p => fs.existsSync(p) && fs.statSync(p).mtimeMs > datasetSavedTime + 2000);
+          if (anyNewerExcel) {
+            console.log('[DatasetStore] 🔔 Detected master Excel files modified externally since last save. Reloading...');
+            await this.reloadFromMasterExcelFiles();
+          } else {
+            console.log(`[DatasetStore] Loaded ${this.shipments.length} records from persisted storage (${this.meta.filename})`);
+          }
           return;
         }
       } catch (err) {
@@ -187,6 +296,55 @@ class DatasetStore {
     }
 
     return this.meta;
+  }
+
+  public async updateShipment(awb: string, updates: Partial<ServerShipment>): Promise<ServerShipment | null> {
+    const cleanAwb = String(awb).trim();
+    const idx = this.shipments.findIndex(s => String(s.awb).trim() === cleanAwb);
+    if (idx === -1) {
+      return null;
+    }
+
+    const current = this.shipments[idx];
+    const updated: ServerShipment = {
+      ...current,
+      ...updates,
+      awb: current.awb // Preserve primary AWB key
+    };
+
+    this.shipments[idx] = updated;
+
+    this.ensureDataDirectory();
+    try {
+      const payload = JSON.stringify({ meta: this.meta, shipments: this.shipments });
+      fs.writeFileSync(ACTIVE_DATASET_FILE, payload, 'utf-8');
+      console.log(`[DatasetStore] Updated shipment AWB ${cleanAwb} and persisted to active_dataset.json`);
+    } catch (err) {
+      console.error('[DatasetStore] Error saving updated shipment to active_dataset.json:', err);
+    }
+
+    // Keep public/defaultData.json in sync for offline/client fallback
+    if (fs.existsSync(DEFAULT_JSON_PATH)) {
+      try {
+        fs.writeFileSync(DEFAULT_JSON_PATH, JSON.stringify(this.shipments), 'utf-8');
+      } catch {
+        // Non-blocking
+      }
+    }
+
+    // Automatically update the original source Excel file (July, August, or September)
+    syncShipmentToSourceExcel(cleanAwb, updates).then(res => {
+      if (res.success) {
+        console.log(`[DatasetStore] Master Excel file ${res.filename} updated for AWB ${cleanAwb}`);
+        this.recordMasterMtimes();
+      } else {
+        console.warn(`[DatasetStore] Master Excel sync note: ${res.error}`);
+      }
+    }).catch(err => {
+      console.error('[DatasetStore] Master Excel sync error:', err);
+    });
+
+    return updated;
   }
 
   public async resetToDefault(): Promise<{ shipments: ServerShipment[]; meta: DatasetMeta }> {

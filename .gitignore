@@ -11,4 +11,5 @@ Thumbs.db
 *.tsbuildinfo
 __pycache__/
 *.pyc
-
+# Local server storage
+data/

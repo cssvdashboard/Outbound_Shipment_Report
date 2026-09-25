@@ -108,3 +108,49 @@ export async function resetServerDataset(): Promise<{ data: Shipment[]; meta: Da
     return null;
   }
 }
+
+export async function updateShipmentDelayOnServer(
+  awb: string,
+  updates: Partial<Shipment>
+): Promise<{ success: boolean; shipment?: Shipment; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/shipments/${encodeURIComponent(awb)}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(updates)
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      return { success: false, error: json.error || 'Server rejected shipment update' };
+    }
+    return { success: true, shipment: json.shipment };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error updating shipment' };
+  }
+}
+
+export async function syncMasterExcelFromServer(): Promise<{ data: Shipment[]; meta: DatasetMeta } | null> {
+  try {
+    const res = await fetch(`${API_BASE}/dataset/sync-excel`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.success && Array.isArray(json.shipments)) {
+      return {
+        data: json.shipments as Shipment[],
+        meta: json.meta
+      };
+    }
+    return null;
+  } catch (err) {
+    console.error('[API Client] Master Excel sync request failed:', err);
+    return null;
+  }
+}
+
+

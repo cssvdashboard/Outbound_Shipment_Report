@@ -24,12 +24,14 @@ function serialToYearMonth(serial: number | null | undefined): string {
   if (isNaN(d.getTime())) return '';
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
-import { loadSavedDataset, saveDataset, clearSavedDataset, DatasetMeta } from '../services/storage';
+import { loadSavedDataset, saveDataset, clearSavedDataset, updateShipmentInStorage, DatasetMeta } from '../services/storage';
 import {
   checkServerHealth,
   fetchDatasetFromServer,
   syncDatasetToServer,
-  resetServerDataset
+  resetServerDataset,
+  updateShipmentDelayOnServer,
+  syncMasterExcelFromServer
 } from '../services/api';
 
 export const initialFilterState: FilterState = {
@@ -417,9 +419,71 @@ export function useLogisticsData() {
     return Array.from(set).sort();
   }, [rawShipments]);
 
+  // Handler to update delay reason, category, and remarks for any AWB
+  const updateShipmentDelay = useCallback(
+    async (
+      awb: string,
+      updates: {
+        transitDelay?: string;
+        clearanceDelay?: string;
+        destinationDelay?: string;
+        weekendDelay?: string;
+        remarks?: string;
+        finalResolution?: string;
+      }
+    ) => {
+      const cleanAwb = String(awb).trim();
+
+      // 1. Optimistically update local react state so UI, charts, and metrics respond immediately
+      setRawShipments((prev) =>
+        prev.map((s) => (String(s.awb).trim() === cleanAwb ? { ...s, ...updates } : s))
+      );
+
+      // 2. Persist in IndexedDB for offline resilience
+      updateShipmentInStorage(cleanAwb, updates).catch((err) =>
+        console.warn('Failed to update IndexedDB:', err)
+      );
+
+      // 3. Sync to backend server if online
+      if (isServerConnected) {
+        try {
+          const res = await updateShipmentDelayOnServer(cleanAwb, updates);
+          return res;
+        } catch (err: any) {
+          console.warn('Failed to sync delay update to server:', err);
+          return { success: false, error: err?.message || 'Server sync failed' };
+        }
+      }
+
+      return { success: true };
+    },
+    [isServerConnected]
+  );
+
+  const syncWithExcelFiles = useCallback(async (): Promise<{ success: boolean; count?: number; message?: string }> => {
+    setIsLoading(true);
+    try {
+      const result = await syncMasterExcelFromServer();
+      if (result && result.data && result.data.length > 0) {
+        setRawShipments(result.data);
+        setDatasetMeta(result.meta);
+        await saveDataset(result.data, result.meta.filename);
+        setIsLoading(false);
+        return { success: true, count: result.data.length, message: `Successfully synced ${result.data.length} records from Excel files.` };
+      }
+      setIsLoading(false);
+      return { success: false, message: 'Could not sync from Excel files.' };
+    } catch (err: any) {
+      setIsLoading(false);
+      return { success: false, message: err?.message || 'Sync failed.' };
+    }
+  }, []);
+
   return {
     rawShipments,
     filteredShipments,
+    updateShipmentDelay,
+    syncWithExcelFiles,
     datasetMeta,
     isLoading,
     isServerConnected,

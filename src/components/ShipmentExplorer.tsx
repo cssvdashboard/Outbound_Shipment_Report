@@ -13,16 +13,29 @@ import {
   ArrowDown,
   Copy,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  Edit3
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
 import { getPickupISODate } from '../utils/analytics';
 import * as XLSX from 'xlsx';
+import { DelayReasonEditorModal } from './DelayReasonEditorModal';
 
 interface ShipmentExplorerProps {
   shipments: Shipment[];
   totalRawCount: number;
+  onUpdateShipmentDelay?: (
+    awb: string,
+    updates: {
+      transitDelay?: string;
+      clearanceDelay?: string;
+      destinationDelay?: string;
+      weekendDelay?: string;
+      remarks?: string;
+      finalResolution?: string;
+    }
+  ) => Promise<{ success: boolean; error?: string } | void>;
 }
 
 type SortField = 'awb' | 'destination' | 'customer' | 'shprName' | 'pickup' | 'weight' | 'tt' | 'ttRange' | 'finalResolution';
@@ -30,9 +43,11 @@ type SortOrder = 'asc' | 'desc';
 
 export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
   shipments,
-  totalRawCount
+  totalRawCount,
+  onUpdateShipmentDelay
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
   const [pageSize, setPageSize] = useState<number>(25);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
@@ -62,6 +77,23 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
       setSortOrder('desc');
     }
   };
+
+  // Extract unique delay reasons across active shipments for dynamic dropdown options
+  const { existingTransitDelays, existingClearanceDelays, existingDestinationDelays } = useMemo(() => {
+    const trans = new Set<string>();
+    const clear = new Set<string>();
+    const dest = new Set<string>();
+    shipments.forEach((s) => {
+      if (s.transitDelay && s.transitDelay !== '-') trans.add(s.transitDelay.trim());
+      if (s.clearanceDelay && s.clearanceDelay !== '-') clear.add(s.clearanceDelay.trim());
+      if (s.destinationDelay && s.destinationDelay !== '-') dest.add(s.destinationDelay.trim());
+    });
+    return {
+      existingTransitDelays: Array.from(trans),
+      existingClearanceDelays: Array.from(clear),
+      existingDestinationDelays: Array.from(dest)
+    };
+  }, [shipments]);
 
   // Filter based on search term & quick filter pills
   const filteredData = useMemo(() => {
@@ -430,8 +462,8 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                   <strong>Logged Delays &amp; Remarks</strong>
                 </th>
 
-                <th className="py-3 px-3 text-center min-w-[80px] font-black align-middle">
-                  <strong>Inspect</strong>
+                <th className="py-3 px-3 text-center min-w-[95px] font-black align-middle">
+                  <strong>Actions</strong>
                 </th>
               </tr>
             </thead>
@@ -603,16 +635,26 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                       )}
                     </td>
 
-                    {/* Inspect Button */}
+                    {/* Action Buttons: Edit Delay & Inspect */}
                     <td className="py-2.5 px-3 text-center align-middle">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedShipment(s)}
-                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-sky-600 dark:hover:text-white transition-colors cursor-pointer border border-slate-300 dark:border-transparent shadow-xs"
-                        title="View Full Shipment Dossier"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-blue-600 group-hover:text-white dark:text-sky-400" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditingShipment(s)}
+                          className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white transition-colors cursor-pointer border border-amber-300 dark:border-amber-700/60 shadow-xs"
+                          title="Edit Delay Reason (PIN Protected)"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedShipment(s)}
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-sky-600 dark:hover:text-white transition-colors cursor-pointer border border-slate-300 dark:border-transparent shadow-xs"
+                          title="View Full Shipment Dossier"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-blue-600 group-hover:text-white dark:text-sky-400" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -842,7 +884,20 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
               </div>
             )}
 
-            <div className="pt-2 flex justify-end">
+            <div className="pt-2 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const toEdit = selectedShipment;
+                  setSelectedShipment(null);
+                  setEditingShipment(toEdit);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span><strong>Edit Delay Reason</strong></span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setSelectedShipment(null)}
@@ -854,6 +909,21 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
           </div>
         </div>
       )}
+
+      {/* Delay Reason Editor Modal */}
+      <DelayReasonEditorModal
+        shipment={editingShipment}
+        isOpen={Boolean(editingShipment)}
+        onClose={() => setEditingShipment(null)}
+        existingTransitDelays={existingTransitDelays}
+        existingClearanceDelays={existingClearanceDelays}
+        existingDestinationDelays={existingDestinationDelays}
+        onSave={async (awb, updates) => {
+          if (onUpdateShipmentDelay) {
+            await onUpdateShipmentDelay(awb, updates);
+          }
+        }}
+      />
 
     </div>
   );

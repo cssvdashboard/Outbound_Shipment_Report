@@ -24,15 +24,24 @@ import {
   Globe,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Edit3,
+  Lock,
+  Unlock,
+  Sparkles,
+  KeyRound,
+  FileSpreadsheet,
+  AlertCircle
 } from 'lucide-react';
 import { RatioBreakdown, MetricSummary, Shipment } from '../types/logistics';
 import { formatExcelDate, formatWeight } from '../utils/formatters';
 import { Bar } from 'react-chartjs-2';
 import * as XLSX from 'xlsx';
+import { DelayReasonEditorModal } from './DelayReasonEditorModal';
+import { useEditorAuth } from '../hooks/useEditorAuth';
 
 export interface DelayModalTarget {
-  category: 'transit' | 'clearance' | 'destination' | 'weekend';
+  category: 'transit' | 'clearance' | 'destination' | 'weekend' | 'missing8plus' | 'allDelays';
   reason?: string; // If undefined, shows all delays in that category
   title: string;
 }
@@ -40,6 +49,7 @@ export interface DelayModalTarget {
 interface DelayHubProps {
   summary: MetricSummary;
   filteredShipments?: Shipment[];
+  allShipments?: Shipment[];
   transitDelays: RatioBreakdown[];
   clearanceDelays: RatioBreakdown[];
   destinationDelays: RatioBreakdown[];
@@ -48,22 +58,41 @@ interface DelayHubProps {
   activeClearanceFilter: string[];
   activeDestinationFilter: string[];
   onNavigateTab: (tab: string) => void;
+  onUpdateShipmentDelay?: (
+    awb: string,
+    updates: {
+      transitDelay?: string;
+      clearanceDelay?: string;
+      destinationDelay?: string;
+      weekendDelay?: string;
+      remarks?: string;
+      finalResolution?: string;
+    }
+  ) => Promise<{ success: boolean; error?: string } | void>;
 }
 
 export const DelayHub: React.FC<DelayHubProps> = ({
   summary,
   filteredShipments = [],
+  allShipments = [],
   transitDelays,
   clearanceDelays,
   destinationDelays,
   onSelectDelayFilter,
   activeTransitFilter,
   activeClearanceFilter,
-  activeDestinationFilter
+  activeDestinationFilter,
+  onUpdateShipmentDelay
 }) => {
   const [activeCategory, setActiveCategory] = useState<'transit' | 'clearance' | 'destination'>('transit');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [hubSelectedCountry, setHubSelectedCountry] = useState<string | null>(null);
+
+  // Editor Auth & Delay Reason Modal State
+  const { isEditor, logout: logoutEditor } = useEditorAuth();
+  const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
+  const [quickAwbInput, setQuickAwbInput] = useState('');
+  const [quickAwbMessage, setQuickAwbMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
   // Modal State for Delay AWB List Popup Window
   const [modalTarget, setModalTarget] = useState<DelayModalTarget | null>(null);
@@ -76,6 +105,43 @@ export const DelayHub: React.FC<DelayHubProps> = ({
   const [countryModalSearch, setCountryModalSearch] = useState<string>('');
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Quick search any AWB across full dataset to edit immediately
+  const handleQuickAwbSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = quickAwbInput.trim();
+    if (!query) return;
+    const dataset = allShipments && allShipments.length > 0 ? allShipments : filteredShipments;
+    const found = dataset.find((s) => s.awb.toLowerCase() === query.toLowerCase());
+    if (found) {
+      setQuickAwbMessage(null);
+      setEditingShipment(found);
+      setQuickAwbInput('');
+    } else {
+      setQuickAwbMessage({ text: `AWB #${query} was not found in the current dataset.`, isError: true });
+    }
+  };
+
+  // Count of shipments that took >8 days without a delay reason
+  const missing8PlusCount = useMemo(() => {
+    const dataset = allShipments && allShipments.length > 0 ? allShipments : filteredShipments;
+    return dataset.filter((s) => {
+      const hasNoReason =
+        (!s.transitDelay || s.transitDelay === '-' || s.transitDelay.trim() === '') &&
+        (!s.clearanceDelay || s.clearanceDelay === '-' || s.clearanceDelay.trim() === '') &&
+        (!s.destinationDelay || s.destinationDelay === '-' || s.destinationDelay.trim() === '');
+      return Number(s.tt || 0) > 8 && hasNoReason;
+    }).length;
+  }, [allShipments, filteredShipments]);
+
+  // Export full updated dataset to Excel (.xlsx)
+  const handleExportAllExcel = () => {
+    const dataset = allShipments && allShipments.length > 0 ? allShipments : filteredShipments;
+    const worksheet = XLSX.utils.json_to_sheet(dataset);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'All_Shipments_Updated');
+    XLSX.writeFile(workbook, `Outbound_Shipment_Report_Updated_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
 
   const openModal = (target: DelayModalTarget) => {
     setModalTarget(target);
@@ -266,7 +332,12 @@ export const DelayHub: React.FC<DelayHubProps> = ({
     if (!modalTarget) return [];
     const { category, reason } = modalTarget;
 
-    return filteredShipments.filter((s) => {
+    const sourceShipments =
+      (category === 'allDelays' || category === 'missing8plus') && allShipments && allShipments.length > 0
+        ? allShipments
+        : filteredShipments;
+
+    return sourceShipments.filter((s) => {
       if (category === 'transit') {
         if (!s.transitDelay || s.transitDelay === '-' || s.transitDelay.trim() === '') return false;
         if (reason && reason !== 'ALL' && s.transitDelay.trim().toLowerCase() !== reason.trim().toLowerCase()) return false;
@@ -288,9 +359,25 @@ export const DelayHub: React.FC<DelayHubProps> = ({
         if (w !== 'yes' && w === '') return false;
         return true;
       }
+      if (category === 'missing8plus') {
+        const hasNoReason =
+          (!s.transitDelay || s.transitDelay === '-' || s.transitDelay.trim() === '') &&
+          (!s.clearanceDelay || s.clearanceDelay === '-' || s.clearanceDelay.trim() === '') &&
+          (!s.destinationDelay || s.destinationDelay === '-' || s.destinationDelay.trim() === '');
+        return Number(s.tt || 0) > 8 && hasNoReason;
+      }
+      if (category === 'allDelays') {
+        const hasAnyDelay =
+          (s.transitDelay && s.transitDelay !== '-' && s.transitDelay.trim() !== '') ||
+          (s.clearanceDelay && s.clearanceDelay !== '-' && s.clearanceDelay.trim() !== '') ||
+          (s.destinationDelay && s.destinationDelay !== '-' && s.destinationDelay.trim() !== '') ||
+          (s.weekendDelay && s.weekendDelay.toLowerCase() === 'yes') ||
+          Number(s.tt || 0) > 5;
+        return hasAnyDelay;
+      }
       return false;
     });
-  }, [modalTarget, filteredShipments]);
+  }, [modalTarget, filteredShipments, allShipments]);
 
   // Country breakdown for active delay modal
   const modalCountryBreakdown = useMemo(() => {
@@ -438,7 +525,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
     });
   };
 
-  const getCategoryColor = (cat: 'transit' | 'clearance' | 'destination' | 'weekend') => {
+  const getCategoryColor = (cat: 'transit' | 'clearance' | 'destination' | 'weekend' | 'missing8plus' | 'allDelays') => {
     switch (cat) {
       case 'transit':
         return {
@@ -471,6 +558,22 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           border: 'border-cyan-200 dark:border-cyan-500/40',
           glow: 'shadow-[0_0_25px_rgba(6,182,212,0.15)] dark:shadow-[0_0_30px_rgba(6,182,212,0.25)]',
           badge: 'bg-cyan-100 text-cyan-900 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-700'
+        };
+      case 'missing8plus':
+        return {
+          text: 'text-purple-700 dark:text-purple-400',
+          bg: 'bg-purple-50 dark:bg-purple-500/20',
+          border: 'border-purple-200 dark:border-purple-500/40',
+          glow: 'shadow-[0_0_25px_rgba(168,85,247,0.15)] dark:shadow-[0_0_30px_rgba(168,85,247,0.25)]',
+          badge: 'bg-purple-100 text-purple-900 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-700'
+        };
+      case 'allDelays':
+        return {
+          text: 'text-sky-700 dark:text-sky-400',
+          bg: 'bg-sky-50 dark:bg-sky-500/20',
+          border: 'border-sky-200 dark:border-sky-500/40',
+          glow: 'shadow-[0_0_25px_rgba(14,165,233,0.15)] dark:shadow-[0_0_30px_rgba(14,165,233,0.25)]',
+          badge: 'bg-sky-100 text-sky-900 border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
         };
     }
   };
@@ -1145,7 +1248,7 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                         </div>
                       </th>
                       <th className="py-2.5 px-3 text-center align-middle">Delay Reason &amp; Remarks</th>
-                      <th className="py-2.5 px-2.5 text-center align-middle">Inspect</th>
+                      <th className="py-2.5 px-3 text-center align-middle">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 bg-white font-sans dark:divide-slate-800/80 dark:bg-slate-950">
@@ -1213,20 +1316,30 @@ export const DelayHub: React.FC<DelayHubProps> = ({
                               </span>
                             </td>
                             <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[200px] truncate text-center align-middle" title={s.remarks || delayText}>
-                              <span className="text-slate-900 dark:text-slate-100 font-bold block truncate">{delayText}</span>
+                              <span className="text-slate-900 dark:text-slate-100 font-bold block truncate">{delayText || '-'}</span>
                               {s.remarks && s.remarks !== delayText && (
                                 <span className="text-slate-500 dark:text-slate-400 text-[10px] font-medium block truncate">{s.remarks}</span>
                               )}
                             </td>
                             <td className="py-2 px-2.5 text-center align-middle" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={() => setInspectedShipment(s)}
-                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white border border-slate-300 dark:bg-slate-900 dark:hover:bg-blue-600 dark:text-sky-400 dark:hover:text-white dark:border-slate-700 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center"
-                                title="View full AWB dossier"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingShipment(s)}
+                                  className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 dark:bg-indigo-950/80 dark:hover:bg-indigo-600 dark:text-indigo-300 dark:hover:text-white dark:border-indigo-800 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center"
+                                  title="Edit Delay Reason (PIN Protected)"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setInspectedShipment(s)}
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white border border-slate-300 dark:bg-slate-900 dark:hover:bg-blue-600 dark:text-sky-400 dark:hover:text-white dark:border-slate-700 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center"
+                                  title="View full AWB dossier"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1530,10 +1643,18 @@ export const DelayHub: React.FC<DelayHubProps> = ({
               </div>
             )}
 
-            <div className="pt-2 flex justify-end">
+            <div className="pt-2 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingShipment(inspectedShipment)}
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5 transition-all"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Edit Delay Reason</span>
+              </button>
               <button
                 onClick={() => setInspectedShipment(null)}
-                className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold shadow-xs cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -1541,6 +1662,22 @@ export const DelayHub: React.FC<DelayHubProps> = ({
           </div>
         </div>
       )}
+
+      {/* 5. DELAY REASON FAST EDITOR MODAL (PIN PROTECTED) */}
+      <DelayReasonEditorModal
+        shipment={editingShipment}
+        isOpen={Boolean(editingShipment)}
+        onClose={() => setEditingShipment(null)}
+        onSave={async (awb, updates) => {
+          if (onUpdateShipmentDelay) {
+            const res = await onUpdateShipmentDelay(awb, updates);
+            if (inspectedShipment && inspectedShipment.awb.toLowerCase() === awb.toLowerCase()) {
+              setInspectedShipment((prev) => (prev ? { ...prev, ...updates } : null));
+            }
+            return res;
+          }
+        }}
+      />
 
     </div>
   );

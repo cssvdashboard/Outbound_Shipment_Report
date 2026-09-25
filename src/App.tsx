@@ -23,6 +23,8 @@ export const App: React.FC = () => {
   const {
     rawShipments,
     filteredShipments,
+    updateShipmentDelay,
+    syncWithExcelFiles,
     datasetMeta,
     isLoading,
     isServerConnected,
@@ -243,6 +245,7 @@ export const App: React.FC = () => {
           onMonthChange={setMonthFilter}
           onDatasetUpdate={handleDatasetUpdate}
           onResetToDefault={handleResetToDefault}
+          onSyncExcel={syncWithExcelFiles}
           activeTab={activeTab}
           onTabChange={handleTabChange}
           currentMode={displayMode}
@@ -330,6 +333,7 @@ export const App: React.FC = () => {
                 <DelayHub
                   summary={summaryMetrics}
                   filteredShipments={displayedShipments}
+                  allShipments={rawShipments}
                   transitDelays={transitDelaysBreakdown}
                   clearanceDelays={clearanceDelaysBreakdown}
                   destinationDelays={destinationDelaysBreakdown}
@@ -338,6 +342,7 @@ export const App: React.FC = () => {
                   activeClearanceFilter={filters.selectedClearanceDelays}
                   activeDestinationFilter={filters.selectedDestinationDelays}
                   onNavigateTab={handleTabChange}
+                  onUpdateShipmentDelay={updateShipmentDelay}
                 />
               )}
 
@@ -364,6 +369,7 @@ export const App: React.FC = () => {
                 <ShipmentExplorer
                   shipments={displayedShipments}
                   totalRawCount={rawShipments.length}
+                  onUpdateShipmentDelay={updateShipmentDelay}
                 />
               )}
 

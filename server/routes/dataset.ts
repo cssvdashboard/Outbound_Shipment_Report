@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
+import * as XLSX from 'xlsx';
 import { datasetStore } from '../services/datasetStore.js';
 import { parseExcelBuffer } from '../utils/excelParser.js';
 
@@ -26,9 +27,13 @@ datasetRouter.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// Get current active dataset
-datasetRouter.get('/dataset', (_req: Request, res: Response) => {
+// Get current active dataset (with auto-sync if Excel files were modified externally)
+datasetRouter.get('/dataset', async (_req: Request, res: Response) => {
   try {
+    if (datasetStore.hasExternalExcelModifications()) {
+      console.log('[DatasetRoute] 🔔 Master Excel files modified externally. Auto-syncing...');
+      await datasetStore.reloadFromMasterExcelFiles();
+    }
     const dataset = datasetStore.getDataset();
     res.json({
       success: true,
@@ -37,6 +42,23 @@ datasetRouter.get('/dataset', (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err?.message || 'Failed to retrieve dataset' });
+  }
+});
+
+// Force manual sync from master Excel files
+datasetRouter.post('/dataset/sync-excel', async (_req: Request, res: Response) => {
+  try {
+    console.log('[DatasetRoute] Manual Excel sync requested by client.');
+    const meta = await datasetStore.reloadFromMasterExcelFiles();
+    const dataset = datasetStore.getDataset();
+    res.json({
+      success: true,
+      message: `Successfully reloaded ${dataset.shipments.length} records from root Excel files.`,
+      meta,
+      shipments: dataset.shipments
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || 'Failed to sync from Excel files' });
   }
 });
 
@@ -105,12 +127,56 @@ datasetRouter.delete('/dataset', async (_req: Request, res: Response) => {
   }
 });
 
-// Get quick aggregated stats
-datasetRouter.get('/stats', (_req: Request, res: Response) => {
+// Update single shipment delay reason and remarks
+const handleUpdateShipment = async (req: Request, res: Response) => {
   try {
-    const stats = datasetStore.getStats();
-    res.json({ success: true, stats });
+    const { awb } = req.params;
+    const { transitDelay, clearanceDelay, destinationDelay, weekendDelay, remarks, finalResolution } = req.body;
+
+    if (!awb) {
+      return res.status(400).json({ success: false, error: 'AWB tracking number is required.' });
+    }
+
+    const updates: Record<string, any> = {};
+    if (transitDelay !== undefined) updates.transitDelay = String(transitDelay).trim();
+    if (clearanceDelay !== undefined) updates.clearanceDelay = String(clearanceDelay).trim();
+    if (destinationDelay !== undefined) updates.destinationDelay = String(destinationDelay).trim();
+    if (weekendDelay !== undefined) updates.weekendDelay = String(weekendDelay).trim();
+    if (remarks !== undefined) updates.remarks = String(remarks).trim();
+    if (finalResolution !== undefined) updates.finalResolution = String(finalResolution).trim();
+
+    const updatedShipment = await datasetStore.updateShipment(awb, updates);
+    if (!updatedShipment) {
+      return res.status(404).json({ success: false, error: `Shipment with AWB ${awb} was not found in active dataset.` });
+    }
+
+    res.json({
+      success: true,
+      message: `Delay details updated successfully for AWB ${awb}.`,
+      shipment: updatedShipment
+    });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err?.message || 'Failed to calculate stats' });
+    res.status(500).json({ success: false, error: err?.message || 'Failed to update shipment delay' });
+  }
+};
+
+datasetRouter.patch('/shipments/:awb', handleUpdateShipment);
+datasetRouter.post('/shipments/:awb', handleUpdateShipment);
+
+// Export current active dataset as Excel file
+datasetRouter.get('/export-excel', (_req: Request, res: Response) => {
+  try {
+    const dataset = datasetStore.getDataset();
+    const worksheet = XLSX.utils.json_to_sheet(dataset.shipments);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    
+    const filename = `Updated_Shipments_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || 'Failed to export Excel file' });
   }
 });
