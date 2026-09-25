@@ -354,8 +354,13 @@ html.teal ::-webkit-scrollbar-thumb {
     margin: 12mm 15mm 15mm 15mm;
   }
 
-  body {
+  html,
+  body,
+  #root,
+  #root > div,
+  .min-h-screen {
     background-color: #ffffff !important;
+    background: #ffffff !important;
     color: #0f172a !important;
     font-size: 11pt;
     -webkit-print-color-adjust: exact !important;
