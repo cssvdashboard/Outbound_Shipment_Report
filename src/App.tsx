@@ -10,6 +10,7 @@ import { CustomerComparison } from './components/CustomerComparison';
 import { ShipmentExplorer } from './components/ShipmentExplorer';
 import { CalendarComparison } from './components/CalendarComparison';
 import { MonthlyComparison } from './components/MonthlyComparison';
+import { CustomerSummaryModal } from './components/CustomerSummaryModal';
 import { getStoredTheme, getStoredDisplayMode, setStoredDisplayMode, DisplayMode } from './services/storage';
 import { applyThemeToDOM } from './components/ThemeModeMenu';
 import { Loader2, Play, Pause, X, AlertTriangle, Tv } from 'lucide-react';
@@ -59,6 +60,21 @@ export const App: React.FC = () => {
     availableDateRange,
     availablePickupDates
   } = useLogisticsData();
+
+  // Single Customer Summary Dossier Modal State
+  const [isCustomerSummaryOpen, setIsCustomerSummaryOpen] = useState(false);
+  const [customerSummaryTarget, setCustomerSummaryTarget] = useState<string>('');
+
+  const handleOpenCustomerSummary = (customer?: string) => {
+    if (customer && customer !== 'ALL') {
+      setCustomerSummaryTarget(customer);
+    } else if (filters.selectedCustomers[0] && filters.selectedCustomers[0] !== 'ALL') {
+      setCustomerSummaryTarget(filters.selectedCustomers[0]);
+    } else {
+      setCustomerSummaryTarget('');
+    }
+    setIsCustomerSummaryOpen(true);
+  };
 
   // 1b. Apply stored theme on initial app mount
   useEffect(() => {
@@ -268,6 +284,7 @@ export const App: React.FC = () => {
           onResetFilters={resetAllFilters}
           allCustomers={allCustomers}
           allDestinations={allDestinations}
+          onOpenCustomerSummary={handleOpenCustomerSummary}
         />
 
         {/* 2b. INCIDENT MODE ACTIVE BANNER */}
@@ -362,6 +379,7 @@ export const App: React.FC = () => {
                   allDestinations={allDestinations}
                   allCustomers={allCustomers}
                   selectedCategoryType={filters.selectedCategoryType || 'ALL'}
+                  onOpenCustomerSummary={handleOpenCustomerSummary}
                 />
               )}
 
@@ -370,6 +388,7 @@ export const App: React.FC = () => {
                   shipments={displayedShipments}
                   totalRawCount={rawShipments.length}
                   onUpdateShipmentDelay={updateShipmentDelay}
+                  onOpenCustomerSummary={handleOpenCustomerSummary}
                 />
               )}
 
@@ -407,6 +426,15 @@ export const App: React.FC = () => {
 
         </main>
       </div>
+
+      {/* Customer Summary & Performance Dossier Modal */}
+      <CustomerSummaryModal
+        isOpen={isCustomerSummaryOpen}
+        onClose={() => setIsCustomerSummaryOpen(false)}
+        shipments={rawShipments}
+        initialCustomer={customerSummaryTarget}
+        allCustomers={allCustomers}
+      />
 
     </div>
   );

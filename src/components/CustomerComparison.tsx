@@ -30,6 +30,7 @@ interface CustomerComparisonProps {
   allDestinations: string[];
   allCustomers: string[];
   selectedCategoryType?: CategoryTypeFilter;
+  onOpenCustomerSummary?: (customer: string) => void;
 }
 
 const DEFAULT_COMPARISON_CUSTOMERS = [
@@ -43,7 +44,8 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
   shipments,
   rawShipments,
   allDestinations,
-  selectedCategoryType = 'ALL'
+  selectedCategoryType = 'ALL',
+  onOpenCustomerSummary
 }) => {
   const [selectedDestination, setSelectedDestination] = useState<string>('ALL');
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>(DEFAULT_COMPARISON_CUSTOMERS);
@@ -445,6 +447,7 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                   </th>
                   <th className="px-4 py-2.5 text-center align-middle font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">Avg TT</th>
                   <th className="px-4 py-2.5 text-center align-middle font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">On-Time</th>
+                  <th className="px-3 py-2.5 text-center align-middle font-black text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">Dossier</th>
                 </tr>
               </thead>
               <tbody>
@@ -548,6 +551,21 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
                         }`}>
                           {c.awbCount > 0 ? `${c.onTimePercentage}%` : '-'}
                         </span>
+                      </td>
+
+                      {/* Customer Summary Dossier Action */}
+                      <td className="px-3 py-3 text-center align-middle border border-slate-300 dark:border-slate-700">
+                        {onOpenCustomerSummary && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenCustomerSummary(c.customer)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-xs transition-all cursor-pointer hover:scale-[1.03]"
+                            title={`Open summary dossier for ${c.customer}`}
+                          >
+                            <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                            <span>Dossier</span>
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -1084,13 +1102,26 @@ export const CustomerComparison: React.FC<CustomerComparisonProps> = ({
 
                 <div className="mt-3 pt-2 text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 font-semibold">
                   <span><strong>Destination: {selectedDestination}</strong></span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveCustomer(c.customer)}
-                    className="text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-bold"
-                  >
-                    <strong>Remove</strong>
-                  </button>
+                  <div className="flex items-center gap-2.5">
+                    {onOpenCustomerSummary && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenCustomerSummary(c.customer)}
+                        className="text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer font-bold inline-flex items-center gap-1"
+                        title={`Open summary dossier for ${c.customer}`}
+                      >
+                        <Sparkles className="w-3 h-3 text-emerald-500" />
+                        <span>Dossier</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCustomer(c.customer)}
+                      className="text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-bold"
+                    >
+                      <strong>Remove</strong>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

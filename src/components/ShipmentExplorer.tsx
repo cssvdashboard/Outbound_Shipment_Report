@@ -14,7 +14,8 @@ import {
   Copy,
   Check,
   AlertTriangle,
-  Edit3
+  Edit3,
+  Sparkles
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
@@ -36,6 +37,7 @@ interface ShipmentExplorerProps {
       finalResolution?: string;
     }
   ) => Promise<{ success: boolean; error?: string } | void>;
+  onOpenCustomerSummary?: (customer: string) => void;
 }
 
 type SortField = 'awb' | 'destination' | 'customer' | 'shprName' | 'pickup' | 'weight' | 'tt' | 'ttRange' | 'finalResolution';
@@ -44,7 +46,8 @@ type SortOrder = 'asc' | 'desc';
 export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
   shipments,
   totalRawCount,
-  onUpdateShipmentDelay
+  onUpdateShipmentDelay,
+  onOpenCustomerSummary
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
@@ -507,7 +510,21 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                     {/* Customer Account Name */}
                     <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.customer}>
                       <div className="line-clamp-2 leading-relaxed text-center font-bold">
-                        {s.customer}
+                        {onOpenCustomerSummary ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenCustomerSummary(s.customer);
+                            }}
+                            className="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline cursor-pointer transition-colors text-center font-bold inline-flex items-center gap-1"
+                            title={`Open summary dossier for ${s.customer}`}
+                          >
+                            <span>{s.customer}</span>
+                          </button>
+                        ) : (
+                          s.customer
+                        )}
                       </div>
                     </td>
 
@@ -786,9 +803,21 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
             {/* Dossier Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
-                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Customer Account</strong></span>
-                <span className="font-black text-slate-900 dark:text-white mt-1 block text-sm"><strong>{selectedShipment.customer}</strong></span>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700 flex flex-col justify-between">
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Customer Account</strong></span>
+                  <span className="font-black text-slate-900 dark:text-white mt-1 block text-sm"><strong>{selectedShipment.customer}</strong></span>
+                </div>
+                {onOpenCustomerSummary && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenCustomerSummary(selectedShipment.customer)}
+                    className="mt-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 cursor-pointer self-start"
+                  >
+                    <Sparkles className="w-3 h-3 text-emerald-500" />
+                    <span>View Customer Dossier</span>
+                  </button>
+                )}
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">

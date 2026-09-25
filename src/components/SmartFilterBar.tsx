@@ -10,7 +10,9 @@ import {
   Shield,
   Package,
   CreditCard,
-  Plane
+  Plane,
+  Sparkles,
+  FileText
 } from 'lucide-react';
 import { FilterState, Shipment, CategoryTypeFilter } from '../types/logistics';
 import { searchCustomers } from '../utils/analytics';
@@ -24,6 +26,7 @@ interface SmartFilterBarProps {
   onResetFilters?: () => void;
   allCustomers?: string[];
   allDestinations?: string[];
+  onOpenCustomerSummary?: (customer?: string) => void;
 }
 
 export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
@@ -34,7 +37,8 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
   onCategoryTypeChange,
   onResetFilters,
   allCustomers = [],
-  allDestinations = []
+  allDestinations = [],
+  onOpenCustomerSummary
 }) => {
   // 1. Customer Search Bar State
   const [customerSearch, setCustomerSearch] = useState<string>('');
@@ -697,6 +701,27 @@ export const SmartFilterBar: React.FC<SmartFilterBarProps> = ({
             <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
             <span>Reset{totalActiveFilters > 0 ? ` (${totalActiveFilters})` : ''}</span>
           </button>
+
+          {/* 5. CUSTOMER SUMMARY / DOSSIER BUTTON */}
+          {onOpenCustomerSummary && (
+            <button
+              type="button"
+              onClick={() => onOpenCustomerSummary(selectedCustomer || undefined)}
+              className={`flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shrink-0 border-2 ${
+                selectedCustomer
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border-emerald-400/50 shadow-emerald-900/20 hover:scale-[1.02]'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-[1.02]'
+              }`}
+              title={
+                selectedCustomer
+                  ? `Open customer performance summary dossier for "${selectedCustomer}"`
+                  : 'Open Customer Summary dossier & email generator'
+              }
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${selectedCustomer ? 'text-amber-300' : 'text-emerald-500'}`} />
+              <span>{selectedCustomer ? 'Account Dossier' : 'Customer Dossier'}</span>
+            </button>
+          )}
 
         </div>
 

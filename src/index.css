@@ -389,5 +389,10 @@ html.teal ::-webkit-scrollbar-thumb {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
+
+  .no-print {
+    display: none !important;
+  }
 }
+
 
