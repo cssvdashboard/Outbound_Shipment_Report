@@ -48,37 +48,19 @@ const THEME_OPTIONS: ThemeOption[] = [
   {
     id: 'dark',
     label: 'Slate Dark',
-    tagline: 'Deep slate & indigo accent',
+    tagline: 'Deep slate dark theme',
     swatchBg: 'bg-[#0b0f19]',
     swatchBorder: 'border-slate-700',
     swatchAccent: 'bg-indigo-500',
     icon: <Moon className="w-3.5 h-3.5 text-indigo-400" />
   },
   {
-    id: 'midnight',
-    label: 'Midnight Navy',
-    tagline: 'Executive oceanic sapphire',
-    swatchBg: 'bg-[#070d1e]',
-    swatchBorder: 'border-blue-900',
-    swatchAccent: 'bg-cyan-400',
-    icon: <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-  },
-  {
-    id: 'teal',
-    label: 'Calm Oceanic',
-    tagline: 'Deep soothing nautical teal',
-    swatchBg: 'bg-[#07151e]',
-    swatchBorder: 'border-teal-800',
-    swatchAccent: 'bg-teal-400',
-    icon: <Compass className="w-3.5 h-3.5 text-teal-400" />
-  },
-  {
     id: 'light',
     label: 'Clean Light',
-    tagline: 'Crisp alabaster & slate',
+    tagline: 'Crisp clean light theme',
     swatchBg: 'bg-slate-50',
     swatchBorder: 'border-slate-300',
-    swatchAccent: 'bg-blue-600',
+    swatchAccent: 'bg-amber-500',
     icon: <Sun className="w-3.5 h-3.5 text-amber-500" />
   }
 ];
@@ -86,32 +68,24 @@ const THEME_OPTIONS: ThemeOption[] = [
 const MODE_OPTIONS: ModeOption[] = [
   {
     id: 'standard',
-    label: 'Standard View',
+    label: 'Standard',
     tagline: 'Balanced responsive layout',
     icon: <SlidersHorizontal className="w-3.5 h-3.5 text-blue-500" />
   },
   {
     id: 'compact',
-    label: 'Compact Dense',
-    tagline: 'Max visible rows for power users',
+    label: 'Compact',
+    tagline: 'Max visible rows for high density',
     icon: <Rows3 className="w-3.5 h-3.5 text-emerald-500" />,
-    badge: '25+ Rows'
+    badge: 'Dense'
   },
   {
     id: 'tv',
-    label: 'Operations TV',
+    label: 'Monitor',
     tagline: 'Auto-rotates tabs on 15s timer',
     icon: <Tv className="w-3.5 h-3.5 text-sky-400" />,
     badge: 'Wallboard',
     badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/40'
-  },
-  {
-    id: 'incident',
-    label: 'Incident Focus',
-    tagline: 'Isolate active delays & RTS',
-    icon: <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />,
-    badge: 'Triage',
-    badgeColor: 'bg-rose-500/20 text-rose-400 border-rose-500/40'
   }
 ];
 
@@ -124,15 +98,10 @@ export const applyThemeToDOM = (newTheme: ThemeType) => {
   // 2. Remove all theme classes
   root.classList.remove('dark', 'light', 'midnight', 'warm', 'amoled', 'nordic', 'teal');
 
-  // 3. Apply base dark or light plus optional variant
+  // 3. Apply base dark or light
   if (newTheme === 'light') {
     root.classList.add('light');
-  } else if (newTheme === 'midnight') {
-    root.classList.add('dark', 'midnight');
-  } else if (newTheme === 'teal') {
-    root.classList.add('dark', 'teal');
   } else {
-    // Standard dark
     root.classList.add('dark');
   }
 
@@ -218,7 +187,7 @@ export const ThemeModeMenu: React.FC<ThemeModeMenuProps> = ({ currentMode, onMod
                 </span>
               </div>
               <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-                4 Palettes
+                2 Themes
               </span>
             </div>
 
@@ -237,9 +206,9 @@ export const ThemeModeMenu: React.FC<ThemeModeMenuProps> = ({ currentMode, onMod
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      {/* Color Preview Pill */}
-                      <div className={`w-5 h-5 rounded-lg border flex items-center justify-center relative overflow-hidden ${opt.swatchBg} ${opt.swatchBorder}`}>
-                        <span className={`w-2 h-2 rounded-full ${opt.swatchAccent}`} />
+                      {/* Theme Icon: Only Dark Icon for Slate Dark, Only Light Icon for Clean Light */}
+                      <div className="p-1 rounded-lg bg-slate-200/60 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 flex items-center justify-center">
+                        {opt.icon}
                       </div>
                       <div>
                         <div className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">

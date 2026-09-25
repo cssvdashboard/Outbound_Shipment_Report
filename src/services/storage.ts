@@ -63,12 +63,12 @@ export async function updateShipmentInStorage(awb: string, updates: Partial<Ship
 
 const STORAGE_KEY_MODE = 'transitpulse_display_mode';
 
-export type ThemeType = 'dark' | 'light' | 'midnight' | 'teal';
-export type DisplayMode = 'standard' | 'compact' | 'tv' | 'incident';
+export type ThemeType = 'dark' | 'light';
+export type DisplayMode = 'standard' | 'compact' | 'tv';
 
 export function getStoredTheme(): ThemeType {
   const stored = localStorage.getItem(STORAGE_KEY_THEME);
-  if (stored === 'light' || stored === 'dark' || stored === 'midnight' || stored === 'teal') {
+  if (stored === 'light' || stored === 'dark') {
     return stored;
   }
   return 'dark'; // Dark mode is default
@@ -80,7 +80,7 @@ export function setStoredTheme(theme: ThemeType): void {
 
 export function getStoredDisplayMode(): DisplayMode {
   const stored = localStorage.getItem(STORAGE_KEY_MODE);
-  if (stored === 'standard' || stored === 'compact' || stored === 'tv' || stored === 'incident') {
+  if (stored === 'standard' || stored === 'compact' || stored === 'tv') {
     return stored;
   }
   return 'standard';

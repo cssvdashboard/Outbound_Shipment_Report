@@ -366,6 +366,14 @@ html.teal ::-webkit-scrollbar-thumb {
     display: none !important;
   }
 
+  /* When Customer / Destination Summary Modal is printing, hide main app completely to ensure zero blank page */
+  body.customer-summary-print-active #root > div > .flex-1,
+  body.customer-summary-print-active header,
+  body.customer-summary-print-active main,
+  body.customer-summary-print-active .tv-progress-bar {
+    display: none !important;
+  }
+
   main {
     max-width: 100% !important;
     padding: 0 !important;

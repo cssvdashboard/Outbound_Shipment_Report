@@ -143,23 +143,25 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Sync Master Excel Files */}
+            {/* Sync Master Excel Files (Icon-only) */}
             {onSyncExcel && (
               <button
                 type="button"
                 onClick={handleSyncExcel}
                 disabled={isSyncing}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${
+                className={`flex items-center justify-center px-2.5 py-1.5 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${
                   syncFeedback
                     ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-400 text-emerald-700 dark:text-emerald-300'
                     : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'
                 }`}
-                title="Sync and reload any manual edits made directly in July, August, or September Excel files"
+                title={syncFeedback || "Sync and reload any manual edits made directly in master Excel files"}
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-blue-600 dark:text-sky-400 ${isSyncing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">
-                  <strong>{isSyncing ? 'Syncing...' : syncFeedback || 'Sync Excel'}</strong>
-                </span>
+                {syncFeedback && (
+                  <span className="hidden md:inline ml-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                    {syncFeedback}
+                  </span>
+                )}
               </button>
             )}
 

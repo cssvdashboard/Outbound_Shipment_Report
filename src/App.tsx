@@ -61,11 +61,12 @@ export const App: React.FC = () => {
     availablePickupDates
   } = useLogisticsData();
 
-  // Single Customer Summary Dossier Modal State
+  // Single Customer / Destination Summary Dossier Modal State
   const [isCustomerSummaryOpen, setIsCustomerSummaryOpen] = useState(false);
   const [customerSummaryTarget, setCustomerSummaryTarget] = useState<string>('');
+  const [customerSummaryDestination, setCustomerSummaryDestination] = useState<string>('');
 
-  const handleOpenCustomerSummary = (customer?: string) => {
+  const handleOpenCustomerSummary = (customer?: string, destination?: string) => {
     if (customer && customer !== 'ALL') {
       setCustomerSummaryTarget(customer);
     } else if (filters.selectedCustomers[0] && filters.selectedCustomers[0] !== 'ALL') {
@@ -73,6 +74,15 @@ export const App: React.FC = () => {
     } else {
       setCustomerSummaryTarget('');
     }
+
+    if (destination && destination !== 'ALL') {
+      setCustomerSummaryDestination(destination);
+    } else if (filters.selectedDestinations[0] && filters.selectedDestinations[0] !== 'ALL') {
+      setCustomerSummaryDestination(filters.selectedDestinations[0]);
+    } else {
+      setCustomerSummaryDestination('');
+    }
+
     setIsCustomerSummaryOpen(true);
   };
 
@@ -143,20 +153,7 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [displayMode]);
 
-  // 1d. Incident Mode Filter: isolates active delayed & exception shipments
-  const displayedShipments = useMemo(() => {
-    if (displayMode === 'incident') {
-      return filteredShipments.filter((s) => {
-        const isDelayedTT = s.tt > 5;
-        const isNotDelivered = s.finalResolution && s.finalResolution !== 'Delivered';
-        const hasClearance = s.clearanceDelay && s.clearanceDelay !== '-';
-        const hasTransit = s.transitDelay && s.transitDelay !== '-';
-        const hasDestDelay = s.destinationDelay && s.destinationDelay !== '-';
-        return isDelayedTT || isNotDelivered || hasClearance || hasTransit || hasDestDelay;
-      });
-    }
-    return filteredShipments;
-  }, [filteredShipments, displayMode]);
+  const displayedShipments = filteredShipments;
 
   // 2. Initialize state from URL Search Params (for shareable links)
   useEffect(() => {
@@ -222,7 +219,7 @@ export const App: React.FC = () => {
   return (
     <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${
       displayMode === 'compact' ? 'mode-compact' : ''
-    } ${displayMode === 'tv' ? 'mode-tv' : ''} ${displayMode === 'incident' ? 'mode-incident' : ''}`}>
+    } ${displayMode === 'tv' ? 'mode-tv' : ''}`}>
       
       {/* TV Mode Top Progress Bar (15s per slide, toggleable via Spacebar) */}
       {displayMode === 'tv' && (
@@ -285,37 +282,8 @@ export const App: React.FC = () => {
           allCustomers={allCustomers}
           allDestinations={allDestinations}
           onOpenCustomerSummary={handleOpenCustomerSummary}
+          activeTab={activeTab}
         />
-
-        {/* 2b. INCIDENT MODE ACTIVE BANNER */}
-        {displayMode === 'incident' && (
-          <div className="max-w-[1700px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4">
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-400/80 dark:bg-rose-950/40 dark:border-rose-500/60 text-rose-900 dark:text-rose-200 shadow-lg incident-active-pulse">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 shrink-0">
-                  <AlertTriangle className="w-5 h-5 animate-pulse" />
-                </div>
-                <div>
-                  <div className="text-sm font-black flex items-center gap-2">
-                    <span>Incident &amp; Exception Triage Mode Active</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-rose-600 text-white font-mono font-bold">
-                      {displayedShipments.length} Exceptions Found
-                    </span>
-                  </div>
-                  <div className="text-xs text-rose-700 dark:text-rose-300/80 font-medium">
-                    Filtered out on-time shipments. Showing only shipments with TT &gt; 5 days, RTS, Customs Holds, and Transit delays.
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => handleDisplayModeChange('standard')}
-                className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-xs ml-3"
-              >
-                Exit Triage Mode
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* 3. MAIN DASHBOARD CONTENT */}
         <main className="flex-1 max-w-[1700px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-6">
@@ -427,13 +395,16 @@ export const App: React.FC = () => {
         </main>
       </div>
 
-      {/* Customer Summary & Performance Dossier Modal */}
+      {/* Customer / Destination Performance Summary Modal */}
       <CustomerSummaryModal
         isOpen={isCustomerSummaryOpen}
         onClose={() => setIsCustomerSummaryOpen(false)}
         shipments={rawShipments}
         initialCustomer={customerSummaryTarget}
+        initialDestination={customerSummaryDestination}
         allCustomers={allCustomers}
+        allDestinations={allDestinations}
+        dateRange={dateRange || undefined}
       />
 
     </div>
