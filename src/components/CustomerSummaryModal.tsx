@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
 import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
+import { getPickupISODate } from '../utils/analytics';
 
 interface CustomerSummaryModalProps {
   isOpen: boolean;
@@ -88,41 +89,79 @@ export const CustomerSummaryModal: React.FC<CustomerSummaryModalProps> = ({
     return activeCustomerList[0] || '';
   }, [currentCustomer, currentDestination, activeCustomerList]);
 
-  // Filter shipments for this customer and/or destination
+  // Filter shipments for this customer and/or destination AND active selected date range
   const scopedShipments = useMemo(() => {
+    const start = dateRange?.start?.trim();
+    const end = dateRange?.end?.trim();
+
     return shipments.filter((s) => {
+      // 1. Customer Filter
       if (effectiveCustomer) {
         if (!s.customer || s.customer.trim().toLowerCase() !== effectiveCustomer.toLowerCase()) {
           return false;
         }
       }
+
+      // 2. Destination Filter
       if (currentDestination && currentDestination !== 'ALL') {
         if (!s.destination || s.destination.trim().toUpperCase() !== currentDestination) {
           return false;
         }
       }
+
+      // 3. Date / Time Period Filter!
+      if (start && end) {
+        const [minRange, maxRange] = start <= end ? [start, end] : [end, start];
+        const pickupIso = getPickupISODate(s.pickup);
+        if (!pickupIso) return false;
+        if (pickupIso < minRange || pickupIso > maxRange) return false;
+      } else if (start && !end) {
+        const pickupIso = getPickupISODate(s.pickup);
+        if (!pickupIso || pickupIso !== start) return false;
+      } else if (!start && end) {
+        const pickupIso = getPickupISODate(s.pickup);
+        if (!pickupIso || pickupIso !== end) return false;
+      }
+
       return true;
     });
-  }, [shipments, effectiveCustomer, currentDestination]);
+  }, [shipments, effectiveCustomer, currentDestination, dateRange]);
 
   // Compute prominent Time Period label
   const timePeriodLabel = useMemo(() => {
-    if (dateRange?.start && dateRange?.end) {
-      return `${dateRange.start} – ${dateRange.end}`;
+    const start = dateRange?.start?.trim();
+    const end = dateRange?.end?.trim();
+
+    if (start && end) {
+      if (start === end) {
+        return formatExcelDate(start);
+      }
+      return `${formatExcelDate(start)} – ${formatExcelDate(end)}`;
     }
+    if (start && !end) {
+      return formatExcelDate(start);
+    }
+    if (!start && end) {
+      return formatExcelDate(end);
+    }
+
+    // Fallback: calculate from shipment pickup dates if any
     let minD: string | null = null;
     let maxD: string | null = null;
     scopedShipments.forEach((s) => {
       if (s.pickup) {
-        const d = String(s.pickup).slice(0, 10);
-        if (!minD || d < minD) minD = d;
-        if (!maxD || d > maxD) maxD = d;
+        const d = getPickupISODate(s.pickup);
+        if (d) {
+          if (!minD || d < minD) minD = d;
+          if (!maxD || d > maxD) maxD = d;
+        }
       }
     });
     if (minD && maxD) {
+      if (minD === maxD) return formatExcelDate(minD);
       return `${formatExcelDate(minD)} – ${formatExcelDate(maxD)}`;
     }
-    return 'July 2026 – September 2026';
+    return 'All Available Records';
   }, [dateRange, scopedShipments]);
 
   // Compute Performance Analytics
