@@ -52,7 +52,10 @@ function normalizeDestinationDelay(val) {
   const trimmed = String(val).trim();
   const lower = trimmed.toLowerCase();
 
-  if (lower === 'missing pod' || lower === 'dispute pod') {
+  if (lower === 'missing pod') {
+    return 'Missing POD';
+  }
+  if (lower === 'dispute pod') {
     return 'Dispute POD';
   }
   if (lower === 'refused by consignee') {

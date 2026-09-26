@@ -120,7 +120,9 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
 
       // Normalize Destination Delay
       const lowerDest = destinationDelay.toLowerCase();
-      if (lowerDest === 'missing pod' || lowerDest === 'dispute pod') {
+      if (lowerDest === 'missing pod') {
+        destinationDelay = 'Missing POD';
+      } else if (lowerDest === 'dispute pod') {
         destinationDelay = 'Dispute POD';
       } else if (lowerDest === 'refused by consignee') {
         destinationDelay = 'Refused by Consignee';

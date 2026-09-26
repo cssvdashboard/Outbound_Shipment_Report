@@ -94,6 +94,7 @@ const COMMON_DESTINATION_DELAYS = [
   'Business Closed',
   'Refused by Consignee',
   'Dispute POD',
+  'Missing POD',
   'Future Delivery',
   'ODA Delay',
   'Misdelivered',
