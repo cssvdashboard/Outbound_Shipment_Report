@@ -8,24 +8,87 @@ const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${PROJE
 
 const EXCEL_TARGETS = [
   {
-    name: 'July Final Draft',
+    name: 'July Final Draft.xlsx',
     filePath: path.resolve(__dirname, '../July Final Draft.xlsx'),
     preferredSheet: 'Data',
     awbKeys: ['awb', 'airway bill', 'tracking number', 'track number']
   },
   {
-    name: 'August Final Draft',
+    name: 'August Final Draft.xlsx',
     filePath: path.resolve(__dirname, '../August Final Draft.xlsx'),
     preferredSheet: 'Sheet1',
     awbKeys: ['track number', 'awb', 'airway bill', 'tracking number']
   },
   {
-    name: 'September Final Draft',
+    name: 'September Final Draft.xlsx',
     filePath: path.resolve(__dirname, '../September Final Draft.xlsx'),
     preferredSheet: 'Sheet1',
     awbKeys: ['awb', 'track number', 'airway bill', 'tracking number']
   }
 ];
+
+function normalizeClearanceDelay(val) {
+  if (!val) return '';
+  const trimmed = String(val).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === 'unable to locate consignee' || lower === 'consignee untraceable') {
+    return 'Unable To Locate Consignee';
+  }
+  if (lower === 'held for duty tax') {
+    return 'Held for Duty Tax';
+  }
+  if (lower === 'refused by consignee') {
+    return 'Refused by Consignee';
+  }
+  if (lower === 'description insufficient' || lower === 'insufficient description') {
+    return 'Insufficient Description';
+  }
+  if (lower === 'nfrbk' || lower === 'nfbrk') {
+    return 'NFBRK';
+  }
+  if (lower === 'cspc form' || lower === 'cpsc required') {
+    return 'CPSC Required';
+  }
+  if (lower === 'eori number' || lower === 'eori required') {
+    return 'EORI Required';
+  }
+  if (lower === 'restricted item' || lower === 'restricted commodity') {
+    return 'Restricted Commodity';
+  }
+
+  return trimmed;
+}
+
+function normalizeDestinationDelay(val) {
+  if (!val) return '';
+  const trimmed = String(val).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === 'missing pod') {
+    return 'Missing POD';
+  }
+  if (lower === 'dispute pod') {
+    return 'Dispute POD';
+  }
+  if (lower === 'refused by consignee') {
+    return 'Refused by Consignee';
+  }
+
+  return trimmed;
+}
+
+function normalizeTransitDelay(val) {
+  if (!val) return '';
+  const trimmed = String(val).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower.includes('offload')) {
+    return '';
+  }
+
+  return trimmed;
+}
 
 function findColumnIndex(headers, possibleNames) {
   for (let i = 0; i < headers.length; i++) {
@@ -51,7 +114,7 @@ function parseFirestoreField(field) {
 }
 
 async function fetchAllCloudEdits() {
-  console.log('📡 Fetching cloud edits from Firebase Firestore...');
+  console.log('📡 Connecting to Firebase Cloud Database...');
   const edits = [];
   let pageToken = '';
 
@@ -66,7 +129,7 @@ async function fetchAllCloudEdits() {
     });
 
     if (!res.ok) {
-      throw new Error(`Firebase API responded with HTTP ${res.status}: ${res.statusText}`);
+      throw new Error(`Firebase API error HTTP ${res.status}: ${res.statusText}`);
     }
 
     const data = await res.json();
@@ -76,13 +139,14 @@ async function fetchAllCloudEdits() {
         const fields = doc.fields || {};
         const parsed = {
           awb: String(parseFirestoreField(fields.awb) || awb).trim(),
-          transitDelay: fields.transitDelay ? parseFirestoreField(fields.transitDelay) : undefined,
-          clearanceDelay: fields.clearanceDelay ? parseFirestoreField(fields.clearanceDelay) : undefined,
-          destinationDelay: fields.destinationDelay ? parseFirestoreField(fields.destinationDelay) : undefined,
+          transitDelay: fields.transitDelay ? normalizeTransitDelay(parseFirestoreField(fields.transitDelay)) : undefined,
+          clearanceDelay: fields.clearanceDelay ? normalizeClearanceDelay(parseFirestoreField(fields.clearanceDelay)) : undefined,
+          destinationDelay: fields.destinationDelay ? normalizeDestinationDelay(parseFirestoreField(fields.destinationDelay)) : undefined,
           weekendDelay: fields.weekendDelay ? parseFirestoreField(fields.weekendDelay) : undefined,
           remarks: fields.remarks ? parseFirestoreField(fields.remarks) : undefined,
           finalResolution: fields.finalResolution ? parseFirestoreField(fields.finalResolution) : undefined,
-          lastEditor: fields.lastEditor ? parseFirestoreField(fields.lastEditor) : undefined
+          lastEditor: fields.lastEditor ? parseFirestoreField(fields.lastEditor) : undefined,
+          updatedAt: fields.updatedAt ? parseFirestoreField(fields.updatedAt) : undefined
         };
         edits.push(parsed);
       }
@@ -95,31 +159,50 @@ async function fetchAllCloudEdits() {
 }
 
 async function syncCloudToExcel() {
+  console.log('====================================================');
+  console.log('🔄 Outbound Shipment Report: Cloud-to-Excel Sync');
+  console.log('====================================================\n');
+
   try {
     const edits = await fetchAllCloudEdits();
 
     if (edits.length === 0) {
-      console.log('ℹ️ No cloud edits found in Firebase Firestore.');
-      console.log('   All local Excel files are already in sync!');
+      console.log('ℹ️ No cloud edits found in Firebase.');
+      console.log('   All your local Excel spreadsheets are already up to date!\n');
+      console.log('====================================================');
       return;
     }
 
-    console.log(`📥 Found ${edits.length} cloud edit(s) in Firebase Firestore.`);
+    console.log(`\n📥 Found ${edits.length} team edit(s) in the cloud:\n`);
 
     const editsMap = new Map();
     for (const e of edits) {
-      if (e.awb) editsMap.set(e.awb.toLowerCase(), e);
+      if (e.awb) {
+        editsMap.set(e.awb.toLowerCase(), e);
+        const details = [];
+        if (e.transitDelay) details.push(`Transit: "${e.transitDelay}"`);
+        if (e.clearanceDelay) details.push(`Clearance: "${e.clearanceDelay}"`);
+        if (e.destinationDelay) details.push(`Destination: "${e.destinationDelay}"`);
+        if (e.remarks) details.push(`Remarks: "${e.remarks}"`);
+        if (e.finalResolution) details.push(`Resolution: "${e.finalResolution}"`);
+        const timeStr = e.updatedAt ? new Date(e.updatedAt).toLocaleTimeString() : '';
+        console.log(` • AWB ${e.awb} (${e.lastEditor || 'Team'}${timeStr ? ' at ' + timeStr : ''}):`);
+        console.log(`   ${details.length > 0 ? details.join(', ') : 'Updated'}`);
+      }
     }
+
+    console.log('\n----------------------------------------------------');
+    console.log('📝 Injecting edits into local Excel spreadsheets...');
+    console.log('----------------------------------------------------');
 
     let totalUpdatedCount = 0;
 
     for (const target of EXCEL_TARGETS) {
       if (!fs.existsSync(target.filePath)) {
-        console.warn(`File not found: ${target.filePath}`);
+        console.warn(`File not found: ${target.name}`);
         continue;
       }
 
-      console.log(`Processing ${target.name}...`);
       const fileBuffer = fs.readFileSync(target.filePath);
       const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
       const sheetName = workbook.Sheets[target.preferredSheet]
@@ -152,6 +235,7 @@ async function syncCloudToExcel() {
       const resolutionColIdx = findColumnIndex(headers, ['FINAL RESOLUTION', 'Final Resolution', 'Status', 'Resolution']);
 
       let fileUpdatedRows = 0;
+      const matchedAwbs = [];
 
       // 3. Scan rows and update
       for (let R = range.s.r + 1; R <= range.e.r; ++R) {
@@ -177,6 +261,7 @@ async function syncCloudToExcel() {
 
           fileUpdatedRows++;
           totalUpdatedCount++;
+          matchedAwbs.push(edit.awb);
         }
       }
 
@@ -184,28 +269,33 @@ async function syncCloudToExcel() {
         try {
           const outBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
           fs.writeFileSync(target.filePath, outBuffer);
-          console.log(`✅ Updated ${fileUpdatedRows} shipment(s) in ${path.basename(target.filePath)}`);
+          console.log(`✅ [${target.name}] Successfully updated ${fileUpdatedRows} shipment(s): ${matchedAwbs.join(', ')}`);
         } catch (err) {
           if (err.code === 'EBUSY') {
-            console.error(`❌ Error: ${path.basename(target.filePath)} is currently open in Excel! Please close it and rerun.`);
+            console.error(`❌ [${target.name}] is open in Microsoft Excel! Please close it and rerun.`);
           } else {
-            console.error(`❌ Failed to save ${path.basename(target.filePath)}:`, err.message);
+            console.error(`❌ [${target.name}] Failed to save:`, err.message);
           }
         }
       } else {
-        console.log(`   (No matching AWBs found in ${target.name})`);
+        console.log(`   (No matching AWBs in ${target.name})`);
       }
     }
 
-    console.log(`\n🎉 Sync complete! Total updated records in Excel: ${totalUpdatedCount}`);
+    console.log('\n----------------------------------------------------');
+    console.log(`🎉 Sync Complete! Total updated records in Excel: ${totalUpdatedCount}`);
+    console.log('----------------------------------------------------');
     
     // Refresh JSON cache files
-    console.log('\n🔄 Refreshing local defaultData.json cache files...');
+    console.log('🔄 Refreshing local defaultData.json cache files...');
     require('./updateDefaultData.cjs');
+    console.log('✨ All files successfully synchronized!\n');
 
   } catch (err) {
-    console.error('❌ Cloud to Excel sync failed:', err.message);
+    console.error('\n❌ Cloud to Excel sync failed:', err.message);
   }
+
+  console.log('====================================================');
 }
 
 syncCloudToExcel();
