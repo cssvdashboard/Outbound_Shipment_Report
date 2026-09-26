@@ -9,6 +9,7 @@
     "start": "tsx server/index.ts",
     "build": "tsc -b && vite build",
     "update-data": "node scripts/updateDefaultData.cjs",
+    "sync-excel": "node scripts/syncCloudToExcel.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
