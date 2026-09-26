@@ -85,10 +85,46 @@ export function parseExcelBuffer(buffer: ArrayBuffer): { shipments: Shipment[]; 
         ttRange = 'Day 8+';
       }
 
-      const transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();
-      const clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay', 'Clearanace Delay']) || '').trim();
-      const destinationDelay = String(normalizeKey(row, ['DESTIANTION DELAY', 'DESTINATION DELAY', 'Destination Delay', 'Delivery Delay']) || '').trim();
+      let transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();
+      let clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay', 'Clearanace Delay']) || '').trim();
+      let destinationDelay = String(normalizeKey(row, ['DESTIANTION DELAY', 'DESTINATION DELAY', 'Destination Delay', 'Delivery Delay']) || '').trim();
       const weekendDelay = String(normalizeKey(row, ['WEEKEND DELAY', 'Weekend Delay']) || '').trim();
+
+      // Normalize Transit Delay
+      if (transitDelay.toLowerCase().includes('offload')) {
+        transitDelay = '';
+      }
+
+      // Normalize Clearance Delay
+      const lowerClear = clearanceDelay.toLowerCase();
+      if (lowerClear === 'unable to locate consignee' || lowerClear === 'consignee untraceable') {
+        clearanceDelay = 'Unable To Locate Consignee';
+      } else if (lowerClear === 'held for duty tax') {
+        clearanceDelay = 'Held for Duty Tax';
+      } else if (lowerClear === 'refused by consignee') {
+        clearanceDelay = 'Refused by Consignee';
+      } else if (lowerClear === 'description insufficient' || lowerClear === 'insufficient description') {
+        clearanceDelay = 'Insufficient Description';
+      } else if (lowerClear === 'nfrbk' || lowerClear === 'nfbrk') {
+        clearanceDelay = 'NFBRK';
+      } else if (lowerClear === 'cspc form' || lowerClear === 'cpsc required') {
+        clearanceDelay = 'CPSC Required';
+      } else if (lowerClear === 'eori number' || lowerClear === 'eori required') {
+        clearanceDelay = 'EORI Required';
+      } else if (lowerClear === 'restricted item' || lowerClear === 'restricted commodity') {
+        clearanceDelay = 'Restricted Commodity';
+      } else if (clearanceDelay === 'US Transit Delay') {
+        transitDelay = 'US Transit Delay';
+        clearanceDelay = '';
+      }
+
+      // Normalize Destination Delay
+      const lowerDest = destinationDelay.toLowerCase();
+      if (lowerDest === 'missing pod' || lowerDest === 'dispute pod') {
+        destinationDelay = 'Dispute POD';
+      } else if (lowerDest === 'refused by consignee') {
+        destinationDelay = 'Refused by Consignee';
+      }
       
       let finalResolution = String(normalizeKey(row, ['FINAL RESOLUTION', 'Final Resolution', 'Status', 'Resolution']) || '').trim();
       if (!finalResolution) finalResolution = 'Delivered';

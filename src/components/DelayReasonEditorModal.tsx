@@ -77,7 +77,14 @@ const COMMON_CLEARANCE_DELAYS = [
   'Fabric Measurement',
   'Insufficient Description',
   'Held for Duty Tax',
-  'Unable To Locate Consignee'
+  'Unable To Locate Consignee',
+  'NFBRK',
+  'Restricted Commodity',
+  'CPSC Required',
+  'EORI Required',
+  'KYC Required',
+  'Proof of Payment',
+  'Refused by Consignee'
 ];
 
 const COMMON_DESTINATION_DELAYS = [

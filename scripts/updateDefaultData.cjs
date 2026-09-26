@@ -14,6 +14,66 @@ function normalizeKey(obj, possibleKeys) {
   return '';
 }
 
+function normalizeClearanceDelay(val) {
+  if (!val) return '';
+  const trimmed = String(val).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === 'unable to locate consignee' || lower === 'consignee untraceable') {
+    return 'Unable To Locate Consignee';
+  }
+  if (lower === 'held for duty tax') {
+    return 'Held for Duty Tax';
+  }
+  if (lower === 'refused by consignee') {
+    return 'Refused by Consignee';
+  }
+  if (lower === 'description insufficient' || lower === 'insufficient description') {
+    return 'Insufficient Description';
+  }
+  if (lower === 'nfrbk' || lower === 'nfbrk') {
+    return 'NFBRK';
+  }
+  if (lower === 'cspc form' || lower === 'cpsc required') {
+    return 'CPSC Required';
+  }
+  if (lower === 'eori number' || lower === 'eori required') {
+    return 'EORI Required';
+  }
+  if (lower === 'restricted item' || lower === 'restricted commodity') {
+    return 'Restricted Commodity';
+  }
+
+  return trimmed;
+}
+
+function normalizeDestinationDelay(val) {
+  if (!val) return '';
+  const trimmed = String(val).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === 'missing pod' || lower === 'dispute pod') {
+    return 'Dispute POD';
+  }
+  if (lower === 'refused by consignee') {
+    return 'Refused by Consignee';
+  }
+
+  return trimmed;
+}
+
+function normalizeTransitDelay(val) {
+  if (!val) return '';
+  const trimmed = String(val).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower.includes('offload')) {
+    return '';
+  }
+
+  return trimmed;
+}
+
 function parseFile(filePath, defaultSheetName) {
   if (!fs.existsSync(filePath)) {
     console.warn(`File not found: ${filePath}`);
@@ -80,10 +140,15 @@ function parseFile(filePath, defaultSheetName) {
       ttRange = 'Day 8+';
     }
 
-    const transitDelay = String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim();
-    const clearanceDelay = String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay', 'Clearanace Delay']) || '').trim();
-    const destinationDelay = String(normalizeKey(row, ['DESTIANTION DELAY', 'DESTINATION DELAY', 'Destination Delay', 'Delivery Delay']) || '').trim();
+    let transitDelay = normalizeTransitDelay(String(normalizeKey(row, ['TRANSIT DELAY', 'Transit Delay', 'Delay in Transit']) || '').trim());
+    let clearanceDelay = normalizeClearanceDelay(String(normalizeKey(row, ['CLEARANCE DELAY', 'Clearance Delay', 'Customs Delay', 'Clearanace Delay']) || '').trim());
+    let destinationDelay = normalizeDestinationDelay(String(normalizeKey(row, ['DESTIANTION DELAY', 'DESTINATION DELAY', 'Destination Delay', 'Delivery Delay']) || '').trim());
     const weekendDelay = String(normalizeKey(row, ['WEEKEND DELAY', 'Weekend Delay']) || '').trim();
+
+    if (clearanceDelay === 'US Transit Delay') {
+      transitDelay = 'US Transit Delay';
+      clearanceDelay = '';
+    }
     
     let finalResolution = String(normalizeKey(row, ['FINAL RESOLUTION', 'Final Resolution', 'Status', 'Resolution']) || '').trim();
     if (!finalResolution) finalResolution = 'Delivered';
