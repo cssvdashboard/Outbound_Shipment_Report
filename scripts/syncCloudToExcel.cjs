@@ -234,6 +234,17 @@ async function syncCloudToExcel() {
       const remarksColIdx = findColumnIndex(headers, ['REMARKS', 'Remarks', 'Comment']);
       const resolutionColIdx = findColumnIndex(headers, ['FINAL RESOLUTION', 'Final Resolution', 'Status', 'Resolution']);
 
+      const weightColIdx = findColumnIndex(headers, ['WEIGHT', 'Weight (kg)', 'Gross Wt', 'Wt', 'Shpmt Weight in Kg', 'Weight in Kg']);
+      const pkgColIdx = findColumnIndex(headers, ['PKG COUNT', 'Pkg Count', 'Pieces', 'Qty']);
+      const recipientColIdx = findColumnIndex(headers, ['RECIPIENT', 'Receiver', 'Consignee', 'Recipient Name And Company']);
+      const cityColIdx = findColumnIndex(headers, ['CITY', 'Dest City', 'Destination City', 'Dest City Name']);
+      const destCountryColIdx = findColumnIndex(headers, ['DESTINATION', 'Dest', 'Country Code', 'Country', 'Dest Country']);
+      const customerColIdx = findColumnIndex(headers, ['CUSTOMER', 'Customer Name', 'Client']);
+      const shprColIdx = findColumnIndex(headers, ['SHPR NAME', 'Shipper Name', 'Shipper', 'SHPR']);
+      const descColIdx = findColumnIndex(headers, ['DESCRIPTION', 'Goods Description', 'Commodity', 'Manifested Description']);
+      const pickupColIdx = findColumnIndex(headers, ['PICKUP', 'Pickup Date', 'Pickup Date Time']);
+      const podColIdx = findColumnIndex(headers, ['POD', 'POD Date', 'Delivery Date']);
+
       let fileUpdatedRows = 0;
       const matchedAwbs = [];
 
@@ -246,7 +257,7 @@ async function syncCloudToExcel() {
         const edit = editsMap.get(cleanAwb);
         if (edit) {
           const setCellValue = (cIdx, val) => {
-            if (cIdx !== -1 && val !== undefined) {
+            if (cIdx !== -1 && val !== undefined && val !== null && val !== '') {
               const addr = XLSX.utils.encode_cell({ r: R, c: cIdx });
               worksheet[addr] = { t: 's', v: String(val) };
             }
@@ -258,6 +269,17 @@ async function syncCloudToExcel() {
           if (edit.weekendDelay !== undefined) setCellValue(weekendColIdx, edit.weekendDelay);
           if (edit.remarks !== undefined) setCellValue(remarksColIdx, edit.remarks);
           if (edit.finalResolution !== undefined) setCellValue(resolutionColIdx, edit.finalResolution);
+
+          if (edit.weight !== undefined) setCellValue(weightColIdx, edit.weight);
+          if (edit.pkgCount !== undefined) setCellValue(pkgColIdx, edit.pkgCount);
+          if (edit.recipient !== undefined) setCellValue(recipientColIdx, edit.recipient);
+          if (edit.city !== undefined) setCellValue(cityColIdx, edit.city);
+          if (edit.destination !== undefined) setCellValue(destCountryColIdx, edit.destination);
+          if (edit.customer !== undefined) setCellValue(customerColIdx, edit.customer);
+          if (edit.shprName !== undefined) setCellValue(shprColIdx, edit.shprName);
+          if (edit.description !== undefined) setCellValue(descColIdx, edit.description);
+          if (edit.pickup !== undefined) setCellValue(pickupColIdx, edit.pickup);
+          if (edit.pod !== undefined) setCellValue(podColIdx, edit.pod);
 
           fileUpdatedRows++;
           totalUpdatedCount++;

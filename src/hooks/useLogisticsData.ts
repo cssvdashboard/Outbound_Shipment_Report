@@ -458,40 +458,48 @@ export function useLogisticsData() {
     return Array.from(set).sort();
   }, [rawShipments]);
 
-  // Handler to update delay reason, category, and remarks for any AWB
+  // Handler to update delay reasons, cargo, parties, dates, and remarks for any AWB
   const updateShipmentDelay = useCallback(
     async (
       awb: string,
-      updates: {
-        transitDelay?: string;
-        clearanceDelay?: string;
-        destinationDelay?: string;
-        weekendDelay?: string;
-        remarks?: string;
-        finalResolution?: string;
-      }
+      updates: Partial<Shipment>
     ) => {
       const cleanAwb = String(awb).trim();
 
+      // If dates or transit times were updated, auto-calculate tt and ttRange if applicable
+      const enrichedUpdates: Partial<Shipment> = { ...updates };
+      if (enrichedUpdates.tt !== undefined) {
+        const ttNum = typeof enrichedUpdates.tt === 'number' ? enrichedUpdates.tt : parseFloat(String(enrichedUpdates.tt)) || 0;
+        enrichedUpdates.tt = ttNum;
+        if (!enrichedUpdates.ttRange) {
+          if (ttNum <= 0) enrichedUpdates.ttRange = 'Undelivered';
+          else if (ttNum <= 4) enrichedUpdates.ttRange = 'Day 1–4';
+          else if (ttNum <= 5) enrichedUpdates.ttRange = 'Day 5';
+          else if (ttNum <= 6) enrichedUpdates.ttRange = 'Day 6';
+          else if (ttNum <= 7) enrichedUpdates.ttRange = 'Day 7';
+          else enrichedUpdates.ttRange = 'Day 8+';
+        }
+      }
+
       // 1. Optimistically update local react state so UI, charts, and metrics respond immediately
       setRawShipments((prev) =>
-        prev.map((s) => (String(s.awb).trim() === cleanAwb ? { ...s, ...updates } : s))
+        prev.map((s) => (String(s.awb).trim() === cleanAwb ? { ...s, ...enrichedUpdates } : s))
       );
 
       // 2. Persist in IndexedDB for offline resilience
-      updateShipmentInStorage(cleanAwb, updates).catch((err) =>
+      updateShipmentInStorage(cleanAwb, enrichedUpdates).catch((err) =>
         console.warn('Failed to update IndexedDB:', err)
       );
 
       // 3. Save to Firebase Firestore if connected (broadcasts live to all collaborators)
-      saveShipmentEditToCloud(cleanAwb, updates).catch((err) =>
+      saveShipmentEditToCloud(cleanAwb, enrichedUpdates).catch((err) =>
         console.warn('Failed to save to Firestore:', err)
       );
 
       // 4. Sync to backend server if online
       if (isServerConnected) {
         try {
-          const res = await updateShipmentDelayOnServer(cleanAwb, updates);
+          const res = await updateShipmentDelayOnServer(cleanAwb, enrichedUpdates as any);
           return res;
         } catch (err: any) {
           console.warn('Failed to sync delay update to server:', err);

@@ -18,7 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Shipment } from '../types/logistics';
-import { formatTT, formatWeight, formatExcelDate } from '../utils/formatters';
+import { formatTT, formatWeight, formatExcelDate, formatExcelDateTime } from '../utils/formatters';
 import { getPickupISODate } from '../utils/analytics';
 import * as XLSX from 'xlsx';
 import { DelayReasonEditorModal } from './DelayReasonEditorModal';
@@ -28,14 +28,7 @@ interface ShipmentExplorerProps {
   totalRawCount: number;
   onUpdateShipmentDelay?: (
     awb: string,
-    updates: {
-      transitDelay?: string;
-      clearanceDelay?: string;
-      destinationDelay?: string;
-      weekendDelay?: string;
-      remarks?: string;
-      finalResolution?: string;
-    }
+    updates: Partial<Shipment>
   ) => Promise<{ success: boolean; error?: string } | void>;
   onOpenCustomerSummary?: (customer: string) => void;
 }
@@ -55,7 +48,8 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [copiedAWB, setCopiedAWB] = useState<string | null>(null);
-  
+  const [savedAwb, setSavedAwb] = useState<string | null>(null);
+
   // Sort state
   const [sortField, setSortField] = useState<SortField>('tt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -497,6 +491,11 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                             <Copy className="w-3.5 h-3.5" />
                           )}
                         </button>
+                        {savedAwb === s.awb && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-400 animate-fade-in">
+                            <Check className="w-2.5 h-2.5" /> Saved!
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -509,30 +508,26 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
 
                     {/* Customer Account Name */}
                     <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.customer}>
-                      <div className="line-clamp-2 leading-relaxed text-center font-bold">
-                        {onOpenCustomerSummary ? (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenCustomerSummary(s.customer);
-                            }}
-                            className="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline cursor-pointer transition-colors text-center font-bold inline-flex items-center gap-1"
-                            title={`Open summary dossier for ${s.customer}`}
-                          >
-                            <span>{s.customer}</span>
-                          </button>
-                        ) : (
-                          s.customer
-                        )}
-                      </div>
+                      {onOpenCustomerSummary ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenCustomerSummary(s.customer);
+                          }}
+                          className="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline cursor-pointer transition-colors text-center font-bold inline-flex items-center gap-1"
+                          title={`Open summary dossier for ${s.customer}`}
+                        >
+                          <span className="line-clamp-2">{s.customer}</span>
+                        </button>
+                      ) : (
+                        <span className="line-clamp-2 leading-relaxed text-center">{s.customer}</span>
+                      )}
                     </td>
 
                     {/* Shipper Name */}
                     <td className="py-2.5 px-4 text-slate-700 dark:text-slate-300 font-medium border-r border-slate-200 dark:border-slate-600 text-center align-middle" title={s.shprName}>
-                      <div className="line-clamp-2 leading-relaxed text-center">
-                        {s.shprName}
-                      </div>
+                      <span className="line-clamp-2 leading-relaxed text-center">{s.shprName}</span>
                     </td>
 
                     {/* Pickup Date */}
@@ -652,14 +647,14 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                       )}
                     </td>
 
-                    {/* Action Buttons: Edit Delay & Inspect */}
+                    {/* Action Buttons: Edit Dossier & Inspect */}
                     <td className="py-2.5 px-3 text-center align-middle">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => setEditingShipment(s)}
                           className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white transition-colors cursor-pointer border border-amber-300 dark:border-amber-700/60 shadow-xs"
-                          title="Edit Delay Reason (PIN Protected)"
+                          title="Edit Shipment Dossier (Delays, Cargo, Route, Dates)"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
@@ -855,16 +850,16 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
-                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Pickup Date</strong></span>
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>Pickup Date &amp; Time</strong></span>
                 <span className="font-bold text-slate-900 dark:text-white mt-1 block font-mono">
-                  <strong>{formatExcelDate(selectedShipment.pickup)}</strong>
+                  <strong>{formatExcelDateTime(selectedShipment.pickup)}</strong>
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border-2 border-slate-300 dark:border-slate-700">
-                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>POD / Delivery Date</strong></span>
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block"><strong>POD / Delivery Date &amp; Time</strong></span>
                 <span className="font-bold text-slate-900 dark:text-white mt-1 block font-mono">
-                  <strong>{formatExcelDate(selectedShipment.pod)}</strong>
+                  <strong>{formatExcelDateTime(selectedShipment.pod)}</strong>
                 </span>
               </div>
 
@@ -924,7 +919,7 @@ export const ShipmentExplorer: React.FC<ShipmentExplorerProps> = ({
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span><strong>Edit Delay Reason</strong></span>
+                <span><strong>Edit Shipment Details</strong></span>
               </button>
 
               <button
