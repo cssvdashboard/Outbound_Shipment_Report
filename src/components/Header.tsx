@@ -53,6 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
   onDateRangeChange,
   availableDateRange,
   availablePickupDates,
+  isServerConnected,
   onResetToDefault,
   onSyncExcel,
   activeTab,
@@ -157,8 +158,8 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Sync Master Excel Files (Icon-only) */}
-            {onSyncExcel && (
+            {/* Sync Master Excel Files (Only when local server is connected) */}
+            {isServerConnected && onSyncExcel && (
               <button
                 type="button"
                 onClick={handleSyncExcel}
