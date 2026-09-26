@@ -230,7 +230,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                   </span>
                   <Cloud className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span className="hidden sm:inline"><strong>Live Synced</strong></span>
+                  <span className="hidden sm:inline"><strong>Live</strong></span>
                 </>
               ) : (
                 <>
