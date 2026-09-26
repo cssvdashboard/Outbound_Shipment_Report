@@ -47,7 +47,7 @@ interface ModeOption {
 const THEME_OPTIONS: ThemeOption[] = [
   {
     id: 'dark',
-    label: 'Slate Dark',
+    label: 'Dark',
     tagline: 'Deep slate dark theme',
     swatchBg: 'bg-[#0b0f19]',
     swatchBorder: 'border-slate-700',
@@ -56,7 +56,7 @@ const THEME_OPTIONS: ThemeOption[] = [
   },
   {
     id: 'light',
-    label: 'Clean Light',
+    label: 'Light',
     tagline: 'Crisp clean light theme',
     swatchBg: 'bg-slate-50',
     swatchBorder: 'border-slate-300',
