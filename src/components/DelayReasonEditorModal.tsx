@@ -911,7 +911,7 @@ export const DelayReasonEditorModal: React.FC<DelayReasonEditorModalProps> = ({
                             type="date"
                             value={pickupDate}
                             onChange={(e) => setPickupDate(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
+                            className="date-picker-custom w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                         <div className="col-span-2">
@@ -920,7 +920,7 @@ export const DelayReasonEditorModal: React.FC<DelayReasonEditorModalProps> = ({
                             type="time"
                             value={pickupTime}
                             onChange={(e) => setPickupTime(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
+                            className="time-picker-custom w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                       </div>
@@ -949,7 +949,7 @@ export const DelayReasonEditorModal: React.FC<DelayReasonEditorModalProps> = ({
                             type="date"
                             value={podDate}
                             onChange={(e) => setPodDate(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
+                            className="date-picker-custom w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                         <div className="col-span-2">
@@ -958,7 +958,7 @@ export const DelayReasonEditorModal: React.FC<DelayReasonEditorModalProps> = ({
                             type="time"
                             value={podTime}
                             onChange={(e) => setPodTime(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
+                            className="time-picker-custom w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                       </div>
