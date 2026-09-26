@@ -893,77 +893,77 @@ export const DelayReasonEditorModal: React.FC<DelayReasonEditorModalProps> = ({
                 <div className="space-y-4 animate-fade-in">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Pickup Date & Time */}
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 space-y-3">
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                           <Calendar className="w-4 h-4 text-purple-500" />
                           Pickup Date &amp; Time
                         </label>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold font-mono">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-300 font-semibold font-mono">
                           Origin Dispatch
                         </span>
                       </div>
 
                       <div className="grid grid-cols-5 gap-2">
                         <div className="col-span-3">
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Date</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-300 block mb-1 font-bold">Date</span>
                           <input
                             type="date"
                             value={pickupDate}
                             onChange={(e) => setPickupDate(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                         <div className="col-span-2">
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Time</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-300 block mb-1 font-bold">Time</span>
                           <input
                             type="time"
                             value={pickupTime}
                             onChange={(e) => setPickupTime(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                       </div>
 
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-300 block font-mono">
                         Original: {formatExcelDateTime(shipment.pickup)}
                       </span>
                     </div>
 
                     {/* POD / Delivery Date & Time */}
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 space-y-3">
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                           <Calendar className="w-4 h-4 text-emerald-500" />
                           POD / Delivery Date &amp; Time
                         </label>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold font-mono">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-300 font-semibold font-mono">
                           Destination Delivery
                         </span>
                       </div>
 
                       <div className="grid grid-cols-5 gap-2">
                         <div className="col-span-3">
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Date</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-300 block mb-1 font-bold">Date</span>
                           <input
                             type="date"
                             value={podDate}
                             onChange={(e) => setPodDate(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                         <div className="col-span-2">
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Time</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-300 block mb-1 font-bold">Time</span>
                           <input
                             type="time"
                             value={podTime}
                             onChange={(e) => setPodTime(e.target.value)}
-                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            className="w-full text-xs font-semibold rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 dark:focus:border-indigo-400 p-2.5 text-slate-900 dark:text-white dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-xs cursor-pointer"
                           />
                         </div>
                       </div>
 
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-300 block font-mono">
                         Original: {formatExcelDateTime(shipment.pod)}
                       </span>
                     </div>
