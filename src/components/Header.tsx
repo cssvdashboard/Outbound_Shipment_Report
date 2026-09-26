@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   RotateCcw,
   Package,
@@ -9,7 +9,8 @@ import {
   AlertCircle,
   CalendarDays,
   CalendarRange,
-  RefreshCw
+  RefreshCw,
+  Cloud
 } from 'lucide-react';
 import { DatasetMeta } from '../services/storage';
 import { Shipment } from '../types/logistics';
@@ -18,6 +19,8 @@ import * as XLSX from 'xlsx';
 import { DateRangePicker } from './DateRangePicker';
 import { ThemeModeMenu } from './ThemeModeMenu';
 import { DisplayMode } from '../services/storage';
+import { CloudSyncModal } from './CloudSyncModal';
+import { subscribeToCloudStatus, CloudSyncStatus } from '../services/firebase';
 
 interface HeaderProps {
   datasetMeta: DatasetMeta;
@@ -59,6 +62,17 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>({
+    state: 'disconnected',
+    totalSyncedEdits: 0
+  });
+  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeToCloudStatus(setCloudStatus);
+    return unsub;
+  }, []);
 
   const handleSyncExcel = async () => {
     if (!onSyncExcel || isSyncing) return;
@@ -192,6 +206,40 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
+            {/* Cloud Collaboration / Sync Button */}
+            <button
+              type="button"
+              onClick={() => setIsCloudModalOpen(true)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${
+                cloudStatus.state === 'connected'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-400 dark:border-emerald-600 shadow-sm'
+                  : cloudStatus.state === 'connecting'
+                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-400 dark:border-amber-600'
+                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+              }`}
+              title={
+                cloudStatus.state === 'connected'
+                  ? `Cloud Sync Active: ${cloudStatus.totalSyncedEdits} shared edits live (${cloudStatus.projectId})`
+                  : 'Connect Firebase for real-time team collaboration'
+              }
+            >
+              {cloudStatus.state === 'connected' ? (
+                <>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <Cloud className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="hidden sm:inline"><strong>Live Synced</strong></span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="w-3.5 h-3.5 text-indigo-500" />
+                  <span className="hidden sm:inline"><strong>Cloud Sync</strong></span>
+                </>
+              )}
+            </button>
+
             {/* Theme & Display Mode Switcher */}
             <ThemeModeMenu currentMode={currentMode} onModeChange={onModeChange} />
           </div>
@@ -247,6 +295,13 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Cloud Database & Collaboration Modal */}
+      <CloudSyncModal
+        isOpen={isCloudModalOpen}
+        onClose={() => setIsCloudModalOpen(false)}
+        status={cloudStatus}
+      />
     </header>
   );
 };

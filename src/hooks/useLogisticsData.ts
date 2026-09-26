@@ -33,6 +33,10 @@ import {
   updateShipmentDelayOnServer,
   syncMasterExcelFromServer
 } from '../services/api';
+import {
+  subscribeToShipmentEdits,
+  saveShipmentEditToCloud
+} from '../services/firebase';
 
 export const initialFilterState: FilterState = {
   searchTerm: '',
@@ -116,6 +120,41 @@ export function useLogisticsData() {
       }
     }
     initData();
+  }, []);
+
+  // Listen to real-time cloud edits from Firebase Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeToShipmentEdits((edits) => {
+      const editKeys = Object.keys(edits);
+      if (editKeys.length === 0) return;
+
+      setRawShipments((prevShipments) => {
+        if (prevShipments.length === 0) return prevShipments;
+
+        const updated = [...prevShipments];
+        const indexMap = new Map<string, number>();
+        updated.forEach((s, idx) => indexMap.set(String(s.awb).trim(), idx));
+
+        let hasChange = false;
+        editKeys.forEach((awb) => {
+          const patch = edits[awb];
+          const cleanAwb = String(awb).trim();
+          const existingIdx = indexMap.get(cleanAwb);
+
+          if (existingIdx !== undefined) {
+            updated[existingIdx] = {
+              ...updated[existingIdx],
+              ...patch
+            };
+            hasChange = true;
+          }
+        });
+
+        return hasChange ? updated : prevShipments;
+      });
+    });
+
+    return unsubscribe;
   }, []);
 
   // Handler for uploading a new weekly dataset
@@ -444,7 +483,12 @@ export function useLogisticsData() {
         console.warn('Failed to update IndexedDB:', err)
       );
 
-      // 3. Sync to backend server if online
+      // 3. Save to Firebase Firestore if connected (broadcasts live to all collaborators)
+      saveShipmentEditToCloud(cleanAwb, updates).catch((err) =>
+        console.warn('Failed to save to Firestore:', err)
+      );
+
+      // 4. Sync to backend server if online
       if (isServerConnected) {
         try {
           const res = await updateShipmentDelayOnServer(cleanAwb, updates);
